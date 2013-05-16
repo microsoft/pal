@@ -1,0 +1,17 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-08-23
+#
+# Settings for all POSIX platforms. Each can be overridden in a platform-
+# specific file (Makefile.pf.<platform>, leaving this file to contain defaults.
+#
+#--------------------------------------------------------------------------------
+
+include $(SCX_BRD)/build/Makefile.gcc3
+CXX_WARN_FLAGS+=-Wstrict-null-sentinel -Wmissing-include-dirs -Winit-self -Wextra 
+
+ifeq ($(PF_DISTRO)$(PF_MAJOR),SUSE11)
+    CXX_WARN_FLAGS+=-Wno-ignored-qualifiers 
+endif

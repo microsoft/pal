@@ -1,0 +1,59 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 
+# Definition of all shared unit tests for SCXSystemLib
+#
+#--------------------------------------------------------------------------------
+
+SYSTEMLIB_UNITTEST_ROOT=$(SCX_SHARED_TEST_ROOT)/scxsystemlib
+
+POSIX_UNITTESTS_SYSTEM_SRCFILES = \
+	$(SYSTEMLIB_UNITTEST_ROOT)/common/scxkstat_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/common/entityinstance_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/common/scxostypeinfo_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/common/scxsysteminfo_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/common/scxdhcplease_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/common/getlinuxos_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/common/scxnetworkadapterip_test.cpp
+
+# For a full build, also include these
+ifneq ($(SCX_STACK_ONLY),true)
+POSIX_UNITTESTS_SYSTEM_SRCFILES += \
+	$(SYSTEMLIB_UNITTEST_ROOT)/networkinterface/networkinterface_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/networkinterfaceconfiguration/networkinterfaceconfiguration_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/cpu/cpuenumeration_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/datasampler_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/memory/memoryenumeration_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/memory/memoryinstance_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/diskrights_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/raidpal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/lvmtab_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/statisticalphysicaldiskpal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/staticphysicaldiskpal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/staticlogicaldiskpal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/staticdiskpartitionpal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/diskpal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/os/ospal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/software/installedsoftware_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/process/processpal_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/bios/biosenumeration_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/bios/biosinstance_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/cpuproperties/cpupropertiesenumeration_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/cpuproperties/cpupropertiesinstance_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/computersystem/computersystemenumeration_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/computersystem/computersysteminstance_test.cpp
+
+endif
+
+
+# Extra include dirs for certain include files
+
+ifneq ($(SCX_STACK_ONLY), true)
+$(INTERMEDIATE_DIR)/test/code/scxsystemlib/networkinterface/networkinterface_test.d: INCLUDES += -I$(SCX_SRC_ROOT)/scxsystemlib/networkinterface
+$(INTERMEDIATE_DIR)/test/code/scxsystemlib/networkinterface/networkinterface_test.$(PF_OBJ_FILE_SUFFIX): INCLUDES += -I$(SCX_SRC_ROOT)/scxsystemlib/networkinterface
+
+endif
+
+#-------------------------------- End of File -----------------------------------

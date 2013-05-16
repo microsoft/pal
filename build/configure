@@ -1,0 +1,214 @@
+#!/bin/bash
+
+build_type="Release"
+
+for opt
+do
+
+  arg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
+
+  case $opt in
+
+    -h | --help)
+      help=1
+    ;;
+
+    --enable-bullseye)
+      if [ "$build_type" = "Debug" ]; then
+          echo "Cannot build Bullseye if debug is enabled"
+          exit 1
+      fi
+      build_type="Bullseye"
+    ;;
+
+    --enable-debug)
+      if [ "$build_type" = "Bullseye" ]; then
+          echo "Cannot build debug if Bullseye is enabled"
+          exit 1
+      fi
+      build_type="Debug"
+    ;;
+
+    --enable-ulinux)
+      if [ `uname` != "Linux"]; then
+          echo "Cannot build for ULINUX on non-Linux platforms"
+          exit 1
+      fi
+      ULINUX=1
+    ;;
+
+    *)
+      echo "configure: invalid option '$opt'"
+      echo "Try configure --help' for more information."
+      exit 1
+    ;;
+
+  esac
+
+done
+
+if [ "$help" = "1" ]; then
+
+    cat<<EOF
+
+Usage: ./configure [OPTIONS]
+
+OVERVIEW:
+
+This script configures SCXPAL for building. Type the following commands.
+
+    $ ./configure
+    $ make
+
+OPTIONS:
+    -h, --help                  Print this help message.
+    --enable-bullseye           Enables the use of code coverage tools (Bullseye).
+    --enable-debug              Perform a debug build.
+    --enable-ulinux             Specifies platform as ULINUX (Linux only).
+
+EOF
+    exit 0
+fi
+
+set_ulinux_pf() 
+{
+    PF_MAJOR=1
+    PF_MINOR=0
+    PF_DISTRO=ULINUX
+    PF_DISTRO_ULINUX_D=`[ -e /usr/bin/dpkg ] && echo 1`
+    if [ -n "$PF_DISTRO_ULINUX_D" ]; then
+        PF_DISTOR_ULINUX_R=
+    else
+        PF_DISTRO_ULINUX_R=`[ -e /usr/bin/rpmbuild ] && echo 1`
+    fi
+}
+
+uname=`uname`
+case $uname in
+    Linux)
+        PF=Linux
+        if [ -e /etc/SuSE-release ]; then 
+            CHECK_SUSE=1
+        fi
+        if [ -e /etc/redhat-release ]; then
+            CHECK_RHEL_OR_CENTOS=1
+        fi
+        if [ -n "$CHECK_RHEL_OR_CENTOS" ]; then
+            CHECK_CENTOS=`grep -i "Red Hat" /etc/redhat-release || echo 1`
+            if [ "$CHECK_CENTOS" != "1" ]; then
+                CHECK_RHEL=1
+            fi
+        fi
+
+        if [ "$ULINUX" = "1" ]; then
+	    set_ulinux_pf
+        elif [ -n "$CHECK_SUSE" ]; then
+            PF_MAJOR=`head -n 1 /etc/SuSE-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
+            PF_MINOR=`(head -n 1 /etc/SuSE-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
+            PF_DISTRO=SUSE
+        elif [ -n "$CHECK_RHEL" ]; then
+            PF_MAJOR=`head -n 1 /etc/redhat-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
+            PF_MINOR=`(head -n 1 /etc/redhat-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
+            PF_DISTRO=REDHAT
+        else
+	    set_ulinux_pf
+        fi
+
+        case `uname -m` in
+            *64*)
+                PF_ARCH=x64
+                ARCH=x64
+            ;;
+            *86*)
+                PF_ARCH=x86
+                ARCH=ia32
+            ;;
+            *athlon*)
+                PF_ARCH=x86
+                ARCH=ia32
+            ;;
+            *)
+                PF_ARCH=UNKNOWN
+                ARCH=UNKNOWN
+            ;;
+        esac
+
+        if [ "$PF_ARCH" = "x86" ]; then
+            PF_WIDTH=32
+        else
+            PF_WIDTH=64
+        fi
+    ;;
+
+    SunOS)
+        PF=SunOS
+        uname_r=`uname -r`
+        PF_MAJOR=`echo $uname_r | awk -F. '{print $1}'`
+        PF_MINOR=`echo $uname_r | awk -F. '{print $2}'`
+        uname_p=`uname -p`
+        if [ "$uname_p" = "sparc" ]; then
+            PF_ARCH=sparc
+            ARCH=sparc
+        elif [ "$uname_p" = "i386" ]; then
+            PF_ARCH=x86
+            ARCH=ia32
+        else
+            PF_ARCH=UNKNOWN
+            ARCH=UNKNOWN
+        fi
+        PF_WIDTH=32
+    ;;
+    
+    HP-UX)
+        PF=HPUX
+        uname_r=`uname -r` 
+        PF_MAJOR=`echo $uname_r | awk -F. '{print $2}'`
+        PF_MINOR=`echo $uname_r | awk -F. '{print $3}'`
+        if [ `uname -m` = "ia64" ]; then
+            PF_ARCH=ia64
+            ARCH=ia64
+        else
+            PF_ARCH=pa-risc
+            ARCH=hppa
+        fi
+        PF_WIDTH=32
+    ;;
+
+    AIX)
+        PF=AIX
+        PF_MAJOR=`uname -v`
+        PF_MINOR=`uname -r`
+        PF_ARCH=ppc
+        ARCH=ppc
+        PF_WIDTH=32
+    ;;
+
+esac
+
+if [ "$uname" = "Linux" ]; then
+    BUILD_CONFIGURATION=${PF}_${PF_DISTRO}_${PF_MAJOR}.${PF_MINOR}_${PF_ARCH}_${PF_WIDTH}_${build_type}
+else
+    BUILD_CONFIGURATION=${PF}_${PF_MAJOR}.${PF_MINOR}_${PF_ARCH}_${PF_WIDTH}_${build_type}
+fi
+
+cat <<EOF > config.mak
+BUILD_TYPE=$build_type
+BUILD_PROFILING=false
+SCX_STACK_ONLY=false
+UNITTESTS_SUBSET=
+PF=$PF
+PF_MAJOR=$PF_MAJOR
+PF_MINOR=$PF_MINOR
+PF_ARCH=$PF_ARCH
+ARCH=$ARCH
+PF_WIDTH=$PF_WIDTH
+PF_DISTRO=$PF_DISTRO
+ULINUX=$ULINUX
+PF_DISTRO_ULINUX_D=$PF_DISTRO_ULINUX_D
+PF_DISTRO_ULINUX_R=$PF_DISTRO_ULINUX_R
+BUILD_CONFIGURATION=$BUILD_CONFIGURATION
+SCXPAL_INTERMEDIATE_DIR=`cd ..; pwd -P`/intermediate/$BUILD_CONFIGURATION
+SCXPAL_TARGET_DIR=`cd ..; pwd -P`/target/$BUILD_CONFIGURATION
+EOF
+
+echo "Configured SCXPAL for ${BUILD_CONFIGURATION}"

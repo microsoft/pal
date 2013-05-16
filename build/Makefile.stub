@@ -1,0 +1,20 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-03-20
+# This target can be used by tfsbuild to make the target dir for debugging the
+# TFSbuild process without doing the whole make. 
+#--------------------------------------------------------------------------------
+
+STUBREADME=$(TARGET_DIR)/README.TXT
+
+stub : $(STUBREADME)
+
+$(STUBREADME) :
+	echo TDIR: $(TARGET_DIR)
+	$(MKPATH) $(TARGET_DIR)
+	echo "place holder for stub directory from make stub" > $(STUBREADME)
+
+#-------------------------------- End of File -----------------------------------
+

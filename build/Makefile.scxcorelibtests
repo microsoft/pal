@@ -1,0 +1,64 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 
+# Definition of all shared unit tests for SCXCore 
+#
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+# Tests related to the Core library
+
+CORELIB_UNITTEST_ROOT=$(SCX_SHARED_TEST_ROOT)/scxcorelib
+
+POSIX_UNITTESTS_CORE_SRCFILES = \
+	$(CORELIB_UNITTEST_ROOT)/util/scxdumpstring_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxlimit_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxstream_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxatomic_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxcompat_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxcondition_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxfilepath_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxfilesystem_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxdirectoryinfo_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxfile_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxglob_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxlibglob_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxmarshal_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxnameresolver_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxprocess_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxregex_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxsignal_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxstrencodingconv_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxthread_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxthreadlock_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxthreadpool_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxtime_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxuser_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxexception_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxhandle_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxmath_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxsingleton_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxstringaid_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogmediatorsimple_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogconfigreader_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogbackend_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogfilebackend_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogfileconfigurator_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogstdoutbackend_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogseverityfilter_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxloghandle_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/scxlogpolicy_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/log/logsuppressor_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxpatternfinder_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/persist/scxpersistence_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/productdependencies.cpp
+
+# Extra include dirs for certain include files
+$(INTERMEDIATE_DIR)/test/code/scxcorelib/pal/scxatomic_test.d: INCLUDES += -I$(SCX_SRC_ROOT)/scxcorelib/pal
+$(INTERMEDIATE_DIR)/test/code/scxcorelib/pal/scxatomic_test.$(PF_OBJ_FILE_SUFFIX): INCLUDES += -I$(SCX_SRC_ROOT)/scxcorelib/pal
+$(INTERMEDIATE_DIR)/test/code/scxcorelib/pal/scxcompat_test.d: INCLUDES += -I$(SCX_SRC_ROOT)/scxcorelib/pal
+$(INTERMEDIATE_DIR)/test/code/scxcorelib/pal/scxcompat_test.$(PF_OBJ_FILE_SUFFIX): INCLUDES += -I$(SCX_SRC_ROOT)/scxcorelib/pal
+
+#-------------------------------- End of File -----------------------------------

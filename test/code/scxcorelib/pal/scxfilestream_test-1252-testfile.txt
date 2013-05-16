@@ -1,0 +1,7 @@
+This file includes Windows-1252 encoded symbols
+
+Starting with numbers
+1234567890 111 222 333 444 555 666 777 888 999 000
+
+Followed by regular English letters
+This text only contains english letters Here are all capital letters ABCDEFGHIJKLMNOPQRSTUVXYZ

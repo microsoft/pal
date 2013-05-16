@@ -1,0 +1,87 @@
+# -*- mode: Makefile; -*- 
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+
+#================================================================================
+# Static Libraries
+#================================================================================
+
+#--------------------------------------------------------------------------------
+# System PAL Library
+
+SYSTEMLIB_ROOT=$(SCX_SRC_ROOT)/scxsystemlib
+
+STATIC_SYSTEMPALLIB_SRCFILES = \
+	$(SYSTEMLIB_ROOT)/common/entityinstance.cpp \
+	$(SYSTEMLIB_ROOT)/common/scxkstat.cpp \
+	$(SYSTEMLIB_ROOT)/common/scxodm.cpp \
+	$(SYSTEMLIB_ROOT)/common/scxostypeinfo.cpp \
+	$(SYSTEMLIB_ROOT)/common/scxsysteminfo.cpp \
+	$(SYSTEMLIB_ROOT)/common/scxsmbios.cpp \
+	$(SYSTEMLIB_ROOT)/common/procfsreader.cpp \
+	$(SYSTEMLIB_ROOT)/common/scxdhcplease.cpp \
+	$(SYSTEMLIB_ROOT)/common/scxgateway.cpp
+
+ifneq ($(SCX_STACK_ONLY), true)     # For a full agent, also include these:
+STATIC_SYSTEMPALLIB_SRCFILES += \
+	$(SYSTEMLIB_ROOT)/networkinterfaceconfiguration/networkinterfaceconfigurationenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/networkinterfaceconfiguration/networkinterfaceconfigurationinstance.cpp \
+	$(SYSTEMLIB_ROOT)/networkinterface/networkinterfaceenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/networkinterface/networkinterfaceinstance.cpp \
+	$(SYSTEMLIB_ROOT)/cpu/cpuenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/cpu/cpuinstance.cpp \
+	$(SYSTEMLIB_ROOT)/networkinterface/scxdlpi.cpp \
+	$(SYSTEMLIB_ROOT)/networkinterface/networkinterface.cpp \
+	$(SYSTEMLIB_ROOT)/memory/memoryenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/memory/memoryinstance.cpp \
+	$(SYSTEMLIB_ROOT)/disk/diskdepend.cpp \
+	$(SYSTEMLIB_ROOT)/disk/staticlogicaldiskenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/disk/staticlogicaldiskinstance.cpp \
+	$(SYSTEMLIB_ROOT)/disk/staticphysicaldiskenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/disk/staticlogicaldiskfullenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/disk/staticphysicaldiskinstance.cpp \
+	$(SYSTEMLIB_ROOT)/disk/staticdiskpartitionenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/disk/staticdiskpartitioninstance.cpp \
+	$(SYSTEMLIB_ROOT)/disk/statisticallogicaldiskenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/disk/statisticallogicaldiskinstance.cpp \
+	$(SYSTEMLIB_ROOT)/disk/statisticalphysicaldiskenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/disk/statisticalphysicaldiskinstance.cpp \
+	$(SYSTEMLIB_ROOT)/disk/statisticaldiskinstance.cpp \
+	$(SYSTEMLIB_ROOT)/disk/scxraid.cpp \
+	$(SYSTEMLIB_ROOT)/disk/scxlvmtab.cpp \
+	$(SYSTEMLIB_ROOT)/os/osenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/os/osinstance.cpp \
+	$(SYSTEMLIB_ROOT)/process/processenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/process/processinstance.cpp \
+	$(SYSTEMLIB_ROOT)/bios/biosenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/bios/biosinstance.cpp \
+	$(SYSTEMLIB_ROOT)/bios/biosdepend.cpp \
+	$(SYSTEMLIB_ROOT)/software/installedsoftwaredepend.cpp \
+	$(SYSTEMLIB_ROOT)/software/installedsoftwareenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/software/installedsoftwareinstance.cpp \
+	$(SYSTEMLIB_ROOT)/cpuproperties/cpupropertiesinstance.cpp \
+	$(SYSTEMLIB_ROOT)/cpuproperties/cpupropertiesenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/cpuproperties/cpupropertiesdependencies.cpp \
+	$(SYSTEMLIB_ROOT)/computersystem/computersystemenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/computersystem/computersysteminstance.cpp \
+	$(SYSTEMLIB_ROOT)/computersystem/computersystemdependencies.cpp \
+
+endif
+
+ifeq ($(PF),Linux)
+	STATIC_SYSTEMPALLIB_SRCFILES += $(SYSTEMLIB_ROOT)/disk/scxlvmutils.cpp
+endif
+
+STATIC_SYSTEMPALLIB_OBJFILES = $(call src_to_obj,$(STATIC_SYSTEMPALLIB_SRCFILES))
+
+$(TARGET_DIR)/libpalsystem.$(PF_STAT_LIB_FILE_SUFFIX) : $(STATIC_SYSTEMPALLIB_OBJFILES)
+	-$(MKPATH) $(@D)
+	$(LINK_STATLIB) $(LINK_STATLIB_OUTFLAG) $^
+
+$(TARGET_DIR)/GetLinuxOS.sh : $(SCX_SRC_ROOT)/scxsystemlib/common/GetLinuxOS.sh
+	-$(MKPATH) $(@D)
+	$(COPY) $(SCX_SRC_ROOT)/scxsystemlib/common/GetLinuxOS.sh $(TARGET_DIR)
+	chmod ug+w $@
+
+scxsystemlib : $(TARGET_DIR)/libpalsystem.$(PF_STAT_LIB_FILE_SUFFIX) $(TARGET_DIR)/GetLinuxOS.sh

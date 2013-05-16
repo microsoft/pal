@@ -1,0 +1,61 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-08-23
+#--------------------------------------------------------------------------------
+
+# No default rules, please
+.SUFFIX: 
+
+# Rule for compiling cpp files in source tree, ouptut in mirrored intermediate dir
+$(INTERMEDIATE_DIR)/%.$(PF_OBJ_FILE_SUFFIX) : $(SCX_BRD)/%.cpp
+	$(MKPATH) $(@D)
+	$(PROFILING) $(CXX) -c $(CXXFLAGS) $(INCLUDES) -I$(<D) -o $@ $<
+
+$(INTERMEDIATE_DIR)/%.$(PF_OBJ_FILE_SUFFIX) : $(SCX_BRD)/%.c
+	$(MKPATH) $(@D)
+	$(PROFILING) $(CXX) -c $(CFLAGS) $(INCLUDES) -I$(<D) -o $@ $<
+
+$(INTERMEDIATE_DIR)/%.$(PF_OBJ_FILE_SUFFIX) : $(SCX_BRD)/%.s
+	$(MKPATH) $(@D)
+	$(PROFILING) $(CXX) -c $(CXXFLAGS) $(INCLUDES) -I$(<D) -o $@ $<
+
+# Rule for creating dependency files in intermediate dir
+# See info make Automatic Prerequisites
+# The XLC++ dependency generator can't produce output to stdout
+ifeq ($(PF),AIX)
+
+$(INTERMEDIATE_DIR)/%.d: $(SCX_BRD)/%.cpp $(INTERMEDIATE_DIR)/include/defines.h
+	$(MKPATH) $(INT_INCLUDE_DIR)
+	$(MKPATH) $(@D)
+	$(MKDEP) $(CXXFLAGS) $(INCLUDES) -I$(<D) $< -MF $@.$$$$ >/dev/null; \
+	sed 's,\($(*F)\)\.o[ :]*,$(@D)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+$(INTERMEDIATE_DIR)/%.d: $(SCX_BRD)/%.c $(INTERMEDIATE_DIR)/include/defines.h
+	$(MKPATH) $(INT_INCLUDE_DIR)
+	$(MKPATH) $(@D)
+	$(MKDEP) $(CFLAGS) $(INCLUDES) -I$(<D) $< -MF $@.$$$$ >/dev/null; \
+	sed 's,\($(*F)\)\.o[ :]*,$(@D)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+else
+
+$(INTERMEDIATE_DIR)/%.d: $(SCX_BRD)/%.cpp $(INTERMEDIATE_DIR)/include/defines.h
+	$(MKPATH) $(INT_INCLUDE_DIR)
+	$(MKPATH) $(@D)
+	$(MKDEP) $(CXXFLAGS) $(INCLUDES) -I$(<D) $< > $@.$$$$; \
+	sed 's,\($(*F)\)\.o[ :]*,$(@D)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+$(INTERMEDIATE_DIR)/%.d: $(SCX_BRD)/%.c $(INTERMEDIATE_DIR)/include/defines.h
+	$(MKPATH) $(INT_INCLUDE_DIR)
+	$(MKPATH) $(@D)
+	$(MKDEP) $(CFLAGS) $(INCLUDES) -I$(<D) $< > $@.$$$$; \
+	sed 's,\($(*F)\)\.o[ :]*,$(@D)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+endif
+
+#-------------------------------- End of File -----------------------------------

@@ -1,0 +1,30 @@
+# -*- mode: Makefile; -*- 
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+
+#================================================================================
+# Static Libraries
+#================================================================================
+
+#--------------------------------------------------------------------------------
+# SCX Util lib
+
+UTILLIB_ROOT=$(SCX_SRC_ROOT)/util
+
+STATIC_UTILLIB_SRCFILES = \
+	$(UTILLIB_ROOT)/unicode/Unicode.cpp \
+	$(UTILLIB_ROOT)/xml/HexBinaryHelper.cpp \
+	$(UTILLIB_ROOT)/xml/XDocument.cpp \
+	$(UTILLIB_ROOT)/xml/XElement.cpp \
+	$(UTILLIB_ROOT)/xml/XMLReader.cpp \
+	$(UTILLIB_ROOT)/xml/XMLWriter.cpp \
+	$(UTILLIB_ROOT)/loghandlecache/LogHandleCache.cpp
+
+STATIC_UTILLIB_OBJFILES = $(call src_to_obj,$(STATIC_UTILLIB_SRCFILES))
+
+$(TARGET_DIR)/libUtil.$(PF_STAT_LIB_FILE_SUFFIX) : $(STATIC_UTILLIB_OBJFILES)
+	-$(MKPATH) $(@D)
+	$(LINK_STATLIB) $(LINK_STATLIB_OUTFLAG) $^
+
+util : $(TARGET_DIR)/libUtil.$(PF_STAT_LIB_FILE_SUFFIX)

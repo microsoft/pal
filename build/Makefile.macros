@@ -1,0 +1,113 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-08-23
+#--------------------------------------------------------------------------------
+
+SCX_TEST_ROOT=$(SCX_BRD)/test
+
+# Roots to functionality areas in PAL
+SCX_SRC_ROOT=$(SCX_BRD)/source/code
+SCX_SHARED_TEST_ROOT=$(SCX_BRD)/test/code
+SCX_SHARED_INCLUDE_DIR=$(SCX_BRD)/source/code/include
+SCX_SHARED_TST_EXT_INCLUDE_DIR=$(SCX_BRD)/test/ext/include
+SCX_SHARED_TST_EXT_LIB_DIR=$(SCX_BRD)/test/ext/lib
+
+# Intermediate include dir. Contains header files generated during build.
+INT_INCLUDE_DIR=$(INTERMEDIATE_DIR)/include
+
+# We never build with SCX_STACK_ONLY on Ubuntu anymore ... (ULINUX agent)
+ISUBUNTU=
+
+#--------------------------------------------------------------------------------
+# Configuration cahce info, controlled from cmdline or Makefile.config_cache
+# 
+
+BUILD_TYPE?=Release
+
+BUILD_PROFILING?=false
+
+UNITTESTS_SUBSET?=
+
+#--------------------------------------------------------------------------------
+# Assemble info on which type of build we have 
+ifeq ($(PF),Linux)
+BUILD_CONFIGURATION=$(PF)_$(PF_DISTRO)_$(PF_MAJOR).$(PF_MINOR)_$(PF_ARCH)_$(PF_WIDTH)_$(BUILD_TYPE)
+else
+BUILD_CONFIGURATION=$(PF)_$(PF_MAJOR).$(PF_MINOR)_$(PF_ARCH)_$(PF_WIDTH)_$(BUILD_TYPE)
+endif
+
+# Root directory of the build process output.
+# Individual developers may redirect the output of their local build 
+# by defining the variable in the environment.
+
+SCX_BUILD_OUTPUT_DIR?=$(SCX_BRD)
+
+# Output of temporary build files on this platform, with current config 
+INTERMEDIATE_DIR=$(SCX_BUILD_OUTPUT_DIR)/intermediate/$(BUILD_CONFIGURATION)
+# Output of all build targets (to be delivered
+TARGET_DIR=$(SCX_BUILD_OUTPUT_DIR)/target/$(BUILD_CONFIGURATION)
+
+# Composite string for build version. 
+SCX_BUILDVERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH)-$(SCX_BUILDVERSION_BUILDNR)
+
+#--------------------------------------------------------------------------------
+# Doxygen output 
+DOXYGEN_OUTPUT_DIR=$(SCX_BUILD_OUTPUT_DIR)/target
+
+#================================================================================
+# Internal functions
+#================================================================================
+
+# Convert a list of src files with absolute paths under SCX_BRD to corresponding
+# object files under intermediate directory 
+# src_to_obj(list_of_cppfiles)
+src_to_obj = $(patsubst $(SCX_BRD)%, $(INTERMEDIATE_DIR)%, $(patsubst %.s, %.$(PF_OBJ_FILE_SUFFIX), $(patsubst %.c, %.$(PF_OBJ_FILE_SUFFIX), $(patsubst %.cpp, %.$(PF_OBJ_FILE_SUFFIX), $(1)))))
+
+
+#================================================================================
+# Maintain Configuration Cache 
+#================================================================================
+
+cache_values:
+	@$(ECHO) " SCX_STACK_ONLY=$(SCX_STACK_ONLY)"
+	@$(ECHO) " BUILD_TYPE=$(BUILD_TYPE)"
+	@$(ECHO) " BUILD_PROFILING=$(BUILD_PROFILING)"
+	@$(ECHO) " UNITTESTS_SUBSET=$(UNITTESTS_SUBSET)"
+
+cache_help:
+	@$(ECHO) "Make System Configuration Cache"
+	@$(ECHO) "-------------------------------"
+	@$(ECHO) "To make the system remember configuration, run 'make cache <config>=<value>'"
+	@$(ECHO) "where <config> is one or more of the variables you want to set." 
+	@$(ECHO) "To reset all values to default, run 'make cache_reset'."
+	@$(ECHO) "where <config> is one or more of the variables you want to set." 
+	@$(ECHO) ""
+	@$(ECHO) "Cacheable values:"
+	@$(ECHO) " BUILD_TYPE=Debug/Release/Bullseye"
+	@$(ECHO) " BUILD_PROFILING=prof/gprof/purify/quantify/false"
+	@$(ECHO) " SCX_STACK_ONLY=true/false"
+	@$(ECHO) " UNITTESTS_SUBSET=\"<list of unit test cpp files run by cppunit>\""
+	@$(ECHO) ""
+	@$(ECHO) "Current configuration:"
+	@grep = $(BUILD_CONFIG_CACHE)
+
+cache_reset:
+	$(RM) $(BUILD_CONFIG_CACHE)
+
+cache:
+	@$(ECHO) "Configuring..." 
+	@$(call pf_fwrite,"# Build configuration cache - do not check in!",  $(BUILD_CONFIG_CACHE))
+	@$(call pf_fappend,"BUILD_TYPE=$(BUILD_TYPE)",                       $(BUILD_CONFIG_CACHE))
+	@$(call pf_fappend,"BUILD_PROFILING=$(BUILD_PROFILING)",             $(BUILD_CONFIG_CACHE))
+	@$(call pf_fappend,"SCX_STACK_ONLY=$(SCX_STACK_ONLY)",               $(BUILD_CONFIG_CACHE))
+	@$(call pf_fappend,"UNITTESTS_SUBSET=$(UNITTESTS_SUBSET)",           $(BUILD_CONFIG_CACHE))
+	@$(call pf_fappend,"SCXPAL_INTERMEDIATE_DIR=$(INTERMEDIATE_DIR)",    $(BUILD_CONFIG_CACHE))
+	@$(call pf_fappend,"SCXPAL_TARGET_DIR=$(TARGET_DIR)",                $(BUILD_CONFIG_CACHE))
+# Force re-linking of testrunner
+	@-$(RM) $(TARGET_DIR)/testrunner
+	@$(ECHO) "Re-configured, new cache values:"
+	@grep = $(BUILD_CONFIG_CACHE) | egrep -v '(INTERMEDIATE_DIR|TARGET_DIR)'
+
+#-------------------------------- End of File -----------------------------------

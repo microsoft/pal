@@ -1,0 +1,113 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-08-23
+#
+# Settings for all POSIX platforms. Each can be overridden in a platform-
+# specific file (Makefile.pf.<platform>, leaving this file to contain defaults.
+#
+#--------------------------------------------------------------------------------
+
+# Define flags. (These will be submitted to all commands that use the preprocesor)
+DEFINES=-DPF_DISTRO_$(PF_DISTRO) -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D$(ARCH) -DPF_WIDTH=$(PF_WIDTH)
+
+ifeq ($(SCX_STACK_ONLY), true)
+	DEFINES += -DSCX_STACK_ONLY
+endif
+
+# Compiler flags that reglulates warning levels
+CXX_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wconversion  -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror 
+C_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror 
+
+# Compiler code-generation options
+CXX_CGEN_FLAGS=-fPIC 
+
+# Compiler Optimization flags 
+CXX_OPTIMIZATION_FLAGS=-fstack-protector-all
+
+# Universal Agent switches
+ifeq ($(PF_DISTRO_ULINUX_R), 1)
+        DEFINES += -DPF_DISTRO_ULINUX_R
+endif
+
+ifeq ($(PF_DISTRO_ULINUX_D), 1)
+        DEFINES += -DPF_DISTRO_ULINUX_D
+endif
+
+# -fstack-protector-all not supported on Sles 9 - remove
+ifeq ($(PF_DISTRO),SUSE)
+	ifeq ($(PF_MAJOR),9)
+		CXX_OPTIMIZATION_FLAGS := $(CXX_OPTIMIZATION_FLAGS:-fstack-protector-all=)
+	endif
+endif
+
+# -fstack-protector-all not supported on RH4 - remove
+ifeq ($(PF_DISTRO),REDHAT)
+	ifeq ($(PF_MAJOR),4)
+		CXX_OPTIMIZATION_FLAGS := $(CXX_OPTIMIZATION_FLAGS:-fstack-protector-all=)
+	endif
+endif
+
+# CXX Debug flags for debug builds
+ifeq ($(BUILD_TYPE),Debug)
+	CXXFLAGS += -ggdb 
+	DEFINES += -D_DEBUG
+else
+	DEFINES += -DNDEBUG
+endif 
+
+# CXX Debug flags for release builds
+ifeq ($(BUILD_TYPE),Release)
+	CXXFLAGS += -Os -fno-enforce-eh-specs
+endif 
+
+# Avoid stack frame corruption when throwing exceptions from 
+# callbacks by not allowing the optimizer to omit frame pointers
+# (implicit with the -Os option). This bug was observed with the
+# GCC 3.4.3 compiler on Red Hat 3.4.3-9. See WI-11657 for more.
+CXXFLAGS += -fno-omit-frame-pointer
+
+# CXX Compiler flags, end result 
+CXXFLAGS += $(DEFINES) $(CXX_OPTIMIZATION_FLAGS) $(CXX_WARN_FLAGS) $(CXX_CGEN_FLAGS)
+CFLAGS += $(DEFINES) $(CXX_OPTIMIZATION_FLAGS) $(C_WARN_FLAGS) $(CXX_CGEN_FLAGS)
+
+
+# Linker flags
+LINK_OUTFLAG=-o $@
+LINK_STATLIB_OUTFLAG=-o $@
+
+#--------------------------------------------------------------------------------
+# Tools for this platform
+
+# Compiler for CPP files
+CXX=g++
+
+# Link command for executables
+# Link an executable
+
+LINK=g++ -L. -L$(TARGET_DIR)
+
+# Link command for static libraries (archives)
+LINK_STATLIB=ar -rc 
+
+# Include paths for POSIX platforms
+INCLUDES=-I$(SCX_SHARED_INCLUDE_DIR) -I$(SCX_SHARED_INCLUDE_DIR) -I$(INT_INCLUDE_DIR) -I$(SCX_BRD) -isystem$(SCX_SHARED_TST_EXT_INCLUDE_DIR) -isystem$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+UNITTEST_EXTRA_INCLUDES=-I$(SCX_SHARED_TEST_ROOT)/include -I$(SCX_SRC_ROOT) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+
+# No operation, i.e. suppressing a command
+NOOP=@echo Step suppressed 
+
+# Command for making dependecies
+MKDEP=g++ -MM
+
+#--------------------------------------------------------------------------------
+# File type suffixes
+
+PF_OBJ_FILE_SUFFIX=o
+PF_STAT_LIB_FILE_SUFFIX=a
+PF_DYN_LIB_FILE_SUFFIX=so
+PF_EXE_FILE_SUFFIX=
+PF_KIT_FILE_SUFFIX=tgz
+
+#-------------------------------- End of File -----------------------------------

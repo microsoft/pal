@@ -1,0 +1,50 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-10-12
+# 
+# Overrides to the HPUX makefile when using GCC
+# 
+#--------------------------------------------------------------------------------
+
+include $(SCX_BRD)/build/Makefile.pf.posix
+
+#--------------------------------------------------------------------------------
+# Paths
+#--------------------------------------------------------------------------------
+
+# Path to where the CPPUNIT libraries are checked in 
+CPPUNIT_LIB_PATH=$(TST_EXT_LIB_DIR)/hpux/$(ARCH)/cppunit
+
+#--------------------------------------------------------------------------------
+# Tools on this platform
+#--------------------------------------------------------------------------------
+
+# Common compiler flags (sent to compile command and link commands)
+COMMONFLAGS=-pthread -milp32
+
+# CXX Compiler flags (Redefined to include COMMONFLAGS)
+CXXFLAGS=$(COMMONFLAGS) $(CXX_WARN_FLAGS)
+
+# Link an executable
+LINK=g++ $(COMMONFLAGS) -L. -L$(TARGET_DIR)
+
+# Link a dynamic lib 
+LINK_DYNLIB = g++ -shared $(COMMONFLAGS) -L$(TARGET_DIR) 
+
+#--------------------------------------------------------------------------------
+# Link switches for this platform, per target
+#--------------------------------------------------------------------------------
+
+LDFLAGS_DYNLIB =
+LDFLAGS_EXECUTABLE =
+
+# The testrunner links with these
+LDFLAGS_TESTRUNNER = $(LDFLAGS_EXECUTABLE)
+
+# Currently building only TAR on Solaris
+PF_KIT_FILE_SUFFIX=tar
+
+
+#-------------------------------- End of File -----------------------------------

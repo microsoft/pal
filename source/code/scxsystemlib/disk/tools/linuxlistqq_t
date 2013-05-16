@@ -1,0 +1,22 @@
+#CentOS
+host: test SCXOMT-CENT5-03.SCX.COM
+host: test SCXOMT-CENT6-03.SCX.COM
+
+#Ubuntu
+host: test SCXOMT-UBUN10-11.SCX.COM
+host: test SCXOMT-UBUN11-03.SCX.COM
+host: test SCXOMT-UBUN12-03.SCX.COM
+host:  ubun_12_32   scxcmt-ubun12-20   ~/src/configmgr     cm-alt  cm
+
+#Oracle
+host: test SCXOMT-ORA5-01.SCX.COM
+host: test SCXOMT-ORA6-03.SCX.COM
+host:  ora_6_32   scxcmt-ora6-20   ~/src/configmgr     cm-alt  cm
+
+#Debian
+host: test SCXOMT-DEB5-03.SCX.COM
+host: test SCXOMT-DEB6-03.SCX.COM
+
+
+host:  suse_10_32   scxcmt-sles10-03   ~/src/configmgr     cm-alt  cm
+host:  redhat_6_32   scxcmt-rhel6-02   ~/src/configmgr     cm-alt  cm

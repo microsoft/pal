@@ -1,0 +1,3 @@
+system-release is actually a soft link to oracle-release.
+However, Teamprise doesn't support soft links.  As a result,
+we just store system-release as a copy of oracle-release.

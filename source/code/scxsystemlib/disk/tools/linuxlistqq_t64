@@ -1,0 +1,32 @@
+#CentOS
+host: test SCXOMT64-CENT5-03.SCX.COM
+host: test SCXOMT64-CENT6-03.SCX.COM
+
+#Ubuntu
+host: test SCXOMT64-UBUN10-11.SCX.COM
+host: test SCXOMT64-UBUN11-03.SCX.COM
+host: test SCXOMT64-UBUN12-03.SCX.COM
+host:  ubun_12_64   scxcmt64-ubun12-20   ~/src/configmgr     cm-alt  cm
+
+#Oracle
+host: test SCXOMT64-ORA5-01.SCX.COM
+host: test SCXOMT64-ORA6-03.SCX.COM
+host:  ora_6_64   scxcmt64-ora6-20   ~/src/configmgr     cm-alt  cm
+
+#Debian
+host: test SCXOMT64-DEB5-03.SCX.COM
+host: test SCXOMT64-DEB6-03.SCX.COM
+
+
+host:  suse_10_64   scxcmt64-sles10-06   ~/src/configmgr     cm-alt  cm
+#slow host:  suse_11_64   scxcmt64-sles11-05   ~/src/configmgr     cm-alt  cm
+
+host:  redhat_5_64   scxcmt64-rhel5-03   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64   scxcmt64-rhel5-04   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64   scxcmt64-rhel5-05   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64   scxcmt64-rhel5-06   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64   scxcmt64-rhel5-10   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64   scxcmt64-rhel5-11   ~/src/configmgr     cm-alt  cm
+#slow host:  redhat_5_64   scxcmt64-rhel5-12   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64   scxcmt64-rhel5-13   ~/src/configmgr     cm-alt  cm
+host:  redhat_6_64   scxcmt64-rhel6-04   ~/src/configmgr     cm-alt  cm

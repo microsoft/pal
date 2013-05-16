@@ -1,0 +1,22 @@
+#!/bin/sh 
+
+if [ -z "$1" ]; then
+    echo "$0 must be run with at least one parameter"
+    exit 1
+fi
+
+# There might be an environment shell script created by 
+# "somebody else" in the current directory, if so run
+# the tests using those variables
+ENV_FILE=`dirname $0`/env.sh
+SOURCE_ENV=""
+if [ -f $ENV_FILE ]; then SOURCE_ENV=". $ENV_FILE $1;"; fi
+
+# Execute the testrunner with root privileges
+sudo sh -c "$SOURCE_ENV $1/testrunner $2 $3"
+# Preserve exit status
+exit_status=$?
+# Make sure any files created during testrun can be removed
+sudo chown -R $USER $1/*
+# Return with exit status from the test run
+exit $exit_status

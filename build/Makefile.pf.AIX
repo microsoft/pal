@@ -1,0 +1,108 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2008-02-27
+# 
+# Platform-specific makefile for AIX
+# 
+#--------------------------------------------------------------------------------
+
+# Define flags. (These will be submitted to all commands that use the preprocesor)
+DEFINES+=-Daix -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR)
+
+# Compiler flags that regulates warning level.
+# Suppress warning 1540-2864: Only the last two digits of year are given by 'x' conversion in some locales.
+CXX_WARN_FLAGS=-qwarn64 -qformat -qhalt=w -qflag=w -qsuppress=1540-2864
+C_WARN_FLAGS=-qformat -qhalt=w -qflag=w:w -qsuppress=1540-2864
+
+# Common compiler flags (sent to compile command and link commands)
+# (-qthreaded is implied by using the _r version of xlc++)
+#64bit: COMMONFLAGS=-q64 -qlanglvl=strict98 -qrtti -qpic
+COMMONFLAGS=-q32 -qlanglvl=strict98 -qrtti -qpic -qextchk
+
+# CXX Compiler flags 
+CXXFLAGS=$(COMMONFLAGS) -qlonglong $(DEFINES) $(CXX_WARN_FLAGS)
+CFLAGS=$(COMMONFLAGS) $(DEFINES) $(C_WARN_FLAGS)
+
+# CXX Debug flags for debug builds
+ifeq ($(BUILD_TYPE),Debug)
+	COMMONFLAGS += -g -qcheck 
+# 	COMMONFLAGS += -qheapdebug     Currently disabled, see WI11161
+	DEFINES += -D_DEBUG
+else
+	COMMONFLAGS += -O2 -qcompact
+	DEFINES += -DNDEBUG
+endif
+
+# Linker flags
+LINK_OUTFLAG=-o $@
+LINK_STATLIB_OUTFLAG=$@
+
+# Add profiling flags to compile/link command, if requested.
+ifeq ($(BUILD_PROFILING), prof)
+        COMMONFLAGS += -p
+endif
+ifeq ($(BUILD_PROFILING), gprof)
+        COMMONFLAGS += -pg
+endif
+
+#--------------------------------------------------------------------------------
+# Tools for this platform
+
+# Compiler for CPP files
+CXX=xlC_r
+
+# Link command for executables
+# Link an executable
+LINK=$(CXX) $(COMMONFLAGS) -L$(TARGET_DIR)
+
+# Link command for static libraries (archives)
+#64bit: LINK_STATLIB=ar -rc -X 64
+LINK_STATLIB=ar -rc -X 32
+
+# Link a dynamic lib ("create a shared library that uses runtime linking")
+LINK_DYNLIB = $(CXX) -G $(COMMONFLAGS) -L$(TARGET_DIR) -bernotok -bnolibpath
+
+# Include paths
+INCLUDES=-I$(SCX_SHARED_INCLUDE_DIR) -I$(SCX_SHARED_INCLUDE_DIR) -I$(INT_INCLUDE_DIR) -I$(SCX_BRD) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+UNITTEST_EXTRA_INCLUDES=-I$(SCX_SHARED_TEST_ROOT)/include -I$(SCX_SRC_ROOT) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+
+# No operation, i.e. suppressing a command
+NOOP=@echo Step suppressed 
+
+# Command for making dependecies
+# Note the we need a special rule that redirects the output with -MF rather that '>'
+MKDEP=xlc++_r -E -qmakedep=gcc 
+
+#--------------------------------------------------------------------------------
+# File type suffixes
+
+PF_OBJ_FILE_SUFFIX=o
+PF_STAT_LIB_FILE_SUFFIX=a
+PF_DYN_LIB_FILE_SUFFIX=so
+PF_EXE_FILE_SUFFIX=
+PF_KIT_FILE_SUFFIX=tar
+
+#--------------------------------------------------------------------------------
+# Paths
+#--------------------------------------------------------------------------------
+
+# Path to where the CPPUNIT libraries are checked in 
+CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/aix/$(ARCH)/cppunit_32bit
+#64bit: CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/aix/$(ARCH)/cppunit_64bit
+
+#--------------------------------------------------------------------------------
+# Link switches for this platform, per target
+#--------------------------------------------------------------------------------
+
+	LDFLAGS_DYNLIB =
+	LDFLAGS_EXECUTABLE =
+
+# Transforms a list of symbols that should be exposed to the correct link flags
+get_ld_flags_for_retaining_symbols=$(addprefix -u, $(1))
+
+# The testrunner links with these
+LDFLAGS_TESTRUNNER = $(LDFLAGS_EXECUTABLE) -lperfstat -lodm -lcfg -lm -llvm
+
+#-------------------------------- End of File -----------------------------------

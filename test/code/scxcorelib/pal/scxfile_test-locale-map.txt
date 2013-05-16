@@ -1,0 +1,10 @@
+EN_US.UTF-8         scxfile_test-en_US.UTF-8.txt   scxfile_test-UTF8.txt
+en_US.ISO8859-1     scxfile_test-iso8859-1.txt     scxfile_test-UTF8.txt
+en_US.UTF-8         scxfile_test-en_US.UTF-8.txt   scxfile_test-UTF8.txt
+en_US.iso88591      scxfile_test-iso8859-1.txt     scxfile_test-UTF8.txt
+en_US.iso885915     scxfile_test-iso8859-1.txt     scxfile_test-UTF8.txt
+en_US.utf8          scxfile_test-en_US.UTF-8.txt   scxfile_test-UTF8.txt
+english_us.1252     scxfile_test-iso8859-1.txt     scxfile_test-UTF8.txt
+english_us.UTF-8    scxfile_test-en_US.UTF-8.txt   scxfile_test-UTF8.txt
+iso_8859_1          scxfile_test-iso8859-1.txt     scxfile_test-UTF8.txt
+C                   scxfile_test-C.txt             scxfile_test-C.txt

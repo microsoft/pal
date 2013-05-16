@@ -1,0 +1,222 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-08-23
+# 
+# Definition of all unit tests for SCXCore 
+#
+#--------------------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------------------
+# Support for Quantify from Rational Software (IBM now)
+
+ifeq ($(BUILD_PROFILING),quantify)
+	PROFILING=quantify
+else
+	PROFILING=
+endif
+
+
+#--------------------------------------------------------------------------------
+# Support for BullseyeCoverage from Bullseye Testing Technology 
+ifeq ($(BUILD_TYPE),Bullseye)
+	BULLSEYE_LINK=-L/opt/Bullseye/lib -lcov
+	COVFILE=$(INTERMEDIATE_DIR)/OpsMgr.cov
+	PROFILING=COVFILE=$(COVFILE) covc --retain
+	export COVFILE
+else
+	BULLSEYE_LINK=
+endif
+
+#--------------------------------------------------------------------------------
+# Testrunner
+
+TESTRUNNER_SRCFILES = \
+	$(SCX_SHARED_TEST_ROOT)/testutils/testrunner.cpp \
+	$(SCX_SHARED_TEST_ROOT)/testutils/scxassert_cppunit.cpp \
+	$(SCX_SHARED_TEST_ROOT)/testutils/testrunnerlogpolicy.cpp 
+
+TESTRUNNER_OBJFILES = $(call src_to_obj,$(TESTRUNNER_SRCFILES))
+# Extra include dir for test code
+$(TARGET_DIR)/testrunner: INCLUDES += $(UNITTEST_EXTRA_INCLUDES)
+$(TARGET_DIR)/testrunner_core: INCLUDES += $(UNITTEST_EXTRA_INCLUDES)
+
+
+#--------------------------------------------------------------------------------
+# Includes for tests
+include $(SCX_BRD)/build/Makefile.scxcorelibtests
+include $(SCX_BRD)/build/Makefile.scxsystemlibtests
+
+#--------------------------------------------------------------------------------
+# All tests
+POSIX_UNITTESTS_SRCFILES = \
+	$(POSIX_UNITTESTS_CORE_SRCFILES) \
+	$(POSIX_UNITTESTS_SYSTEM_SRCFILES)
+
+POSIX_UNITTESTS_OBJFILES = $(call src_to_obj,$(POSIX_UNITTESTS_SRCFILES))
+POSIX_UNITTESTS_CORE_OBJFILES = $(call src_to_obj,$(POSIX_UNITTESTS_CORE_SRCFILES))
+
+# Extra include dir for test code
+$(INTERMEDIATE_DIR)/test/code/%.d: INCLUDES += $(UNITTEST_EXTRA_INCLUDES)
+$(INTERMEDIATE_DIR)/test/code/%.$(PF_OBJ_FILE_SUFFIX): INCLUDES += $(UNITTEST_EXTRA_INCLUDES)
+
+# Extra include dir for test code
+$(INTERMEDIATE_DIR)/test/%.d: INCLUDES += $(UNITTEST_EXTRA_INCLUDES)
+$(INTERMEDIATE_DIR)/test/%.$(PF_OBJ_FILE_SUFFIX): INCLUDES += $(UNITTEST_EXTRA_INCLUDES)
+
+#--------------------------------------------------------------------------------
+# Static dependencies on POSIX platforms
+
+POSIX_UNITTESTS_CORE_STATICLIB_DEPS = \
+	scxcore
+
+POSIX_UNITTESTS_STATICLIB_DEPS = \
+	palsystem \
+	$(POSIX_UNITTESTS_CORE_STATICLIB_DEPS)
+
+
+# Foreach XYZ in the list above, build $(INTERMEDIATE_DIR)/libXYZ.a
+POSIX_UNITTESTS_STATICLIB_DEPFILES = $(addprefix $(TARGET_DIR)/lib, $(addsuffix .$(PF_STAT_LIB_FILE_SUFFIX), $(POSIX_UNITTESTS_STATICLIB_DEPS)))
+POSIX_UNITTESTS_CORE_STATICLIB_DEPFILES = $(addprefix $(TARGET_DIR)/lib, $(addsuffix .$(PF_STAT_LIB_FILE_SUFFIX), $(POSIX_UNITTESTS_CORE_STATICLIB_DEPS)))
+
+# Foreach XYZ in the list above, build -lXYZ
+POSIX_UNITTESTS_LINK_STATICLIBS = $(addprefix -l, $(POSIX_UNITTESTS_STATICLIB_DEPS))
+POSIX_UNITTESTS_CORE_LINK_STATICLIBS = $(addprefix -l, $(POSIX_UNITTESTS_CORE_STATICLIB_DEPS))
+
+#--------------------------------------------------------------------------------
+# Check if user has requested a subset of the unit tests only 
+ifneq ($(UNITTESTS_SUBSET),)
+UNITTESTS_OBJFILES = $(TESTRUNNER_OBJFILES) $(call src_to_obj,$(UNITTESTS_SUBSET))
+UNITTESTS_CORE_OBJFILES = $(TESTRUNNER_OBJFILES) $(call src_to_obj,$(UNITTESTS_SUBSET))
+else
+UNITTESTS_OBJFILES = $(TESTRUNNER_OBJFILES) $(POSIX_UNITTESTS_OBJFILES) 
+UNITTESTS_CORE_OBJFILES = $(TESTRUNNER_OBJFILES) $(POSIX_UNITTESTS_CORE_OBJFILES) 
+endif
+
+
+#--------------------------------------------------------------------------------
+# This is a small tool for usage in the testrunner
+CLOSEFILEDESCRIPTOR_SRCFILES = $(SCX_SHARED_TEST_ROOT)/testutils/closefiledescriptors/closefiledescriptors.cpp
+CLOSEFILEDESCRIPTOR_OBJFILES = $(call src_to_obj,$(CLOSEFILEDESCRIPTOR_SRCFILES))
+
+$(TARGET_DIR)/closefiledescriptors : $(CLOSEFILEDESCRIPTOR_OBJFILES)
+	-$(MKPATH) $(TARGET_DIR)
+	$(PROFILING) $(LINK) $(LINK_OUTFLAG) $(CLOSEFILEDESCRIPTOR_OBJFILES)
+
+#--------------------------------------------------------------------------------
+# The tool itself
+testrunner-status:
+	$(ECHO) "========================= Performing make PAL testrunner"
+
+$(TARGET_DIR)/testrunner : testrunner-status $(UNITTESTS_OBJFILES) $(POSIX_UNITTESTS_STATICLIB_DEPFILES) 
+	-$(MKPATH) $(TARGET_DIR)
+	$(QUANTIFY) $(LINK) $(LINK_OUTFLAG) $(UNITTESTS_OBJFILES) $(CPPUNIT_LIB_PATH)/libcppunit.a $(POSIX_UNITTESTS_LINK_STATICLIBS) $(BULLSEYE_LINK) $(LDFLAGS_TESTRUNNER)
+
+testbuild :  $(TARGET_DIR)/testrunner
+
+
+# The tool itself
+$(TARGET_DIR)/testrunner_core : testrunner-status $(UNITTESTS_CORE_OBJFILES) $(POSIX_UNITTESTS_CORE_STATICLIB_DEPFILES) 
+	-$(MKPATH) $(TARGET_DIR)
+	$(PROFILING) $(LINK) $(LINK_OUTFLAG) $(UNITTESTS_CORE_OBJFILES) $(CPPUNIT_LIB_PATH)/libcppunit.a $(POSIX_UNITTESTS_CORE_LINK_STATICLIBS) $(LDFLAGS_TESTRUNNER)
+
+testbuild_core :  $(TARGET_DIR)/testrunner_core
+
+testrun_copy : $(TARGET_DIR)/closefiledescriptors
+	$(ECHO) "========================= Performing make testrun_copy PAL"
+	-$(MKPATH) $(TARGET_DIR)/testfiles
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxcorelib/pal/scxfile_test-*.txt $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/bios/*.dat $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/computersystem/*.dat $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/disk/*.md.cf $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/disk/bug*.lvmtab $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/disk/bug*_mnttab $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/networkinterface/procnetdev*.txt $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxcorelib/util/env_loc_en_US.UTF-8.txt $(TARGET_DIR)/testfiles/
+	chmod u+w $(TARGET_DIR)/testfiles/*
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/report.xsl $(TARGET_DIR)
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/createEnv.sh $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/testrun_wrapper $(TARGET_DIR)/testfiles/
+	sed "s@<RelDir>@.@" $(SYSTEMLIB_ROOT)/common/GetLinuxOS.sh | sed "s@EtcPath=\"/etc\"@if [ -n \"\$${1}\" ]; then EtcPath=\$$1; else EtcPath=\"/etc\"; fi@" > $(TARGET_DIR)/testfiles/GetLinuxOS.sh
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/software/dpkg_status_test $(TARGET_DIR)/testfiles/
+	chmod u+x $(TARGET_DIR)/testfiles/createEnv.sh
+	chmod u+x $(TARGET_DIR)/testfiles/testrun_wrapper
+	chmod u+x $(TARGET_DIR)/testfiles/GetLinuxOS.sh
+	chmod u+w $(TARGET_DIR)/report.xsl
+	$(COPY) $(TARGET_DIR)/closefiledescriptors $(TARGET_DIR)/testfiles/
+ifeq ($(PF),Linux)
+	$(COPY) -fR $(SCX_SHARED_TEST_ROOT)/scxsystemlib/common/platforms $(TARGET_DIR)/testfiles
+endif
+
+create_environment_sh : 
+	cd $(TARGET_DIR); testfiles/createEnv.sh
+
+testrun_setup : $(TARGET_DIR)/testrunner testrun_copy create_environment_sh
+
+testrun_pkg : testrun_setup
+	cd $(TARGET_DIR);rm -f testrun.tar;tar cvf testrun.tar testrunner testfiles
+
+ifeq ($(BUILD_PRODUCTION),1)
+BUILD_TESTRUN_PACKAGE=testrun_pkg
+else
+BUILD_TESTRUN_PACKAGE=
+endif
+
+# During code coverage run, the coverage file is OpsMgr.cov. That is also the name
+# of the empty coverage file in the package. Once run as unit test, copy the file 
+# with unit test coverage data to the target folder. 
+testrun_copycovfile :
+	if [ $(BUILD_TYPE) = Bullseye ]; then $(COPY) $(COVFILE) $(TARGET_DIR)/UnitTest.cov; fi
+
+testrun : testrun_setup $(BUILD_TESTRUN_PACKAGE)
+	$(ECHO) "========================= Performing PAL testrun execution"
+	cd $(TARGET_DIR);testfiles/testrun_wrapper .
+	$(MAKE) testrun_copycovfile
+
+# Make a little more compatible with other projects
+test : testrun
+
+testrun_noslow : testrun_setup
+	$(ECHO) "========================= Performing PAL testrun execution"
+	cd $(TARGET_DIR); testfiles/testrun_wrapper . -attr=-SLOW -slow=25
+	$(MAKE) testrun_copycovfile
+
+testrun_nosudo : testrun_setup
+	$(ECHO) "========================= Performing PAL testrun execution"
+	cd $(TARGET_DIR);./testrunner
+	$(MAKE) testrun_copycovfile
+
+testrun_core : $(TARGET_DIR)/testrunner_core testrun_copy
+	$(ECHO) "========================= Performing PAL testrun execution"
+	cd $(TARGET_DIR);./testrunner_core
+
+
+#================================================================================
+# Test parts of the installer builder framework
+#================================================================================
+test_installerbuilder:
+	cd ${SCX_BRD}/installer/InstallerBuilder/tests;python testrunner.py
+
+#================================================================================
+# Enable/disable profiling
+#================================================================================
+
+ccbuild: ccbuild_testrun
+
+testrun_code_coverage: ccbuild_testrun
+
+#================================================================================
+# Dependency generation Targets
+#================================================================================
+
+# Rule for automatically generating dependencies.
+OBJFILES_TEST=$(POSIX_UNITTESTS_OBJFILES) \
+	$(POSIX_UNITTESTS_OBJFILES) \
+
+DEPFILES_TEST=$(OBJFILES_TEST:.$(PF_OBJ_FILE_SUFFIX)=.d)
+
+
+#-------------------------------- End of File -----------------------------------
+

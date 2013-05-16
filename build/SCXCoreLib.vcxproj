@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Bullseye|Win32">
+      <Configuration>Bullseye</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F7AA9044-A9C0-4577-8671-89406262E367}</ProjectGuid>
+    <RootNamespace>SCXCoreLib</RootNamespace>
+    <SccProjectName>$/ScxCore/scx_core/build</SccProjectName>
+    <SccAuxPath>http://scxtfs2:8080/tfs/scx</SccAuxPath>
+    <SccLocalPath>.</SccLocalPath>
+    <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)..\target\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)..\intermediate\$(Platform)_$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)..\target\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)..\intermediate\$(Platform)_$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'">$(SolutionDir)..\target\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'">$(SolutionDir)..\intermediate\$(Platform)_$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildStep>
+      <Message>Creating scxcore-devel structure</Message>
+      <Command>xcopy $(ProjectDir)\..\source\code\include\scxcorelib $(TargetDir)scxcore-devel\include\
+xcopy $(TargetDir)SCXCoreLib.* $(TargetDir)scxcore-devel\lib
+copy $(ProjectDir)Makefile.version $(TargetDir)scxcore-devel\build_version.txt
+</Command>
+      <Outputs>$(TargetDir)scxcore-devel\lib\$(ProjectName).lib;$(TargetDir)scxcore-devel\lib\$(ProjectName).idb;$(TargetDir)scxcore-devel\lib\$(ProjectName).pdb;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\source\code\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;DISABLE_WIN_UNSUPPORTED;_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <ProgramDataBaseFileName>$(TargetDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CustomBuildStep>
+      <Message>Creating scxcore-devel structure</Message>
+      <Command>xcopy $(ProjectDir)\..\source\code\include\scxcorelib $(TargetDir)scxcore-devel\include\
+xcopy $(TargetDir)SCXCoreLib.* $(TargetDir)scxcore-devel\lib
+copy $(ProjectDir)Makefile.version $(TargetDir)scxcore-devel\build_version.txt
+</Command>
+      <Outputs>$(TargetDir)scxcore-devel\lib\$(ProjectName).lib;$(TargetDir)scxcore-devel\lib\$(ProjectName).idb;$(TargetDir)scxcore-devel\lib\$(ProjectName).pdb;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\source\code\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;DISABLE_WIN_UNSUPPORTED;_CRT_SECURE_NO_WARNINGS ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <ProgramDataBaseFileName>$(TargetDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>true</EnablePREfast>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Bullseye|Win32'">
+    <PreBuildEvent>
+      <Command>cov01 -1</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>Creating scxcore-devel structure</Message>
+      <Command>xcopy $(ProjectDir)\..\source\code\include\scxcorelib $(TargetDir)scxcore-devel\include\
+xcopy $(TargetDir)SCXCoreLib.* $(TargetDir)scxcore-devel\lib
+copy $(ProjectDir)Makefile.version $(TargetDir)scxcore-devel\build_version.txt
+</Command>
+      <Outputs>$(TargetDir)scxcore-devel\lib\$(ProjectName).lib;$(TargetDir)scxcore-devel\lib\$(ProjectName).idb;$(TargetDir)scxcore-devel\lib\$(ProjectName).pdb;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\source\code\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;DISABLE_WIN_UNSUPPORTED;_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <ProgramDataBaseFileName>$(TargetDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+    <PostBuildEvent>
+      <Command>cov01 -0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxtime\absolute.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxtime\amount.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxtime\primitives.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxtime\relative.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\scxassert_abort.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxcondition.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxdirectoryinfo.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\scxdumpstring.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\scxexception.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\scxfacets.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxfile.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxfilepath.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxfilesystem.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxlocale.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxlogconfigreader.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxlogfilebackend.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxlogfileconfigurator.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxloghandle.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxloghandlefactory.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxlogitem.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxlogmediatorsimple.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxlogseverityfilter.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\log\scxlogstdoutbackend.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\scxmath.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxoserror.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\scxpatternfinder.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxprocess.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\scxstream.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxthread.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxthreadlock.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxthreadlockfactory.cpp" />
+    <ClCompile Include="..\source\code\common_lib\pal\os\scxthreadlockhandle.cpp" />
+    <ClCompile Include="..\source\code\common_lib\util\stringaid.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\code\common_lib\pal\os\scxtime\primitives.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scx_widen_string.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxassert.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxatomic.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxcmn.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxcondition.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxdirectoryinfo.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxdumpstring.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxexception.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxfile.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxfilepath.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxfilesystem.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxhandle.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxlimit.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxlocale.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxlog.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogbackend.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogfilebackend.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogfileconfigurator.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogitem.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogmediator.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogmediatorsimple.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogseverityfilter.h" />
+    <ClInclude Include="..\source\code\common_lib\util\log\scxlogstdoutbackend.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxmath.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxoserror.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxpatternfinder.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxprocess.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxsingleton.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxstream.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxthread.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxthreadlock.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\scxtime.h" />
+    <ClInclude Include="..\test\code\include\scxcorelib\scxunit.h" />
+    <ClInclude Include="..\source\code\include\scxcorelib\stringaid.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="SCXAssertAbort.vcxproj">
+      <Project>{6aa4a18c-9a19-44a5-af6d-360d7e945ebc}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

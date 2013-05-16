@@ -1,0 +1,41 @@
+host:  redhat_4_32	scxcm-rhel4-32		~/src/configmgr		cm-alt	cm
+host:  redhat_4_64  scxcm64-rhel4-01    ~/src/configmgr     cm-alt  cm
+host:  redhat_4_64  scxcrd64-rhel40-4    ~/src/configmgr     cm-alt  cm
+host:  redhat_5_32	scxcm-rhel5-32		~/src/configmgr		cm-alt	cm
+host:  redhat_5_32  scxcmd-rhel5-01   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_32  scxcmd-rhel5-02   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64  scxcmd64-rhel5-01   ~/src/configmgr     cm-alt  cm
+host:  redhat_5_64  scxcmd64-rhel5-02   ~/src/configmgr     cm-alt  cm
+host:  redhat_6_32 scxcmd-rhel6-01     ~/src/configmgr     cm-alt  cm
+#unknown host:  redhat_6_32 scxcmd-rhel60-01     ~/src/configmgr     cm-alt  cm
+host:  redhat_6_32 scxcmd-rhel6-02     ~/src/configmgr     cm-alt  cm
+host:  redhat_6_64  scxcmd64-rhel6-01   ~/src/configmgr     cm-alt  cm
+host:  redhat_6_64  scxcmd64-rhel6-02   ~/src/configmgr     cm-alt  cm
+host:  redhat_6_64  scxcmd64-rhel6-03   ~/src/configmgr     cm-alt  cm
+host:  redhat_6_64  scxcmd64-rhel6-04   ~/src/configmgr     cm-alt  cm
+
+host:  suse_09_32   scxcrd-sles9-01     ~/src/configmgr     cm-alt  cm
+host:  suse_09_32   scxcrd-sles9-02     ~/src/configmgr     cm-alt  cm
+host:  suse_10_32   scxcrd-sles10-01    ~/src/configmgr     cm-alt  cm
+host:  suse_10_32   scxcrd-sles10-02    ~/src/configmgr     cm-alt  cm
+host:  suse_10_64   scxcrd64-sles10-01  ~/src/configmgr     cm-alt  cm
+#unknown host:  suse_10_64   scxcm64-sles10-01  ~/src/configmgr     cm-alt  cm
+#unknown host:  suse_10_64   scxcmd64-sles10-0  ~/src/configmgr     cm-alt  cm
+host:  suse_11_64   scxcmd64-sles11-01     ~/src/configmgr     cm-alt  cm
+host:  suse_11_32   scxcm-sles11-01     ~/src/configmgr     cm-alt  cm
+host:  suse_11_64   scxcm64-sles11-01   ~/src/configmgr     cm-alt  cm
+host:  suse_11_32   scxcm-sles11-02     ~/src/configmgr     cm-alt  cm
+host:  suse_11_64   scxcm64-sles11-02   ~/src/configmgr     cm-alt  cm
+
+host:  ubun_11_32   scxomd-ubun11-01   ~/src/configmgr     cm-alt  cm
+#slow host:  ubun_11_32   scxomd-ubun11-02   ~/src/configmgr     cm-alt  cm
+host:  ubun_11_64   scxomd64-ubun11-01   ~/src/configmgr     cm-alt  cm
+host:  ubun_11_64   scxomd64-ubun11-02   ~/src/configmgr     cm-alt  cm
+host:  ubun_12_32   scxomd-ubun12-01   ~/src/configmgr     cm-alt  cm
+#unknown host:  ubun_12_32   scxomd-ubun12-02   ~/src/configmgr     cm-alt  cm
+host:  ubun_12_64   scxomd64-ubun12-01   ~/src/configmgr     cm-alt  cm
+#unknown host:  ubun_12_64   scxomd64-ubun12-02   ~/src/configmgr     cm-alt  cm
+
+host:  redhat_4_32   scxcmt-rhel4-06   ~/src/configmgr     cm-alt  cm
+
+

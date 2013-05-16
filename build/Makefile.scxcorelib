@@ -1,0 +1,117 @@
+# -*- mode: Makefile; -*- 
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+
+#================================================================================
+# Static Libraries
+#================================================================================
+
+#--------------------------------------------------------------------------------
+# SCX Core lib
+
+CORELIB_ROOT=$(SCX_SRC_ROOT)/scxcorelib
+
+STATIC_CORELIB_SRCFILES = \
+	$(CORELIB_ROOT)/util/scxdumpstring.cpp \
+	$(CORELIB_ROOT)/util/scxstream.cpp \
+	$(CORELIB_ROOT)/util/scxfacets.cpp \
+	$(CORELIB_ROOT)/pal/scxoserror.cpp \
+	$(CORELIB_ROOT)/pal/scxtime/absolute.cpp \
+	$(CORELIB_ROOT)/pal/scxtime/relative.cpp \
+	$(CORELIB_ROOT)/pal/scxtime/amount.cpp \
+	$(CORELIB_ROOT)/pal/scxtime/primitives.cpp \
+	$(CORELIB_ROOT)/pal/scxatomic.cpp \
+	$(CORELIB_ROOT)/pal/scxcompat.cpp \
+	$(CORELIB_ROOT)/pal/scxcondition.cpp \
+	$(CORELIB_ROOT)/pal/scxfilepath.cpp \
+	$(CORELIB_ROOT)/pal/scxfile.cpp \
+	$(CORELIB_ROOT)/pal/scxfilesystem.cpp \
+	$(CORELIB_ROOT)/pal/scxdirectoryinfo.cpp \
+	$(CORELIB_ROOT)/pal/scxglob.cpp \
+	$(CORELIB_ROOT)/pal/scxlibglob.cpp \
+	$(CORELIB_ROOT)/pal/scxmarshal.cpp \
+	$(CORELIB_ROOT)/pal/scxnameresolver.cpp \
+	$(CORELIB_ROOT)/pal/scxprocess.cpp \
+	$(CORELIB_ROOT)/pal/scxregex.cpp \
+	$(CORELIB_ROOT)/pal/scxsignal.cpp \
+	$(CORELIB_ROOT)/pal/scxstrencodingconv.cpp \
+	$(CORELIB_ROOT)/pal/scxthread.cpp \
+	$(CORELIB_ROOT)/pal/scxthreadlock.cpp \
+	$(CORELIB_ROOT)/pal/scxthreadlockfactory.cpp \
+	$(CORELIB_ROOT)/pal/scxthreadlockhandle.cpp \
+	$(CORELIB_ROOT)/pal/scxthreadpool.cpp \
+	$(CORELIB_ROOT)/pal/scxuser.cpp \
+	$(CORELIB_ROOT)/pal/scxstrencodingconv.cpp \
+	$(CORELIB_ROOT)/util/scxexception.cpp \
+	$(CORELIB_ROOT)/util/scxmath.cpp \
+	$(CORELIB_ROOT)/util/utftoupper.cpp \
+	$(CORELIB_ROOT)/util/stringaid.cpp \
+	$(CORELIB_ROOT)/util/log/scxlogfilebackend.cpp \
+	$(CORELIB_ROOT)/util/log/scxlogstdoutbackend.cpp \
+	$(CORELIB_ROOT)/util/log/scxlogseverityfilter.cpp \
+	$(CORELIB_ROOT)/util/log/scxlogmediatorsimple.cpp \
+	$(CORELIB_ROOT)/util/log/scxlogfileconfigurator.cpp \
+	$(CORELIB_ROOT)/util/log/scxloghandle.cpp \
+	$(CORELIB_ROOT)/util/log/scxloghandlefactory.cpp \
+	$(CORELIB_ROOT)/util/log/scxlogitem.cpp \
+	$(CORELIB_ROOT)/util/log/scxlogconfigreader.cpp \
+	$(CORELIB_ROOT)/util/scxpatternfinder.cpp \
+	$(CORELIB_ROOT)/pal/scxlocale.cpp \
+	$(CORELIB_ROOT)/util/persist/scxfilepersistmedia.cpp \
+	$(CORELIB_ROOT)/util/persist/scxfilepersistdatareader.cpp \
+	$(CORELIB_ROOT)/util/persist/scxfilepersistdatawriter.cpp
+
+
+# Extra include dirs for certain include files
+$(INTERMEDIATE_DIR)/src/scxcorelib/pal/scxstrencodingconv.d: INCLUDES += -I$(CMOUTPUT)/include
+$(INTERMEDIATE_DIR)/src/scxcorelib/pal/scxstrencodingconv.$(PF_OBJ_FILE_SUFFIX): INCLUDES += -I$(CMOUTPUT)/include
+
+#--------------------------------------------------------------------------------
+# interlock funcitons
+ifeq ($(PF_ARCH),pa-risc)
+	STATIC_CORELIB_SRCFILES += $(CORELIB_ROOT)/pal/hppa_spinlock.s
+endif
+
+ifeq ($(PF_ARCH)$(PF_MAJOR)$(PF_MINOR),sparc58)
+	STATIC_CORELIB_SRCFILES += $(CORELIB_ROOT)/pal/sunsparc8_atomic.s
+endif
+
+ifeq ($(PF_ARCH)$(PF_MAJOR)$(PF_MINOR),sparc59)
+	STATIC_CORELIB_SRCFILES += $(CORELIB_ROOT)/pal/sunsparc8_atomic.s
+endif
+
+STATIC_CORELIB_OBJFILES = $(call src_to_obj,$(STATIC_CORELIB_SRCFILES))
+
+$(TARGET_DIR)/libscxcore.$(PF_STAT_LIB_FILE_SUFFIX) : $(STATIC_CORELIB_OBJFILES)
+	-$(MKPATH) $(@D)
+	$(LINK_STATLIB) $(LINK_STATLIB_OUTFLAG) $^
+
+scxcorelib : $(TARGET_DIR)/libscxcore.$(PF_STAT_LIB_FILE_SUFFIX)
+
+#--------------------------------------------------------------------------------
+# Aborting assert (standard behavior)
+
+STATIC_ASSERT_ABORTLIB_SRCFILES = \
+	$(CORELIB_ROOT)/util/scxassert_abort.cpp
+
+STATIC_ASSERT_ABORTLIB_OBJFILES = $(call src_to_obj,$(STATIC_ASSERT_ABORTLIB_SRCFILES))
+
+$(TARGET_DIR)/libscxassertabort.$(PF_STAT_LIB_FILE_SUFFIX) : $(STATIC_ASSERT_ABORTLIB_OBJFILES)
+	-$(MKPATH) $(@D)
+	$(LINK_STATLIB) $(LINK_STATLIB_OUTFLAG) $^
+
+scxassertabort: $(TARGET_DIR)/libscxassertabort.$(PF_STAT_LIB_FILE_SUFFIX)
+
+#--------------------------------------------------------------------------------
+# Continuning assert, to be used for unit tests
+
+STATIC_ASSERT_CPPUNITLIB_SRCFILES = \
+	$(SCX_SHARED_TEST_ROOT)/testutils/scxassert_cppunit.cpp
+
+STATIC_ASSERT_CPPUNITLIB_OBJFILES = $(call src_to_obj,$(STATIC_ASSERT_CPPUNITLIB_SRCFILES))
+
+$(TARGET_DIR)/libscxassertcppunit.$(PF_STAT_LIB_FILE_SUFFIX) : $(STATIC_ASSERT_CPPUNITLIB_OBJFILES)
+	$(LINK_STATLIB) $(LINK_STATLIB_OUTFLAG) $^
+
+scxassertcppunit: $(TARGET_DIR)/libscxassertcppunit.$(PF_STAT_LIB_FILE_SUFFIX)

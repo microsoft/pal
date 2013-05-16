@@ -1,0 +1,145 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-08-23
+# 
+# Platform-specific overrides to the general POSIX platform file
+# 
+#--------------------------------------------------------------------------------
+
+# UNIX_STD affects the behaviour of certain C-lib functions.
+export UNIX_STD=2003
+
+
+# Define flags. (These will be submitted to all commands that use the preprocesor)
+DEFINES=-Dhpux -D$(ARCH) -D_XOPEN_SOURCE=600 -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D_PSTAT64=1 -D_LARGEFILE64_SOURCE=1
+
+ifeq ($(SCX_STACK_ONLY), true)
+	DEFINES += -DSCX_STACK_ONLY
+endif
+
+# Compiler flags that regulates warning levels
+# The following aCC warnings are currently disabled:
+# warning #2236-D: controlling expression is constant
+# warning #2111-D: statement is unreachable
+# warning #2815-D: type qualifier on return type is meaningless
+CXX_WARN_FLAGS=+W2236,2111,2815
+
+# Common compiler flags (sent to compile command and link commands)
+# The following flags get set:
+# -D__hpux -D__ia64=1 -D_BIG_ENDIAN=1 -D__STDCPP__
+# -D__HP_aCC=version-string -D_HP_NAMESPACE_STD
+COMMONFLAGS=+DD32 -AA -mt +Z
+
+# Use "warnings as errors", if available
+ifeq ($(ARCH),ia64)
+	COMMONFLAGS += +check=stack
+	# Note: -We exists in the PARISC compiler also, but is buggy and 
+	# exits with "fatal error #523:" for many files.
+	CXX_WARN_FLAGS += +We
+	# Enable security diagnostics at compile 
+#	CXX_WARN_FLAGS += +wsecurity=2 +wlint      Currently disabled, see WI 11173
+#   COMMONFLAGS += +check=all                  Currently disabled, see WI 11173
+endif
+
+# CXX Compiler flags (Redefined to include COMMONFLAGS)
+CXXFLAGS=$(COMMONFLAGS) $(DEFINES) $(CXX_WARN_FLAGS)
+CFLAGS=$(COMMONFLAGS) -ext $(DEFINES) $(CXX_WARN_FLAGS)
+
+# CXX Debug flags for debug builds
+ifeq ($(BUILD_TYPE),Debug)
+	CXXFLAGS += -g1
+	DEFINES += -D_DEBUG
+else
+	CXXFLAGS += +O1
+	ifeq ($(ARCH),ia64)
+		CXXFLAGS += +Osize
+	endif
+	DEFINES += -DNDEBUG
+endif
+
+# Linker flags
+LINK_OUTFLAG=-o $@
+LINK_STATLIB_OUTFLAG=$@
+
+# Add profiling flags to compile/link command, if requested. (-p not available on PA-RISC)
+ifeq ($(BUILD_PROFILING), prof)
+        COMMONFLAGS += -p
+endif
+ifeq ($(BUILD_PROFILING), gprof)
+        COMMONFLAGS += -G
+endif
+
+#--------------------------------------------------------------------------------
+# Tools for this platform
+
+# Compiler for CPP files
+CXX=aCC
+
+# Link command for executables
+# Link an executable
+LINK=aCC $(COMMONFLAGS) -L$(TARGET_DIR)
+
+# Link command for static libraries (archives)
+# Be sure to use local ar, not gnu-ar. That ar won't accept -o.
+LINK_STATLIB=/bin/ar -rc
+
+# Link a dynamic lib 
+LINK_DYNLIB = aCC $(COMMONFLAGS) -b -L$(TARGET_DIR)
+
+# Include flags are redefined since aCC can't take the -i option.
+INCLUDES=-I$(SCX_SHARED_INCLUDE_DIR) -I$(SCX_SHARED_INCLUDE_DIR) -I$(INT_INCLUDE_DIR) -I$(SCX_BRD) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+UNITTEST_EXTRA_INCLUDES=-I$(SCX_SHARED_TEST_ROOT)/include -I$(SCX_SRC_ROOT) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+
+# No operation, i.e. suppressing a command
+NOOP=@echo Step suppressed 
+
+# Command for making dependecies
+MKDEP=aCC +make -E
+
+#--------------------------------------------------------------------------------
+# File type suffixes
+
+PF_OBJ_FILE_SUFFIX=o
+PF_STAT_LIB_FILE_SUFFIX=a
+ifeq ($(ARCH),ia64)
+	PF_DYN_LIB_FILE_SUFFIX=so
+else
+	PF_DYN_LIB_FILE_SUFFIX=sl
+endif
+PF_EXE_FILE_SUFFIX=
+PF_KIT_FILE_SUFFIX=tar
+
+#--------------------------------------------------------------------------------
+# Flags depending on PF_. Placed here since ifeq does not work with forward vars.
+#--------------------------------------------------------------------------------
+# Use new compiler fronend on PA-RISC (that makes it more like IA-64)
+ifeq ($(ARCH),hppa)
+ifneq ($(PF_MINOR),23)
+	COMMONFLAGS += +hpxstd98
+endif
+endif
+
+#--------------------------------------------------------------------------------
+# Paths
+#--------------------------------------------------------------------------------
+
+# Path to where the CPPUNIT libraries are checked in 
+CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/hpuxacc/$(ARCH)/cppunit_32bit
+
+#--------------------------------------------------------------------------------
+# Link switches for this platform, per target
+#--------------------------------------------------------------------------------
+
+LDFLAGS_DYNLIB =
+LDFLAGS_EXECUTABLE =
+
+# The testrunner links with these
+LDFLAGS_TESTRUNNER = $(LDFLAGS_EXECUTABLE)
+
+# Transforms a list of symbols that should be exposed to the correct link flags
+# Example: "symbol1 symbol2" will give you "-u symbol1 -Wl,+esymbol1 -u symbol2 -Wl,+esymbol2"
+get_ld_flags_for_retaining_symbols=$(foreach EXPOSED_SYM,$(1), -u $(EXPOSED_SYM) -Wl,+e$(EXPOSED_SYM))
+
+#-------------------------------- End of File -----------------------------------

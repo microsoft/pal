@@ -1,0 +1,230 @@
+#scripts used to execute ioctl_scan on a number of linux machines
+#this file is for backup purposes and some of the paths and names are hardcoded and may have to be changed.
+#user must have paswordless root access
+
+declare -a DEVELOPMENT_LIST SYSTEM_LIST
+
+RESULTS_FILE="/home/a-tomark/Desktop/diskscan/disk_results.txt"
+RESULTS_FILE_G="/home/a-tomark/Desktop/diskscan/drg.txt"
+
+qq_addrootkey()
+{
+    if [ "$1" = "" ]; then
+        echo "Error: Need machine name!"
+        return 1
+    fi
+    cat ~/.ssh/id_dsa.pub | ssh root@"$1" 'cp ~/.ssh/authorized_keys ~/.ssh/authorized_keys_old;cat >> ~/.ssh/authorized_keys'
+#    cat ~/.ssh/id_dsa.pub | ssh root@"$1" 'echo "testtest" >> /home/a-tomark/testfile;cp /home/a-tomark/testfile /home/a-tomark/testfile_old;cat >> /home/a-tomark/testfile'
+}
+
+private_prepare_c()
+{
+    DISKS_FILE="/home/a-tomark/Desktop/diskscan/disk_names_c.txt"
+    DEVELOPMENT_LIST=( `egrep ^host: ~/Desktop/diskscan/linuxlistqq_c | awk '{print $3}' | sort -u` )
+    SYSTEM_LIST=(${DEVELOPMENT_LIST[*]})
+}
+
+private_prepare_t()
+{
+    ulmachine=scxcrd-sles10-01
+    DISKS_FILE="/home/a-tomark/Desktop/diskscan/disk_names_t.txt"
+    DEVELOPMENT_LIST=( `egrep ^host: ~/Desktop/diskscan/linuxlistqq_t | awk '{print $3}' | sort -u` )
+    SYSTEM_LIST=(${DEVELOPMENT_LIST[*]})
+    EXEC_UL_FILE=ioctl_scan_t
+}
+
+private_prepare_t64()
+{
+    ulmachine=scxcrd64-sles10-01
+    DISKS_FILE="/home/a-tomark/Desktop/diskscan/disk_names_t64.txt"
+    DEVELOPMENT_LIST=( `egrep ^host: ~/Desktop/diskscan/linuxlistqq_t64 | awk '{print $3}' | sort -u` )
+    SYSTEM_LIST=(${DEVELOPMENT_LIST[*]})
+    EXEC_UL_FILE=ioctl_scan_t64
+}
+
+private_enumerate_machines()
+{
+    for i in ${SYSTEM_LIST[*]}; do
+        echo "${i} --------------------------------------------"
+        ssh root@${i} "hostname"
+    done
+}
+
+qq_enumerate_machines()
+{
+    echo "###################################################"
+    echo "COMPILE LIST"
+    echo "###################################################"
+    private_prepare_c
+    private_enumerate_machines
+    echo "###################################################"
+    echo "TEST LIST"
+    echo "###################################################"
+    private_prepare_t
+    private_enumerate_machines
+    echo "###################################################"
+    echo "TEST64 LIST"
+    echo "###################################################"
+    private_prepare_t64
+    private_enumerate_machines
+}
+
+private_getdisknames()
+{
+    rm -f "${DISKS_FILE}"
+    for i in ${SYSTEM_LIST[*]}; do
+#        echo "${i} --------------------------------------------"
+        IFS=$'\n'
+        disks=( $(ssh root@${i} "fdisk -l 2>/dev/null|grep Disk") )
+        for item in ${disks[*]}
+        do
+            diskname=$(echo ${item}|awk 'BEGIN{FS="[ :]"}END{print $2}')
+            if [ "$diskname" != "identifier" ]
+            then
+                echo "disk ${i} ${diskname}"
+                echo "disk ${i} ${diskname}" >> "${DISKS_FILE}"
+            fi
+        done
+    done
+    unset IFS
+}
+
+qq_getdisknames()
+{
+    echo "###################################################"
+    echo "COMPILE LIST"
+    echo "###################################################"
+    private_prepare_c
+    private_getdisknames
+    echo "###################################################"
+    echo "TEST LIST"
+    echo "###################################################"
+    private_prepare_t
+    private_getdisknames
+    echo "###################################################"
+    echo "TEST64 LIST"
+    echo "###################################################"
+    private_prepare_t64
+    private_getdisknames
+}
+
+private_processdisks_c()
+{
+    DISKS_LIST1=( `egrep ^disk "${DISKS_FILE}"` )
+    DISKS_LIST=(${DISKS_LIST1[*]})
+    for i in ${DISKS_LIST1[*]}; do
+        machine=$(echo ${i}|awk '{print $2}')
+        disk=$(echo ${i}|awk '{print $3}')
+        echo "------------- machine ${machine} disk ${disk}"
+        ssh root@${machine} "mkdir /tmp/a-tomark 2>/dev/null;mkdir /tmp/a-tomark/testioctl 2>/dev/null"
+        scp /home/a-tomark/Desktop/diskscan/ioctl_scan.cpp root@${machine}:/tmp/a-tomark/testioctl/
+        ssh root@${machine} "g++ /tmp/a-tomark/testioctl/ioctl_scan.cpp -o /tmp/a-tomark/testioctl/ioctl_scan"
+        ssh root@${machine} "/tmp/a-tomark/testioctl/ioctl_scan ${disk}" >> "${RESULTS_FILE}"
+        ssh root@${machine} "rm -rf /tmp/a-tomark/testioctl 2>/dev/null"
+    done
+}
+
+private_processdisks_ul()
+{
+    #make executable
+    echo compiling using ${ulmachine}
+    ssh root@${ulmachine} "mkdir /tmp/a-tomark 2>/dev/null;mkdir /tmp/a-tomark/testioctl 2>/dev/null"
+    scp /home/a-tomark/Desktop/diskscan/ioctl_scan.cpp root@${ulmachine}:/tmp/a-tomark/testioctl/
+    ssh root@${ulmachine} "g++ /tmp/a-tomark/testioctl/ioctl_scan.cpp -o /tmp/a-tomark/testioctl/${EXEC_UL_FILE}"
+    scp root@${ulmachine}:/tmp/a-tomark/testioctl/${EXEC_UL_FILE} /home/a-tomark/Desktop/diskscan/
+
+    #run executable on all machines in the list
+    DISKS_LIST1=( `egrep ^disk "${DISKS_FILE}"` )
+    DISKS_LIST=(${DISKS_LIST1[*]})
+    for i in ${DISKS_LIST1[*]}; do
+        machine=$(echo ${i}|awk '{print $2}')
+        disk=$(echo ${i}|awk '{print $3}')
+        echo "------------- machine ${machine} disk ${disk}"
+        ssh root@${machine} "mkdir /tmp/a-tomark 2>/dev/null;mkdir /tmp/a-tomark/testioctl 2>/dev/null"
+        scp /home/a-tomark/Desktop/diskscan/${EXEC_UL_FILE} root@${machine}:/tmp/a-tomark/testioctl/
+        ssh root@${machine} "/tmp/a-tomark/testioctl/${EXEC_UL_FILE} ${disk}" >> "${RESULTS_FILE}"
+#        ssh root@${machine} "/tmp/a-tomark/testioctl/${EXEC_UL_FILE} ${disk}"
+        ssh root@${machine} "rm -rf /tmp/a-tomark/testioctl 2>/dev/null"
+    done
+}
+
+qq_processdisks()
+{
+    rm -f "${RESULTS_FILE}"
+    rm -f "${RESULTS_FILE_G}"
+    IFS=$'\n'
+
+    echo "###################################################"
+    echo "COMPILE LIST"
+    echo "###################################################"
+    private_prepare_c
+    private_processdisks_c
+    echo "###################################################"
+    echo "TEST LIST"
+    echo "###################################################"
+    private_prepare_t
+    private_processdisks_ul
+    echo "###################################################"
+    echo "TEST64 LIST"
+    echo "###################################################"
+    private_prepare_t64
+    private_processdisks_ul
+
+    unset IFS
+    grep --binary-files=text PHYS_HD_SCAN ${RESULTS_FILE} > ${RESULTS_FILE_G}
+}
+
+private_getdiskinfo()
+{
+    DISKS_LIST1=( `egrep ^disk "${DISKS_FILE}"` )
+    DISKS_LIST=(${DISKS_LIST1[*]})
+    for i in ${DISKS_LIST1[*]}; do
+        machine=$(echo ${i}|awk '{print $2}')
+        disk=$(echo ${i}|awk '{print $3}')
+        echo ""
+        echo "------------------------------------------------------------------------------------"
+        echo "------------------------------------------------------------------------------------"
+        echo "------------------------------------------------------------------------------------"
+        echo "machine ${machine} disk ${disk}"
+        echo "------------------------------------------------------------------------------------"
+        echo "hdparm:-----------------------------------------------------------------------------"
+        ssh root@${machine} "hdparm -I ${disk}"
+        echo "lshw:-------------------------------------------------------------------------------"
+        ssh root@${machine} "lshw -class disk"
+#        echo "sg_inq:-----------------------------------------------------------------------------"
+#        ssh root@${machine} "sg_inq --len=36 ${disk}"
+#        ssh root@${machine} "sg_inq -36 ${disk}"
+#        echo "sg_inq --ata:-----------------------------------------------------------------------"
+#        ssh root@${machine} "sg_inq --ata --len=36 ${disk}"
+#        ssh root@${machine} "sg_inq -A -36 ${disk}"
+    done
+}
+
+qq_getdiskinfo()
+{
+    IFS=$'\n'
+
+    echo "###################################################"
+    echo "COMPILE LIST"
+    echo "###################################################"
+    private_prepare_c
+    private_getdiskinfo
+    echo "###################################################"
+    echo "TEST LIST"
+    echo "###################################################"
+    private_prepare_t
+    private_getdiskinfo
+    echo "###################################################"
+    echo "TEST64 LIST"
+    echo "###################################################"
+    private_prepare_t64
+    private_getdiskinfo
+
+    unset IFS
+}
+
+#if console stops working properly, for example can't list files with ls.
+qq_reset()
+{
+    unset IFS
+}

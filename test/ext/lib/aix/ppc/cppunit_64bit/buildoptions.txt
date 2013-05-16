@@ -1,0 +1,10 @@
+cppunit was built the following way from the cppunit-1.12.0 source.
+
+./configure AR="ar -X 64" NM="nm -X 64" CXX="xlc++_r -q64" CXXFLAGS=-qrtti --prefix=/suitable/install/dir/
+make
+make check
+make install
+
+Then the contents of "/suitable/install/dir/lib/" was copied here and pruned somewhat.
+The file libcppunit.a was a link to libcppunit-1.12.a, but since links don't work
+very well with TFS it was renamed.

@@ -1,0 +1,10 @@
+cppunit was built the following way from the cppunit-1.12.0 source.
+
+./configure --disable-dependency-tracking CXXFLAGS="-arch i386 -gdwarf-2 -O2" --prefix=/Users/stefan/cppunit/
+make AM_LDFLAGS="-XCClinker -arch -XCClinker i386"
+make install
+
+Then the contents of "/Users/stefan/cppunit/" was copied here and pruned somewhat.
+The file libcppunit.dylib was a link to libcppunit-1.12.0.0.0.dylib, but since links don't work
+very well with TFS it was renamed.
+

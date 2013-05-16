@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SCXCoreLib", "SCXCoreLib.vcxproj", "{F7AA9044-A9C0-4577-8671-89406262E367}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SCXTestrunner", "SCXTestrunner.vcxproj", "{F82F5167-D6A7-4FC5-85E7-19B17860586D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SCXAssertAbort", "SCXAssertAbort.vcxproj", "{6AA4A18C-9A19-44A5-AF6D-360D7E945EBC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SCXTestrun", "SCXTestrun.vcxproj", "{26CD2254-B4CE-4C11-8AAD-65546845308A}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 5
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://scxtfs2:8080/tfs/scx
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = SCXCoreLib.vcxproj
+		SccLocalPath1 = .
+		SccProjectUniqueName2 = SCXTestrunner.vcxproj
+		SccLocalPath2 = .
+		SccProjectUniqueName3 = SCXAssertAbort.vcxproj
+		SccLocalPath3 = .
+		SccProjectUniqueName4 = SCXTestrun.vcxproj
+		SccLocalPath4 = .
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Bullseye|Win32 = Bullseye|Win32
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F7AA9044-A9C0-4577-8671-89406262E367}.Bullseye|Win32.ActiveCfg = Bullseye|Win32
+		{F7AA9044-A9C0-4577-8671-89406262E367}.Bullseye|Win32.Build.0 = Bullseye|Win32
+		{F7AA9044-A9C0-4577-8671-89406262E367}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F7AA9044-A9C0-4577-8671-89406262E367}.Debug|Win32.Build.0 = Debug|Win32
+		{F7AA9044-A9C0-4577-8671-89406262E367}.Release|Win32.ActiveCfg = Release|Win32
+		{F7AA9044-A9C0-4577-8671-89406262E367}.Release|Win32.Build.0 = Release|Win32
+		{F82F5167-D6A7-4FC5-85E7-19B17860586D}.Bullseye|Win32.ActiveCfg = Bullseye|Win32
+		{F82F5167-D6A7-4FC5-85E7-19B17860586D}.Bullseye|Win32.Build.0 = Bullseye|Win32
+		{F82F5167-D6A7-4FC5-85E7-19B17860586D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F82F5167-D6A7-4FC5-85E7-19B17860586D}.Debug|Win32.Build.0 = Debug|Win32
+		{F82F5167-D6A7-4FC5-85E7-19B17860586D}.Release|Win32.ActiveCfg = Release|Win32
+		{F82F5167-D6A7-4FC5-85E7-19B17860586D}.Release|Win32.Build.0 = Release|Win32
+		{6AA4A18C-9A19-44A5-AF6D-360D7E945EBC}.Bullseye|Win32.ActiveCfg = Bullseye|Win32
+		{6AA4A18C-9A19-44A5-AF6D-360D7E945EBC}.Bullseye|Win32.Build.0 = Bullseye|Win32
+		{6AA4A18C-9A19-44A5-AF6D-360D7E945EBC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6AA4A18C-9A19-44A5-AF6D-360D7E945EBC}.Debug|Win32.Build.0 = Debug|Win32
+		{6AA4A18C-9A19-44A5-AF6D-360D7E945EBC}.Release|Win32.ActiveCfg = Release|Win32
+		{6AA4A18C-9A19-44A5-AF6D-360D7E945EBC}.Release|Win32.Build.0 = Release|Win32
+		{26CD2254-B4CE-4C11-8AAD-65546845308A}.Bullseye|Win32.ActiveCfg = Bullseye|Win32
+		{26CD2254-B4CE-4C11-8AAD-65546845308A}.Bullseye|Win32.Build.0 = Bullseye|Win32
+		{26CD2254-B4CE-4C11-8AAD-65546845308A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{26CD2254-B4CE-4C11-8AAD-65546845308A}.Debug|Win32.Build.0 = Debug|Win32
+		{26CD2254-B4CE-4C11-8AAD-65546845308A}.Release|Win32.ActiveCfg = Release|Win32
+		{26CD2254-B4CE-4C11-8AAD-65546845308A}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

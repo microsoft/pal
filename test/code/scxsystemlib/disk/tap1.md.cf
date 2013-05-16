@@ -1,0 +1,20 @@
+# metadevice configuration file
+# do not hand edit
+d100 -m d101 d102 1
+d101 1 1 c0t2d0s0
+d102 1 1 c0t3d0s0
+d50 -m d51 d52 1
+d51 1 1 c0t0d0s5
+d52 1 1 c0t1d0s5
+d30 -m d31 d32 1
+d31 1 1 c0t0d0s3
+d32 1 1 c0t1d0s3
+d10 -m d11 d12 1
+d11 1 1 c0t0d0s1
+d12 1 1 c0t1d0s1
+d0 -m d1 d2 1
+d1 1 1 c0t0d0s0
+d2 1 1 c0t1d0s0
+d60 -m d61 d62 1
+d61 1 1 c0t0d0s6
+d62 1 1 c0t1d0s6

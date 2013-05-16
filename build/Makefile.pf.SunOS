@@ -1,0 +1,133 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 2007-08-23
+# 
+# Platform-specific overrides to the general POSIX platform file
+# 
+#--------------------------------------------------------------------------------
+
+# Solaris 5.11 compiler is a little different ...
+
+ifeq ($(PF_MAJOR),5)
+ifeq ($(PF_MINOR),11)
+
+USING_SOLARIS_11=1
+
+endif
+endif
+
+
+# Define flags. (These will be submitted to all commands that use the preprocesor)
+DEFINES += -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D_LARGEFILE64_SOURCE=1
+
+# Compiler flags that regulates warning levels
+# Suppresses warnings about extern "C":
+CXX_WARN_FLAGS=-errtags -erroff=badargtype2w,wbadinit,wnoretvalue,truncwarn -xwe +w
+
+# CXX Compiler flags 
+CXXFLAGS=$(DEFINES) $(CXX_WARN_FLAGS) -KPIC -mt -xspace -xtarget=generic -xarch=generic
+CFLAGS=$(DEFINES) $(CXX_WARN_FLAGS) -KPIC -mt -xspace -xtarget=generic -xarch=generic
+
+# On Solaris 11 (debug only), -features=no%split_init causes core dumps (due to
+# the fact that size optimization does not happen when the singleton is in a
+# separate dynamic library - as it is for Debug builds).
+#
+# For safety, include that flag in all cases EXCEPT for Solaris 11 (Debug)
+
+USE_SOLARIS_SIZE_OPTIMIZATION=1
+
+ifeq ($(BUILD_TYPE),Debug)
+ifeq ($(USING_SOLARIS_11),1)
+	USE_SOLARIS_SIZE_OPTIMIZATION=0
+endif
+endif
+
+ifeq ($(USE_SOLARIS_SIZE_OPTIMIZATION),1)
+	CXXFLAGS += -features=no%split_init
+	CFLAGS += -features=no%split_init
+endif
+
+# These flags are used for all link commands.
+# I.e. for executables, static libraries and for dynamic libraries.
+LDFLAGS_COMMON=-norunpath -lpthread -mt -i
+
+# CXX Debug flags for debug builds
+ifeq ($(BUILD_TYPE),Debug)
+	CXXFLAGS += -g
+	DEFINES += -D_DEBUG
+	LDFLAGS_COMMON += -g
+ifeq ($(ARCH),sparc)
+	LDFLAGS_COMMON += -xcheck=%all
+endif
+else
+	CXXFLAGS += -xO1
+	DEFINES += -DNDEBUG
+	LDFLAGS_COMMON += -xldscope=hidden
+ifeq ($(ARCH),sparc)
+	LDFLAGS_COMMON +=  -xlinkopt=2
+endif
+endif
+
+# Linker flags
+LINK_OUTFLAG=-o $@
+LINK_STATLIB_OUTFLAG=-o $@
+
+#--------------------------------------------------------------------------------
+# Tools on this platform
+
+# Compiler for CPP files
+CXX=CC
+
+# Link command for executables
+# Link an executable 
+LINK=CC -L$(TARGET_DIR) 
+
+# Link command for static libraries (archives)
+LINK_STATLIB=CC -xar -L$(TARGET_DIR) $(LDFLAGS_COMMON)
+
+# Link a dynamic lib 
+LINK_DYNLIB=CC -G -L$(TARGET_DIR)
+
+# Include paths for POSIX platforms
+INCLUDES=-I$(SCX_SHARED_INCLUDE_DIR) -I$(SCX_SHARED_INCLUDE_DIR) -I$(INT_INCLUDE_DIR) -I$(SCX_BRD) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+UNITTEST_EXTRA_INCLUDES=-I$(SCX_SHARED_TEST_ROOT)/include -I$(SCX_SRC_ROOT) -I$(SCX_SHARED_TST_EXT_INCLUDE_DIR)
+
+# No operation, i.e. suppressing a command
+NOOP=@echo Step suppressed 
+
+# Command for making dependecies
+MKDEP=CC -xM1
+
+#--------------------------------------------------------------------------------
+# File type suffixes
+
+PF_OBJ_FILE_SUFFIX=o
+PF_STAT_LIB_FILE_SUFFIX=a
+PF_DYN_LIB_FILE_SUFFIX=so
+PF_EXE_FILE_SUFFIX=
+PF_KIT_FILE_SUFFIX=tar
+
+#--------------------------------------------------------------------------------
+# Paths
+#--------------------------------------------------------------------------------
+
+# Path to where the CPPUNIT libraries are checked in 
+CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/solaris/$(ARCH)/cppunit
+
+#--------------------------------------------------------------------------------
+# Link switches for this platform, per target
+#--------------------------------------------------------------------------------
+
+LDFLAGS_DYNLIB = $(LDFLAGS_COMMON)
+LDFLAGS_EXECUTABLE = -lnsl -lrt $(LDFLAGS_COMMON)
+
+# Transforms a list of symbols that should be exposed to the correct link flags
+get_ld_flags_for_retaining_symbols=$(addprefix -u, $(1))
+
+# The testrunner links with these
+LDFLAGS_TESTRUNNER = $(LDFLAGS_EXECUTABLE) -lkstat -lsocket -ldevinfo
+
+#-------------------------------- End of File -----------------------------------
+
