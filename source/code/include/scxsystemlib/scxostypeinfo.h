@@ -36,6 +36,7 @@ namespace SCXSystemLib
 #if defined(PF_DISTRO_ULINUX)
         virtual const std::wstring getScriptPath() const;
         virtual const std::wstring getReleasePath() const;
+        virtual bool isReleasePathWritable() const;
 #endif // defined(PF_DISTRO_ULINUX)
     };
 

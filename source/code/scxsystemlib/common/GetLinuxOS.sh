@@ -239,5 +239,8 @@ if [ ! -e $DisableFile ] || [ ! -e $RelFile ]; then
     printf "OSFullName=$OSFullName\n" >>$RelFile
     printf "OSAlias=$OSAlias\n" >>$RelFile
     printf "OSManufacturer=$OSManufacturer\n" >>$RelFile
+
+    # Verify that it's W:R so non-priv'ed users can read
+    chmod 644 $RelFile
 fi
 

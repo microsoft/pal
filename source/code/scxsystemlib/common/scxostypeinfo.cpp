@@ -29,6 +29,11 @@
 #include <sys/systeminfo.h>
 #endif
 
+#if defined(PF_DISTRO_ULINUX)
+#include <unistd.h>
+#include <sys/types.h>
+#endif // defined(PF_DISTRO_ULINUX)
+
 #include <scxcorelib/scxfile.h>
 #include <scxcorelib/scxprocess.h>
 #include <scxcorelib/scxstream.h>
@@ -103,6 +108,10 @@ namespace SCXSystemLib
         return SCXSystemLib::SCXProductDependencies::GetLinuxOS_ReleasePath();
     }
 
+    bool SCXOSTypeInfoDependencies::isReleasePathWritable() const
+    {
+        return ( 0 == geteuid() );
+    }
 #endif // defined(PF_DISTRO_ULINUX)
 
     //
@@ -429,13 +438,22 @@ namespace SCXSystemLib
         m_osManufacturer = L"Red Hat, Inc.";
 
 #elif defined(PF_DISTRO_ULINUX)
+        // The release file is created at agent start time by init.d startup script
+        // This is done to insure that we can write to the appropriate directory at
+        // the time (since, at agent run-time, we may not have root privileges).
+        //
+        // If we CAN create the file here (if we're running as root), then we'll
+        // do so here. But in the normal case, this shouldn't be necessary.  Only
+        // in "weird" cases (i.e. starting omiserver by hand, for example).
+
         // Create the release file by running GetLinuxOS.sh script
+        // (if we have root privileges)
 
         try
         {
-            static bool bBuildOSTypeFile = false;
-            if ( (!bBuildOSTypeFile || !SCXFile::Exists(m_deps->getReleasePath())) &&
-                SCXFile::Exists(m_deps->getScriptPath()))
+            if ( !SCXFile::Exists(m_deps->getReleasePath()) &&
+                 SCXFile::Exists(m_deps->getScriptPath()) &&
+                 m_deps->isReleasePathWritable() )
             {
                 std::istringstream in;
                 std::ostringstream out;
@@ -453,11 +471,6 @@ namespace SCXSystemLib
 
                     SCX_LOGERROR(m_log, sout.str() );
                 }
-                else
-                {
-                    // Success case - all is well
-                    bBuildOSTypeFile = true;
-                }
             }
         }
         catch(SCXCoreLib::SCXInterruptedProcessException &e)
@@ -467,12 +480,12 @@ namespace SCXSystemLib
                 L"\", " + e.Where() + L'.';
             SCX_LOGERROR(m_log, msg );
         };
-        
+
         // Look in release file for O/S information
+
         static const string sFile = StrToMultibyte(m_deps->getReleasePath());
         wifstream fin(sFile.c_str());
         SCXStream::ReadAllLines(fin, lines, nlfs); 
-
 
         if (!lines.empty())
         {

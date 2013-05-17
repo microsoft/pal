@@ -41,6 +41,11 @@ public:
     {
         return L"./scx-release";
     }
+
+    bool isReleasePathWritable() const
+    {
+        return true;
+    }
 #endif // defined(PF_DISTRO_ULINUX)
 };
 
