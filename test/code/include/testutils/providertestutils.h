@@ -62,11 +62,16 @@ public:
         MI_Uint8 flags;
         MI_Value value;
         PropertyInfo():isKey(0), type(MI_BOOLEAN), exists(0), flags(0){ memset(&value, 0, sizeof(value));}
+        bool GetValue_MIBoolean(std::wostringstream &errMsg) const;
         std::wstring GetValue_MIString(std::wostringstream &errMsg) const;
         MI_Uint8 GetValue_MIUint8(std::wostringstream &errMsg) const;
         MI_Uint16 GetValue_MIUint16(std::wostringstream &errMsg) const;
         MI_Uint32 GetValue_MIUint32(std::wostringstream &errMsg) const;
         MI_Uint64 GetValue_MIUint64(std::wostringstream &errMsg) const;
+        MI_Sint8 GetValue_MISint8(std::wostringstream &errMsg) const;
+        MI_Sint16 GetValue_MISint16(std::wostringstream &errMsg) const;
+        MI_Sint32 GetValue_MISint32(std::wostringstream &errMsg) const;
+        MI_Sint64 GetValue_MISint64(std::wostringstream &errMsg) const;
     };
 
     TestableInstance(const MI_Instance* instance) : Instance(instance->classDecl, instance, false) { }
@@ -225,8 +230,8 @@ MI_Result FindFieldString(mi::Instance &instance, const char* name, Field* &foun
 //! \param[in]  keyValues Vector of the key values describing the requested object instance.
 //! \param[in]  context        Object containing all retrieved instance. Only one instance is returned.
 //! \param[in]  errMsg       Stream containing error messages.
-//! \returns    true on success.
-template<class T, class TN> bool GetInstance(
+//! \returns    MI_RESULT_OK on success, otherwise error code.
+template<class T, class TN> MI_Result GetInstance(
     const std::vector<std::wstring>& keyNames, const std::vector<std::wstring>& keyValues, TestableContext &context,
     std::wostringstream &errMsg)
 {
@@ -252,7 +257,7 @@ template<class T, class TN> bool GetInstance(
     agent.GetInstance(context, NULL, instanceName, context.GetPropertySet());
     if (context.GetResult() != MI_RESULT_OK)
     {
-        return false;
+        return context.GetResult();
     }
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 1u, context.Size());
     // Verify we got the proper instance back.
@@ -263,7 +268,7 @@ template<class T, class TN> bool GetInstance(
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyValues[k], context[0].GetKeyValue(static_cast<MI_Uint32>(k),
             CALL_LOCATION(errMsg)));
     }    
-    return true;
+    return MI_RESULT_OK;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -272,10 +277,11 @@ template<class T, class TN> bool GetInstance(
 //! \param      T            Type of object to be enumerated.
 //! \param      TN           Type of instance name object to be used.
 //! \param[in]  allKeyNames  Names of key properties.
+//! \param[in]  invalidKey   Index of a key to be set to invalid value, -1 if all valid.
 //! \param[in]  errMsg       Stream containing error messages.
-//! \returns    true if successfully verified.
-template<class T, class TN> bool VerifyGetInstanceByCompleteKeySuccess(
-    const std::vector<std::wstring>& allKeyNames, std::wostringstream &errMsg)
+//! \returns    MI_RESULT_OK on success, otherwise error code.
+template<class T, class TN> MI_Result VerifyGetInstanceByCompleteKeySuccess(
+    const std::vector<std::wstring>& allKeyNames, size_t invalidKey, std::wostringstream &errMsg)
 {
     TestableContext originalContext;
     EnumInstances<T>(originalContext, CALL_LOCATION(errMsg));
@@ -290,11 +296,19 @@ template<class T, class TN> bool VerifyGetInstanceByCompleteKeySuccess(
         allKeyValues.push_back(originalInstance.GetKey(allKeyNames[nr], CALL_LOCATION(errMsg)));
     }
 
-    // Getinstance.
-    TestableContext context;
-    if (!GetInstance<T, TN>(allKeyNames, allKeyValues, context, CALL_LOCATION(errMsg)))
+    // Set the invalid key value.
+    CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, (invalidKey == static_cast<size_t>(-1)) || (invalidKey < allKeyNames.size()));
+    if (invalidKey != static_cast<size_t>(-1))
     {
-        return false;
+        allKeyValues[invalidKey] = L"InvalidKeyValue";
+    }
+
+    // Get instance.
+    TestableContext context;
+    MI_Result result = GetInstance<T, TN>(allKeyNames, allKeyValues, context, CALL_LOCATION(errMsg));
+    if (result != MI_RESULT_OK)
+    {
+        return result;
     }   
     const TestableInstance &instance = context[0];
 
@@ -326,11 +340,11 @@ template<class T, class TN> bool VerifyGetInstanceByCompleteKeySuccess(
         // which we don't have at the moment.
     }
 
-    return true;
+    return result;
 }
 
 /*----------------------------------------------------------------------------*/
-//! Verify that it's not possible to get instances without  using a complete key.
+//! Verify that it's not possible to get instances without using a complete key.
 //! \param      T            Type of object to be enumerated.
 //! \param      TN           Type of instance name object to be used.
 //! \param[in]  allKeyNames  Names of key properties.
@@ -343,8 +357,26 @@ template<class T, class TN> void VerifyGetInstanceByPartialKeyFailure(const std:
         std::vector<std::wstring> notAllKeyNames(allKeyNames);
         notAllKeyNames.erase(notAllKeyNames.begin() + nr);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + " Didn't detect missing key " +
-            SCXCoreLib::StrToMultibyte(allKeyNames[nr].c_str()),
-            false, (VerifyGetInstanceByCompleteKeySuccess<T, TN>(notAllKeyNames, CALL_LOCATION(errMsg))));
+            SCXCoreLib::StrToMultibyte(allKeyNames[nr]), MI_RESULT_INVALID_PARAMETER,
+            (VerifyGetInstanceByCompleteKeySuccess<T, TN>(
+            notAllKeyNames, static_cast<size_t>(-1), CALL_LOCATION(errMsg))));
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+//! Verify that it's not possible to get instances by using a key with invalid value.
+//! \param      T            Type of object to be enumerated.
+//! \param      TN           Type of instance name object to be used.
+//! \param[in]  allKeyNames  Names of key properties.
+//! \param[in]  errMsg       Stream containing error messages.
+template<class T, class TN> void VerifyGetInstanceByInvalidKeyFailure(const std::vector<std::wstring>& allKeyNames,
+    std::wostringstream &errMsg)
+{
+    for (size_t nr = 0; nr < allKeyNames.size(); nr++)
+    {
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + " Didn't detect invalid key " +
+            SCXCoreLib::StrToMultibyte(allKeyNames[nr]), MI_RESULT_NOT_FOUND,
+            (VerifyGetInstanceByCompleteKeySuccess<T, TN>(allKeyNames, nr, CALL_LOCATION(errMsg))));
     }
 }
 
@@ -474,7 +506,8 @@ template<class T, class TN> void StandardTestGetInstance(TestableContext &contex
         keyNames.push_back(name);
         keyValues.push_back(value);
     }
-    CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, (GetInstance<T, TN>(keyNames, keyValues, context, CALL_LOCATION(errMsg))));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK,
+        (GetInstance<T, TN>(keyNames, keyValues, context, CALL_LOCATION(errMsg))));
 }
 
 /*----------------------------------------------------------------------------*/
@@ -488,9 +521,10 @@ template<class T, class TN> void StandardTestVerifyGetInstanceKeys(const std::ve
     std::wostringstream &errMsg)
 {
     try {
-        CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, (VerifyGetInstanceByCompleteKeySuccess<T, TN>(
-            allKeyNames, CALL_LOCATION(errMsg))));
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, (VerifyGetInstanceByCompleteKeySuccess<T, TN>(
+            allKeyNames, static_cast<size_t>(-1), CALL_LOCATION(errMsg))));
         VerifyGetInstanceByPartialKeyFailure<T, TN>(allKeyNames, CALL_LOCATION(errMsg));
+        VerifyGetInstanceByInvalidKeyFailure<T, TN>(allKeyNames, CALL_LOCATION(errMsg));
     } catch (SCXCoreLib::SCXAccessViolationException&) {
         // Skip access violations because some properties
         // require root access.

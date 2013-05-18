@@ -25,6 +25,13 @@
 
 std::map<MI_Context *, TestableContext *> TestableContext::ms_map;
 
+bool TestableInstance::PropertyInfo::GetValue_MIBoolean(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_BOOLEAN, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    return value.boolean;
+}
+
 std::wstring TestableInstance::PropertyInfo::GetValue_MIString(std::wostringstream &errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRING, type);
@@ -58,6 +65,34 @@ MI_Uint64 TestableInstance::PropertyInfo::GetValue_MIUint64(std::wostringstream 
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT64, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.uint64;
+}
+
+MI_Sint8 TestableInstance::PropertyInfo::GetValue_MISint8(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT8, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    return value.sint8;
+}
+
+MI_Sint16 TestableInstance::PropertyInfo::GetValue_MISint16(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT16, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    return value.sint16;
+}
+
+MI_Sint32 TestableInstance::PropertyInfo::GetValue_MISint32(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT32, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    return value.sint32;
+}
+
+MI_Sint64 TestableInstance::PropertyInfo::GetValue_MISint64(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT64, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    return value.sint64;
 }
 
 MI_Uint32 TestableInstance::GetNumberOfKeys() const
