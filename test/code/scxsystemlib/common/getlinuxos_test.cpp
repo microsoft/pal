@@ -55,6 +55,7 @@ class SCXGetLinuxOS_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestPlatform_Ubuntu_11 );
     // CPPUNIT_TEST( TestPlatform_Fedora );
     CPPUNIT_TEST( TestPlatform_CentOS_5 );
+    CPPUNIT_TEST( TestPlatform_Debian_7_0 );
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -353,7 +354,7 @@ public:
         //      OSVersion = 5.0.10
         //      OSFullName = Debian 5.0.10 (x86_64)
         //      OSAlias = UniversalD
-        //      OSManufacturer = Debian
+        //      OSManufacturer = Software in the Public Interest, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Debian"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("5.0.10"), releaseFile["OSVersion"] );
@@ -402,6 +403,27 @@ public:
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS 5") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Central Logistics GmbH"), releaseFile["OSManufacturer"] );
+    }
+
+    // Platform Debian 7.0:
+    void TestPlatform_Debian_7_0()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/debian_7.0", releaseFile );
+
+        // Verify our data:
+        //      OSName = Debian GNU/Linux
+        //      OSVersion = 7.0
+        //      OSFullName = Debian GNU/Linux 7.0 (wheezy)
+        //      OSAlias = UniversalD
+        //      OSManufacturer = Softare in the Public Interest, Inc.
+
+        CPPUNIT_ASSERT_EQUAL( string("Debian GNU/Linux"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Debian") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalD"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("Softare in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
     }
 };
 

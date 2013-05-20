@@ -26,6 +26,17 @@ fi
 
 ## Function used to get Linux Distro and Version
 ######################################################################
+GetKitType() {
+    # The os-release file doesn't tell us the type of kit, so try to determine
+    if [ `rpm -q rpm 2> /dev/null | /bin/egrep '^rpm-[0-9].*' | wc -l` = 1 ]; then
+        OSAlias="UniversalR"
+    elif [ `dpkg -l dpkg 2> /dev/null | egrep "^ii.*"| wc -l` = 1 ]; then
+        OSAlias="UniversalD"
+    else
+        OSAlias="Universal?"
+    fi
+}
+
 GetLinuxInfo() {
     IsLinux="true"
 
@@ -107,7 +118,30 @@ GetLinuxInfo() {
         OSName="Linux"
         Version=`uname -r | cut -d. -f1,2`
 
-        if [ ! -z $ReleaseFile ]; then
+        # Do we have the (newer) os-release standard file?
+        # If so, that trumps everything else
+        if [ -e "${EtcPath}/os-release" ]; then
+            GetKitType
+
+            # The os-release files contain TAG=VALUE pairs; just read it in
+            . $ReleaseFile
+
+            # Some fields are optional, for details see the WWW site:
+            #   http://www.freedesktop.org/software/systemd/man/os-release.html
+            [ ! -z "$NAME" ] && OSName="$NAME"
+            [ ! -z "$VERSION_ID" ] && Version="$VERSION_ID"
+
+            # Set the manufacturer if we know this ID
+            # (Set OSAlias for unit test purposes; test injection won't inject that)
+            [ -z "$ID" ] && ID="linux"
+            case $ID in
+                debian)
+                    OSManufacturer="Softare in the Public Interest, Inc."
+       	            OSAlias="UniversalD"
+                    ;;
+            esac
+
+        elif [ ! -z $ReleaseFile ]; then
             # Set OSName to release file contents for evaluation.  If parsing logic is not known, Release File contents will be used as OSName.
             OSName=`sed '/^$/d' ${ReleaseFile} | head -1`
 
@@ -188,11 +222,7 @@ GetLinuxInfo() {
             # If distro is not known, determine whether RPM or DPKG is installed
             if [ "${OSAlias}" = "Universal" ]; then
                 # Identify package manager
-                if [ `rpm -q rpm | /bin/egrep '^rpm-[0-9].*' | wc -l` = 1 ]; then
-                    OSAlias="UniversalR"
-                elif [ `dpkg -l dpkg | egrep "^ii.*"| wc -l` = 1 ]; then
-                    OSAlias="UniversalD"
-                fi
+                GetKitType
             fi
 
             # If Version is null, something went wrong in release file parsing, reset to kernel version
@@ -207,14 +237,7 @@ GetLinuxInfo() {
             fi
 
         else
-            # No release file to parse, use generic values
-            if [ `rpm -q rpm 2> /dev/null | /bin/egrep '^rpm-[0-9].*' | wc -l` = 1 ]; then
-                OSAlias="UniversalR"
-            elif [ `dpkg -l dpkg 2> /dev/null | egrep "^ii.*"| wc -l` = 1 ]; then
-                OSAlias="UniversalD"
-            else
-                OSAlias"Universal?"
-            fi
+            GetKitType
 
             Version=`uname -r`
             OSName="Linux"
