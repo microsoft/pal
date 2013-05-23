@@ -216,6 +216,8 @@ public:
 
         correctAnswer = StrTrim(StrFromMultibyte(out.str()));
         bCompareWithDynamic = true;
+        size_t pos = correctAnswer.find(L'.');
+        CPPUNIT_ASSERT_MESSAGE("OS version does not contain \".\".", pos != wstring::npos);
 #elif defined(sun)
         bCompareWithDynamic = false;
 #elif defined(aix)

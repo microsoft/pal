@@ -245,6 +245,10 @@ GetLinuxInfo() {
         fi
     fi
 
+    if [ -z `echo ${Version} | grep '\.'` ]; then
+        Version="$Version.0"
+    fi
+
     # Construct OSFullName string
     OSFullName="$OSName $Version ($Arch)"
 }

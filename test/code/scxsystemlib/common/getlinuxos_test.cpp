@@ -252,8 +252,8 @@ public:
         //      OSManufacturer = SUSE GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("SUSE LINUX Enterprise Server"), releaseFile["OSName"] );
-        CPPUNIT_ASSERT_EQUAL( string("9"), releaseFile["OSVersion"] );
-        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("SUSE LINUX Enterprise Server 9") );
+        CPPUNIT_ASSERT_EQUAL( string("9.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("SUSE LINUX Enterprise Server 9.0") );
         CPPUNIT_ASSERT_EQUAL( string("SLES"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
     }
@@ -294,8 +294,8 @@ public:
         //      OSManufacturer = Oracle Corporation
 
         CPPUNIT_ASSERT_EQUAL( string("Enterprise Linux Server"), releaseFile["OSName"] );
-        CPPUNIT_ASSERT_EQUAL( string("5"), releaseFile["OSVersion"] );
-        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Enterprise Linux Server 5") );
+        CPPUNIT_ASSERT_EQUAL( string("5.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Enterprise Linux Server 5.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Oracle Corporation"), releaseFile["OSManufacturer"] );
     }
@@ -399,8 +399,8 @@ public:
         //      OSManufacturer = Central Logistics GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("CentOS"), releaseFile["OSName"] );
-        CPPUNIT_ASSERT_EQUAL( string("5"), releaseFile["OSVersion"] );
-        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS 5") );
+        CPPUNIT_ASSERT_EQUAL( string("5.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS 5.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Central Logistics GmbH"), releaseFile["OSManufacturer"] );
     }
