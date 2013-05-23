@@ -13,10 +13,13 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 /*----------------------------------------------------------------------------*/
 
 #include <scxcorelib/scxcmn.h>
-#include <scxsystemlib/scxdhcplease.h>
-#include <scxcorelib/stringaid.h>
-#include <testutils/scxunit.h>
 #include <scxcorelib/scxfile.h>
+#include <scxcorelib/stringaid.h>
+#include <scxsystemlib/scxdhcplease.h>
+
+#include <testutils/scxunit.h>
+#include <testutils/scxtestutils.h>
+
 #include <stdio.h>
 
 using namespace SCXSystemLib;
@@ -55,6 +58,8 @@ public:
         );
 #else
         testFile = SCXFile::CreateTempFile(fileData);
+        SelfDeletingFilePath leaseFile( testFile.Get() );
+
         DHCPLeaseInfo leaseInfo(L"lan0", testFile.Get());
 #endif
 #if !defined(aix)
