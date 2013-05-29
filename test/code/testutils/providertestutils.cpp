@@ -95,6 +95,19 @@ MI_Sint64 TestableInstance::PropertyInfo::GetValue_MISint64(std::wostringstream 
     return value.sint64;
 }
 
+std::vector<std::wstring> TestableInstance::PropertyInfo::GetValue_MIStringA(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRINGA, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    std::vector<std::wstring> ret;
+    MI_Uint32 i;
+    for (i = 0; i < value.stringa.size; i++)
+    {
+        ret.push_back(SCXCoreLib::StrFromMultibyte(std::string(value.stringa.data[i])));
+    }
+    return ret;
+}
+
 MI_Uint32 TestableInstance::GetNumberOfKeys() const
 {
     const MI_Instance* self = GetInstance();

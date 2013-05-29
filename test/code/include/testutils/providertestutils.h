@@ -72,6 +72,7 @@ public:
         MI_Sint16 GetValue_MISint16(std::wostringstream &errMsg) const;
         MI_Sint32 GetValue_MISint32(std::wostringstream &errMsg) const;
         MI_Sint64 GetValue_MISint64(std::wostringstream &errMsg) const;
+        std::vector<std::wstring> GetValue_MIStringA(std::wostringstream &errMsg) const;
     };
 
     TestableInstance(const MI_Instance* instance) : Instance(instance->classDecl, instance, false) { }
