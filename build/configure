@@ -30,7 +30,7 @@ do
     ;;
 
     --enable-ulinux)
-      if [ `uname` != "Linux"]; then
+      if [ `uname` != "Linux" ]; then
           echo "Cannot build for ULINUX on non-Linux platforms"
           exit 1
       fi
