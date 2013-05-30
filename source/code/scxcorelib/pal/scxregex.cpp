@@ -28,7 +28,7 @@ namespace SCXCoreLib {
     */
     SCXRegex::SCXRegex(const std::wstring& expression) : m_Expression(expression), m_fCompiled(0)
     {
-        m_fCompiled = regcomp(&m_Preq, StrToMultibyte(expression).c_str(), REG_EXTENDED);  //|REG_NOSUB);
+        m_fCompiled = regcomp(&m_Preq, StrToUTF8(expression).c_str(), REG_EXTENDED);  //|REG_NOSUB);
         if (m_fCompiled != 0)
         {
             throw SCXInvalidRegexException(expression, m_fCompiled, &m_Preq, SCXSRCLOCATION);
@@ -48,7 +48,7 @@ namespace SCXCoreLib {
         if (m_fCompiled == 0)
         {
             // Compiled successfully
-            return (0 == regexec(&m_Preq, StrToMultibyte(text).c_str(), 0, 0, 0));
+            return (0 == regexec(&m_Preq, StrToUTF8(text).c_str(), 0, 0, 0));
         }
         else
         {
@@ -120,7 +120,7 @@ namespace SCXCoreLib {
             allMatches[idx].rm_eo = -1;
         }
         
-        rc = regexec(&m_Preq, StrToMultibyte(text).c_str(), requestedMatchCt, &allMatches[0], flags);
+        rc = regexec(&m_Preq, StrToUTF8(text).c_str(), requestedMatchCt, &allMatches[0], flags);
         
         if (rc != 0)
         {

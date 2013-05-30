@@ -36,7 +36,7 @@ std::wstring TestableInstance::PropertyInfo::GetValue_MIString(std::wostringstre
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRING, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
-    return SCXCoreLib::StrFromMultibyte(std::string(value.string));
+    return SCXCoreLib::StrFromUTF8(std::string(value.string));
 }
 
 MI_Uint8 TestableInstance::PropertyInfo::GetValue_MIUint8(std::wostringstream &errMsg) const
@@ -103,7 +103,7 @@ std::vector<std::wstring> TestableInstance::PropertyInfo::GetValue_MIStringA(std
     MI_Uint32 i;
     for (i = 0; i < value.stringa.size; i++)
     {
-        ret.push_back(SCXCoreLib::StrFromMultibyte(std::string(value.stringa.data[i])));
+        ret.push_back(SCXCoreLib::StrFromUTF8(std::string(value.stringa.data[i])));
     }
     return ret;
 }
