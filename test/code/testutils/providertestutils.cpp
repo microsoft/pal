@@ -95,6 +95,19 @@ MI_Sint64 TestableInstance::PropertyInfo::GetValue_MISint64(std::wostringstream 
     return value.sint64;
 }
 
+std::vector<MI_Uint16> TestableInstance::PropertyInfo::GetValue_MIUint16A(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT16A, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    std::vector<MI_Uint16> ret;
+    MI_Uint32 i;
+    for (i = 0; i < value.uint16a.size; i++)
+    {
+        ret.push_back(value.uint16a.data[i]);
+    }
+    return ret;
+}
+
 std::vector<std::wstring> TestableInstance::PropertyInfo::GetValue_MIStringA(std::wostringstream &errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRINGA, type);
@@ -410,6 +423,8 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
         TestableInstance::PropertyInfo info;
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Missing property: " + SCXCoreLib::StrToMultibyte(*iter),
             MI_RESULT_OK, instance.FindProperty((*iter).c_str(), info));
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Property exists flag not set: " + SCXCoreLib::StrToMultibyte(*iter),
+            true, info.exists);
     }
 }
 

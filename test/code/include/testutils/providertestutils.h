@@ -42,7 +42,13 @@ public:
         const_cast<std::wostringstream &>(m_str) << loc.Where();
     }
     ~CppUnitLocation()
-    {   const_cast<std::wostringstream &>(m_str).str(m_str.str().substr(0, m_size));
+    {
+        std::wstring ret = m_str.str().substr(0, m_size);
+        if (ret.size() == 0)
+        {
+            ret = L" ";// On aix can't set buffer to be zero length.
+        }
+        const_cast<std::wostringstream &>(m_str).str(ret);
         const_cast<std::wostringstream &>(m_str).seekp(m_size);
     }
     const std::wostringstream& GetStr() const { return m_str;}
@@ -72,6 +78,7 @@ public:
         MI_Sint16 GetValue_MISint16(std::wostringstream &errMsg) const;
         MI_Sint32 GetValue_MISint32(std::wostringstream &errMsg) const;
         MI_Sint64 GetValue_MISint64(std::wostringstream &errMsg) const;
+        std::vector<MI_Uint16> GetValue_MIUint16A(std::wostringstream &errMsg) const;
         std::vector<std::wstring> GetValue_MIStringA(std::wostringstream &errMsg) const;
     };
 
@@ -94,6 +101,15 @@ public:
     PropertyInfo GetProperty(const wchar_t *name, std::wostringstream &errMsg) const
     {
         return GetProperty(SCXCoreLib::StrToMultibyte(std::wstring(name)).c_str(), CALL_LOCATION(errMsg));
+    }
+    bool PropertyExists(const char *name) const
+    {
+        PropertyInfo info;
+        if (MI_RESULT_OK == FindProperty(name, info) && info.exists == true)
+        {
+            return true;
+        }
+        return false;
     }
     // Key handling methods.
     MI_Uint32 GetNumberOfKeys() const;
