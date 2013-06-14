@@ -416,7 +416,7 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
             1u, expectedProperties.count(info.name));
     }
 
-    // Be sure that all of the properties in our set exist in the property list
+    // Be sure that all of the properties in our set exist in the property list.
     for (std::set<std::wstring>::const_iterator iter = expectedProperties.begin();
          iter != expectedProperties.end(); ++iter)
     {
@@ -426,6 +426,22 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Property exists flag not set: " + SCXCoreLib::StrToMultibyte(*iter),
             true, info.exists);
     }
+}
+
+void VerifyInstancePropertyNames(const TestableInstance &instance, const std::wstring* expectedPropertiesList,
+    size_t expectedPropertiesCnt, const std::wstring* possiblePropertiesList, size_t possiblePropertiesCnt,
+    std::wostringstream &errMsg)
+{
+    std::vector<std::wstring> propertiesList(expectedPropertiesList, expectedPropertiesList + expectedPropertiesCnt);
+    size_t i;
+    for (i = 0; i < possiblePropertiesCnt; i++)
+    {
+        if (instance.PropertyExists(possiblePropertiesList[i].c_str()))
+        {
+            propertiesList.push_back(possiblePropertiesList[i]);
+        }
+    }
+    VerifyInstancePropertyNames(instance, &propertiesList[0], propertiesList.size(), CALL_LOCATION(errMsg));
 }
 
 std::wstring GetFQHostName(std::wostringstream &errMsg)

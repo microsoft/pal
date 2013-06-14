@@ -111,6 +111,10 @@ public:
         }
         return false;
     }
+    bool PropertyExists(const wchar_t *name) const
+    {
+        return PropertyExists(SCXCoreLib::StrToMultibyte(std::wstring(name)).c_str());
+    }
     // Key handling methods.
     MI_Uint32 GetNumberOfKeys() const;
     std::wstring GetKey(const wchar_t *name, std::wostringstream &errMsg) const;
@@ -230,6 +234,19 @@ template<class T> void EnumInstances(TestableContext &context, std::wostringstre
 //! \param[in]  errMsg       Stream containing error messages.
 void VerifyInstancePropertyNames(const TestableInstance &instance,
     const std::wstring* expectedPropertiesList, size_t expectedPropertiesCnt, std::wostringstream &errMsg);
+
+/*----------------------------------------------------------------------------*/
+//! Helper, verifies that theres one to one mapping between instance property names and given list of names.
+//! Allows for some instance properties to be optional.
+//! \param[in]  instance                Instance to be verified
+//! \param[in]  expectedPropertiesList  List of expected property names.
+//! \param[out] expectedPropertiesCnt   Number of names in expectedProperties.
+//! \param[in]  possiblePropertiesList  List of possible property names that may or may not be available at run time.
+//! \param[out] possiblePropertiesCnt   Number of names in possiblePropertiesList.
+//! \param[in]  errMsg       Stream containing error messages.
+void VerifyInstancePropertyNames(const TestableInstance &instance,
+    const std::wstring* expectedPropertiesList, size_t expectedPropertiesCnt,
+    const std::wstring* possiblePropertiesList, size_t possiblePropertiesCnt, std::wostringstream &errMsg);
 
 /*----------------------------------------------------------------------------*/
 //! Helper, tries to find the field by the given field name.
