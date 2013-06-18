@@ -90,6 +90,7 @@ namespace SCXCoreLib
         int WaitForReturn(std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr); 
         virtual ~SCXProcess();
         void Kill();
+        unsigned GetEffectiveTimeout(unsigned timeout);
 
     protected:
         virtual bool ReadToStream(int fd, std::ostream& stream);
@@ -118,6 +119,7 @@ namespace SCXCoreLib
         bool m_stdinActive;                   //!< The child process may read from its stdin
         bool m_stdoutActive;                  //!< The child process may write to its stdout
         bool m_stderrActive;                  //!< The child process may write to its stderr
+        size_t m_timeoutOverhead;             //!< The amount of overhead in waiting for the child process to begin.
 #endif
     };
 } /* namespace SCXCoreLib */

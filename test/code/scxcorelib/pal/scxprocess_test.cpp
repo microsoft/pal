@@ -14,7 +14,9 @@
 
 #include <scxcorelib/scxcmn.h>
 #include <scxcorelib/scxfile.h>
+#include <scxcorelib/scxfilepath.h>
 #include <scxcorelib/scxprocess.h>
+#include <scxcorelib/scxthread.h>
 #include <testutils/scxunit.h>
 #include <testutils/scxtestutils.h>
 #include <scxcorelib/scxexception.h>
@@ -76,6 +78,7 @@ class SCXProcessTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestRunErr );
     CPPUNIT_TEST( TestRunInputFree );
     CPPUNIT_TEST( TestKill );
+    CPPUNIT_TEST( TestKillGroup );
     CPPUNIT_TEST( TestLongTimeout );
     CPPUNIT_TEST( TestShortTimeout );
     CPPUNIT_TEST( TestTimeoutWithChildren );
@@ -222,6 +225,74 @@ public:
             SCXCoreLib::SCXProcess process(argv);
             CPPUNIT_ASSERT_NO_THROW(process.Kill());
             SCXUNIT_ASSERT_THROWN_EXCEPTION(process.WaitForReturn(), SCXCoreLib::SCXInterruptedProcessException, L"interrupted");
+        }
+    }
+
+    void TestKillGroup() {
+        const unsigned int c_waitIterations = 100;
+        const unsigned int c_waitIterationMS = 100;
+        
+        // Start a process that starts another process; when that second process begins, it writes its pid to a file in the
+        // testfiles directory. We then read that file to get the pid, and assert that 'ps -p PID' returns 0 (i.e. it finds the process).
+        // Then we kill the process that we started, and assert that 'ps -p PID' returns 1 (i.e. the subprocess is no longer alive).
+        std::vector<std::wstring> argv;
+        argv.push_back(L"./testfiles/killgrouptest.sh");
+        SCXCoreLib::SCXProcess process(argv);
+
+        // Wait for the pid file to get created.  When this is created, the subprocess we will later kill should be alive.
+        unsigned int count = 0;
+        std::wstring pidfile  = L"./testfiles/killgrouptest_hang.pid";
+        while (!SCXCoreLib::SCXFile::Exists(pidfile))
+        {
+            if (++count > c_waitIterations)
+            {
+                CPPUNIT_FAIL("killgrouptest_hang.pid is not being created in time (or at all) for this unit test.");
+                return;
+            }     
+            SCXCoreLib::SCXThread::Sleep(c_waitIterationMS);
+        }
+
+        // Sleep for a small amount of time so that our slower systems can actually write (not just create) this pidfile.
+        SCXCoreLib::SCXThread::Sleep(500);
+
+        SCXCoreLib::SelfDeletingFilePath pidfileDelete(pidfile);
+        
+        std::istringstream input;
+        std::ostringstream output;
+        std::ostringstream error;
+        int returnCode;
+
+        // Get the pid of the subprocess so we can check on its status.        
+        std::vector<std::wstring> lines;
+        SCXCoreLib::SCXStream::NLFs nlfs;
+        SCXCoreLib::SCXFile::ReadAllLines(SCXCoreLib::SCXFilePath(L"./testfiles/killgrouptest_hang.pid"), lines, nlfs);
+        std::wstring pid = lines[0];
+        
+        // Assert that the subprocess is currently running.
+        std::wstring ps_command = L"ps -p " + pid;
+        returnCode = SCXCoreLib::SCXProcess::Run(ps_command, input, output, error, 10000);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Command \"" + SCXCoreLib::StrToMultibyte(ps_command) + "\" returned an unexpected value", 0, returnCode);
+
+        // Kill the process group.
+        CPPUNIT_ASSERT_NO_THROW(process.Kill());
+        SCXUNIT_ASSERT_THROWN_EXCEPTION(process.WaitForReturn(), SCXCoreLib::SCXInterruptedProcessException, L"interrupted");
+
+        // Wait for the system to clean up the processes and remove them from the process list.  If it doesn't, then fail this unit test.
+        input.str("");
+        output.str("");
+        error.str("");
+        count = 0;  
+        while ((returnCode = SCXCoreLib::SCXProcess::Run(ps_command, input, output, error, 10000)) != 1)
+        {
+            if (++count > c_waitIterations)
+            {
+                CPPUNIT_FAIL("Process group associated with killgrouptest_hang.sh was not killed.");
+                return;
+            }     
+            SCXCoreLib::SCXThread::Sleep(c_waitIterationMS);
+            input.str("");
+            output.str("");
+            error.str("");
         }
     }
 

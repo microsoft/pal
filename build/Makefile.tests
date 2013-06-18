@@ -139,10 +139,15 @@ testrun_copy : $(TARGET_DIR)/closefiledescriptors
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/report.xsl $(TARGET_DIR)
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/createEnv.sh $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/testrun_wrapper $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/killgrouptest.sh $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/killgrouptest_hang.sh $(TARGET_DIR)/testfiles/
 	sed "s@<RelDir>@.@" $(SYSTEMLIB_ROOT)/common/GetLinuxOS.sh | sed "s@EtcPath=\"/etc\"@if [ -n \"\$${1}\" ]; then EtcPath=\$$1; else EtcPath=\"/etc\"; fi@" > $(TARGET_DIR)/testfiles/GetLinuxOS.sh
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/software/dpkg_status_test $(TARGET_DIR)/testfiles/
+	rm -f $(TARGET_DIR)/testfiles/killgrouptest_hang.pid
 	chmod u+x $(TARGET_DIR)/testfiles/createEnv.sh
 	chmod u+x $(TARGET_DIR)/testfiles/testrun_wrapper
+	chmod u+x $(TARGET_DIR)/testfiles/killgrouptest.sh
+	chmod u+x $(TARGET_DIR)/testfiles/killgrouptest_hang.sh
 	chmod u+x $(TARGET_DIR)/testfiles/GetLinuxOS.sh
 	chmod u+w $(TARGET_DIR)/report.xsl
 	$(COPY) $(TARGET_DIR)/closefiledescriptors $(TARGET_DIR)/testfiles/

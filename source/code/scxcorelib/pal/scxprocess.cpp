@@ -281,6 +281,15 @@ namespace SCXCoreLib
     }
 
     /**********************************************************************************/
+    //! Helper function to determine effective timeout duration.
+    //! \param[in]  timeout   The specified timeout duration set by the creator of the SCXProcess
+    //! \returns A timeout that is adjusted by approximately the amount of time it took to set up the subprocess.
+    unsigned SCXProcess::GetEffectiveTimeout(unsigned timeout)
+    {
+        return static_cast<unsigned>(std::max(0, static_cast<int>(timeout) - static_cast<int>(m_timeoutOverhead)));
+    }
+
+    /**********************************************************************************/
     //! Run a process by passing it arguments and streams for stdin, stdout and stderr
     //! \param[in]  myargv      Arguments corresponding to argv in the main function of the process
     //! \param[in]  mystdin     stdin for the process
@@ -356,7 +365,8 @@ namespace SCXCoreLib
             m_waitCompleted(false),
             m_stdinActive(true),
             m_stdoutActive(true),
-            m_stderrActive(true)
+            m_stderrActive(true),
+            m_timeoutOverhead(0)
     {
         // Convert arguments to types expected by the system function for running processes
         for (std::vector<char *>::size_type i = 0; i < myargv.size(); i++) 
@@ -375,9 +385,21 @@ namespace SCXCoreLib
         if ( -1 == pipe(m_errForChild) ) {
                throw SCXInternalErrorException(L"Failed to open pipe for m_errForChild", SCXSRCLOCATION);
         }
+
+        // A 'magic number' that is passed to the parent to signify that this process has had its pgid set.
+        const char * c_magicGUID = "b4360097-03d5-4d1d-9514-176428bcd88f";
+        const ssize_t c_magicGUID_length = 36;
+
         m_pid = fork();                         // Create child process, duplicates file descriptors
         if (m_pid == 0) 
         {
+            // Set the pgid of the forked process to be the same as the forked process's pid, so that 
+            // we can kill the forked process and all subprocesses (if necessary) by calling killpg.
+            setpgid(0, 0);
+ 
+            // Communicate with the parent process that the child process has set its process group id.
+            write(m_outForChild[W], c_magicGUID, c_magicGUID_length);
+
             // Child process.
             // The file descriptors are duplicates, created by "fork",  of those in the parent process
             dup2(m_inForChild[R], STDIN_FILENO);      // Make the child process read from the parent process
@@ -479,6 +501,49 @@ namespace SCXCoreLib
             if (-1 == fcntl(m_errForChild[R], F_SETFL, O_NONBLOCK))
             {
                 throw SCXInternalErrorException(UnexpectedErrno(L"Failed to set non-blocking I/O on stderr pipe", errno), SCXSRCLOCATION);
+            }
+
+            // Block until c_magicGUID is written to the child's stdout. This is to prevent a race condition
+            // where the parent process attempts to kill the child's process group before the child process
+            // sets its process group.
+            char readmagic[c_magicGUID_length+1];
+            m_timeoutOverhead = 0;
+            const size_t c_timeBetweenReads = 50;
+            const size_t c_maxTimeout = 30000;
+            ssize_t numOfBytesRead = 0;
+
+            while(m_timeoutOverhead < c_maxTimeout)
+            {
+                ssize_t readVal = read(m_outForChild[R], readmagic + numOfBytesRead, c_magicGUID_length - numOfBytesRead);
+                if ( (readVal + numOfBytesRead) == c_magicGUID_length)
+                {
+                    // Proper number of bytes read.  Let's make sure the strings match.
+                    if (strncmp(readmagic, c_magicGUID, c_magicGUID_length) != 0)
+                    {
+                        // there was an error communicating with the subprocess
+                        throw SCXInternalErrorException(L"Process communication failed: read data did not match", SCXSRCLOCATION);
+                    }
+                    break;
+                }
+                else if (readVal < 0) 
+                {
+                    if (errno == EAGAIN)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        // there was an error communicating with the subprocess
+                        throw SCXInternalErrorException(UnexpectedErrno(L"Process communication failed: read returned an error", errno), SCXSRCLOCATION);
+                    }
+                }
+                else
+                {
+                    // read returned an unexpected number of bytes, keep reading until the number of bytes matches
+                    numOfBytesRead += readVal;
+                }
+                SCXThread::Sleep(c_timeBetweenReads);
+                m_timeoutOverhead += c_timeBetweenReads;
             }
         }
     }
@@ -696,9 +761,9 @@ namespace SCXCoreLib
     //! Terminate the process
     void SCXProcess::Kill() 
     {
-        if (kill(m_pid, SIGKILL) < 0 && errno != ESRCH) 
+        if (killpg(m_pid, SIGKILL) < 0 && errno != ESRCH) 
         {
-            throw SCXInternalErrorException(UnexpectedErrno(L"Unable to kill child process", errno), SCXSRCLOCATION);
+            throw SCXInternalErrorException(UnexpectedErrno(L"Unable to kill child process group", errno), SCXSRCLOCATION);
         }
     }
     
