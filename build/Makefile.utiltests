@@ -1,0 +1,23 @@
+# -*- mode: Makefile; -*-
+#--------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#--------------------------------------------------------------------------------
+# 
+# Definition of all shared unit tests for util
+#
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+# Tests related to the util library
+
+UTIL_UNITTEST_ROOT=$(SCX_SHARED_TEST_ROOT)/util
+
+POSIX_UNITTESTS_UTIL_SRCFILES+=$(UTIL_UNITTEST_ROOT)/Utf16StringTest.cpp
+POSIX_UNITTESTS_UTIL_SRCFILES+=$(UTIL_UNITTEST_ROOT)/Utf8StringPerfTest.cpp
+POSIX_UNITTESTS_UTIL_SRCFILES+=$(UTIL_UNITTEST_ROOT)/Utf8StringTest.cpp
+POSIX_UNITTESTS_UTIL_SRCFILES+=$(UTIL_UNITTEST_ROOT)/XElementTest.cpp
+
+INCLUDES += -I$(SCX_SRC_ROOT)/include/util
+
+#-------------------------------- End of File -----------------------------------
+

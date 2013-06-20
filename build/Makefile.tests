@@ -48,12 +48,14 @@ $(TARGET_DIR)/testrunner_core: INCLUDES += $(UNITTEST_EXTRA_INCLUDES)
 # Includes for tests
 include $(SCX_BRD)/build/Makefile.scxcorelibtests
 include $(SCX_BRD)/build/Makefile.scxsystemlibtests
+include $(SCX_BRD)/build/Makefile.utiltests
 
 #--------------------------------------------------------------------------------
 # All tests
 POSIX_UNITTESTS_SRCFILES = \
 	$(POSIX_UNITTESTS_CORE_SRCFILES) \
-	$(POSIX_UNITTESTS_SYSTEM_SRCFILES)
+	$(POSIX_UNITTESTS_SYSTEM_SRCFILES) \
+	$(POSIX_UNITTESTS_UTIL_SRCFILES)
 
 POSIX_UNITTESTS_OBJFILES = $(call src_to_obj,$(POSIX_UNITTESTS_SRCFILES))
 POSIX_UNITTESTS_CORE_OBJFILES = $(call src_to_obj,$(POSIX_UNITTESTS_CORE_SRCFILES))
@@ -70,7 +72,8 @@ $(INTERMEDIATE_DIR)/test/%.$(PF_OBJ_FILE_SUFFIX): INCLUDES += $(UNITTEST_EXTRA_I
 # Static dependencies on POSIX platforms
 
 POSIX_UNITTESTS_CORE_STATICLIB_DEPS = \
-	scxcore
+	scxcore \
+	Util
 
 POSIX_UNITTESTS_STATICLIB_DEPS = \
 	palsystem \
