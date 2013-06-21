@@ -221,7 +221,7 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
             
         }
 
-        std::vector<int> ConvertToBase(size_t decimalNum, unsigned int base)
+        std::vector<int> ConvertToBase(int decimalNum, int base)
         {
             std::vector<int> baseNum;
             std::vector<int>::iterator it;
@@ -237,13 +237,13 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
 
         void Ctor_ValidSurrogateCodePointsTest()
         {
-            const unsigned int numberOfCombinations = 7;
-            size_t numTest = numberOfCombinations * numberOfCombinations;
+            const int numberOfCombinations = 7;
+            int numTest = numberOfCombinations * numberOfCombinations;
 
             std::basic_string<Utf16Char> input;
             bool expectedResult = true;
             size_t expectedSize = 3;
-            for (size_t i = 0; i < numTest; i++)
+            for (int i = 0; i < numTest; i++)
             {
                 input.clear();
                 expectedResult = true;
@@ -309,7 +309,7 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
                     try
                     {
                         Utf16String str(input);
-                        CPPUNIT_ASSERT_EQUAL((size_t)expectedSize, str.CodePoints());
+                        CPPUNIT_ASSERT_EQUAL(expectedSize, str.CodePoints());
                     }
                     catch (InvalidCodeUnitException& e)
                     {
