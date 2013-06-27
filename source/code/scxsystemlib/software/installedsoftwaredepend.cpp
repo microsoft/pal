@@ -31,6 +31,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 #endif
 
 #if defined(linux)
+#include <fcntl.h>
 #include <scxcorelib/scxlibglob.h>
 #include <scxcorelib/logsuppressor.h>
 #endif
@@ -575,15 +576,53 @@ Homepage: http://nfs.sourceforge.net/
     */
     void InstalledSoftwareDependencies::GetRPMQueryResult(int argc, char * argv[], const wstring& tempFileName, std::vector<wstring>& result)
     {
-        FILE *stream  = NULL;
-        if((stream = freopen(SCXCoreLib::StrToMultibyte(tempFileName).c_str(), "w", stdout)) == NULL)
+        // We need to redirect stdout to a file so we can capture the result of InvokeRPMQuery() call.
+        
+        // Flush stdout.
+        if (fflush(stdout) != 0)
         {
-            throw SCXInternalErrorException(UnexpectedErrno(L"freopen stdout failed", errno), SCXSRCLOCATION);
+            throw SCXInternalErrorException(UnexpectedErrno(L"fflush(stdout) failed", errno), SCXSRCLOCATION);
+        }
+        // Make a copy of original stdout destination.
+        int oldStdOutFD = dup(1);
+        if (oldStdOutFD == -1)
+        {
+            throw SCXInternalErrorException(UnexpectedErrno(L"dup(1) failed", errno), SCXSRCLOCATION);
+        }
+        // Open new stdout destination.
+        int fileFD = open(SCXCoreLib::StrToMultibyte(tempFileName).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRUSR | S_IWUSR);
+        if (fileFD == -1)
+        {
+            throw SCXInternalErrorException(UnexpectedErrno(L"open(" + tempFileName + L") failed", errno), SCXSRCLOCATION);
+        }
+        // Redirect stdout to the new destination.
+        if (dup2(fileFD, 1) == -1)
+        {
+            throw SCXInternalErrorException(UnexpectedErrno(L"dup2(fileFD, 1) failed", errno), SCXSRCLOCATION);
         }
 
         InvokeRPMQuery(argc, argv);
-        fclose(stream);
-        freopen("/dev/tty", "w", stdout);
+
+        // Flush new stdout.
+        if (fflush(stdout) != 0)
+        {
+            throw SCXInternalErrorException(UnexpectedErrno(L"fflush(stdout) failed", errno), SCXSRCLOCATION);
+        }
+        // Restore stdout to the original destination.
+        if (dup2(oldStdOutFD, 1) == -1)
+        {
+            throw SCXInternalErrorException(UnexpectedErrno(L"dup2(oldStdOutFD, 1) failed", errno), SCXSRCLOCATION);
+        }
+        // Close new stdout destination, not needed anymore.
+        if (close(fileFD) != 0)
+        {
+            throw SCXInternalErrorException(UnexpectedErrno(L"close(fileFD) failed", errno), SCXSRCLOCATION);
+        }
+        // Close copy of the original stdout destination.
+        if (close(oldStdOutFD) != 0)
+        {
+            throw SCXInternalErrorException(UnexpectedErrno(L"close(oldStdOutFD) failed", errno), SCXSRCLOCATION);
+        }
 
         SCXCoreLib::SCXHandle<std::wfstream> fs(SCXCoreLib::SCXFile::OpenWFstream(tempFileName, std::ios::in));
         fs.SetOwner();
