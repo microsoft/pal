@@ -78,9 +78,9 @@ class Utf8StringPerfTest : public CPPUNIT_NS::TestFixture
 
         double CalculateIncrease(timespec time1, timespec time2)
         {
-            const long NS_PER_SEC = 1000000000;
-            long time1nsec = time1.tv_sec * NS_PER_SEC + time1.tv_nsec;
-            long time2nsec = time2.tv_sec * NS_PER_SEC + time2.tv_nsec;
+            const long SCX_NS_PER_SEC = 1000000000;
+            long time1nsec = time1.tv_sec * SCX_NS_PER_SEC + time1.tv_nsec;
+            long time2nsec = time2.tv_sec * SCX_NS_PER_SEC + time2.tv_nsec;
 
             double change = static_cast<double>(time2nsec - time1nsec) /
                 static_cast<double>(time1nsec);
