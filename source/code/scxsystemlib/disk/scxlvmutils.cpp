@@ -11,18 +11,20 @@
    \date        2010-12-14 18:11:00
 */
 /*----------------------------------------------------------------------------*/
-#include <string.h>
 
+#include <string.h>
 #include <sstream>
+#include <string>
+#include <algorithm>
 
 #include <scxsystemlib/scxlvmutils.h>
 
+extern void LogToDiskLogFile(std::wstring);
 
 namespace SCXSystemLib {
     SCXCoreLib::LogSuppressor SCXLVMUtils::m_errorSuppressor(SCXCoreLib::eError, SCXCoreLib::eTrace);
     SCXCoreLib::LogSuppressor SCXLVMUtils::m_warningSuppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
     SCXCoreLib::LogSuppressor SCXLVMUtils::m_infoSuppressor(SCXCoreLib::eInfo, SCXCoreLib::eTrace);
-
 
     /**
        Checks if the given path is in /dev/mapper.
@@ -57,7 +59,6 @@ namespace SCXSystemLib {
                 (0 != device.compare(0, dmControl.length(), dmControl)));
     }
 
-
     /**
        Get the devicemapper (dm) device that contains the given LVM device.
 
@@ -88,7 +89,7 @@ namespace SCXSystemLib {
         // All LVM devices are in the /dev/mapper directory.
         if (IsDMDevice(lvmDevice))
         {
-            // Stat the LVM device.  It's minor ID number will indicate which
+            // Stat the LVM device.  Its minor ID number will indicate which
             // dm device it maps to.
             unsigned int major = 0;
             unsigned int minor = 0;
@@ -180,7 +181,6 @@ namespace SCXSystemLib {
         return result;
     }
 
-
     /**
        Get the slave devices that contain the given devicemapper (dm) device.
 
@@ -199,7 +199,7 @@ namespace SCXSystemLib {
                Any of these exceptions indicate that the LVM LVM/dm device's
                physical volumes cannot be resolved.
      */
-    std::vector< std::wstring > SCXLVMUtils::GetDMSlaves(const std::wstring & dmDevice)
+    std::vector< std::wstring > SCXLVMUtils::GetDMSlaves(const std::wstring& dmDevice)
     {
         std::vector< std::wstring > result;
 
@@ -313,8 +313,10 @@ namespace SCXSystemLib {
                 SCX_LOG(log, m_warningSuppressor.GetSeverity(dirpath), out.str());
                 continue;
             }
-
             std::wstring dirname = dirpath.substr(pos, count);
+
+            // replace all '!' with '/' if special file is in a subdirectory of the /dev directory
+            std::replace(dirname.begin(), dirname.end(), '!', '/');
 
             unsigned int       major = 0;
             unsigned int       minor = 0;
@@ -356,7 +358,6 @@ namespace SCXSystemLib {
 
         return result;
     }
-
 
     /**
        Uses stat to get the major/minor device ID for the given path.
@@ -414,7 +415,6 @@ namespace SCXSystemLib {
 
         return result;
     }
-
 
     /**
        Matches the given major/minor device ID with the text read from the

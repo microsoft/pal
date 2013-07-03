@@ -16,7 +16,7 @@
 #include <scxcorelib/scxdirectoryinfo.h>
 #include <scxcorelib/scxfile.h>
 #include <scxcorelib/stringaid.h>
-
+#include <scxcorelib/scxregex.h>
 #include <scxsystemlib/diskdepend.h>
 #include <scxsystemlib/scxsysteminfo.h>
 #include <scxsystemlib/scxproductdependencies.h>
@@ -72,7 +72,7 @@ namespace SCXSystemLib
 #elif defined(linux)
           m_ProcDiskStatsPath.Set(L"/proc/diskstats");
           m_MntTabPath.Set(L"/etc/mtab");
-#elif defined(sun) 
+#elif defined(sun)
           m_MntTabPath.Set(L"/etc/mnttab");
           m_DevTabPath.Set(L"/etc/device.tab");
 #elif defined(hpux)
@@ -311,7 +311,7 @@ namespace SCXSystemLib
         \param       count of bytes in output memory.
         \returns  0 == success, -1 == failure (see errno)
      */
-     ssize_t DiskDependDefault::read (void *pbuf, size_t bytecount)
+     ssize_t DiskDependDefault::read(void *pbuf, size_t bytecount)
      {
           ssize_t rc = 0;
 
@@ -395,15 +395,15 @@ namespace SCXSystemLib
      {
         static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
         const std::wstring slashdevslash(L"/dev/");
-        std::wstring tailstr; 
+        std::wstring tailstr;
 
         // We assume device path is all of the device name after '/dev/'
         if(device.find(slashdevslash) == 0)
-            tailstr = device.substr(slashdevslash.length()); 
+            tailstr = device.substr(slashdevslash.length());
         else
         {
             // This is the former way of doing the lookup ... do not find leading '/dev/'
-            SCXCoreLib::SCXFilePath dev(device); 
+            SCXCoreLib::SCXFilePath dev(device);
             tailstr = dev.GetFilename();
         }
 
@@ -413,7 +413,7 @@ namespace SCXSystemLib
         if (it == m_ProcDiskStats.end())
         {
             SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(device));
-            std::wstringstream out ; 
+            std::wstringstream out ;
             out << L"Did not find key '" << tailstr << L"' in proc_disk_stats map, device name was '" << device << L"'.";
             SCX_LOG(m_log, severity, out.str());
             static std::vector<std::wstring> empty;
@@ -479,7 +479,7 @@ namespace SCXSystemLib
      */
      void DiskDependDefault::RefreshMNTTab()
      {
-          SCX_LOGTRACE(m_log, L"mnttab file being read"); 
+          SCX_LOGTRACE(m_log, L"mnttab file being read");
           if (0 < m_MntTab.size())
           {
                m_MntTab.clear();
@@ -559,7 +559,7 @@ namespace SCXSystemLib
           fs->close();
 #endif
      }
-    
+
      /**
        Helper function for FileSystemIgnored.  Inserts each string from arr into newSet.
 
@@ -573,7 +573,7 @@ namespace SCXSystemLib
              newSet.insert(arr[i]);
          }
      }
-    
+
      /*----------------------------------------------------------------------------*/
      /**
        \copydoc SCXSystemLib::DiskDepend::FileSystemIgnored
@@ -587,7 +587,7 @@ namespace SCXSystemLib
                L"autofs",
                L"bdev", L"binfmt_misc",
                L"cachefs", L"cdfs", L"cdrfs", L"cifs", L"ctfs",
-               L"debugfs", L"devfs", L"devpts", 
+               L"debugfs", L"devfs", L"devpts",
 #if defined(sun) && ((PF_MAJOR == 5 && PF_MINOR >= 11) || (PF_MAJOR > 5))
                // On Solaris 11, /dev is a pseudo file system.
                // Always ignore to eliminate inode detection, etc
@@ -595,7 +595,7 @@ namespace SCXSystemLib
 #endif
 #if defined(linux)
                L"devtmpfs",
-#endif               
+#endif
                L"eventpollfs",
                L"fd", L"ffs", L"fifofs", L"fusectl", L"futexfs",
                L"hugetlbfs", L"hsfs",
@@ -643,7 +643,7 @@ namespace SCXSystemLib
                   AddToSet(IGFS_Parts_set, IGFS_PARTS);
                   SCXSystemLib::SCXProductDependencies::Disk_IgnoredFileSystems(IGFS_set);
                   SCXSystemLib::SCXProductDependencies::Disk_IgnoredFileSystems_StartsWith(IGFS_Start_set);
-                  SCXSystemLib::SCXProductDependencies::Disk_IgnoredFileSystems_Contains(IGFS_Parts_set);  
+                  SCXSystemLib::SCXProductDependencies::Disk_IgnoredFileSystems_Contains(IGFS_Parts_set);
                   fInitialized = true;
               }
           }
@@ -653,7 +653,7 @@ namespace SCXSystemLib
               || IsStringInSet(fs_in_lower_case, IGFS_Parts_set, CompareContains)
               || IsStringInSet(fs_in_lower_case, IGFS_Start_set, CompareStartsWith);
      }
-    
+
      /*----------------------------------------------------------------------------*/
      /**
         \copydoc SCXSystemLib::DiskDepend::DeviceIgnored
@@ -864,8 +864,8 @@ namespace SCXSystemLib
                }
           }
 #elif defined(linux)
-          // Given a device path to a partition (for example /dev/hda5), convert
-          // it to a path to the base device (for example /dev/hda).
+          // Given a device path to a partition (for example /dev/hda5 or /dev/cciss/c0d0p1), convert
+          // it to a path to the base device (for example /dev/hda or /dev/cciss/c0d0).
 
           try
           {
@@ -908,7 +908,14 @@ namespace SCXSystemLib
                          for (std::vector< std::wstring >::const_iterator iter = slaves.begin();
                               iter != slaves.end(); iter++)
                          {
-                              path = GuessPhysicalFromLogicalDevice(*iter);
+                              if ((*iter).empty() || !isdigit((int)(*iter)[(*iter).size() - 1]))
+                              {
+                                  path = *iter;
+                              }
+                              else
+                              {
+                                  path = GuessPhysicalFromLogicalDevice(*iter);
+                              }
                               name = path.GetFilename();
                               devices[name] = path.Get();
                          }
@@ -1296,8 +1303,8 @@ namespace SCXSystemLib
         return false;
     }
 
-
 #endif
+
      /*----------------------------------------------------------------------------*/
      /**
         Removes all numbers or one other character from end of given string.
@@ -1314,16 +1321,16 @@ namespace SCXSystemLib
                return str;
           }
           std::wstring result = str;
-          if (str.find_last_of(L"0123456789") == (str.length()-1))
+          if (str.find_last_of(L"0123456789") == (str.length() - 1))
           {
-               while (result.length() > 0 && result.find_last_of(L"0123456789") == (result.length()-1))
+               while (result.length() > 0 && result.find_last_of(L"0123456789") == (result.length() - 1))
                {
-                    result.resize(result.length()-1);
+                    result.resize(result.length() - 1);
                }
           }
           else
           {
-               result.resize(result.length()-1);
+               result.resize(result.length() - 1);
           }
           return result;
      }
@@ -1337,24 +1344,52 @@ namespace SCXSystemLib
         \returns     physical_dev Path to physical disk device.
 
         \note This algorithm is based on the fact that physical disks resides in the same
-        folder as logical disks. It also assumes that logical disks (partitions/slices) have
-        names that are [physical device] followed by an optional letter and one or more digits.
-        Whis is what we've observed so far.
+        folder as logical disks. It also assumes that logical disk names in Linux format
+        (partitions/slices) have names that are [physical device] followed by one or more digits
+        and that logical disk names in Solaris format have names that are "c#d#{p,s}##" or
+        "c#t#d#{p,s}##", which is what we've observed so far.
      */
-     std::wstring DiskDependDefault::GuessPhysicalFromLogicalDevice(const std::wstring& logical_dev)
-     {
-          std::wstring physical_dev = logical_dev;
-          SCXCoreLib::SCXFilePath path(physical_dev);
-          while (path.GetFilename().length() > 0)
-          {
-               physical_dev = RemoveTailNumberOrOther(physical_dev);
-               if (this->FileExists(physical_dev))
-               {
-                    return physical_dev;
-               }
-               path = physical_dev;
+    std::wstring DiskDependDefault::GuessPhysicalFromLogicalDevice(const std::wstring& logical_dev)
+    {
+        std::wstring physical_dev = logical_dev;
+        SCXCoreLib::SCXFilePath path(physical_dev);
+        SCXCoreLib::SCXHandle<SCXCoreLib::SCXRegex> SolarisPartitionNamePatternRegExPtr(NULL);
+        static wchar_t SolarisPartitionNamePattern[] = { L"c[0-9]+(t[0-9])?d[0-9][ps][0-9]+" };
+
+        // Build the RegEx template
+        try
+        {
+            SolarisPartitionNamePatternRegExPtr = new SCXCoreLib::SCXRegex(SolarisPartitionNamePattern);
+        }
+        catch(SCXCoreLib::SCXInvalidRegexException &e)
+        {
+            SCX_LOGERROR(m_log, L"Exception caught in compiling regex: " + e.What());
+            return L"";
+        }
+
+        if (SolarisPartitionNamePatternRegExPtr->IsMatch(path.GetFilename()))
+        {    // remove the "p#", "s#", "p##" or "s##" from the end of the name
+              physical_dev = RemoveTailNumberOrOther(physical_dev);
+              physical_dev = physical_dev.substr(0, physical_dev.size() - 1);
+              if (this->FileExists(physical_dev))
+              {
+                   return physical_dev;
+              }
+              return logical_dev;
           }
-          return logical_dev;
+          else
+          {
+              while (path.GetFilename().length() > 0)
+              {
+                   physical_dev = RemoveTailNumberOrOther(physical_dev);
+                   if (this->FileExists(physical_dev))
+                   {
+                        return physical_dev;
+                   }
+                   path = physical_dev;
+              }
+              return logical_dev;
+          }
      }
 
 #if defined(sun)
@@ -1641,7 +1676,7 @@ namespace SCXSystemLib
      */
      void DiskDependDefault::SetDevTabPath(const std::wstring& newValue)
      {
-       m_DevTabPath = newValue; 
+       m_DevTabPath = newValue;
      }
 
      /*----------------------------------------------------------------------------*/
