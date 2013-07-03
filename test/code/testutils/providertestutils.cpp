@@ -95,6 +95,13 @@ MI_Sint64 TestableInstance::PropertyInfo::GetValue_MISint64(std::wostringstream 
     return value.sint64;
 }
 
+MI_Datetime TestableInstance::PropertyInfo::GetValue_MIDatetime(std::wostringstream &errMsg) const
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_DATETIME, type);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
+    return value.datetime;
+}
+
 std::vector<MI_Uint16> TestableInstance::PropertyInfo::GetValue_MIUint16A(std::wostringstream &errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT16A, type);
@@ -253,8 +260,10 @@ void TestableInstance::GetKey(MI_Uint32 index, std::wstring &name, std::wstring 
 std::wstring TestableInstance::GetKeyName(MI_Uint32 index, std::wostringstream &errMsg) const
 {
     std::wstring name;
-    std::wstring value;
-    GetKey(index, name, value, CALL_LOCATION(errMsg));
+    struct PropertyInfo info;
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, FindProperty(index, info, true));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, info.isKey);
+    name = info.name;
     return name;
 }
 
@@ -446,6 +455,11 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
 
 std::wstring GetFQHostName(std::wostringstream &errMsg)
 {
+    static std::wstring fqHostName;
+    if (fqHostName.empty() != true)
+    {
+        return fqHostName;
+    }
 #if defined(sun) || defined(hpux)
     char hostName[MAXHOSTNAMELEN];
 #else
@@ -454,7 +468,6 @@ std::wstring GetFQHostName(std::wostringstream &errMsg)
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 0, gethostname(hostName, sizeof(hostName)));
     hostName[sizeof(hostName) - 1] = 0;
     
-    std::wstring fqHostName;
     std::ostringstream processOutput;
     std::ostringstream processErr;
     try 
@@ -466,13 +479,15 @@ std::wstring GetFQHostName(std::wostringstream &errMsg)
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 0, status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "; stderr: " + processErr.str(), 0u, processErr.str().size());
         fqHostName = SCXCoreLib::StrTrim(SCXCoreLib::StrFromMultibyte(processOutput.str()));
+        fqHostName = SCXCoreLib::StrToLower(fqHostName);
     }
     catch(SCXCoreLib::SCXException &e)
     {
+        fqHostName.clear();
         CPPUNIT_FAIL(ERROR_MESSAGE + SCXCoreLib::StrToMultibyte(L" In GetFQHostName(), executing nslookup threw " +
             e.What() + L" " + e.Where()) + "; stderr: " + processErr.str() + "; stdout: " + processOutput.str());
     }
-    return SCXCoreLib::StrToLower(fqHostName);
+    return fqHostName;
 }
 
 bool MeetsPrerequisites(std::wstring testName)
