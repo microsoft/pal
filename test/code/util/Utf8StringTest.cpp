@@ -1,10 +1,9 @@
 #include <Unicode.h>
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
-#include <SCXAssertException.h>
 #include <math.h>
 #include <sstream>
+
+#include <testutils/scxunit.h>
 
 using namespace SCX::Util;
 
@@ -232,18 +231,18 @@ class Utf8StringTest : public CPPUNIT_NS::TestFixture
 
         void CharArrayCtor_DisallowedUtf8CharsTest()
         {
-            CHECK_EXCEPTION(Utf8String str("\xC0\xAF"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("abcd\xC1sefgh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xD0\xB0\xF5sefgh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csef\xF6gh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xF7gh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xF8gh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xF9gh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xFAgh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xFBgh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xFCgh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xFDgh"), InvalidCodeUnitException);
-            CHECK_EXCEPTION(Utf8String str("ab\xEA\xBA\x8Csefadada\xFEgh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("\xC0\xAF"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("abcd\xC1sefgh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xD0\xB0\xF5sefgh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csef\xF6gh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xF7gh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xF8gh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xF9gh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xFAgh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xFBgh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xFCgh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xFDgh"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("ab\xEA\xBA\x8Csefadada\xFEgh"), InvalidCodeUnitException);
         }
 
         void CharArrayCtor_EmbeddedNullCharTest()
@@ -273,7 +272,7 @@ class Utf8StringTest : public CPPUNIT_NS::TestFixture
 
         void Ctor_HandleIncompleteBOMTest()
         {
-            CHECK_EXCEPTION(Utf8String str("\x00EF\x00BBsabc"), InvalidCodeUnitException);
+            CPPUNIT_ASSERT_THROW(Utf8String str("\x00EF\x00BBsabc"), InvalidCodeUnitException);
         }
 
         std::vector<int> ConvertToBase(int decimalNum, unsigned int base)
@@ -632,7 +631,8 @@ class Utf8StringTest : public CPPUNIT_NS::TestFixture
             CPPUNIT_ASSERT_EQUAL(Utf8String("0123"), str);
 
             str = "0123456789";
-            CHECK_EXCEPTION(str.Erase(15, 1), SCXCoreLib::SCXIllegalIndexException<size_t>);
+            CPPUNIT_ASSERT_THROW(str.Erase(15, 1), SCXCoreLib::SCXIllegalIndexException<size_t>);
+            SCXUNIT_ASSERTIONS_FAILED_ANY();
         }
 
         void AsciiSubStrTest()
@@ -708,9 +708,8 @@ class Utf8StringTest : public CPPUNIT_NS::TestFixture
             CPPUNIT_ASSERT_EQUAL(Utf8String("456789"), str2);
 
             str = "0123456789";
-            CHECK_EXCEPTION(str.SubStr(15, 1), SCXCoreLib::SCXIllegalIndexException<size_t>);
-
-
+            CPPUNIT_ASSERT_THROW(str.SubStr(15, 1), SCXCoreLib::SCXIllegalIndexException<size_t>);
+            SCXUNIT_ASSERTIONS_FAILED_ANY();
         }
 
         void AsciiFindStrTest()
@@ -877,11 +876,13 @@ class Utf8StringTest : public CPPUNIT_NS::TestFixture
             n = 6;
             CPPUNIT_ASSERT((str1.Compare(pos, n, str2)));
 
-            CHECK_EXCEPTION(str1.Compare(15, 1, str2), SCXCoreLib::SCXIllegalIndexException<size_t>);
+            CPPUNIT_ASSERT_THROW(str1.Compare(15, 1, str2), SCXCoreLib::SCXIllegalIndexException<size_t>);
 
             str1 = "[CDATA[&&***#4<>";
             str2 = "[CDATA[";
             CPPUNIT_ASSERT((str1.Compare(0, str2.Size(), str2)));
+
+            SCXUNIT_ASSERTIONS_FAILED_ANY();
         }
 
         void AsciiAppendTest()

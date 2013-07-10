@@ -2,11 +2,12 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
-#include <SCXAssertException.h>
 #include <math.h>
 #include <sstream> 
 #include <time.h> 
 #include <XElement.h>
+
+#include <testutils/scxunit.h>
 
 using namespace SCX::Util;
 using namespace SCX::Util::Xml;

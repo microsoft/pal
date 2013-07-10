@@ -1,10 +1,9 @@
 #include <Unicode.h>
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
-#include <SCXAssertException.h>
 #include <algorithm>
 #include <map>
+
+#include <testutils/scxunit.h>
 
 using namespace SCX::Util;
 
@@ -187,36 +186,36 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
             // Higher Order without lower Order
             {
                 Utf16Char arr[] = {0xFEFF, 0x004D, 0x0430, 0x4E8C, 0xD800, 0x4E8C, 0x0};
-                CHECK_EXCEPTION(Utf16String str(arr), InvalidCodeUnitException);
+                CPPUNIT_ASSERT_THROW(Utf16String str(arr), InvalidCodeUnitException);
             }
 
             
             {
                 Utf16Char arr[] = {0xFEFF, 0x004D, 0x0430, 0x4E8C, 0xDBFF, 0x0};
-                CHECK_EXCEPTION(Utf16String str(arr), InvalidCodeUnitException);
+                CPPUNIT_ASSERT_THROW(Utf16String str(arr), InvalidCodeUnitException);
             }
 
             // Lower Order without Higher Order
             {
                 Utf16Char arr[] = {0xFEFF, 0x004D, 0x0430, 0x4E8C, 0xDC00, 0x0};
-                CHECK_EXCEPTION(Utf16String str(arr), InvalidCodeUnitException);
+                CPPUNIT_ASSERT_THROW(Utf16String str(arr), InvalidCodeUnitException);
             }
             
             {
                 Utf16Char arr[] = {0xFEFF, 0x004D, 0x0430, 0x4E8C, 0xDFFF, 0x0};
-                CHECK_EXCEPTION(Utf16String str(arr), InvalidCodeUnitException);
+                CPPUNIT_ASSERT_THROW(Utf16String str(arr), InvalidCodeUnitException);
             }
             
             // Reverse order 
              {
                 Utf16Char arr[] = {0xFEFF, 0x004D, 0x0430, 0x4E8C, 0xDFFF,0xD800, 0x0};
-                CHECK_EXCEPTION(Utf16String str(arr), InvalidCodeUnitException);
+                CPPUNIT_ASSERT_THROW(Utf16String str(arr), InvalidCodeUnitException);
             }
 
              // Last character is surrogate high
              {
                 Utf16Char arr[] = {0xFEFF, 0x004D, 0x0430, 0x4E8C, 0xDFFF,0xD800, 0x0};
-                CHECK_EXCEPTION(Utf16String str(arr), InvalidCodeUnitException);
+                CPPUNIT_ASSERT_THROW(Utf16String str(arr), InvalidCodeUnitException);
              }
             
         }
@@ -321,7 +320,7 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
                 }
                 else
                 {
-                    CHECK_EXCEPTION(Utf16String str(input), InvalidCodeUnitException);
+                    CPPUNIT_ASSERT_THROW(Utf16String str(input), InvalidCodeUnitException);
                 }
             }
         }
