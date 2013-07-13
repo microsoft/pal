@@ -25,84 +25,84 @@
 
 std::map<MI_Context *, TestableContext *> TestableContext::ms_map;
 
-bool TestableInstance::PropertyInfo::GetValue_MIBoolean(std::wostringstream &errMsg) const
+bool TestableInstance::PropertyInfo::GetValue_MIBoolean(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_BOOLEAN, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.boolean;
 }
 
-std::wstring TestableInstance::PropertyInfo::GetValue_MIString(std::wostringstream &errMsg) const
+std::wstring TestableInstance::PropertyInfo::GetValue_MIString(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRING, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return SCXCoreLib::StrFromUTF8(std::string(value.string));
 }
 
-MI_Uint8 TestableInstance::PropertyInfo::GetValue_MIUint8(std::wostringstream &errMsg) const
+MI_Uint8 TestableInstance::PropertyInfo::GetValue_MIUint8(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT8, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.uint8;
 }
 
-MI_Uint16 TestableInstance::PropertyInfo::GetValue_MIUint16(std::wostringstream &errMsg) const
+MI_Uint16 TestableInstance::PropertyInfo::GetValue_MIUint16(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT16, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.uint16;
 }
 
-MI_Uint32 TestableInstance::PropertyInfo::GetValue_MIUint32(std::wostringstream &errMsg) const
+MI_Uint32 TestableInstance::PropertyInfo::GetValue_MIUint32(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT32, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.uint32;
 }
 
-MI_Uint64 TestableInstance::PropertyInfo::GetValue_MIUint64(std::wostringstream &errMsg) const
+MI_Uint64 TestableInstance::PropertyInfo::GetValue_MIUint64(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT64, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.uint64;
 }
 
-MI_Sint8 TestableInstance::PropertyInfo::GetValue_MISint8(std::wostringstream &errMsg) const
+MI_Sint8 TestableInstance::PropertyInfo::GetValue_MISint8(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT8, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.sint8;
 }
 
-MI_Sint16 TestableInstance::PropertyInfo::GetValue_MISint16(std::wostringstream &errMsg) const
+MI_Sint16 TestableInstance::PropertyInfo::GetValue_MISint16(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT16, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.sint16;
 }
 
-MI_Sint32 TestableInstance::PropertyInfo::GetValue_MISint32(std::wostringstream &errMsg) const
+MI_Sint32 TestableInstance::PropertyInfo::GetValue_MISint32(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT32, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.sint32;
 }
 
-MI_Sint64 TestableInstance::PropertyInfo::GetValue_MISint64(std::wostringstream &errMsg) const
+MI_Sint64 TestableInstance::PropertyInfo::GetValue_MISint64(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_SINT64, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.sint64;
 }
 
-MI_Datetime TestableInstance::PropertyInfo::GetValue_MIDatetime(std::wostringstream &errMsg) const
+MI_Datetime TestableInstance::PropertyInfo::GetValue_MIDatetime(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_DATETIME, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
     return value.datetime;
 }
 
-std::vector<MI_Uint16> TestableInstance::PropertyInfo::GetValue_MIUint16A(std::wostringstream &errMsg) const
+std::vector<MI_Uint16> TestableInstance::PropertyInfo::GetValue_MIUint16A(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_UINT16A, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
@@ -115,7 +115,7 @@ std::vector<MI_Uint16> TestableInstance::PropertyInfo::GetValue_MIUint16A(std::w
     return ret;
 }
 
-std::vector<std::wstring> TestableInstance::PropertyInfo::GetValue_MIStringA(std::wostringstream &errMsg) const
+std::vector<std::wstring> TestableInstance::PropertyInfo::GetValue_MIStringA(std::wstring errMsg) const
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRINGA, type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, exists);
@@ -225,7 +225,7 @@ MI_Result TestableInstance::FindProperty(MI_Uint32 index, struct PropertyInfo& i
     return MI_RESULT_NOT_FOUND;
 }
 
-MI_Boolean TestableInstance::GetMIReturn_MIBoolean(std::wostringstream &errMsg) const
+MI_Boolean TestableInstance::GetMIReturn_MIBoolean(std::wstring errMsg) const
 {
     struct PropertyInfo info;
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, FindProperty("MIReturn", info));
@@ -235,7 +235,7 @@ MI_Boolean TestableInstance::GetMIReturn_MIBoolean(std::wostringstream &errMsg) 
     return info.value.boolean;
 }
 
-std::wstring TestableInstance::GetKey(const wchar_t *name, std::wostringstream &errMsg) const
+std::wstring TestableInstance::GetKey(const wchar_t *name, std::wstring errMsg) const
 {
     struct PropertyInfo info;
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK,
@@ -246,7 +246,7 @@ std::wstring TestableInstance::GetKey(const wchar_t *name, std::wostringstream &
     return SCXCoreLib::StrFromMultibyte(std::string(info.value.string));
 }
 
-void TestableInstance::GetKey(MI_Uint32 index, std::wstring &name, std::wstring &value, std::wostringstream &errMsg) const
+void TestableInstance::GetKey(MI_Uint32 index, std::wstring &name, std::wstring &value, std::wstring errMsg) const
 {
     struct PropertyInfo info;
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, FindProperty(index, info, true));
@@ -257,7 +257,7 @@ void TestableInstance::GetKey(MI_Uint32 index, std::wstring &name, std::wstring 
     value = SCXCoreLib::StrFromMultibyte(std::string(info.value.string));
 }
 
-std::wstring TestableInstance::GetKeyName(MI_Uint32 index, std::wostringstream &errMsg) const
+std::wstring TestableInstance::GetKeyName(MI_Uint32 index, std::wstring errMsg) const
 {
     std::wstring name;
     struct PropertyInfo info;
@@ -267,7 +267,7 @@ std::wstring TestableInstance::GetKeyName(MI_Uint32 index, std::wostringstream &
     return name;
 }
 
-std::wstring TestableInstance::GetKeyValue(MI_Uint32 index, std::wostringstream &errMsg) const
+std::wstring TestableInstance::GetKeyValue(MI_Uint32 index, std::wstring errMsg) const
 {
     std::wstring name;
     std::wstring value;
@@ -413,7 +413,7 @@ MI_Result FindFieldString(mi::Instance &instance, const char* name, Field* &foun
 }
 
 void VerifyInstancePropertyNames(const TestableInstance &instance, const std::wstring* expectedPropertiesList,
-    size_t expectedPropertiesCnt, std::wostringstream &errMsg)
+    size_t expectedPropertiesCnt, std::wstring errMsg)
 {
     std::set<std::wstring> expectedProperties(expectedPropertiesList, expectedPropertiesList + expectedPropertiesCnt);
 
@@ -439,7 +439,7 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
 
 void VerifyInstancePropertyNames(const TestableInstance &instance, const std::wstring* expectedPropertiesList,
     size_t expectedPropertiesCnt, const std::wstring* possiblePropertiesList, size_t possiblePropertiesCnt,
-    std::wostringstream &errMsg)
+    std::wstring errMsg)
 {
     std::vector<std::wstring> propertiesList(expectedPropertiesList, expectedPropertiesList + expectedPropertiesCnt);
     size_t i;
@@ -453,7 +453,7 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
     VerifyInstancePropertyNames(instance, &propertiesList[0], propertiesList.size(), CALL_LOCATION(errMsg));
 }
 
-std::wstring GetFQHostName(std::wostringstream &errMsg)
+std::wstring GetFQHostName(std::wstring errMsg)
 {
     static std::wstring fqHostName;
     if (fqHostName.empty() != true)
@@ -513,7 +513,7 @@ bool MeetsPrerequisites(std::wstring testName)
 #endif
 }
 
-std::wstring GetDistributionName(std::wostringstream &errMsg)
+std::wstring GetDistributionName(std::wstring errMsg)
 {
     std::wstring distributionName;
 #if defined(sun) || defined(aix) || defined(hpux)

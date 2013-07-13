@@ -25,34 +25,9 @@
 #include <vector>
 
 
-// Helper definitions and class. Used in the case of error to printout entire call stack.
-// NOTE: because of the HPUX v2 compiler we have to cast everything to const and then back.
-#define CALL_LOCATION(errMsg) (const_cast<std::wostringstream &>( \
-    CppUnitLocation(const_cast<const std::wostringstream &>(errMsg), SCXSRCLOCATION).GetStr()))
-#define ERROR_MESSAGE (SCXCoreLib::StrToMultibyte(errMsg.str()))
-
-class CppUnitLocation
-{
-    size_t m_size;
-    const std::wostringstream &m_str;
-public:
-    CppUnitLocation(const std::wostringstream &str, const SCXCoreLib::SCXCodeLocation &loc) :
-        m_size(str.str().size()), m_str(const_cast<std::wostringstream &>(str))
-    {
-//        const_cast<std::wostringstream &>(m_str) << loc.Where();// TODO: This is beeing fixed.
-    }
-    ~CppUnitLocation()
-    {
-        std::wstring ret = m_str.str().substr(0, m_size);
-        if (ret.size() == 0)
-        {
-            ret = L" ";// On aix can't set buffer to be zero length.
-        }
-//        const_cast<std::wostringstream &>(m_str).str(ret);// TODO: This is beeing fixed.
-//        const_cast<std::wostringstream &>(m_str).seekp(ret.size());
-    }
-    const std::wostringstream& GetStr() const { return m_str;}
-};
+// Helper definitions used in the case of error to printout entire call stack.
+#define CALL_LOCATION(errMsg) (std::wstring(errMsg + (SCXSRCLOCATION).Where()))
+#define ERROR_MESSAGE (SCXCoreLib::StrToMultibyte(errMsg))
 
 class TestableInstance : public mi::Instance
 {
@@ -68,19 +43,19 @@ public:
         MI_Uint8 flags;
         MI_Value value;
         PropertyInfo():isKey(0), type(MI_BOOLEAN), exists(0), flags(0){ memset(&value, 0, sizeof(value));}
-        bool GetValue_MIBoolean(std::wostringstream &errMsg) const;
-        std::wstring GetValue_MIString(std::wostringstream &errMsg) const;
-        MI_Uint8 GetValue_MIUint8(std::wostringstream &errMsg) const;
-        MI_Uint16 GetValue_MIUint16(std::wostringstream &errMsg) const;
-        MI_Uint32 GetValue_MIUint32(std::wostringstream &errMsg) const;
-        MI_Uint64 GetValue_MIUint64(std::wostringstream &errMsg) const;
-        MI_Sint8 GetValue_MISint8(std::wostringstream &errMsg) const;
-        MI_Sint16 GetValue_MISint16(std::wostringstream &errMsg) const;
-        MI_Sint32 GetValue_MISint32(std::wostringstream &errMsg) const;
-        MI_Sint64 GetValue_MISint64(std::wostringstream &errMsg) const;
-        MI_Datetime GetValue_MIDatetime(std::wostringstream &errMsg) const;
-        std::vector<MI_Uint16> GetValue_MIUint16A(std::wostringstream &errMsg) const;
-        std::vector<std::wstring> GetValue_MIStringA(std::wostringstream &errMsg) const;
+        bool GetValue_MIBoolean(std::wstring errMsg) const;
+        std::wstring GetValue_MIString(std::wstring errMsg) const;
+        MI_Uint8 GetValue_MIUint8(std::wstring errMsg) const;
+        MI_Uint16 GetValue_MIUint16(std::wstring errMsg) const;
+        MI_Uint32 GetValue_MIUint32(std::wstring errMsg) const;
+        MI_Uint64 GetValue_MIUint64(std::wstring errMsg) const;
+        MI_Sint8 GetValue_MISint8(std::wstring errMsg) const;
+        MI_Sint16 GetValue_MISint16(std::wstring errMsg) const;
+        MI_Sint32 GetValue_MISint32(std::wstring errMsg) const;
+        MI_Sint64 GetValue_MISint64(std::wstring errMsg) const;
+        MI_Datetime GetValue_MIDatetime(std::wstring errMsg) const;
+        std::vector<MI_Uint16> GetValue_MIUint16A(std::wstring errMsg) const;
+        std::vector<std::wstring> GetValue_MIStringA(std::wstring errMsg) const;
     };
 
     TestableInstance(const MI_Instance* instance) : Instance(instance->classDecl, instance, false) { }
@@ -93,13 +68,13 @@ public:
         return FindProperty(SCXCoreLib::StrToMultibyte(std::wstring(name)).c_str(), info);
     }
     MI_Result FindProperty(MI_Uint32 index, struct PropertyInfo& info, bool keysOnly = false) const;
-    PropertyInfo GetProperty(const char *name, std::wostringstream &errMsg) const
+    PropertyInfo GetProperty(const char *name, std::wstring errMsg) const
     {
         PropertyInfo info;
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + " name = " + name, MI_RESULT_OK, FindProperty(name, info));
         return info;
     }
-    PropertyInfo GetProperty(const wchar_t *name, std::wostringstream &errMsg) const
+    PropertyInfo GetProperty(const wchar_t *name, std::wstring errMsg) const
     {
         return GetProperty(SCXCoreLib::StrToMultibyte(std::wstring(name)).c_str(), CALL_LOCATION(errMsg));
     }
@@ -118,16 +93,16 @@ public:
     }
     // Key handling methods.
     MI_Uint32 GetNumberOfKeys() const;
-    std::wstring GetKey(const wchar_t *name, std::wostringstream &errMsg) const;
-    std::wstring GetKey(const std::wstring &name, std::wostringstream &errMsg) const
+    std::wstring GetKey(const wchar_t *name, std::wstring errMsg) const;
+    std::wstring GetKey(const std::wstring &name, std::wstring errMsg) const
     {
         return GetKey(name.c_str(), CALL_LOCATION(errMsg));
     }
-    void GetKey(MI_Uint32 index, std::wstring &name, std::wstring &value, std::wostringstream &errMsg) const;
-    std::wstring GetKeyName(MI_Uint32 index, std::wostringstream &errMsg) const;
-    std::wstring GetKeyValue(MI_Uint32 index, std::wostringstream &errMsg) const;
+    void GetKey(MI_Uint32 index, std::wstring &name, std::wstring &value, std::wstring errMsg) const;
+    std::wstring GetKeyName(MI_Uint32 index, std::wstring errMsg) const;
+    std::wstring GetKeyValue(MI_Uint32 index, std::wstring errMsg) const;
     // Return value.
-    MI_Boolean GetMIReturn_MIBoolean(std::wostringstream &errMsg) const;
+    MI_Boolean GetMIReturn_MIBoolean(std::wstring errMsg) const;
 };
 
 class TestableContext
@@ -181,15 +156,15 @@ bool MeetsPrerequisites(std::wstring testName);
 //! Helper, gets full host name.
 //! \param[in]  errMsg    error message to be output on failure.
 //! \returns    fully qualified host name.
-std::wstring GetFQHostName(std::wostringstream &errMsg);
+std::wstring GetFQHostName(std::wstring errMsg);
 
 /*----------------------------------------------------------------------------*/
 //! Helper, gets OS distribution name.
 //! \param[in]  errMsg    error message to be output on failure.
 //! \returns    distribution name.
-std::wstring GetDistributionName(std::wostringstream &errMsg);
+std::wstring GetDistributionName(std::wstring errMsg);
 
-template<class T> void SetUpAgent(TestableContext &context, std::wostringstream &errMsg)
+template<class T> void SetUpAgent(TestableContext &context, std::wstring errMsg)
 {
     mi::Module Module;
     T agent(&Module);
@@ -200,7 +175,7 @@ template<class T> void SetUpAgent(TestableContext &context, std::wostringstream 
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, context.GetResult() );
 }
 
-template<class T> void TearDownAgent(TestableContext &context, std::wostringstream &errMsg)
+template<class T> void TearDownAgent(TestableContext &context, std::wstring errMsg)
 {
     mi::Module Module;
     T agent(&Module);
@@ -215,9 +190,9 @@ template<class T> void TearDownAgent(TestableContext &context, std::wostringstre
 //! Enumerates all instances and returns vector with instance data.
 //! \param      T Type of object to be enumerated.
 //! \param[out]  context Object containing returned instances data and the return code.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 //! \param[in]  keysOnly True if only keys should be returned, otherwise all properties are returned.
-template<class T> void EnumInstances(TestableContext &context, std::wostringstream &errMsg, bool keysOnly = false)
+template<class T> void EnumInstances(TestableContext &context, std::wstring errMsg, bool keysOnly = false)
 {
     mi::Module Module;
     T agent(&Module);
@@ -230,9 +205,9 @@ template<class T> void EnumInstances(TestableContext &context, std::wostringstre
 //! \param[in]  instance                Instance to be verified
 //! \param[in]  expectedPropertiesList  List of expected property names.
 //! \param[out] expectedPropertiesCnt   Number of names in expectedProperties.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 void VerifyInstancePropertyNames(const TestableInstance &instance,
-    const std::wstring* expectedPropertiesList, size_t expectedPropertiesCnt, std::wostringstream &errMsg);
+    const std::wstring* expectedPropertiesList, size_t expectedPropertiesCnt, std::wstring errMsg);
 
 /*----------------------------------------------------------------------------*/
 //! Helper, verifies that theres one to one mapping between instance property names and given list of names.
@@ -242,10 +217,10 @@ void VerifyInstancePropertyNames(const TestableInstance &instance,
 //! \param[out] expectedPropertiesCnt   Number of names in expectedProperties.
 //! \param[in]  possiblePropertiesList  List of possible property names that may or may not be available at run time.
 //! \param[out] possiblePropertiesCnt   Number of names in possiblePropertiesList.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 void VerifyInstancePropertyNames(const TestableInstance &instance,
     const std::wstring* expectedPropertiesList, size_t expectedPropertiesCnt,
-    const std::wstring* possiblePropertiesList, size_t possiblePropertiesCnt, std::wostringstream &errMsg);
+    const std::wstring* possiblePropertiesList, size_t possiblePropertiesCnt, std::wstring errMsg);
 
 /*----------------------------------------------------------------------------*/
 //! Helper, tries to find the field by the given field name.
@@ -262,11 +237,11 @@ MI_Result FindFieldString(mi::Instance &instance, const char* name, Field* &foun
 //! \param[in]  keyNames Vector of the keys describing the requested object instance.
 //! \param[in]  keyValues Vector of the key values describing the requested object instance.
 //! \param[in]  context        Object containing all retrieved instance. Only one instance is returned.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 //! \returns    MI_RESULT_OK on success, otherwise error code.
 template<class T, class TN> MI_Result GetInstance(
     const std::vector<std::wstring>& keyNames, const std::vector<std::wstring>& keyValues, TestableContext &context,
-    std::wostringstream &errMsg)
+    std::wstring errMsg)
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames.size(), keyValues.size());
     
@@ -311,10 +286,10 @@ template<class T, class TN> MI_Result GetInstance(
 //! \param      TN           Type of instance name object to be used.
 //! \param[in]  allKeyNames  Names of key properties.
 //! \param[in]  invalidKey   Index of a key to be set to invalid value, -1 if all valid.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 //! \returns    MI_RESULT_OK on success, otherwise error code.
 template<class T, class TN> MI_Result VerifyGetInstanceByCompleteKeySuccess(
-    const std::vector<std::wstring>& allKeyNames, size_t invalidKey, std::wostringstream &errMsg)
+    const std::vector<std::wstring>& allKeyNames, size_t invalidKey, std::wstring errMsg)
 {
     TestableContext originalContext;
     EnumInstances<T>(originalContext, CALL_LOCATION(errMsg));
@@ -381,9 +356,9 @@ template<class T, class TN> MI_Result VerifyGetInstanceByCompleteKeySuccess(
 //! \param      T            Type of object to be enumerated.
 //! \param      TN           Type of instance name object to be used.
 //! \param[in]  allKeyNames  Names of key properties.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 template<class T, class TN> void VerifyGetInstanceByPartialKeyFailure(const std::vector<std::wstring>& allKeyNames,
-    std::wostringstream &errMsg)
+    std::wstring errMsg)
 {
     for (size_t nr = 0; nr < allKeyNames.size(); nr++)
     {
@@ -401,9 +376,9 @@ template<class T, class TN> void VerifyGetInstanceByPartialKeyFailure(const std:
 //! \param      T            Type of object to be enumerated.
 //! \param      TN           Type of instance name object to be used.
 //! \param[in]  allKeyNames  Names of key properties.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 template<class T, class TN> void VerifyGetInstanceByInvalidKeyFailure(const std::vector<std::wstring>& allKeyNames,
-    std::wostringstream &errMsg)
+    std::wstring errMsg)
 {
     for (size_t nr = 0; nr < allKeyNames.size(); nr++)
     {
@@ -425,9 +400,9 @@ Standard tests, usualy run on every provider.
 //! \param[in]  allKeyNames     List of all expected key names.
 //! \param[in]  context         Object containing all retrieved instances. Can be used
 //!                             for further provider specific validation.
-//! \param[in]  errMsg          Stream containing error messages.
+//! \param[in]  errMsg          String containing error messages.
 template<class T> void StandardTestEnumerateKeysOnly(const std::vector<std::wstring>& allKeyNames,
-    TestableContext &context, std::wostringstream &errMsg)
+    TestableContext &context, std::wstring errMsg)
 {
     EnumInstances<T>(context, CALL_LOCATION(errMsg), true);// Second parameter is true to get keys only.
     const std::vector<TestableInstance> &instances = context.GetInstances();
@@ -452,10 +427,10 @@ template<class T> void StandardTestEnumerateKeysOnly(const std::vector<std::wstr
 //! \param[in]  keysSame        List of keys that should have same values for all instances.
 //! \param[in]  context         Object containing all retrieved instances. Can be used
 //!                             for further provider specific validation.
-//! \param[in]  errMsg          Stream containing error messages.
+//! \param[in]  errMsg          String containing error messages.
 template<class T> void StandardTestCheckKeyValues(const std::vector<std::wstring>& keyNames,
     const std::vector<std::wstring>& keyValues, const std::vector<std::wstring>& keysSame,
-    TestableContext &context, std::wostringstream &errMsg)
+    TestableContext &context, std::wstring errMsg)
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames.size(), keyValues.size());
     EnumInstances<T>(context, CALL_LOCATION(errMsg), true);// Second parameter is true to get keys only.
@@ -491,9 +466,9 @@ template<class T> void StandardTestCheckKeyValues(const std::vector<std::wstring
 //! \param[in]  allKeyNames    List of all expected key names.
 //! \param[in]  context        Object containing all retrieved instances. Can be used
 //!                            for further provider specific validation.
-//! \param[in]  errMsg         Stream containing error messages.
+//! \param[in]  errMsg         String containing error messages.
 template<class T> void StandardTestEnumerateInstances(const std::vector<std::wstring>& allKeyNames,
-    TestableContext &context, std::wostringstream &errMsg)
+    TestableContext &context, std::wstring errMsg)
 {
     EnumInstances<T>(context, CALL_LOCATION(errMsg));
     const std::vector<TestableInstance> &instances = context.GetInstances();
@@ -516,9 +491,9 @@ template<class T> void StandardTestEnumerateInstances(const std::vector<std::wst
 //! \param[in]  context      Object containing all retrieved instances. Can be used
 //!                          for further provider specific validation.
 //! \param[in]  numberOfKeys Number of keys instance should have.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 template<class T, class TN> void StandardTestGetInstance(TestableContext &context, size_t numberOfKeys,
-    std::wostringstream &errMsg)
+    std::wstring errMsg)
 {
     // First retrieve all instance names just to know what instance
     // to ask for.
@@ -549,9 +524,9 @@ template<class T, class TN> void StandardTestGetInstance(TestableContext &contex
 //! \param      T            Type of object to be enumerated.
 //! \param      TN           Type of instance name object to be used.
 //! \param[in]  allKeyNames  Names of key properties.
-//! \param[in]  errMsg       Stream containing error messages.
+//! \param[in]  errMsg       String containing error messages.
 template<class T, class TN> void StandardTestVerifyGetInstanceKeys(const std::vector<std::wstring>& allKeyNames,
-    std::wostringstream &errMsg)
+    std::wstring errMsg)
 {
     try {
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, (VerifyGetInstanceByCompleteKeySuccess<T, TN>(
