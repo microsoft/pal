@@ -267,7 +267,10 @@ std::vector<NetworkInterfaceConfigurationInstance> NetworkInterfaceConfiguration
         // Example: microsoft.com
 #if defined(linux) || defined(sun) || defined(hpux)
         instance.m_DNSDomain = dhcpLeaseInfo.getDomainName();
-        instance.SetKnown(NetworkInterfaceConfigurationInstance::eDNSDomain);
+        if (instance.m_DNSDomain.empty() == false)
+        {
+            instance.SetKnown(NetworkInterfaceConfigurationInstance::eDNSDomain);
+        }
 #endif
 
         // Determine m_DNSDomainSuffixSearchOrder

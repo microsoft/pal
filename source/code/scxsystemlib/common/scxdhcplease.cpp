@@ -193,6 +193,10 @@ namespace SCXSystemLib
             {
                 m_interface = tokens[1];
             }
+            else if (tokens[0].compare(L"DOMAIN") == 0)
+            {
+                m_domainName = tokens[1];
+            }
             else if (tokens[0].compare(L"DNSDOMAIN") == 0)
             {
                 m_domainName = tokens[1];
