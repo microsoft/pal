@@ -479,9 +479,11 @@ namespace SCXSystemLib
      */
      void DiskDependDefault::RefreshMNTTab()
      {
-          SCX_LOGTRACE(m_log, L"mnttab file being read");
+          static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
+          SCX_LOGTRACE(m_log, L"RefreshMNTTab: mnttab file being read");
           if (0 < m_MntTab.size())
           {
+              SCX_LOGTRACE(m_log, L"RefreshMNTTab: Clearing m_MntTab");
                m_MntTab.clear();
           }
 #if defined(aix)
@@ -540,6 +542,51 @@ namespace SCXSystemLib
                     {
                          continue;
                     }
+#if defined(linux)
+                    // WI 574703:
+                    //
+                    // On Debian 7 systems, the system disk may come in with a device like:
+                    //    /dev/disk/by-uuid/e62e95e9-502b-463a-998d-23cf7130d7d2
+                    // This differs from what's in /proc/diskstats (which is the real physical
+                    // device).  Since the path in /dev/disk/by-uuid is actually a soft link
+                    // to the physical device, just resolve it if that's what we've got.
+
+                    if (parts[0].find(L"/dev/disk/by-uuid/") == 0)
+                    {
+                        char buf[1024];
+                        memset(buf, 0, sizeof(buf));
+                        if (-1 == readlink(SCXCoreLib::StrToUTF8(parts[0]).c_str(), buf, sizeof(buf)))
+                        {
+                            std::wstringstream message;
+                            message << L"readlink(file='" << parts[0] << "',...)";
+
+                            SCXCoreLib::SCXErrnoException e(message.str(), errno, SCXSRCLOCATION);
+                            SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(message.str()));
+                            std::wstringstream out;
+                            out << "RefreshMNTTab: Error : " << e.What() << " at " << e.Where();
+                            SCX_LOG(m_log, severity, out.str());
+                        }
+                        else
+                        {
+                            // readlink returns something like "../../sda1"; trim to return "/dev/sda1"
+                            std::wstring link = SCXCoreLib::StrFromUTF8(buf);
+                            size_t pos;
+                            if ( (pos = link.rfind(L"/")) != std::wstring::npos )
+                            {
+                                parts[0] = L"/dev/" + link.substr(pos+1);
+                            }
+                            else
+                            {
+                                std::wstringstream message;
+                                message << L"RefreshMNTTab: Unable to find physical define in link: " << link
+                                        << " (Original file: " << parts[0] << ")";
+
+                                SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(message.str()));
+                                SCX_LOG(m_log, severity, message.str());
+                            }
+                        }
+                    }
+#endif
                     MntTabEntry entry;
                     entry.device = parts[0];
                     entry.mountPoint = parts[1];
@@ -553,10 +600,17 @@ namespace SCXSystemLib
                               entry.devAttribute = entry.devAttribute.substr(0,entry.devAttribute.find_first_not_of(L"0123456789abcdef"));
                          }
                     }
+
+                    SCX_LOGTRACE(m_log,
+                                 L"RefreshMNTTab: Storing device '" + entry.device
+                                 + L"', mountpoint '" + entry.mountPoint
+                                 + L"', filesysstem '" + entry.fileSystem + L"'" );
+
                     m_MntTab.push_back(entry);
                }
           }
           fs->close();
+          SCX_LOGTRACE(m_log, L"RefreshMNTTab: Done writing m_MntTab");
 #endif
      }
 
