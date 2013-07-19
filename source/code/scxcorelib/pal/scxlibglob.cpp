@@ -68,8 +68,8 @@ namespace SCXCoreLib
     {
         // if the path1's filename has a greater version than path2's filename, 
         // then put path1 before path2 in the sort.
-        if (strverscmp(StrToMultibyte(path1.GetFilename()).c_str(),
-                       StrToMultibyte(path2.GetFilename()).c_str()) > 0)
+        if (strverscmp(StrToUTF8(path1.GetFilename()).c_str(),
+                       StrToUTF8(path2.GetFilename()).c_str()) > 0)
         {
             return true;
         }

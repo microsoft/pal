@@ -231,7 +231,7 @@ public:
         #endif
 
         CPPUNIT_ASSERT(inst->GetDescription(description));
-        CPPUNIT_ASSERT_EQUAL(tmpDescription, StrToMultibyte(description));
+        CPPUNIT_ASSERT_EQUAL(tmpDescription, StrToUTF8(description));
  
 #endif
 
@@ -329,7 +329,7 @@ public:
             cout << "The ErrorString is : " << streamErrstr.str() << endl;
         }
     #endif
-        CPPUNIT_ASSERT_EQUAL(model, StrToMultibyte(strtmp)); 
+        CPPUNIT_ASSERT_EQUAL(model, StrToUTF8(strtmp)); 
     }
 
 };

@@ -399,7 +399,7 @@ namespace SCX
                     
                     XmlException(const std::string& message, 
                                  const Utf8String& xmlComponent) 
-                        : m_message(SCXCoreLib::StrFromMultibyte(message)),
+                        : m_message(SCXCoreLib::StrFromUTF8(message)),
                           m_xmlComponent(xmlComponent)
                           {}
                     
@@ -411,7 +411,7 @@ namespace SCX
                         std::wstring errMsg = L"Error Message: ";
                                   errMsg += m_message;
                                   errMsg += L" XML Component: ";
-                                  errMsg += SCXCoreLib::StrFromMultibyte(m_xmlComponent.Str());
+                                  errMsg += SCXCoreLib::StrFromUTF8(m_xmlComponent.Str());
                         return errMsg;
                     }
                     

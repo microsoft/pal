@@ -53,7 +53,7 @@ namespace SCXCoreLib
                 memset(&m_globHolder, 0, sizeof(glob_t));
                 
                 this->m_logHandle = SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.os.scxglob");
-                this->m_pattern = StrToMultibyte(pttrn);
+                this->m_pattern = StrToUTF8(pttrn);
                 this->NormalizePattern();
         }
         
@@ -68,7 +68,7 @@ namespace SCXCoreLib
                 memset(&m_globHolder, 0, sizeof(glob_t));
 
         this->m_logHandle = SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.os.scxglob");
-        this->m_pattern = StrToMultibyte(pttrn.Get());
+        this->m_pattern = StrToUTF8(pttrn.Get());
         this->NormalizePattern();
     }
 
@@ -109,7 +109,7 @@ namespace SCXCoreLib
     wstring SCXGlob::GetPattern() const
     {
         SCX_LOGTRACE(m_logHandle, L"GetPattern()");
-        return StrFromMultibyte(this->m_pattern);
+        return StrFromUTF8(this->m_pattern);
     }
 
     void SCXGlob::DoGlob()
@@ -154,19 +154,19 @@ namespace SCXCoreLib
         case GLOB_NOSPACE:
         {
             globfree(&this->m_globHolder);
-            wstring message = L"SCXGlob_NoSpace_Error: " + StrFromMultibyte(this->m_pattern);
+            wstring message = L"SCXGlob_NoSpace_Error: " + StrFromUTF8(this->m_pattern);
             throw SCXResourceExhaustedException(L"Memory", message, SCXSRCLOCATION);
         }
         case GLOB_ABORTED:
         {
             // We are here only if isErrorAbortOn is true.
             globfree(&this->m_globHolder);
-            wstring message = L"SCXGlob::Initialize(): " + StrFromMultibyte(this->m_pattern);
+            wstring message = L"SCXGlob::Initialize(): " + StrFromUTF8(this->m_pattern);
             throw SCXErrnoException(message, errno, SCXSRCLOCATION);
         }
         default:
             globfree(&this->m_globHolder);
-            wstring message = L"SCXGlob_Unknown_Error: " + StrFromMultibyte(this->m_pattern);
+            wstring message = L"SCXGlob_Unknown_Error: " + StrFromUTF8(this->m_pattern);
             throw SCXInternalErrorException(message, SCXSRCLOCATION);
         }  
     }
@@ -215,7 +215,7 @@ namespace SCXCoreLib
                 }
                 
                 if (this->m_pathnames[m_index]) {
-                        return StrFromMultibyte(this->m_pathnames[m_index]);
+                        return StrFromUTF8(this->m_pathnames[m_index]);
                 } 
                 else 
                 {

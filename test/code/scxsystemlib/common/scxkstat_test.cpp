@@ -223,7 +223,7 @@ private:
         {
             return 0;
         }
-        std::wstring output = SCXCoreLib::StrFromMultibyte(buf);
+        std::wstring output = SCXCoreLib::StrFromUTF8(buf);
         std::vector<std::wstring> tokens;
         SCXCoreLib::StrTokenize(output, tokens, L" \t");
 
@@ -271,7 +271,7 @@ private:
             {
                 memset(buf, 0, sizeof(buf));
                 fgets(buf, sizeof(buf), fp);
-                std::wstring line = SCXCoreLib::StrFromMultibyte(buf);
+                std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 disks.push_back(line);
             }
             pclose(fp);
@@ -389,8 +389,8 @@ public:
             {
                 try {
                     int instance = -1; // Ask for any instance
-                    std::string module = SCXCoreLib::StrToMultibyte(parts[0]);
-                    std::string name = SCXCoreLib::StrToMultibyte(parts[2]);
+                    std::string module = SCXCoreLib::StrToUTF8(parts[0]);
+                    std::string name = SCXCoreLib::StrToUTF8(parts[2]);
                     compB = GetCompareKstatValue(module.c_str(), name.c_str(), "reads", instance);
                     CPPUNIT_ASSERT_NO_THROW(m_pKstat = new SCXSystemLib::SCXKstat);
                     CPPUNIT_ASSERT_NO_THROW(m_pKstat->Lookup(parts[0], parts[2], instance));
@@ -470,8 +470,8 @@ public:
             {
                 try {
                     int instance = -1; // Ask for any instance
-                    std::string module = SCXCoreLib::StrToMultibyte(parts[0]);
-                    std::string name = SCXCoreLib::StrToMultibyte(parts[2]);
+                    std::string module = SCXCoreLib::StrToUTF8(parts[0]);
+                    std::string name = SCXCoreLib::StrToUTF8(parts[2]);
                     scxulong dummy = GetCompareKstatValue(module.c_str(), name.c_str(), "reads", instance);
                     CPPUNIT_ASSERT_NO_THROW(m_pKstat = new SCXSystemLib::SCXKstat);
                     CPPUNIT_ASSERT_NO_THROW(m_pKstat->Lookup(parts[0], parts[2], instance));

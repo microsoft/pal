@@ -128,10 +128,10 @@ public:
 
         wstring tmp = L""; 
         CPPUNIT_ASSERT(biosInstance->GetSmbiosBiosVersion(tmp));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmp),smbiosBiosVersion);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmp),smbiosBiosVersion);
 
         CPPUNIT_ASSERT(biosInstance->GetManufacturer(tmp));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmp),manufacturer);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmp),manufacturer);
 
         SCXCalendarTime tmpDate;
         CPPUNIT_ASSERT(biosInstance->GetInstallDate(tmpDate));
@@ -156,10 +156,10 @@ public:
 
         wstring tmp; 
         CPPUNIT_ASSERT(biosInstance->GetManufacturer(tmp));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmp), string("SUNW,4.30.4"));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmp), string("SUNW,4.30.4"));
 
         CPPUNIT_ASSERT(biosInstance->GetVersion(tmp));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmp), string("OBP 4.30.4 2009/08/19 07:25"));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmp), string("OBP 4.30.4 2009/08/19 07:25"));
 
         SCXCalendarTime tmpDate;
         CPPUNIT_ASSERT(biosInstance->GetInstallDate(tmpDate));

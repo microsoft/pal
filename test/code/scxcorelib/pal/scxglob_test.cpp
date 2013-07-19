@@ -407,7 +407,7 @@ public:
                 CPPUNIT_ASSERT(false == globObj.Next());
                 
                 // Remove the found file from disk
-                unlink(StrToMultibyte(path_verify1.Get()).c_str());
+                unlink(StrToUTF8(path_verify1.Get()).c_str());
                 // Re-glob
                 globObj.DoGlob();
                 // No match should be found

@@ -501,7 +501,7 @@ namespace SCXSystemLib
         bufsize = confstr(_CS_MACHINE_MODEL,NULL,(size_t)0);
         char *buffer = new char[bufsize+1];
         int status = confstr(_CS_MACHINE_MODEL,buffer,bufsize+1);
-        model = StrFromMultibyte(buffer);
+        model = StrFromUTF8(buffer);
         delete buffer;
         if (status <= 0)
             return false;

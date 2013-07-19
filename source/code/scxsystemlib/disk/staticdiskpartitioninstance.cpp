@@ -223,12 +223,12 @@ bool StaticDiskPartitionInstance::GetFdiskResult()
    {
         SCXCoreLib::SCXProcess::Run(c_cmdFdiskStr, processInput, processOutput, processErr, 15000);
         m_fdiskResult = processOutput.str();
-        SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromMultibyte(m_fdiskResult)));
+        SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(m_fdiskResult)));
 
         std::string errOut = processErr.str();
         if (errOut.size() > 0)
         {
-            SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from fdisk command: ", StrFromMultibyte(errOut)));
+            SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from fdisk command: ", StrFromUTF8(errOut)));
         }
    }
    catch (SCXCoreLib::SCXException &e) 
@@ -331,8 +331,8 @@ void StaticDiskPartitionInstance::Update_Solaris()
             if (status != 0)
             {
                 SCX_LOGERROR(m_log, StrAppend(L"Error on command " + cmdStringDf + L" - status ", status));
-                SCX_LOGERROR(m_log, StrFromMultibyte("Output - " + processOutputDf.str()));
-                SCX_LOGERROR(m_log, StrFromMultibyte("Error - " + processErrDf.str()));
+                SCX_LOGERROR(m_log, StrFromUTF8("Output - " + processOutputDf.str()));
+                SCX_LOGERROR(m_log, StrFromUTF8("Error - " + processErrDf.str()));
                 return;
             }
             dfResult = processOutputDf.str();
@@ -806,12 +806,12 @@ void StaticDiskPartitionInstance::Update_Linux()
         {
             SCXCoreLib::SCXProcess::Run(bDevSizeCmd.c_str(), processBdevSizeInput, processBdevSizeOutput, processBdevSizeErr, 15000);
             blockDevResult = processBdevSizeOutput.str();
-            SCX_LOGTRACE(m_log, StrAppend(wstring(L"  Got this output from BlockDev: "), StrFromMultibyte(blockDevResult)));
+            SCX_LOGTRACE(m_log, StrAppend(wstring(L"  Got this output from BlockDev: "), StrFromUTF8(blockDevResult)));
 
             std::string errOutPSz = processBdevSizeErr.str();
             if (errOutPSz.size() > 0)
             {
-                SCX_LOGERROR(m_log, StrAppend(L"Got this error string from blockdev GetSize command: ", StrFromMultibyte(errOutPSz)));
+                SCX_LOGERROR(m_log, StrAppend(L"Got this error string from blockdev GetSize command: ", StrFromUTF8(errOutPSz)));
             }
         }
         catch (SCXCoreLib::SCXException &e) 
@@ -827,7 +827,7 @@ void StaticDiskPartitionInstance::Update_Linux()
         }
 
         //So, everything checks out, lets save off the result:
-        partitionSize = SCXCoreLib::StrToULong(SCXCoreLib::StrFromMultibyte(blockDevResult));
+        partitionSize = SCXCoreLib::StrToULong(SCXCoreLib::StrFromUTF8(blockDevResult));
 
 
         //Now we'll use blockdev to retrieve the blocksize for the file system (as opposed to the kernel buffer block size).
@@ -842,12 +842,12 @@ void StaticDiskPartitionInstance::Update_Linux()
         {
             SCXCoreLib::SCXProcess::Run(bDevBlkSizeCmd.c_str(), processBlkSizeInput, processBlkSizeOutput, processBlkSizeErr, 15000);
             blockDevResult = processBlkSizeOutput.str();
-            SCX_LOGTRACE(m_log, StrAppend(L"  Got this output from BlockDev: ", StrFromMultibyte(blockDevResult)));
+            SCX_LOGTRACE(m_log, StrAppend(L"  Got this output from BlockDev: ", StrFromUTF8(blockDevResult)));
 
             std::string errOutBsz = processBlkSizeErr.str();
             if (errOutBsz.size() > 0)
             {
-                SCX_LOGERROR(m_log, StrAppend(L"Got this error string from blockdev GetSize command: ", StrFromMultibyte(errOutBsz)));
+                SCX_LOGERROR(m_log, StrAppend(L"Got this error string from blockdev GetSize command: ", StrFromUTF8(errOutBsz)));
             }
         }
         catch (SCXCoreLib::SCXException &e) 
@@ -863,7 +863,7 @@ void StaticDiskPartitionInstance::Update_Linux()
         }
 
         //So, everything checks out, lets save off the result:
-        blockDevBsz = SCXCoreLib::StrToULong(SCXCoreLib::StrFromMultibyte(blockDevResult));
+        blockDevBsz = SCXCoreLib::StrToULong(SCXCoreLib::StrFromUTF8(blockDevResult));
 
         // Now, let's fill in our fields  
         if (foundIt && startBlk > 0)

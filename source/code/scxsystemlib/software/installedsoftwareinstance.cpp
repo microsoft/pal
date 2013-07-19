@@ -478,7 +478,7 @@ namespace SCXSystemLib
     void InstalledSoftwareInstance::SetInstallDate(const wstring& installDate)
     {
         tm          installtm;
-        const std::string nsInstallDate = StrToMultibyte(installDate);
+        const std::string nsInstallDate = StrToUTF8(installDate);
         const char *buf      = nsInstallDate.c_str();
         size_t      ccLength = installDate.length();
         const char *bufend   = buf + ccLength;

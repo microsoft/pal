@@ -27,7 +27,7 @@ SCXCoreLib::SCXLogHandle LogHandleCache::GetLogHandle(const std::string& name)
     {
         // Create a new one and insert that
         logHandlePtr = SCXLogHandlePtr (new SCXCoreLib::SCXLogHandle());        
-        *logHandlePtr = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(SCXCoreLib::StrFromMultibyte(name));
+        *logHandlePtr = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(SCXCoreLib::StrFromUTF8(name));
         m_logHandleMap.insert(std::make_pair<std::string, SCXLogHandlePtr> (name, logHandlePtr));
     }
 

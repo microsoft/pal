@@ -199,8 +199,8 @@ public:
         }
 
         // Assure that the received regular expressions are actually correct
-        CPPUNIT_ASSERT_EQUAL(std::string("abc"), SCXCoreLib::StrToMultibyte(vri2[0].regex->Get()));
-        CPPUNIT_ASSERT_EQUAL(std::string("def"), SCXCoreLib::StrToMultibyte(vri2[1].regex->Get()));
+        CPPUNIT_ASSERT_EQUAL(std::string("abc"), SCXCoreLib::StrToUTF8(vri2[0].regex->Get()));
+        CPPUNIT_ASSERT_EQUAL(std::string("def"), SCXCoreLib::StrToUTF8(vri2[1].regex->Get()));
     }
 
     void TestMarshalException(void)

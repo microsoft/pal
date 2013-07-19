@@ -636,9 +636,9 @@ public:
         ostringstream errStream;
 
         errStream << "currentLocal: " << currentLocal.ToPosixTime()
-                  << ", currentLocal (UTC): " << StrToMultibyte(currentLocal.GetOffsetFromUTC().DumpString())
+                  << ", currentLocal (UTC): " << StrToUTF8(currentLocal.GetOffsetFromUTC().DumpString())
                   << ", envLocal: " << envLocal.ToPosixTime()
-                  << ", envLocal (UTC): " << StrToMultibyte(envLocal.GetOffsetFromUTC().DumpString());
+                  << ", envLocal (UTC): " << StrToUTF8(envLocal.GetOffsetFromUTC().DumpString());
 
         CPPUNIT_ASSERT_MESSAGE(
             errStream.str().c_str(),
@@ -665,9 +665,9 @@ public:
         ostringstream errStream;
 
         errStream << "currentLocal: " << currentLocal.ToPosixTime()
-                  << ", currentLocal (UTC): " << StrToMultibyte(currentLocal.GetOffsetFromUTC().DumpString())
+                  << ", currentLocal (UTC): " << StrToUTF8(currentLocal.GetOffsetFromUTC().DumpString())
                   << ", envLocal: " << envLocal.ToPosixTime()
-                  << ", envLocal (UTC): " << StrToMultibyte(envLocal.GetOffsetFromUTC().DumpString());
+                  << ", envLocal (UTC): " << StrToUTF8(envLocal.GetOffsetFromUTC().DumpString());
         CPPUNIT_ASSERT_MESSAGE(
             errStream.str().c_str(),
             currentLocal.GetOffsetFromUTC() == envLocal.GetOffsetFromUTC());
@@ -891,7 +891,7 @@ public:
 
     std::string PosixToISO8601(time_t ut) {
         SCXCoreLib::SCXCalendarTime c2(SCXCoreLib::SCXCalendarTime::FromPosixTime(ut));
-        std::string iso8601(SCXCoreLib::StrToMultibyte(c2.ToExtendedISO8601()));
+        std::string iso8601(SCXCoreLib::StrToUTF8(c2.ToExtendedISO8601()));
         return(iso8601);
     }
 

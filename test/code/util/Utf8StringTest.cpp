@@ -354,7 +354,7 @@ class Utf8StringTest : public CPPUNIT_NS::TestFixture
                }
                catch (InvalidCodeUnitException& e)
                {
-                   //printf("Exception = %s\n", SCXCoreLib::StrToMultibyte(e.What()).c_str());
+                   //printf("Exception = %s\n", SCXCoreLib::StrToUTF8(e.What()).c_str());
                    gotException = true;
                }
 
@@ -478,7 +478,7 @@ class Utf8StringTest : public CPPUNIT_NS::TestFixture
             }
             catch (SCXCoreLib::SCXException& e)
             {
-                CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(e.What()).c_str());
+                CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(e.What()).c_str());
             }
 #endif
         }

@@ -476,7 +476,7 @@ namespace SCXSystemLib
 
     /* Do a statvfs() call to get file system statistics */
     SCXStatVfs fsstat;
-    if (0 != m_deps->statvfs(SCXCoreLib::StrToMultibyte(GetId()).c_str(), &fsstat))
+    if (0 != m_deps->statvfs(SCXCoreLib::StrToUTF8(GetId()).c_str(), &fsstat))
           {
         // Ignore EOVERFLOW (if disk is too big) to keep disk 'on-line' even without statistics
         if ( EOVERFLOW == errno ){

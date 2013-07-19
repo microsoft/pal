@@ -129,14 +129,14 @@ bool SCXdlpi::get_cur_link_speed(std::wstring& interface_name,
         ppaStream << i->name << i->ppa;
         ppaStream >> namePPA;
 
-        if (strcmp(SCXCoreLib::StrToMultibyte(interface_name).c_str(),namePPA.c_str()) == 0)
+        if (strcmp(SCXCoreLib::StrToUTF8(interface_name).c_str(),namePPA.c_str()) == 0)
         {
            /* We have to attach to the PPA before issuing the command. */
             if (attach(fd, i->ppa))
             {
                 // This is to log file name and line number along with the rest of error message.
                 SCXCoreLib::SCXErrnoException e(std::wstring(L"Could not attach. PPA: ").
-                                                        append(SCXCoreLib::StrFromMultibyte(namePPA)).
+                                                        append(SCXCoreLib::StrFromUTF8(namePPA)).
                                                         append(std::wstring(L" errno: ")),
                                                         errno, 
                                                         SCXSRCLOCATION);
@@ -171,7 +171,7 @@ bool SCXdlpi::get_cur_link_speed(std::wstring& interface_name,
             if (detach(fd))
             {
                 SCXCoreLib::SCXErrnoException e(std::wstring(L"Unable to Detach for PPA= ").
-                                                        append(SCXCoreLib::StrFromMultibyte(namePPA)).
+                                                        append(SCXCoreLib::StrFromUTF8(namePPA)).
                                                         append(L" errno: "),
                                                         errno, SCXSRCLOCATION);
                 SCX_LOGERROR(m_log, e.What());

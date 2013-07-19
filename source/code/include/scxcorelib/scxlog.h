@@ -171,7 +171,7 @@ namespace SCXCoreLib
 
         void Log(SCXLogSeverity sev, const std::string& message, const SCXCodeLocation& location) const
         {
-            Log(sev, SCXCoreLib::StrFromMultibyte(message), location);
+            Log(sev, SCXCoreLib::StrFromUTF8(message), location);
         }
 
         SCXLogSeverity GetSeverityThreshold() const;

@@ -124,7 +124,7 @@ namespace SCXSystemLib
         m_processorAttr.is64Bit = true; // Both supported processors, Itanium and PA_RISC, are 64 bit.
         m_socketId = socketId;
 #if (PF_MINOR >= 31)
-        m_processorAttr.manufacturer = SCXCoreLib::StrFromMultibyte(cpu.psp_cpu_vendor);
+        m_processorAttr.manufacturer = SCXCoreLib::StrFromUTF8(cpu.psp_cpu_vendor);
 
         m_processorAttr.currentClockSpeed =
             m_processorAttr.maxClockSpeed =
@@ -1076,7 +1076,7 @@ namespace SCXSystemLib
         int rc = uname( & uname_buf );
         if (0 <= rc)
         {
-            wstring smachine(SCXCoreLib::StrFromMultibyte(uname_buf.machine));
+            wstring smachine(SCXCoreLib::StrFromUTF8(uname_buf.machine));
 
             // uname machine must have enough characters to identify the architecture.
             static const unsigned short MINMACHINENAMECC = 4;

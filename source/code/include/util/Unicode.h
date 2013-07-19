@@ -154,7 +154,7 @@ namespace SCX
                 message <<
                     "Description : " <<
                     m_description;
-                return SCXCoreLib::StrFromMultibyte(message.str());
+                return SCXCoreLib::StrFromUTF8(message.str());
             }
 
         private:

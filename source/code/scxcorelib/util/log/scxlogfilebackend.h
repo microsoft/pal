@@ -49,6 +49,8 @@ namespace SCXCoreLib
 
         int m_LogFileRunningNumber;            //!< Keep track of number of rotates
         SCXCalendarTime m_procStartTimestamp;  //!< Timestamp when first log from process was made, regardless of rotations
+
+        bool m_LogAllCharacters;
     };
 
 } /* namespace SCXCoreLib */

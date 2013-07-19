@@ -195,7 +195,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(6, tmp);
          
         CPPUNIT_ASSERT(inst->GetStepping(strtmp));
-        CPPUNIT_ASSERT_EQUAL("2",StrToMultibyte(strtmp));
+        CPPUNIT_ASSERT_EQUAL("2",StrToUTF8(strtmp));
        
         tmp = 0;
         CPPUNIT_ASSERT(inst->GetCpuStatus(tmp));
@@ -279,7 +279,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(L"CPU 0", strtmp);
 
         CPPUNIT_ASSERT(inst->GetStepping(strtmp));
-        CPPUNIT_ASSERT_EQUAL("2",StrToMultibyte(strtmp));
+        CPPUNIT_ASSERT_EQUAL("2",StrToUTF8(strtmp));
 
         unsigned short tmp = 0;
         CPPUNIT_ASSERT(inst->GetCpuStatus(tmp));
@@ -367,16 +367,16 @@ public:
                     }
                     else if (0 == tokens[0].compare(L"chip_id"))
                     {
-                        chipId = StrToMultibyte(tokens[1]);
+                        chipId = StrToUTF8(tokens[1]);
                         deviceId = deviceId + chipId;
                     }
                     else if (0 == tokens[0].compare(L"vendor_id"))
                     {
-                        manufacturer = StrToMultibyte(tokens[1]);
+                        manufacturer = StrToUTF8(tokens[1]);
                     }
                     else if (0 == tokens[0].compare(L"stepping"))
                     {
-                        stepping = StrToMultibyte(tokens[1]);
+                        stepping = StrToUTF8(tokens[1]);
                     }
                     else if (0 == tokens[0].compare(L"family"))
                     {
@@ -395,11 +395,11 @@ public:
                     }
                     else if (0 == tokens[0].compare(L"brand"))
                     {
-                        name = StrToMultibyte(tokens[1]);
+                        name = StrToUTF8(tokens[1]);
                     }
                     else if (0 == tokens[0].compare(L"model"))
                     {
-                        model = StrToMultibyte(tokens[1]);
+                        model = StrToUTF8(tokens[1]);
                     }
                 }
             }
@@ -412,7 +412,7 @@ public:
                 {
                     if (0 == tokens[0].compare(L"chip_id"))
                     {
-                        if (chipId == StrToMultibyte(tokens[1]))
+                        if (chipId == StrToUTF8(tokens[1]))
                         {
                             numLogicalProcs++;
                             theSamechipId = true;
@@ -437,17 +437,17 @@ public:
 
         wstring strtmp = L"";
         CPPUNIT_ASSERT(inst->GetDeviceID(strtmp));
-        CPPUNIT_ASSERT_EQUAL(deviceId, StrToMultibyte(strtmp));
+        CPPUNIT_ASSERT_EQUAL(deviceId, StrToUTF8(strtmp));
 
         CPPUNIT_ASSERT(!inst->GetRole(strtmp));
         
         unsigned int itmp = 0;
 #if defined(ia32)
         CPPUNIT_ASSERT(inst->GetManufacturer(strtmp));
-        CPPUNIT_ASSERT_EQUAL(manufacturer, StrToMultibyte(strtmp));
+        CPPUNIT_ASSERT_EQUAL(manufacturer, StrToUTF8(strtmp));
 
         CPPUNIT_ASSERT(inst->GetStepping(strtmp));
-        CPPUNIT_ASSERT_EQUAL(stepping, StrToMultibyte(strtmp));
+        CPPUNIT_ASSERT_EQUAL(stepping, StrToUTF8(strtmp));
         
         unsigned short tmp; 
         CPPUNIT_ASSERT(inst->GetFamily(tmp));
@@ -456,7 +456,7 @@ public:
         std::stringstream version(std::stringstream::out);
         version << "Model " << model << " Stepping " << stepping;      
         CPPUNIT_ASSERT(inst->GetVersion(strtmp));
-        CPPUNIT_ASSERT_EQUAL(version.str(), StrToMultibyte(strtmp));
+        CPPUNIT_ASSERT_EQUAL(version.str(), StrToUTF8(strtmp));
 #endif
 
 #if defined(ia32) || (defined(sparc) && PF_MINOR >= 11)

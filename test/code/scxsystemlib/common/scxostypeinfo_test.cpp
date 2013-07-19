@@ -103,10 +103,10 @@ public:
         std::ostringstream out, err;
         if (SCXCoreLib::SCXProcess::Run(L"sh -c 'grep OSName= ./scx-release | cut -f2 -d='", in, out, err))
         {
-            throw SCXCoreLib::SCXErrnoException(StrAppend(L"sh script: ", StrFromMultibyte(err.str())), errno, SCXSRCLOCATION);
+            throw SCXCoreLib::SCXErrnoException(StrAppend(L"sh script: ", StrFromUTF8(err.str())), errno, SCXSRCLOCATION);
         }
 
-        correctAnswer = StrTrim(StrFromMultibyte(out.str()));
+        correctAnswer = StrTrim(StrFromUTF8(out.str()));
   #elif defined(PF_DISTRO_REDHAT)
     #if (PF_MAJOR >= 5)
         correctAnswer = L"Red Hat Enterprise Linux Server";
@@ -136,7 +136,7 @@ public:
         // OK, let's verify that PAL returns that
         wostringstream sout;
         sout << L"\"" << infoObject.GetOSName() << L"\" != \"" << correctAnswer << L"\"";
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
                                infoObject.GetOSName() == correctAnswer);
     }
 
@@ -160,7 +160,7 @@ public:
         wostringstream sout;
         
         sout << infoObject.GetOSName(true) << L" != " << correctAnswer;
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
                                infoObject.GetOSName(true) == correctAnswer);
     }
 
@@ -187,7 +187,7 @@ public:
 
         wostringstream sout;
         sout << infoObject.GetOSFamilyString() << L" != " << correctAnswer;
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(), infoObject.GetOSFamilyString() == correctAnswer);
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), infoObject.GetOSFamilyString() == correctAnswer);
     }
 
     void TestOSVersion(void)
@@ -211,10 +211,10 @@ public:
         std::ostringstream out, err;
         if (SCXCoreLib::SCXProcess::Run(L"sh -c 'grep OSVersion= ./scx-release | cut -f2 -d='", in, out, err))
         {
-            throw SCXCoreLib::SCXErrnoException(StrAppend(L"sh script: ", StrFromMultibyte(err.str())), errno, SCXSRCLOCATION);
+            throw SCXCoreLib::SCXErrnoException(StrAppend(L"sh script: ", StrFromUTF8(err.str())), errno, SCXSRCLOCATION);
         }
 
-        correctAnswer = StrTrim(StrFromMultibyte(out.str()));
+        correctAnswer = StrTrim(StrFromUTF8(out.str()));
         bCompareWithDynamic = true;
         size_t pos = correctAnswer.find(L'.');
         CPPUNIT_ASSERT_MESSAGE("OS version does not contain \".\".", pos != wstring::npos);
@@ -229,7 +229,7 @@ public:
         pclose(cmdOutput);
         string correctAnswerMB;  // Multi-byte string 
         correctAnswerMB = buf;
-        correctAnswer = StrTrim(StrFromMultibyte(correctAnswerMB));
+        correctAnswer = StrTrim(StrFromUTF8(correctAnswerMB));
         bCompareWithDynamic = true;
 #else 
 #warning "Platform not supported for OSAlias"
@@ -238,7 +238,7 @@ public:
         {
             wostringstream sout;
             sout << L"[" << infoObject.GetOSVersion() << L"] != [" << correctAnswer << L"]";
-            CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(), 
+            CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
                                    infoObject.GetOSVersion() == correctAnswer);
         }
         else
@@ -273,10 +273,10 @@ public:
         // Universal Linux has many acceptable aliases, 
         // so just ensure the alias is an actual string with length > 0
         sout << infoObject.GetOSAlias().size() << L" == " << 0;
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(), infoObject.GetOSAlias().size() != 0);
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), infoObject.GetOSAlias().size() != 0);
 #else
         sout << infoObject.GetOSAlias() << L" != " << correctAnswer;
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
                                infoObject.GetOSAlias() == correctAnswer);
 #endif
     }
@@ -297,14 +297,14 @@ public:
         std::string testUnameString = buf;
         pclose(unameOutput);
 
-        wstring testUname = StrTrim(StrFromMultibyte(testUnameString));
+        wstring testUname = StrTrim(StrFromUTF8(testUnameString));
 
         SCXOSTypeInfo infoObject;
         wstring palUname = infoObject.GetUnameArchitectureString();
 
         wostringstream sout;
         sout << palUname << L" != " << testUname;
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
                                palUname == testUname);
     }
 
@@ -352,10 +352,10 @@ public:
             if (strlen(buf) > 0)
             {
                 std::vector<wstring> parts;
-                SCXCoreLib::StrTokenize(SCXCoreLib::StrFromMultibyte(buf), parts, L":");
+                SCXCoreLib::StrTokenize(SCXCoreLib::StrFromUTF8(buf), parts, L":");
 
                 // If we got what we expected, set the resultant bit size
-                if (parts[0] == SCXCoreLib::StrFromMultibyte(sysctlName))
+                if (parts[0] == SCXCoreLib::StrFromUTF8(sysctlName))
                 {
                     if (parts[1] == L"1")
                     {
@@ -376,7 +376,7 @@ public:
 
         wostringstream sout;
         sout << infoObject.GetArchitectureString() << L" != " << testArch;
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(sout.str()).c_str(),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
                                infoObject.GetArchitectureString() == testArch);
 #endif
     }

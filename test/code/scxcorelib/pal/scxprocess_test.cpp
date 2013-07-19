@@ -271,7 +271,7 @@ public:
         // Assert that the subprocess is currently running.
         std::wstring ps_command = L"ps -p " + pid;
         returnCode = SCXCoreLib::SCXProcess::Run(ps_command, input, output, error, 10000);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE("Command \"" + SCXCoreLib::StrToMultibyte(ps_command) + "\" returned an unexpected value", 0, returnCode);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Command \"" + SCXCoreLib::StrToUTF8(ps_command) + "\" returned an unexpected value", 0, returnCode);
 
         // Kill the process group.
         CPPUNIT_ASSERT_NO_THROW(process.Kill());
@@ -412,9 +412,9 @@ public:
         SCXCoreLib::SCXProcess::Run(L"cat " + myTempFile, input, output, error);
         CPPUNIT_ASSERT( !error.str().length() );
         CPPUNIT_ASSERT_EQUAL( std::string("<?php phpinfo();?>"),
-                              SCXCoreLib::StrToMultibyte(
+                              SCXCoreLib::StrToUTF8(
                                   SCXCoreLib::StrTrimR(
-                                      SCXCoreLib::StrFromMultibyte(output.str() ))) );
+                                      SCXCoreLib::StrFromUTF8(output.str() ))) );
     }
 
     //
@@ -427,9 +427,9 @@ public:
         for (size_t i = 0; i < vec.size(); i++)
         {
             const char *theArg = expectedArgs[i];
-            CPPUNIT_ASSERT_EQUAL_MESSAGE( SCXCoreLib::StrToMultibyte(
+            CPPUNIT_ASSERT_EQUAL_MESSAGE( SCXCoreLib::StrToUTF8(
                                               SCXCoreLib::StrAppend(L"Difference found in element ", i) ),
-                                          std::string(theArg), SCXCoreLib::StrToMultibyte(vec[i]) );
+                                          std::string(theArg), SCXCoreLib::StrToUTF8(vec[i]) );
         }
     }
 

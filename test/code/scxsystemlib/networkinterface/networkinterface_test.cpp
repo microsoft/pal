@@ -105,8 +105,8 @@ protected:
     {
         if(instrumentTests)
         {
-            std::cout<<"MyKstat::Lookup(\""<<StrToMultibyte(module)<<"\", \""<<
-                StrToMultibyte(name)<<"\", "<<instance<<")"<<std::endl;
+            std::cout<<"MyKstat::Lookup(\""<<StrToUTF8(module)<<"\", \""<<
+                StrToUTF8(name)<<"\", "<<instance<<")"<<std::endl;
         }
         SCXKstat::Lookup(module, name, instance);
     }
@@ -130,7 +130,7 @@ protected:
     {
         if(instrumentTests)
         {
-            std::cout<<"MyKstat::Lookup(\""<<StrToMultibyte(module)<<"\", "<<
+            std::cout<<"MyKstat::Lookup(\""<<StrToUTF8(module)<<"\", "<<
                 instance<<")"<<std::endl;
         }
         SCXKstat::Lookup(module, instance);
@@ -1180,10 +1180,10 @@ public:
     void WriteNetworkInterfaceInfo(NetworkInterfaceInfo &interface)
     {
         cout<<endl<<" ---------------------------------------"<<endl;
-        cout<<"  "<<StrToMultibyte(interface.GetName())<<endl;
-        cout<<"  "<<StrToMultibyte(interface.GetIPAddress())<<endl;
-        cout<<"  "<<StrToMultibyte(interface.GetBroadcastAddress())<<endl;
-        cout<<"  "<<StrToMultibyte(interface.GetNetmask())<<endl;
+        cout<<"  "<<StrToUTF8(interface.GetName())<<endl;
+        cout<<"  "<<StrToUTF8(interface.GetIPAddress())<<endl;
+        cout<<"  "<<StrToUTF8(interface.GetBroadcastAddress())<<endl;
+        cout<<"  "<<StrToUTF8(interface.GetNetmask())<<endl;
         cout<<"  "<<interface.GetBytesReceived()<<endl;
         cout<<"  "<<interface.GetPacketsReceived()<<endl;
         cout<<"  "<<interface.GetErrorsReceiving()<<endl;
@@ -1213,14 +1213,14 @@ public:
         size_t i;
         for(i = 0; i < interfaces.Size(); i++)
         {
-            cout<<"  "<<StrToMultibyte(interfaces[i]->GetName())<<endl;
+            cout<<"  "<<StrToUTF8(interfaces[i]->GetName())<<endl;
             bool cond;
             cond = false;
             cout<<"  "<<interfaces[i]->GetUp(cond)<<" "<<cond<<endl;
             cond = false;
             cout<<"  "<<interfaces[i]->GetRunning(cond)<<" "<<cond<<endl;
             wstring ipAddress;
-            cout<<"  "<<interfaces[i]->GetIPAddress(ipAddress)<<" "<<StrToMultibyte(ipAddress)<<endl;
+            cout<<"  "<<interfaces[i]->GetIPAddress(ipAddress)<<" "<<StrToUTF8(ipAddress)<<endl;
         }
     }
 
@@ -1335,9 +1335,9 @@ public:
         if (address.size() > 0) {
             struct in_addr inp;
 #if defined(linux) || defined(aix)
-            correct = inet_aton(StrToMultibyte(address).c_str(), &inp);
+            correct = inet_aton(StrToUTF8(address).c_str(), &inp);
 #elif defined(sun) || defined(hpux)
-            correct = inet_addr(StrToMultibyte(address).c_str()) > 0;
+            correct = inet_addr(StrToUTF8(address).c_str()) > 0;
 #else
 #error "Unsupported platform"
 #endif
@@ -1972,7 +1972,7 @@ public:
         {
             wstring macaddrW;
             i->GetMACAddress(macaddrW);
-            string macaddr = StrToMultibyte(StrToUpper(macaddrW));
+            string macaddr = StrToUTF8(StrToUpper(macaddrW));
 
             // remove ':' from macaddr so that it matches lanscan
             size_t curLoc = 0;
@@ -1981,7 +1981,7 @@ public:
                 macaddr.replace(curLoc, 1, "");
             }
 
-            std::pair<string, string> tempPair(StrToMultibyte(i->GetName()), macaddr);
+            std::pair<string, string> tempPair(StrToUTF8(i->GetName()), macaddr);
             
             // assert if an interface is not found in the set of lanscan interfaces
             CPPUNIT_ASSERT_MESSAGE("Not able to find NamePPA " + tempPair.first + 
@@ -2047,7 +2047,7 @@ public:
         tmpOStream << name << ppa;
         string namePPA = tmpOStream.str();
         
-        CPPUNIT_ASSERT_EQUAL(namePPA, StrToMultibyte(interfaces[0].GetName()));
+        CPPUNIT_ASSERT_EQUAL(namePPA, StrToUTF8(interfaces[0].GetName()));
         CPPUNIT_ASSERT_EQUAL(inOctets, interfaces[0].GetBytesReceived());
         
     }
@@ -2168,14 +2168,14 @@ public:
         tmpOStream << name1 << ppa1;
         namePPA = tmpOStream.str();
         
-        CPPUNIT_ASSERT_EQUAL(namePPA, StrToMultibyte(interfaces[0].GetName()));
+        CPPUNIT_ASSERT_EQUAL(namePPA, StrToUTF8(interfaces[0].GetName()));
         CPPUNIT_ASSERT_EQUAL(inOctets1, interfaces[0].GetBytesReceived());
 
         tmpOStream.str("");
         tmpOStream << name3 << ppa3;
         namePPA = tmpOStream.str();
         
-        CPPUNIT_ASSERT_EQUAL(namePPA, StrToMultibyte(interfaces[1].GetName()));
+        CPPUNIT_ASSERT_EQUAL(namePPA, StrToUTF8(interfaces[1].GetName()));
         CPPUNIT_ASSERT_EQUAL(outPackets3, interfaces[1].GetPacketsSent());
         
     }
@@ -2233,7 +2233,7 @@ public:
             tmpOStream.str("");
             tmpOStream << name << ppa;
             namePPA = tmpOStream.str(); 
-            CPPUNIT_ASSERT_EQUAL(namePPA, StrToMultibyte(interfaces[ppa].GetName()));
+            CPPUNIT_ASSERT_EQUAL(namePPA, StrToUTF8(interfaces[ppa].GetName()));
         }
     }
 
@@ -2345,13 +2345,13 @@ public:
         wstring namePPA3;
 
         tmpOStream << name1 << ppa1;
-        namePPA1 = StrFromMultibyte(tmpOStream.str());
+        namePPA1 = StrFromUTF8(tmpOStream.str());
         tmpOStream.str("");
         tmpOStream << name2 << ppa2;
-        namePPA2 = StrFromMultibyte(tmpOStream.str());
+        namePPA2 = StrFromUTF8(tmpOStream.str());
         tmpOStream.str("");
         tmpOStream << name3 << ppa3;
-        namePPA3 = StrFromMultibyte(tmpOStream.str());
+        namePPA3 = StrFromUTF8(tmpOStream.str());
 
         // Case when some interfaces are not UP or RUNNING.
         SCXHandle<DLPINetworkInterfaceDependencies> deps_a = FindAllInDLPI_ThreeInterface_Initialization(
@@ -2434,13 +2434,13 @@ public:
         wstring namePPA3;
 
         tmpOStream << name1 << ppa1;
-        namePPA1 = StrFromMultibyte(tmpOStream.str());
+        namePPA1 = StrFromUTF8(tmpOStream.str());
         tmpOStream.str("");
         tmpOStream << name2 << ppa2;
-        namePPA2 = StrFromMultibyte(tmpOStream.str());
+        namePPA2 = StrFromUTF8(tmpOStream.str());
         tmpOStream.str("");
         tmpOStream << name3 << ppa3;
-        namePPA3 = StrFromMultibyte(tmpOStream.str());
+        namePPA3 = StrFromUTF8(tmpOStream.str());
 
         // Case when some interfaces are not UP or RUNNING. NetworkInterfaceEnumeration must
         // return all of the interfaces regardless of UP or RUNNING state.

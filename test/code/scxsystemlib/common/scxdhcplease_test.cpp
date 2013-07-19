@@ -64,35 +64,35 @@ public:
 #endif
 #if !defined(aix)
     #if !defined(sun)
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Domain Name: "    , leaseInfo.getDomainName())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Domain Name: "    , leaseInfo.getDomainName())),
                                leaseInfo.getDomainName().compare(expectedDomainName) == 0 );
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"DHCP Server: "    , leaseInfo.getDHCPServer())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"DHCP Server: "    , leaseInfo.getDHCPServer())),
                                leaseInfo.getDHCPServer().compare(expectedDHCPServer) == 0 );
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Default Gateway: ", leaseInfo.getDefaultGateway())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Default Gateway: ", leaseInfo.getDefaultGateway())),
                                leaseInfo.getDefaultGateway().compare(expectedDefaultGateway) == 0 );
     #endif
         SCXCalendarTime leaseExpires = leaseInfo.getLeaseExpires();
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Year "  , leaseExpires.GetYear())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Year "  , leaseExpires.GetYear())),
                                int(leaseExpires.GetYear()) == int(expectedLeaseExpires.GetYear()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Month " , leaseExpires.GetMonth())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Month " , leaseExpires.GetMonth())),
                                int(leaseExpires.GetMonth() ) == int(expectedLeaseExpires.GetMonth()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Day "   , leaseExpires.GetDay())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Day "   , leaseExpires.GetDay())),
                                int(leaseExpires.GetDay()) == int(expectedLeaseExpires.GetDay()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Hour "  , leaseExpires.GetHour())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Hour "  , leaseExpires.GetHour())),
                                int(leaseExpires.GetHour()) == int(expectedLeaseExpires.GetHour()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Minute ", leaseExpires.GetMinute())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Minute ", leaseExpires.GetMinute())),
                                int(leaseExpires.GetMinute()) == int(expectedLeaseExpires.GetMinute()));
 
         SCXCalendarTime leaseObtained = leaseInfo.getLeaseObtained();
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Year " , leaseObtained.GetYear())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Year " , leaseObtained.GetYear())),
                                int(leaseObtained.GetYear()) == int(expectedLeaseObtained.GetYear()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Month " , leaseObtained.GetMonth())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Month " , leaseObtained.GetMonth())),
                                int(leaseObtained.GetMonth()) == int(expectedLeaseObtained.GetMonth()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Day "   , leaseObtained.GetDay())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Day "   , leaseObtained.GetDay())),
                                int(leaseObtained.GetDay()) == int(expectedLeaseObtained.GetDay()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Hour "  , leaseObtained.GetHour())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Hour "  , leaseObtained.GetHour())),
                                int(leaseObtained.GetHour()) == int(expectedLeaseObtained.GetHour()));
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"Expire Minute ", leaseObtained.GetMinute())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"Expire Minute ", leaseObtained.GetMinute())),
                                int(leaseObtained.GetMinute()) == int(expectedLeaseObtained.GetMinute()));
 #endif
     }
@@ -101,51 +101,51 @@ public:
     {
         SCXCalendarTime calendarTime;
         calendarTime = DHCPLeaseInfo::strToSCXCalendarTime(L"3/1/2014", L"1:15");
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
                                (int) calendarTime.GetYear() == 2014);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
                                (int) calendarTime.GetDay() == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
                                (int) calendarTime.GetMonth() == 3);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
                                (int) calendarTime.GetHour() == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
                                (int) calendarTime.GetMinute() == 15);
 
         calendarTime = DHCPLeaseInfo::strToSCXCalendarTime(L"03/1/2014", L"1:15");                                                  
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
                                (int) calendarTime.GetYear() == 2014);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
                                (int) calendarTime.GetDay() == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
                                (int) calendarTime.GetMonth() == 3);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
                                (int) calendarTime.GetHour() == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
                                (int) calendarTime.GetMinute() == 15);
 
         calendarTime = DHCPLeaseInfo::strToSCXCalendarTime(L"3/01/2014", L"1:15");                                                  
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
                                (int) calendarTime.GetYear() == 2014);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
                                (int) calendarTime.GetDay() == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
                                (int) calendarTime.GetMonth() == 3);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
                                (int) calendarTime.GetHour()  == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
                                (int) calendarTime.GetMinute() == 15);
 
         calendarTime = DHCPLeaseInfo::strToSCXCalendarTime(L"03/01/2014", L"1:15");                                                 
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetYear "  , calendarTime.GetYear())),
                                (int) calendarTime.GetYear() == 2014);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetDay "   , calendarTime.GetDay())),
                                (int) calendarTime.GetDay() == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMonth " , calendarTime.GetMonth())),
                                (int) calendarTime.GetMonth() == 3);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetHour "  , calendarTime.GetHour())),
                                (int) calendarTime.GetHour() == 1);
-        CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(StrAppend(L"SCXCalendarTime GetMinute ", calendarTime.GetMinute())),
                                (int) calendarTime.GetMinute() == 15);
     }
     

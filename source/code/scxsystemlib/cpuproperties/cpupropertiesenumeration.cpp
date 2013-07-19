@@ -330,9 +330,9 @@ namespace SCXSystemLib
         try 
         {
             SCXCoreLib::SCXProcess::Run(cmdStringPsrinfo, processInputPsrinfo, processOutputPsrinfo, processErrPsrinfo, 15000);
-            psrinfoResultStr = StrFromMultibyte(processOutputPsrinfo.str());
+            psrinfoResultStr = StrFromUTF8(processOutputPsrinfo.str());
 
-            wstring errOutPsr = StrFromMultibyte(processErrPsrinfo.str());
+            wstring errOutPsr = StrFromUTF8(processErrPsrinfo.str());
             if (errOutPsr.size() > 0)
             {
                 SCX_LOGERROR(m_log, StrAppend(wstring(L"Got this error string from psrinfo command: "),errOutPsr));

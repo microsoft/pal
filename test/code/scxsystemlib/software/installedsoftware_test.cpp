@@ -140,19 +140,19 @@ public:
 
         if (!productPath.empty())
         {
-            failure = rmdir(StrToMultibyte(productPath).c_str());
+            failure = rmdir(StrToUTF8(productPath).c_str());
             if (!failure)
             {
                 productPath = m_TestProduct.GetDirectory();
                 if (!productPath.empty())
                 {
-                    failure = rmdir(StrToMultibyte(productPath).c_str());
+                    failure = rmdir(StrToUTF8(productPath).c_str());
                     if (!failure)
                     {
                         productPath = m_TempDirectory.GetDirectory();
                         if (!productPath.empty())
                         {
-                            failure = rmdir(StrToMultibyte(productPath).c_str());
+                            failure = rmdir(StrToUTF8(productPath).c_str());
                         }
                     }
                 }
@@ -301,22 +301,22 @@ public:
 
     #if defined(PF_DISTRO_REDHAT) || defined(PF_DISTRO_ULINUX)
         CPPUNIT_ASSERT(inst->GetDisplayName(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), ARPDisplayName);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), ARPDisplayName);
 
         CPPUNIT_ASSERT(inst->GetEvidenceSource(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), EvidenceSource);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), EvidenceSource);
 
         CPPUNIT_ASSERT(inst->GetInstallSource(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), InstallSource);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), InstallSource);
 
         CPPUNIT_ASSERT(inst->GetProductName(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), ProductName);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), ProductName);
 
         CPPUNIT_ASSERT(inst->GetProductVersion(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), ProductVersion);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), ProductVersion);
 
         CPPUNIT_ASSERT(inst->GetPublisher(tmpData) );
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), Publisher);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), Publisher);
 
         CPPUNIT_ASSERT(inst->GetVersionMajor(scxuint32tmpData) );
         CPPUNIT_ASSERT_EQUAL(scxuint32tmpData, VersionMajor);
@@ -329,22 +329,22 @@ public:
 
     #elif defined(sun)
         CPPUNIT_ASSERT(inst->GetDisplayName(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), ARPDisplayName);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), ARPDisplayName);
 
         CPPUNIT_ASSERT(inst->GetEvidenceSource(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), EvidenceSource);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), EvidenceSource);
 
         CPPUNIT_ASSERT(inst->GetInstalledLocation(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), InstalledLocation);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), InstalledLocation);
 
         CPPUNIT_ASSERT(inst->GetProductName(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), ProductName);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), ProductName);
 
         CPPUNIT_ASSERT(inst->GetProductVersion(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), ProductVersion);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), ProductVersion);
 
         CPPUNIT_ASSERT(inst->GetPublisher(tmpData) );
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(tmpData), Publisher);
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(tmpData), Publisher);
 
         CPPUNIT_ASSERT(inst->GetVersionMajor(scxuint32tmpData) );
         CPPUNIT_ASSERT_EQUAL(scxuint32tmpData, VersionMajor);
@@ -384,23 +384,23 @@ public:
 
         std::cout << "Testing DisplayName" << std::endl;
         CPPUNIT_ASSERT(inst->GetDisplayName(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(/*Expected*/ARPDisplayName), StrToMultibyte(/*Actual*/tmpData));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(/*Expected*/ARPDisplayName), StrToUTF8(/*Actual*/tmpData));
 
         std::cout << "Testing InstalledLocation" << std::endl;
         CPPUNIT_ASSERT(inst->GetInstalledLocation(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(InstalledLocation), StrToMultibyte(tmpData));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(InstalledLocation), StrToUTF8(tmpData));
 
         std::cout << "Testing ProductName" << std::endl;
         CPPUNIT_ASSERT(inst->GetProductName(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(ProductName), StrToMultibyte(tmpData));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(ProductName), StrToUTF8(tmpData));
 
         std::cout << "Testing ProductVersion" << std::endl;
         CPPUNIT_ASSERT(inst->GetProductVersion(tmpData));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(ProductVersion), StrToMultibyte(tmpData));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(ProductVersion), StrToUTF8(tmpData));
 
         std::cout << "Testing Publisher" << std::endl;
         CPPUNIT_ASSERT(inst->GetPublisher(tmpData) );
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(Publisher), StrToMultibyte(tmpData));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(Publisher), StrToUTF8(tmpData));
 
         std::cout << "Testing Version Major" << std::endl;
         CPPUNIT_ASSERT(inst->GetVersionMajor(scxuint32tmpData) );
@@ -435,7 +435,7 @@ public:
         std::vector<wstring> contents;
         dpkgSoftware.GetSoftwareInfoRawData(package, contents);
         
-        CPPUNIT_ASSERT_MESSAGE("Unable to find expected package " + StrToMultibyte(package) + " in dependency injected file", contents.size() > 0);
+        CPPUNIT_ASSERT_MESSAGE("Unable to find expected package " + StrToUTF8(package) + " in dependency injected file", contents.size() > 0);
         
         wstring foundVersion = L"";
         for (std::vector<wstring>::iterator it = contents.begin(); it != contents.end(); it++)
@@ -447,8 +447,8 @@ public:
             }
         }
         
-        CPPUNIT_ASSERT_MESSAGE("Unable to find Version key for package " + StrToMultibyte(package), foundVersion != L"");
-        string outmsg = "Versions do not match: " + StrToMultibyte(version) + " != " + StrToMultibyte(foundVersion);
+        CPPUNIT_ASSERT_MESSAGE("Unable to find Version key for package " + StrToUTF8(package), foundVersion != L"");
+        string outmsg = "Versions do not match: " + StrToUTF8(version) + " != " + StrToUTF8(foundVersion);
         bool versionsMatch = (version == foundVersion) ? true : false;
         
         CPPUNIT_ASSERT_MESSAGE(outmsg, versionsMatch);
@@ -467,7 +467,7 @@ public:
         std::vector<wstring> contents;
         dpkgSoftware.GetSoftwareInfoRawData(package, contents);
         
-        CPPUNIT_ASSERT_MESSAGE("Unable to find expected package " + StrToMultibyte(package) + " in dependency injected file", contents.size() > 0);
+        CPPUNIT_ASSERT_MESSAGE("Unable to find expected package " + StrToUTF8(package) + " in dependency injected file", contents.size() > 0);
         
         wstring foundVersion = L"";
         for (std::vector<wstring>::iterator it = contents.begin(); it != contents.end(); it++)
@@ -479,8 +479,8 @@ public:
             }
         }
         
-        CPPUNIT_ASSERT_MESSAGE("Unable to find Version key for package " + StrToMultibyte(package), foundVersion != L"");
-        string outmsg = "Versions do not match: " + StrToMultibyte(version) + " != " + StrToMultibyte(foundVersion);
+        CPPUNIT_ASSERT_MESSAGE("Unable to find Version key for package " + StrToUTF8(package), foundVersion != L"");
+        string outmsg = "Versions do not match: " + StrToUTF8(version) + " != " + StrToUTF8(foundVersion);
         bool versionsMatch = (version == foundVersion) ? true : false;
         
         CPPUNIT_ASSERT_MESSAGE(outmsg, versionsMatch);

@@ -93,7 +93,7 @@ namespace SCXSystemLib
             throw SCXInternalErrorException(L"ioctl on /dev/openprom failed", SCXSRCLOCATION);
         }
         (void)close(fd);
-        version = StrFromMultibyte((char*)opp->oprom_array);
+        version = StrFromUTF8((char*)opp->oprom_array);
         free(opp);
 
         return;
@@ -151,7 +151,7 @@ namespace SCXSystemLib
              promPropName = di_prom_prop_name(prop);
              if (promPropName != NULL)
              {
-                 fFound = (bool)(0 == propName.compare(SCXCoreLib::StrFromMultibyte(promPropName)));
+                 fFound = (bool)(0 == propName.compare(SCXCoreLib::StrFromUTF8(promPropName)));
                  if (fFound)
                  {
                      break;
@@ -182,7 +182,7 @@ namespace SCXSystemLib
 
 #endif
         // get prom property value
-        rval = di_prom_prop_lookup_strings(ph, promNode, const_cast<char*>(StrToMultibyte(propName).c_str()), &strp);
+        rval = di_prom_prop_lookup_strings(ph, promNode, const_cast<char*>(StrToUTF8(propName).c_str()), &strp);
         if (rval == -1)
         {
             di_prom_fini(ph);
@@ -190,7 +190,7 @@ namespace SCXSystemLib
             throw SCXInternalErrorException(L"di_prom_prop_lookup_strings() failed for property name :version", SCXSRCLOCATION);
         }
 
-        retValue = StrFromMultibyte(strp);
+        retValue = StrFromUTF8(strp);
 
         // Clean up handles
         di_prom_fini(ph);

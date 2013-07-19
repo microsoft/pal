@@ -54,7 +54,7 @@ public:
 
     void tearDown(void)
     {
-        unlink(SCXCoreLib::StrToMultibyte(fauxMntTab).c_str());
+        unlink(SCXCoreLib::StrToUTF8(fauxMntTab).c_str());
 
         if (m_diskEnum != 0)
         {
@@ -168,7 +168,7 @@ public:
         deps->SetStat("/dev/dsk/c9t1d0s7",statData);
 
         SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
-        FILE* fp = fopen(SCXCoreLib::StrToMultibyte(fauxMntTab).c_str(), "wb");
+        FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
         CPPUNIT_ASSERT(0 != fp);
         // Note: sample data comes from a Solaris 9 development box with a UFS CD
         // in the drive. The SPARC (not the x86) installation media is an example
@@ -230,7 +230,7 @@ public:
         deps->SetOpenErrno("/dev/rdisk/disk5",ENXIO);
         deps->SetOpenErrno("/dev/rdisk/disk7",ENXIO);
         SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
-        FILE* fp = fopen(SCXCoreLib::StrToMultibyte(fauxMntTab).c_str(), "wb");
+        FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
         CPPUNIT_ASSERT(0 != fp);
         fprintf(fp, 
                 "/dev/vg00/lvol3 / vxfs ioerror=nodisable,log,dev=40000003 0 1 1213709666\n"

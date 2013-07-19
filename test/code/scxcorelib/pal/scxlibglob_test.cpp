@@ -142,8 +142,8 @@ public:
         vector<SCXFilePath> paths = libglobtest.Get();
 
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), paths.size());
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.0.10"), StrToMultibyte(paths[0].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(cwd) + string("/lg1/libtest.so.1.0.9"), StrToMultibyte(paths[1].Get()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.0.10"), StrToUTF8(paths[0].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(cwd) + string("/lg1/libtest.so.1.0.9"), StrToUTF8(paths[1].Get()));
     }
 
     void testManyDirectoriesManyVersions()
@@ -162,13 +162,13 @@ public:
         vector<SCXFilePath> paths = libglobtest.Get();
 
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(7), paths.size());
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.3.0.1"), StrToMultibyte(paths[0].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.2.40.5"), StrToMultibyte(paths[1].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.2.6.7"), StrToMultibyte(paths[2].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.2.1.0"), StrToMultibyte(paths[3].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.1.2"), StrToMultibyte(paths[4].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.0.10"), StrToMultibyte(paths[5].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.0.9"), StrToMultibyte(paths[6].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.3.0.1"), StrToUTF8(paths[0].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.2.40.5"), StrToUTF8(paths[1].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.2.6.7"), StrToUTF8(paths[2].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.2.1.0"), StrToUTF8(paths[3].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.1.2"), StrToUTF8(paths[4].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.0.10"), StrToUTF8(paths[5].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.0.9"), StrToUTF8(paths[6].GetFilename()));
     }
 
     void testManyVersionTypes()
@@ -189,10 +189,10 @@ public:
         vector<SCXFilePath> paths = libglobtest.Get();
 
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), paths.size());
-        CPPUNIT_ASSERT_EQUAL(string("libtestdb-4.4.so"), StrToMultibyte(paths[0].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.1.2"), StrToMultibyte(paths[1].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest.so"), StrToMultibyte(paths[2].GetFilename()));
-        CPPUNIT_ASSERT_EQUAL(string("libtest-4.4.so"), StrToMultibyte(paths[3].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtestdb-4.4.so"), StrToUTF8(paths[0].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so.1.1.2"), StrToUTF8(paths[1].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest.so"), StrToUTF8(paths[2].GetFilename()));
+        CPPUNIT_ASSERT_EQUAL(string("libtest-4.4.so"), StrToUTF8(paths[3].GetFilename()));
     }
 
 };

@@ -30,6 +30,7 @@
 
 #include <sstream>
 #include <typeinfo>
+#include <errno.h>
 
 #include <scxcorelib/scxstream.h>
 
@@ -280,7 +281,6 @@ namespace SCXCoreLib
 
         if (newCharCount >= (size_t) - 1)
         {
-
             throw SCXStringConversionException(SCXSRCLOCATION);
         }
         setlocale(LC_CTYPE, sLoc); 

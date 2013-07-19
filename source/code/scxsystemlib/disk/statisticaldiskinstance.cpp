@@ -200,7 +200,7 @@ namespace SCXSystemLib
         {
             SCXStatVfs s_vfs;
             memset(&s_vfs, 0, sizeof(s_vfs));
-            if (0 == m_deps->statvfs(SCXCoreLib::StrToMultibyte(m_mountPoint).c_str(), &s_vfs))
+            if (0 == m_deps->statvfs(SCXCoreLib::StrToUTF8(m_mountPoint).c_str(), &s_vfs))
             {
                 // ceil is used here since df system command rounds values up and we want to show values as presented
                 // when using system commands.

@@ -213,7 +213,7 @@ using namespace SCXCoreLib;
 
     wstring wstrerror(int err)
     {
-        return SCXCoreLib::StrFromMultibyte(strerror(err));
+        return SCXCoreLib::StrFromUTF8(strerror(err));
     }
 
 #if defined(sun)
@@ -642,7 +642,7 @@ void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &
                             || hasRbytes64 || hasObytes64 || hasIerrors || hasOerrors || hasCollisions))
                 {
                     NetworkInterfaceInfo instance(deps);
-                    instance.m_name = StrFromMultibyte(cur->ks_name);
+                    instance.m_name = StrFromUTF8(cur->ks_name);
 
                     instance.m_packetsSent = BestValueOf(hasOpackets64, opackets64, hasOpackets, opackets, ePacketsSent, instance.m_knownAttributesMask);
                     instance.m_packetsReceived = BestValueOf(hasIpackets64, ipackets64, hasIpackets, ipackets, ePacketsReceived, instance.m_knownAttributesMask);
@@ -655,7 +655,7 @@ void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &
 
 #if defined(sun)
                     // Save the kstat criteria values for searching other values
-                    instance.m_ks_module=StrFromMultibyte(cur->ks_module);
+                    instance.m_ks_module=StrFromUTF8(cur->ks_module);
                     instance.m_ks_instance=cur->ks_instance;
 #endif
 
@@ -682,12 +682,12 @@ void NetworkInterfaceInfo::GetAttributesUsingKstat(SCXCoreLib::SCXHandle<Network
         for (kstat_t* cur = kstat->ResetInternalIterator(); cur; cur = kstat->AdvanceInternalIterator())
         {
             // Use mii as the ks_name to get the cap_autoneg
-            if (StrFromMultibyte(cur->ks_name).compare(KSTAT_MII) == 0 && StrFromMultibyte(cur->ks_module).compare(m_ks_module) == 0 && cur->ks_instance == m_ks_instance)
+            if (StrFromUTF8(cur->ks_name).compare(KSTAT_MII) == 0 && StrFromUTF8(cur->ks_module).compare(m_ks_module) == 0 && cur->ks_instance == m_ks_instance)
             {
                 if (cur->ks_type == KSTAT_TYPE_NAMED)
                 {
                     scxulong autoneg=10000;
-                    bool result = kstat->TryGetValue(StrFromMultibyte(KSTAT_CAP_AUTONEG), autoneg);
+                    bool result = kstat->TryGetValue(StrFromUTF8(KSTAT_CAP_AUTONEG), autoneg);
                     if (result)
                     {
                         m_autoSense=autoneg>0?true:false;
@@ -716,7 +716,7 @@ void NetworkInterfaceInfo::ParseMacAddr(int fd, SCXCoreLib::SCXHandle<NetworkInt
     struct arpreq arpreq;
     memset(&ifr, 0, sizeof (ifr));
     memset(&arpreq, 0, sizeof (arpreq));
-    strncpy(ifr.ifr_name, StrToMultibyte(m_name).c_str(), sizeof ifr.ifr_name);
+    strncpy(ifr.ifr_name, StrToUTF8(m_name).c_str(), sizeof ifr.ifr_name);
     if (deps->ioctl(fd, SIOCGIFADDR, &ifr) >= 0)
     {
         ((struct sockaddr_in*)&arpreq.arp_pa)->sin_addr.s_addr=((struct sockaddr_in*)&ifr.ifr_addr)->sin_addr.s_addr;
@@ -754,7 +754,7 @@ void NetworkInterfaceInfo::FindAllInFile(std::vector<NetworkInterfaceInfo> &inte
         FileDescriptor fd = socket(AF_INET, SOCK_DGRAM, 0);
         struct ifreq ifr;
         memset(&ifr, 0, sizeof(ifr));
-        strcpy(ifr.ifr_name, StrToMultibyte(interface_name).c_str());
+        strcpy(ifr.ifr_name, StrToUTF8(interface_name).c_str());
 
         // if not found with ioctl, don't add an instance and continue the loop
         if (deps->ioctl(fd, SIOCGIFFLAGS, &ifr) >= 0)
@@ -820,7 +820,7 @@ void NetworkInterfaceInfo::FindAllUsingPerfStat(std::vector<NetworkInterfaceInfo
         // Currently there is no way to return type of network, our current CIM-model supports ethernet
         if (statp[nr].type == IFT_ETHER) {
             NetworkInterfaceInfo instance(deps);
-            instance.m_name = StrFromMultibyte(statp[nr].name);
+            instance.m_name = StrFromUTF8(statp[nr].name);
 
             instance.m_packetsSent = statp[nr].opackets;
             instance.m_knownAttributesMask |= ePacketsSent;
@@ -884,8 +884,8 @@ void NetworkInterfaceInfo::ParseMacAddrAix(SCXCoreLib::SCXHandle<NetworkInterfac
 
         for (i=0; i<nrec; i++)
         {
-            wstring thisName(StrFromMultibyte(nddp[i].ndd_name));
-            wstring thisAlias(StrFromMultibyte(nddp[i].ndd_alias));
+            wstring thisName(StrFromUTF8(nddp[i].ndd_name));
+            wstring thisAlias(StrFromUTF8(nddp[i].ndd_alias));
             if ((m_name == thisName) ||
                 (m_name == thisAlias))
             {
@@ -966,7 +966,7 @@ void NetworkInterfaceInfo::FindAllInDLPI(std::vector<NetworkInterfaceInfo> &inte
         }
         
         NetworkInterfaceInfo instance(deps);
-        instance.m_name = StrFromMultibyte(namePPA);
+        instance.m_name = StrFromUTF8(namePPA);
         
         instance.m_macAddress = FormatMacAddress(((unsigned char *)i->stats.ifPhysAddress.o_bytes)[0],
                                                  ((unsigned char *)i->stats.ifPhysAddress.o_bytes)[1],
@@ -1132,7 +1132,7 @@ void NetworkInterfaceInfo::Refresh() {
         m_adapterTypeID = eNetworkAdapterTypeInvalid;
         memset(&ifr, 0, sizeof(ifr));
         ifr.ifr_addr.sa_family = AF_INET;
-        strncpy(ifr.ifr_name, SCXCoreLib::StrToMultibyte(m_name).c_str(), IFNAMSIZ - 1);
+        strncpy(ifr.ifr_name, SCXCoreLib::StrToUTF8(m_name).c_str(), IFNAMSIZ - 1);
         if (deps->ioctl(fd, SIOCGIFHWADDR, &ifr) >= 0) {
             switch(ifr.ifr_hwaddr.sa_family)
             {
@@ -1209,7 +1209,7 @@ void NetworkInterfaceInfo::Refresh() {
 
         ecmd.cmd = ETHTOOL_GSET; /* get setting */
         memset(&ifr, 0, sizeof(ifr));
-        strncpy(ifr.ifr_name, SCXCoreLib::StrToMultibyte(m_name).c_str(), IFNAMSIZ - 1);
+        strncpy(ifr.ifr_name, SCXCoreLib::StrToUTF8(m_name).c_str(), IFNAMSIZ - 1);
         ifr.ifr_data = (caddr_t) &ecmd;
 
         m_autoSense = false;
@@ -1481,7 +1481,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         sa.sndd_8022_len = sizeof(struct sockaddr_ndd_8022);
         sa.sndd_8022_filtertype = NS_TAP;
         sa.sndd_8022_filterlen = sizeof(ns_8022_t);
-        strcpy((char *)sa.sndd_8022_nddname, SCXCoreLib::StrToMultibyte(m_name).c_str());
+        strcpy((char *)sa.sndd_8022_nddname, SCXCoreLib::StrToUTF8(m_name).c_str());
 
         if (deps->bind(s, (struct sockaddr *)&sa, sizeof(struct sockaddr_ndd_8022)) < 0) 
         {
@@ -1689,7 +1689,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         struct ifreq ifr;
 
         memset(&ifr, 0, sizeof(ifr));
-        strncpy(ifr.ifr_name, SCXCoreLib::StrToMultibyte(m_name).c_str(), IFNAMSIZ - 1);
+        strncpy(ifr.ifr_name, SCXCoreLib::StrToUTF8(m_name).c_str(), IFNAMSIZ - 1);
         ifr.ifr_addr.sa_family = AF_INET;
         if (deps->ioctl(fd, SIOCGIFINDEX, &ifr) >= 0)
         {
@@ -1748,12 +1748,12 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
 
         for (ifa = ifAddr.GetIFAddr(); ifa != NULL; ifa = ifa->ifa_next)
         {
-            if (ifa->ifa_addr->sa_family == AF_INET6 && strcmp(ifa->ifa_name, StrToMultibyte(m_name).c_str()) == 0)
+            if (ifa->ifa_addr->sa_family == AF_INET6 && strcmp(ifa->ifa_name, StrToUTF8(m_name).c_str()) == 0)
             { 
                 pTmpAddr = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
                 char addrStr[INET6_ADDRSTRLEN];
                 inet_ntop(AF_INET6, pTmpAddr, addrStr, INET6_ADDRSTRLEN);
-                m_ipv6Address.push_back(StrFromMultibyte(addrStr));
+                m_ipv6Address.push_back(StrFromUTF8(addrStr));
             }
         }
 #endif
@@ -1832,7 +1832,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         for (size_t i = 0; i < lifrCnt; i++)
         {
             string currName = lifcBuff[i].lifr_name;
-            string name = SCXCoreLib::StrToMultibyte(m_name);
+            string name = SCXCoreLib::StrToUTF8(m_name);
             string name1 = name + ':';
             if (currName == name || currName.substr(0, name1.size()) == name1)
             {
@@ -1841,7 +1841,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
                 {
                     char addrStr[INET6_ADDRSTRLEN];
                     inet_ntop(sockAddr->sa_family, &((struct sockaddr_in6 *)sockAddr)->sin6_addr, addrStr, INET6_ADDRSTRLEN);
-                    m_ipv6Address.push_back(StrFromMultibyte(addrStr)); 
+                    m_ipv6Address.push_back(StrFromUTF8(addrStr)); 
                 }
             }
         }
@@ -1875,7 +1875,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         for (size_t i = 0; i < lifrCnt; i++)
         {
             string currName = lifcBuff[i].iflr_name;
-            string name = SCXCoreLib::StrToMultibyte(m_name);
+            string name = SCXCoreLib::StrToUTF8(m_name);
             string name1 = name + ':';
             if (currName == name || currName.substr(0, name1.size()) == name1)
             {
@@ -1888,7 +1888,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
                     // ioctl(SIOCGLIFCONF) call.
                     inet_ntop(sockAddr->sa_family, &((struct sockaddr_in6 *)((char*)sockAddr))->sin6_addr, addrStr,
                         INET6_ADDRSTRLEN);
-                    m_ipv6Address.push_back(StrFromMultibyte(addrStr)); 
+                    m_ipv6Address.push_back(StrFromUTF8(addrStr)); 
                 }
             }
         }
@@ -1928,7 +1928,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         for(; cp < cplim; cp += (sizeof(ifr->ifr_name) + SIZE(ifr->ifr_addr)))
         {
             ifr = (struct ifreq *)cp;
-            if (0 == strcmp(ifr->ifr_name, StrToMultibyte(m_name).c_str()))
+            if (0 == strcmp(ifr->ifr_name, StrToUTF8(m_name).c_str()))
             {
                 // Interface name matches.
                 struct sockaddr *sa;
@@ -1941,7 +1941,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
                     inet_ntop(AF_INET6, (struct in6_addr *)&(((struct sockaddr_in6 *)sa)->sin6_addr), addrStr,
                         INET6_ADDRSTRLEN);
                     // Store the address.
-                    m_ipv6Address.push_back(StrFromMultibyte(addrStr));
+                    m_ipv6Address.push_back(StrFromUTF8(addrStr));
                 }
             }
         }
@@ -1973,7 +1973,7 @@ std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<Networ
     memset(&ifr, 0, sizeof(ifr));
     for (size_t nr = 0; nr < interfaces.size(); nr++) {
         NetworkInterfaceInfo &instance = interfaces[nr];
-        strcpy(ifr.ifr_name, StrToMultibyte(instance.m_name).c_str());
+        strcpy(ifr.ifr_name, StrToUTF8(instance.m_name).c_str());
         if (deps->ioctl(fd, SIOCGIFADDR, &ifr) >= 0) {
             instance.m_ipAddress = ToString(ifr.ifr_addr);
             instance.m_knownAttributesMask |= eIPAddress;

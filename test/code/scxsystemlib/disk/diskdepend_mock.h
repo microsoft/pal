@@ -109,7 +109,7 @@ namespace
             for (std::map<std::string, struct stat>::const_iterator it = m_mapStat.begin();
                  it != m_mapStat.end(); ++it)
             {
-                SCXCoreLib::SCXFilePath f(SCXCoreLib::StrFromMultibyte(it->first));
+                SCXCoreLib::SCXFilePath f(SCXCoreLib::StrFromUTF8(it->first));
                 if (f.GetDirectory() == path)
                 {
                     files.push_back(f);
@@ -664,8 +664,8 @@ const char* mountPoint1_devName = "rpool/export";
         }
         else
         {
-            std::wstring failstr = L"Invalid mount point \"" + SCXCoreLib::StrFromMultibyte(pn) + L"\".";
-            CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(failstr));
+            std::wstring failstr = L"Invalid mount point \"" + SCXCoreLib::StrFromUTF8(pn) + L"\".";
+            CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(failstr));
         }
         return 0;
     }
@@ -1247,7 +1247,7 @@ const char* mountPoint1_devName = "rpool/export";
                 CPPUNIT_FAIL("Tried to open file with invalid file name \"" + pathNameStr + "\".");
             }
             CPPUNIT_ASSERT_EQUAL_MESSAGE("Tried to open file \"" + pathNameStr + "\" with invalid flags = " + 
-                SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(flags)) + ".", O_RDONLY, flags);
+                SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(flags)) + ".", O_RDONLY, flags);
             CPPUNIT_ASSERT_EQUAL_MESSAGE("File \"" + pathNameStr + "\" already opened.", false, rdevOpen[partitionIndex]);
             rdevOpen[partitionIndex] = true;
             return GetFD(partitionIndex);
@@ -1255,11 +1255,11 @@ const char* mountPoint1_devName = "rpool/export";
         virtual int _close(int fd)
         {
             CPPUNIT_ASSERT_MESSAGE("When trying to close file, invalid file descriptor fd = " +
-                SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) + ".", fd >= GetFD(0));
+                SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) + ".", fd >= GetFD(0));
             int partitionIndex = fd - GetFD(0);
             CPPUNIT_ASSERT_MESSAGE("When trying to close file, invalid file descriptor fd = " +
-                SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) + ".", partitionIndex < partition_cnt);
-            CPPUNIT_ASSERT_EQUAL_MESSAGE("File with fd = " + SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) +
+                SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) + ".", partitionIndex < partition_cnt);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE("File with fd = " + SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) +
                 " already closed.", true, rdevOpen[partitionIndex]);
             rdevOpen[partitionIndex] = false;
             return 0;
@@ -1267,16 +1267,16 @@ const char* mountPoint1_devName = "rpool/export";
         virtual int _ioctl(int fd, int request, void* data)
         {
             CPPUNIT_ASSERT_MESSAGE("Trying to call ioctl with invalid file descriptor fd = " +
-                SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) + ".", fd >= GetFD(0));
+                SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) + ".", fd >= GetFD(0));
             int partitionIndex = fd - GetFD(0);
             CPPUNIT_ASSERT_MESSAGE("Trying to call ioctl with invalid file descriptor fd = " +
-                SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) + ".", partitionIndex < partition_cnt);
-            CPPUNIT_ASSERT_EQUAL_MESSAGE("File with fd = " + SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) +
+                SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) + ".", partitionIndex < partition_cnt);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE("File with fd = " + SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) +
                 " not opened.", true, rdevOpen[partitionIndex]);
-            CPPUNIT_ASSERT_EQUAL_MESSAGE("ioctl with fd = " + SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) +
-                " received invalid request = " + SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(request)) + ".",
+            CPPUNIT_ASSERT_EQUAL_MESSAGE("ioctl with fd = " + SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) +
+                " received invalid request = " + SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(request)) + ".",
                 DIOC_CAPACITY, request);
-            CPPUNIT_ASSERT_MESSAGE("ioctl with fd = " + SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) +
+            CPPUNIT_ASSERT_MESSAGE("ioctl with fd = " + SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) +
                 " received NULL data pointer.", data != NULL);
             capacity_type *ct = static_cast<capacity_type*>(data);
             memset(ct, 0, sizeof(*ct));
@@ -1291,7 +1291,7 @@ const char* mountPoint1_devName = "rpool/export";
             }
             // Right now this ioctl is called only for unmounted partitions.
             CPPUNIT_FAIL("Trying to call ioctl with invalid file descriptor fd = " +
-                SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(fd)) + ".");
+                SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(fd)) + ".");
             return -1;
         }
     public:
@@ -1333,13 +1333,13 @@ const char* mountPoint1_devName = "rpool/export";
                 std::cout<<"RefreshMNTTab()"<<endl;
             }
             SCXSystemLib::MntTabEntry mte;
-            mte.device = SCXCoreLib::StrFromMultibyte(partition0_name);
-            mte.fileSystem = SCXCoreLib::StrFromMultibyte(mountPoint0_basetype);
-            mte.mountPoint = SCXCoreLib::StrFromMultibyte(mountPoint0_name);
+            mte.device = SCXCoreLib::StrFromUTF8(partition0_name);
+            mte.fileSystem = SCXCoreLib::StrFromUTF8(mountPoint0_basetype);
+            mte.mountPoint = SCXCoreLib::StrFromUTF8(mountPoint0_name);
             m_MntTab.push_back(mte);
-            mte.device = SCXCoreLib::StrFromMultibyte(partition1_name);
-            mte.fileSystem = SCXCoreLib::StrFromMultibyte(mountPoint1_basetype);
-            mte.mountPoint = SCXCoreLib::StrFromMultibyte(mountPoint1_name);
+            mte.device = SCXCoreLib::StrFromUTF8(partition1_name);
+            mte.fileSystem = SCXCoreLib::StrFromUTF8(mountPoint1_basetype);
+            mte.mountPoint = SCXCoreLib::StrFromUTF8(mountPoint1_name);
             m_MntTab.push_back(mte);
         }
         virtual const std::vector<SCXSystemLib::MntTabEntry>& GetMNTTab()
@@ -1399,7 +1399,7 @@ namespace
             }
  
             string msg = "Invalid deviceName argument when calling PhysicalDiskSimulationDepend::"
-                    "GetPhysicalDevices(): " + SCXCoreLib::StrToMultibyte(deviceName) + ".";
+                    "GetPhysicalDevices(): " + SCXCoreLib::StrToUTF8(deviceName) + ".";
             CPPUNIT_FAIL(msg);
             return devices;
         }
@@ -1420,7 +1420,7 @@ namespace
             size_t i;
             for (i = 0; i < m_Tests.size(); i++)
             {
-                if (SCXCoreLib::StrToMultibyte(m_Tests[i].strDiskDevice) == pathName)
+                if (SCXCoreLib::StrToUTF8(m_Tests[i].strDiskDevice) == pathName)
                 {
                 // Use high numbers so calls to the OS that are not overridden in deps will fail if trying to use mock
                 // file deskriptor.
@@ -1507,7 +1507,7 @@ namespace
             {
                 if (s_instrumentTests)
                 {
-                    cout << "ioctl(" << SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strDiskName) <<
+                    cout << "ioctl(" << SCXCoreLib::StrToUTF8(m_Tests[testIndex].strDiskName) <<
                             ", HDIO_GET_32BIT)" << endl;
                 }
                 int* io32bit = static_cast<int*>(data);
@@ -1518,14 +1518,14 @@ namespace
             {
                 if (s_instrumentTests)
                 {
-                    cout << "ioctl(" << SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strDiskName) <<
+                    cout << "ioctl(" << SCXCoreLib::StrToUTF8(m_Tests[testIndex].strDiskName) <<
                             ", HDIO_GET_IDENTITY)" << endl;
                 }
                 if(m_Tests[testIndex].ioctl_HDIO_GET_IDENTITY_OK)
                 {
                     struct hd_driveid* hdid = static_cast<struct hd_driveid*>(data);
                     memset(hdid, 0, sizeof(*hdid));
-                    string serialNumber = SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strSerialNumber);
+                    string serialNumber = SCXCoreLib::StrToUTF8(m_Tests[testIndex].strSerialNumber);
                     // Not necesarily null terminated string in the output buffer.
                     strncpy(reinterpret_cast<char*>(hdid->serial_no), serialNumber.c_str(), sizeof(hdid->serial_no));
                     return 0;
@@ -1535,7 +1535,7 @@ namespace
             {
                 if (s_instrumentTests)
                 {
-                    cout << "ioctl(" << SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strDiskName) <<
+                    cout << "ioctl(" << SCXCoreLib::StrToUTF8(m_Tests[testIndex].strDiskName) <<
                             ", SG_GET_VERSION_NUM)" << endl;
                 }
                 int* version = static_cast<int*>(data);
@@ -1552,12 +1552,12 @@ namespace
                     {
                         if (io_hdr == NULL)
                         {
-                            cout << "ioctl(" << SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strDiskName) <<
+                            cout << "ioctl(" << SCXCoreLib::StrToUTF8(m_Tests[testIndex].strDiskName) <<
                                     ", SG_IO, io_hdr = NULL)" << endl;
                         }
                         else
                         {
-                            cout << "ioctl(" << SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strDiskName) <<
+                            cout << "ioctl(" << SCXCoreLib::StrToUTF8(m_Tests[testIndex].strDiskName) <<
                                     ", SG_IO)" << endl;
                             cout << "  io_hdr = " << io_hdr << endl;
                             cout << "  io_hdr->interface_id = " << static_cast<char>(io_hdr->interface_id) << endl;
@@ -1618,7 +1618,7 @@ namespace
                         if (page0x00evpd0)
                         {
                             CPPUNIT_ASSERT(io_hdr->dxfer_len >= 16);// At least enough space for 8 byte vendor ID.
-                            string manufacturer = SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strManufacturer);
+                            string manufacturer = SCXCoreLib::StrToUTF8(m_Tests[testIndex].strManufacturer);
                             // Not necesarily null terminated string in the output buffer.
                             strncpy(dxferp + 8, manufacturer.c_str(), 8);
                         }
@@ -1627,7 +1627,7 @@ namespace
                             CPPUNIT_ASSERT(io_hdr->dxfer_len >= 12);// At least enough space for 8 byte serial num.
                             dxferp[1] = static_cast<char>(0x80);
                             dxferp[3] = 0x08;
-                            string serialNumber = SCXCoreLib::StrToMultibyte(m_Tests[testIndex].strSerialNumber);
+                            string serialNumber = SCXCoreLib::StrToUTF8(m_Tests[testIndex].strSerialNumber);
                             // Not necesarily null terminated string in the output buffer.
                             strncpy(dxferp + 4, serialNumber.c_str(), 8);
                         }

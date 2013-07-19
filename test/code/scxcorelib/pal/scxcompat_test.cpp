@@ -17,7 +17,7 @@
 #include <scxcorelib/stringaid.h>
 #include <testutils/scxunit.h>
 
-using SCXCoreLib::StrToMultibyte;
+using SCXCoreLib::StrToUTF8;
 using namespace std;
 
 class SCXCompatTest : public CPPUNIT_NS::TestFixture

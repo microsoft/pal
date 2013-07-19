@@ -127,7 +127,7 @@ namespace SCXCoreLib {
             // Have an error in finding a match
             char errmsg[0x0200];
             regerror(rc, &m_Preq, errmsg, 0x200);
-            std::wstring fullregerr(StrFromMultibyte(errmsg));
+            std::wstring fullregerr(StrFromUTF8(errmsg));
             matches.push_back(SCXRegExMatch(fullregerr, false));
             return false;
         }

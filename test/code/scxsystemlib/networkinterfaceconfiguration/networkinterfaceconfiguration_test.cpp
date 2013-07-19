@@ -632,7 +632,7 @@ public:
             // Verify the defaultIPGateway is not empty.
             CPPUNIT_ASSERT(!defaultIPGateway.empty());
             // Verify we have the right address.
-            CPPUNIT_ASSERT_EQUAL(deps->DefaultGatewayAddressStr(), StrToMultibyte(defaultIPGateway[0]));
+            CPPUNIT_ASSERT_EQUAL(deps->DefaultGatewayAddressStr(), StrToUTF8(defaultIPGateway[0]));
         }
 
         // Force failure.

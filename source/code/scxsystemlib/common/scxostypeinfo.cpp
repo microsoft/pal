@@ -232,7 +232,7 @@ namespace SCXSystemLib
         string capt(m_unameInfo.sysname);
         capt.append(" ");
         capt.append(m_unameInfo.release);
-        return SCXCoreLib::StrFromMultibyte(capt);
+        return SCXCoreLib::StrFromUTF8(capt);
 
 #elif defined(aix)
         // append in caption the system name and release.
@@ -241,7 +241,7 @@ namespace SCXSystemLib
         capt.append(m_unameInfo.version);
         capt.append(".");
         capt.append(m_unameInfo.release);
-        return SCXCoreLib::StrFromMultibyte(capt);
+        return SCXCoreLib::StrFromUTF8(capt);
 #elif defined(macos)
         // append in caption the system name and release.
         wstring capt(m_osName);
@@ -306,8 +306,8 @@ namespace SCXSystemLib
 
         if (m_unameIsValid)
         {
-            m_osName = StrFromMultibyte(m_unameInfo.sysname);
-            m_osVersion = StrFromMultibyte(m_unameInfo.release);
+            m_osName = StrFromUTF8(m_unameInfo.sysname);
+            m_osVersion = StrFromUTF8(m_unameInfo.release);
         }
 #if defined(hpux)
         m_osAlias = L"HPUX";
@@ -320,13 +320,13 @@ namespace SCXSystemLib
 
         if (m_unameIsValid)
         {
-            m_osName = StrFromMultibyte(m_unameInfo.sysname);
+            m_osName = StrFromUTF8(m_unameInfo.sysname);
 
             // To get "5.3" we must read "5" and "3" from different fields.
             string ver(m_unameInfo.version);
             ver.append(".");
             ver.append(m_unameInfo.release);
-            m_osVersion = StrFromMultibyte(ver);
+            m_osVersion = StrFromUTF8(ver);
         }
         m_osAlias = L"AIX";
         m_osManufacturer = L"International Business Machines Corporation";
@@ -466,8 +466,8 @@ namespace SCXSystemLib
                     wostringstream sout;
                     sout << L"Unexpected errors running script: " << m_deps->getScriptPath().c_str()
                         << L", return code: " << ret
-                        << L", stdout: " << StrFromMultibyte(out.str())
-                        << L", stderr: " << StrFromMultibyte(err.str());
+                        << L", stdout: " << StrFromUTF8(out.str())
+                        << L", stderr: " << StrFromUTF8(err.str());
 
                     SCX_LOGERROR(m_log, sout.str() );
                 }
@@ -483,7 +483,7 @@ namespace SCXSystemLib
 
         // Look in release file for O/S information
 
-        static const string sFile = StrToMultibyte(m_deps->getReleasePath());
+        static const string sFile = StrToUTF8(m_deps->getReleasePath());
         wifstream fin(sFile.c_str());
         SCXStream::ReadAllLines(fin, lines, nlfs); 
 
@@ -673,7 +673,7 @@ namespace SCXSystemLib
 
         // Return the actual architecture, whatever it is
 
-        return StrFromMultibyte(hwMachine);
+        return StrFromUTF8(hwMachine);
 
 #else
 #error "Platform not supported"
@@ -696,13 +696,13 @@ namespace SCXSystemLib
 #if defined(linux) || defined(hpux) || defined(macos)
         if (m_unameIsValid)
         {
-            return StrFromMultibyte(m_unameInfo.machine);
+            return StrFromUTF8(m_unameInfo.machine);
         }
 #elif defined(sun)
         char buf[256];
         if (0 < sysinfo(SI_ARCHITECTURE, buf, sizeof(buf)))
         {
-            return StrFromMultibyte(buf);
+            return StrFromUTF8(buf);
         }
 #elif defined(aix)
         // Can't find a generic way to get this property on AIX. This is however the

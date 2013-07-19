@@ -77,7 +77,7 @@ struct assertion_traits<std::wstring, T2>: public assertion_traits_base<std::wst
 {
     static std::string toString( const std::wstring& x )
     {
-        return SCXCoreLib::StrToMultibyte(x);
+        return SCXCoreLib::StrToUTF8(x);
     }
 };
 
@@ -92,7 +92,7 @@ struct assertion_traits<const wchar_t[N], T2>: public assertion_traits_base<cons
     static std::string toString( const wchar_t (&x) [N])
     {
         std::wstring s(x);
-        return SCXCoreLib::StrToMultibyte(s);
+        return SCXCoreLib::StrToUTF8(s);
     }
 };
 

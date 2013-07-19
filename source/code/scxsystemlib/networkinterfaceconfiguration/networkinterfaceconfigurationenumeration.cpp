@@ -101,7 +101,7 @@ std::vector<NetworkInterfaceConfigurationInstance> NetworkInterfaceConfiguration
         // Index in format [nnnnnnnn] followed by a short textual description (one-line string) of the object.
         ostringstream ixstr;
         ixstr << '[' << setfill('0') << setw(8) << nr << "] ";
-        instance.m_Caption = StrFromMultibyte(ixstr.str()) + instance.GetName();
+        instance.m_Caption = StrFromUTF8(ixstr.str()) + instance.GetName();
         instance.SetKnown(NetworkInterfaceConfigurationInstance::eCaption);
 
         // Determine m_Description
@@ -475,7 +475,7 @@ std::vector<NetworkInterfaceConfigurationInstance> NetworkInterfaceConfiguration
                   continue; 
             
              for(std::vector<std::string>::iterator i_parms = parms.begin(); i_parms != parms.end(); i_parms++)
-               if(name.compare(SCXCoreLib::StrFromMultibyte(*i_parms)) == 0)
+               if(name.compare(SCXCoreLib::StrFromUTF8(*i_parms)) == 0)
                  return true;
         } 
         

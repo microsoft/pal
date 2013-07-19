@@ -119,7 +119,7 @@ namespace SCXCoreLib
 
         if (ppwd)
         {
-            m_name = StrFromMultibyte(ppwd->pw_name);
+            m_name = StrFromUTF8(ppwd->pw_name);
         }
         else
         {

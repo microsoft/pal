@@ -124,7 +124,7 @@ namespace SCXSystemLib
             //
             string ksModuleName(pKstat->ks_module);
             SCX_LOGTRACE(m_log, StrAppend(L"CpuPropertiesPALDependencies::AdvanceInternalIterator: pKstat : ", &pKstat));
-            if (ksModuleName != StrToMultibyte(cModul_Name).c_str()) return false;
+            if (ksModuleName != StrToUTF8(cModul_Name).c_str()) return false;
             return true;
         }
 

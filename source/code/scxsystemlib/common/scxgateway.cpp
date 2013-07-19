@@ -199,7 +199,7 @@ namespace SCXSystemLib
                     if (destinationAddress.s_addr == INADDR_ANY) // INADDR_ANY == 0.0.0.0, default gateway.
                     {
                         // We have the default gateway address.
-                        gatewayIP = SCXCoreLib::StrFromMultibyte(inet_ntoa(gatewayAddress));
+                        gatewayIP = SCXCoreLib::StrFromUTF8(inet_ntoa(gatewayAddress));
                         return true;
                     }
                 }
@@ -325,7 +325,7 @@ namespace SCXSystemLib
                     if(line.length() <= pos)
                         continue; 
 
-                    gatewayIP = std::wstring(SCXCoreLib::StrFromMultibyte(line.substr(pos + 1)));
+                    gatewayIP = std::wstring(SCXCoreLib::StrFromUTF8(line.substr(pos + 1)));
                     gatewayIP = StrTrim(gatewayIP);
                     found_gatewayip = 1;
 

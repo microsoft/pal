@@ -123,7 +123,7 @@ namespace SCXSystemLib
             return;
         }
 
-        strncpy(id.name, SCXCoreLib::StrToMultibyte(name).c_str(), sizeof(id.name)-1);
+        strncpy(id.name, SCXCoreLib::StrToUTF8(name).c_str(), sizeof(id.name)-1);
         int retval;
         if (1 == (retval = m_deps->perfstat_disk(&id, &data, sizeof(data), 1)))
         {

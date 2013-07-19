@@ -572,7 +572,7 @@ namespace SCXSystemLib
         } else {
             ss << "<" << m_pid << ">" << name;
         }
-        return SCXCoreLib::StrFromMultibyte(ss.str());
+        return SCXCoreLib::StrFromUTF8(ss.str());
     }
 
 #if defined(linux)

@@ -238,7 +238,7 @@ namespace SCXSystemLib
             throw SCXErrnoException(L"uname() function call failed", errno, SCXSRCLOCATION);
         }
 
-        wstring  strMachine = StrFromMultibyte(uname_buf.machine);
+        wstring  strMachine = StrFromUTF8(uname_buf.machine);
         if (StrCompare(strMachine, L"x86_64") == 0)
         {
             bitSize = 64;
@@ -500,7 +500,7 @@ namespace SCXSystemLib
                 // Uh oh; some sort of signature we don't recognize
                 result = eUnknownVmDetected;
 
-                wstring  wsSignature = StrFromMultibyte(signature);
+                wstring  wsSignature = StrFromUTF8(signature);
 
                 static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTrace);
                 SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(wsSignature));
@@ -700,7 +700,7 @@ namespace SCXSystemLib
         }
         else
         {
-            shellCommand = StrFromMultibyte(shell);
+            shellCommand = StrFromUTF8(shell);
             shellCommand.append(L" -c \"");
         }
         shellCommand.append(command);

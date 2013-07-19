@@ -86,7 +86,7 @@ namespace SCXSystemLib
             {
                 if (tmputmpx->ut_type == RUN_LVL && tmputmpx->ut_line != 0)
                 {
-                    runLevel = SCXCoreLib::StrFromMultibyte(tmputmpx->ut_line);
+                    runLevel = SCXCoreLib::StrFromUTF8(tmputmpx->ut_line);
                     return true;
                 }
             }
@@ -140,7 +140,7 @@ namespace SCXSystemLib
              int retval = sysinfo(contentType, contentVal, cSysinfoValueLength);
              if (retval>0)
              {
-                 content = StrFromMultibyte(contentVal);
+                 content = StrFromUTF8(contentVal);
              }
 
              return retval;

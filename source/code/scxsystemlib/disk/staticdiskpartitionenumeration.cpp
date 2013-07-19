@@ -233,7 +233,7 @@ namespace SCXSystemLib
                     // Get filesystem info.
                     struct statvfs64 stat;
                     memset(&stat, 0, sizeof(stat));
-                    if (m_deps->statvfs64(SCXCoreLib::StrToMultibyte(it->mountPoint).c_str(), &stat) == 0)
+                    if (m_deps->statvfs64(SCXCoreLib::StrToUTF8(it->mountPoint).c_str(), &stat) == 0)
                     {
                         partit->m_blockSize = stat.f_frsize;
                         partit->m_numberOfBlocks = stat.f_blocks;
@@ -337,7 +337,7 @@ namespace SCXSystemLib
                     if (ret_lvmlv != 0)
                     {
                         throw SCXInternalErrorException(L"lvm_querylv for logical volume \"" +
-                            StrFromMultibyte(vg->lvs[ilv].lvname) + L"\" failed with error code: " +
+                            StrFromUTF8(vg->lvs[ilv].lvname) + L"\" failed with error code: " +
                             StrFrom(ret_lvmlv) + L".", SCXSRCLOCATION);
                     }
                     ProcessOneDiskPartition(vm, mount_point_cnt, lv->lvname, 
@@ -370,7 +370,7 @@ namespace SCXSystemLib
                     // We have a mount point for this logical volume. Get info about the file system.
                     struct statvfs64 stat;
                     memset(&stat, 0, sizeof(stat));
-                    int r = m_deps->statvfs64(StrToMultibyte(logVol[i].mntDir).c_str(), &stat);
+                    int r = m_deps->statvfs64(StrToUTF8(logVol[i].mntDir).c_str(), &stat);
                     if(r != 0)
                     {
                         wstring msg = L"statvfs() failed for mountpoint \"" + logVol[i].mntDir + L"\".";
@@ -418,7 +418,7 @@ namespace SCXSystemLib
                         }
                         rname.insert(namePos + 1, L"r");
                         // Open the device file, call ioctl(DIOC_CAPACITY), set the size value and close the device file.
-                        int fd = m_deps->_open(StrToMultibyte(rname).c_str(), O_RDONLY);
+                        int fd = m_deps->_open(StrToUTF8(rname).c_str(), O_RDONLY);
                         if (fd == -1)
                         {
                             wstring msg = L"open(O_RDONLY) failed for device \"" + rname + L"\".";
@@ -477,11 +477,11 @@ namespace SCXSystemLib
         criteria_at += partition_name;
         // Find disk partition instance or create one.
         SCXCoreLib::SCXHandle<StaticDiskPartitionInstance> partition_instance =
-            GetInstance(StrFromMultibyte(partition_name));
+            GetInstance(StrFromUTF8(partition_name));
         if (NULL == partition_instance)
         {
             partition_instance = new StaticDiskPartitionInstance();
-            partition_instance->SetId(StrFromMultibyte(partition_name));
+            partition_instance->SetId(StrFromUTF8(partition_name));
 
             std::string type;
             // Get first attribute of the partition.
@@ -536,7 +536,7 @@ namespace SCXSystemLib
                 vmp = reinterpret_cast<const struct vmount *>(reinterpret_cast<const char*>(vmp) + vmp->vmt_length);
             }
 
-            partition_instance->m_deviceID = StrFromMultibyte(partition_name);
+            partition_instance->m_deviceID = StrFromUTF8(partition_name);
             partition_instance->m_index = partitionIndex;
             if(partition_instance->m_partitionSize == 0)
             {
@@ -681,8 +681,8 @@ namespace SCXSystemLib
         else
         {
             std::wstring procExcMsg = L"Execution of '" + procCmd + L"' failed with return code " +
-                StrFrom(procRet) + L".\nOutput:\n" + StrFromMultibyte(lvlnbootStr) + L"\nError output:\n" +
-                StrFromMultibyte(errStr) + L"\n";
+                StrFrom(procRet) + L".\nOutput:\n" + StrFromUTF8(lvlnbootStr) + L"\nError output:\n" +
+                StrFromUTF8(errStr) + L"\n";
             throw SCXCoreLib::SCXInternalErrorException(procExcMsg, SCXSRCLOCATION);
         }
     }
@@ -747,10 +747,10 @@ namespace SCXSystemLib
             while(mountpoint != NULL)
             {
                 SCXLogicalVolumes currentMountPoint;
-                currentMountPoint.name = SCXCoreLib::StrFromMultibyte(mountpoint->mnt_fsname);
-                currentMountPoint.mntDir = SCXCoreLib::StrFromMultibyte(mountpoint->mnt_dir);
-                currentMountPoint.mntType = SCXCoreLib::StrFromMultibyte(mountpoint->mnt_type);
-                currentMountPoint.mntOpts = SCXCoreLib::StrFromMultibyte(mountpoint->mnt_opts);
+                currentMountPoint.name = SCXCoreLib::StrFromUTF8(mountpoint->mnt_fsname);
+                currentMountPoint.mntDir = SCXCoreLib::StrFromUTF8(mountpoint->mnt_dir);
+                currentMountPoint.mntType = SCXCoreLib::StrFromUTF8(mountpoint->mnt_type);
+                currentMountPoint.mntOpts = SCXCoreLib::StrFromUTF8(mountpoint->mnt_opts);
                 mountPoints.push_back(currentMountPoint);
                 // Next mount point.
                 mountpoint = deps->getmntent(fp);
@@ -899,8 +899,8 @@ namespace SCXSystemLib
         else
         {
             std::wstring procExcMsg = L"Execution of '" + procCmd + L"' failed with return code " +
-                StrFrom(procRet) + L".\nOutput:\n" + StrFromMultibyte(vgStr) + L"\nError output:\n" +
-                StrFromMultibyte(errStr) + L"\n";
+                StrFrom(procRet) + L".\nOutput:\n" + StrFromUTF8(vgStr) + L"\nError output:\n" +
+                StrFromUTF8(errStr) + L"\n";
             throw SCXCoreLib::SCXInternalErrorException(procExcMsg, SCXSRCLOCATION);
         }
     }

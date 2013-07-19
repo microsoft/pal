@@ -371,7 +371,7 @@ namespace SCXCoreLib
         // Convert arguments to types expected by the system function for running processes
         for (std::vector<char *>::size_type i = 0; i < myargv.size(); i++) 
         {
-            m_cargv.push_back(strdup(StrToMultibyte(myargv[i]).c_str()));
+            m_cargv.push_back(strdup(StrToUTF8(myargv[i]).c_str()));
         }
         m_cargv.push_back(0);
         
@@ -415,12 +415,12 @@ namespace SCXCoreLib
             char error_msg[1024];
             if (L"" != chrootPath.Get())
             {
-                if ( 0 != ::chroot(StrToMultibyte(chrootPath.Get()).c_str()))
+                if ( 0 != ::chroot(StrToUTF8(chrootPath.Get()).c_str()))
                 {
                     snprintf(error_msg,
                              sizeof(error_msg),
                              "Failed to chroot '%s' errno=%d",
-                             StrToMultibyte(chrootPath.Get()).c_str(), errno);
+                             StrToUTF8(chrootPath.Get()).c_str(), errno);
                     DoWrite(STDERR_FILENO, error_msg, strlen(error_msg));
                     CloseAndDie();
                 }
@@ -435,7 +435,7 @@ namespace SCXCoreLib
             }
             if (L"" != cwd.Get())
             {
-                if (0 != ::chdir(StrToMultibyte(cwd.Get()).c_str()))
+                if (0 != ::chdir(StrToUTF8(cwd.Get()).c_str()))
                 {
                     snprintf(error_msg,
                              sizeof(error_msg),

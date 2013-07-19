@@ -188,7 +188,7 @@ namespace SCXCoreLib {
         if (m_FromUTF8iconv == (iconv_t)-1)
         {
             wstringstream os;
-            os << L"SCXLocaleContext::SetIconv: iconv_open(" << SCXCoreLib::StrFromMultibyte(code) << L", UTF-8) failed: " << errno << endl;
+            os << L"SCXLocaleContext::SetIconv: iconv_open(" << SCXCoreLib::StrFromUTF8(code) << L", UTF-8) failed: " << errno << endl;
             m_Errors.push_back(os.str());
             m_FromUTF8iconv = NULL;
             m_UseIconv = false;
@@ -200,7 +200,7 @@ namespace SCXCoreLib {
         if (m_ToUTF8iconv == (iconv_t)-1)
         {
             wstringstream os;
-            os << L"SCXLocaleContext::SetIconv: iconv_open(UTF-8, " << SCXCoreLib::StrFromMultibyte(code) << L") failed: " << errno << endl;
+            os << L"SCXLocaleContext::SetIconv: iconv_open(UTF-8, " << SCXCoreLib::StrFromUTF8(code) << L") failed: " << errno << endl;
             m_Errors.push_back(os.str());
             m_ToUTF8iconv = NULL;
             m_UseIconv = false;
@@ -246,7 +246,7 @@ namespace SCXCoreLib {
      */
     wstring SCXLocaleContext::GetActiveLocale()
     {
-        return SCXCoreLib::StrFromMultibyte(std::locale().name());
+        return SCXCoreLib::StrFromUTF8(std::locale().name());
     }
 
     /**
@@ -259,7 +259,7 @@ namespace SCXCoreLib {
     wstring SCXLocaleContext::GetCtypeName()
     {
         string tmp(setlocale(LC_CTYPE, 0)); // The is no C++ interface to this
-        return SCXCoreLib::StrFromMultibyte(tmp);
+        return SCXCoreLib::StrFromUTF8(tmp);
     }
 }
 

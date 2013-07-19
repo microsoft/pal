@@ -146,7 +146,7 @@ namespace SCXSystemLib
 
         if (nscanned != 1) {
             wostringstream errtxt;
-            errtxt << L"Getting wrong number of parameters from " << StrFromMultibyte(filename) << L" file. "
+            errtxt << L"Getting wrong number of parameters from " << StrFromUTF8(filename) << L" file. "
                    << L"Expecting 1 but getting " << nscanned << '.';
             throw SCXInternalErrorException(errtxt.str(), SCXSRCLOCATION);
         }
@@ -195,7 +195,7 @@ namespace SCXSystemLib
         // -2 since we read pid and name separatly
         if (nscanned != procstat_len-2) {
             wostringstream errtxt;
-            errtxt << L"Getting wrong number of parameters from " << StrFromMultibyte(filename) << L" file. "
+            errtxt << L"Getting wrong number of parameters from " << StrFromUTF8(filename) << L" file. "
                    << L"Expecting " << procstat_len-2 << " but getting " << nscanned << '.';
             throw SCXInternalErrorException(errtxt.str(), SCXSRCLOCATION);
         }
@@ -241,7 +241,7 @@ namespace SCXSystemLib
 
         if (nscanned != procstat_len) {
             wostringstream errtxt;
-            errtxt << L"Getting wrong number of parameters from " << StrFromMultibyte(filename) << L" file. "
+            errtxt << L"Getting wrong number of parameters from " << StrFromUTF8(filename) << L" file. "
                    << L"Expecting " << procstat_len << " but getting " << nscanned << '.';
             throw SCXInternalErrorException(errtxt.str(), SCXSRCLOCATION);
         }
@@ -598,7 +598,7 @@ namespace SCXSystemLib
                 }
                 else
                 {
-                    throw SCXErrnoException(StrAppend(StrFromMultibyte(m_procStatusName), L" read"), saved_errno, SCXSRCLOCATION);
+                    throw SCXErrnoException(StrAppend(StrFromUTF8(m_procStatusName), L" read"), saved_errno, SCXSRCLOCATION);
                 }
             }
             else if (bytes != sizeof(m_pstat)) {
@@ -979,10 +979,10 @@ namespace SCXSystemLib
                     if (lastReadWasEbusy)
                     {
                         SCX_LOGWARNING(m_log, wstring(L"Got errno=EBUSY from open at least 2 consecutive times on file ")
-                                       .append(StrFromMultibyte(m_procStatusName)));
+                                       .append(StrFromUTF8(m_procStatusName)));
                     } else {
                         SCX_LOGTRACE(m_log, wstring(L"Got errno=EBUSY from open. File: ")
-                                                                         .append(StrFromMultibyte(m_procStatusName)));
+                                                                         .append(StrFromUTF8(m_procStatusName)));
                     }
                     lastReadWasEbusy = true;
                 } else {
@@ -1018,7 +1018,7 @@ namespace SCXSystemLib
                         m_found = false; return false;
                     }
 
-                    throw SCXErrnoException(StrAppend(StrFromMultibyte(m_procStatusName), 
+                    throw SCXErrnoException(StrAppend(StrFromUTF8(m_procStatusName), 
                                                       L" read"), saved_errno, SCXSRCLOCATION);
                 }
                 else if (bytes != sizeof(pstatus_t)) {
@@ -1246,7 +1246,7 @@ namespace SCXSystemLib
 
         if (!m_name.empty())
         {
-            name = StrToMultibyte(m_name);
+            name = StrToUTF8(m_name);
         }
 
         // If we can get process parameters, use argv[0] as our process name
@@ -1282,7 +1282,7 @@ namespace SCXSystemLib
 
         name.clear();
 
-        name = StrToMultibyte(m_name);
+        name = StrToUTF8(m_name);
 
         // If we didn't pick up any information from parameters, fall back
         if (name.empty())
@@ -1334,7 +1334,7 @@ namespace SCXSystemLib
         pw = getpwuid (startuid);
         if (pw)
         {
-            username.assign(StrFromMultibyte(pw->pw_name));
+            username.assign(StrFromUTF8(pw->pw_name));
             fRet = true;
         }
 
@@ -1914,7 +1914,7 @@ namespace SCXSystemLib
         }
         else
         {
-            modpath = StrToMultibyte(m_modulePath);
+            modpath = StrToUTF8(m_modulePath);
             fRet = true;
         }
 
@@ -1975,10 +1975,10 @@ namespace SCXSystemLib
         if (!module.empty())
         {
             m_params.clear();
-            m_params.push_back(StrToMultibyte(module));
+            m_params.push_back(StrToUTF8(module));
             if (!args.empty())
             {
-                m_params.push_back(StrToMultibyte(args));
+                m_params.push_back(StrToUTF8(args));
             }
             return true;
         }
@@ -2117,7 +2117,7 @@ namespace SCXSystemLib
         }
 
         if (0 == argv_addr || argc == 0) {
-            return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+            return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
         }
 
         snprintf(procAsName, sizeof(procAsName), "/proc/%u/as", static_cast<unsigned int>(m_pid));
@@ -2128,7 +2128,7 @@ namespace SCXSystemLib
         {
             // Failed to open file. Most likely the process died.
             SCX_LOGHYSTERICAL(m_log, StrAppend(L"GetParameters: Error opening process file, err=", errno));
-            return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+            return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
         }
 
         AutoClose _fd(m_log, asfd);
@@ -2140,11 +2140,11 @@ namespace SCXSystemLib
         }
         else
         {
-            SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(StrFromMultibyte(procAsName)));
+            SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(StrFromUTF8(procAsName)));
             SCX_LOG(m_log, severity, StrAppend(
                         StrAppend(L"GetParameters: Process ", procAsName),
                         StrAppend(L" argc too large, argc = ", argc)));
-            return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+            return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
         }
 
         vector<uintptr_t> arg_vec(argc);
@@ -2156,7 +2156,7 @@ namespace SCXSystemLib
             SCX_LOGHYSTERICAL(m_log, StrAppend(
                 StrAppend(L"GetParameters: Failed to read arg vector from ", procAsName),
                 StrAppend(L", err=", errno)));
-            return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+            return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
         }
 
         /* The idea here is that the environment varaibles are stored after the argv
@@ -2173,7 +2173,7 @@ namespace SCXSystemLib
                 SCX_LOGHYSTERICAL(m_log, StrAppend(
                     StrAppend(L"GetParameters: Failed to read envp vector from ", procAsName),
                     StrAppend(L", err=", errno)));
-                return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+                return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
             }
         }
 
@@ -2184,7 +2184,7 @@ namespace SCXSystemLib
         // Test that the CMD exists. (Some programs, incl scxcimserver, clobbers it.)
         if (0 == argvecbase) {        // problem = " (Clobbered its own arguments)";
             SCX_LOGHYSTERICAL(m_log, L"GetParameters: Process clobbered it's own arguments");
-            return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+            return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
         }
 
         /* Now read full argv area in one swoop */
@@ -2194,11 +2194,11 @@ namespace SCXSystemLib
         }
         else
         {
-            SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(StrFromMultibyte(procAsName)));
+            SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(StrFromUTF8(procAsName)));
             SCX_LOG(m_log, severity, StrAppend(
                         StrAppend(L"GetParameters: Process ", procAsName),
                         StrAppend(L" argvecsz too large, argvecsz = ", argvecsz)));
-            return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+            return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
         }
 
         vector<char> argvarea(argvecsz);
@@ -2209,7 +2209,7 @@ namespace SCXSystemLib
             SCX_LOGHYSTERICAL(m_log, StrAppend(
                 StrAppend(L"GetParameters: Failed to read argv vector from ", procAsName),
                 StrAppend(L", err=", errno)));
-            return StoreModuleAndArgs(StrFromMultibyte(psinfoModule), StrFromMultibyte(psinfoArgs));
+            return StoreModuleAndArgs(StrFromUTF8(psinfoModule), StrFromUTF8(psinfoArgs));
         }
 
         argvarea[argvecsz - 1] = '\0';
@@ -2263,7 +2263,7 @@ namespace SCXSystemLib
             else {
                 initialcmd = initialcmd.substr(arg.length());
             }
-            SCX_LOGHYSTERICAL(m_log, StrAppend(StrAppend(StrAppend(StrAppend(StrAppend(L"GetParameters: arg_vec[", i), L"] = "), static_cast<ulong>(arg_vec[i])),L", Parameter Value: "), StrFromMultibyte(arg)));
+            SCX_LOGHYSTERICAL(m_log, StrAppend(StrAppend(StrAppend(StrAppend(StrAppend(L"GetParameters: arg_vec[", i), L"] = "), static_cast<ulong>(arg_vec[i])),L", Parameter Value: "), StrFromUTF8(arg)));
             m_params.push_back(arg);
         }
 
@@ -2311,7 +2311,7 @@ namespace SCXSystemLib
         c = c.substr(0, firstSpace);
         size_t slashPos = c.find_last_of("/");
         slashPos = (slashPos == std::string::npos) ? 0 : slashPos + 1;
-        m_name = StrFromMultibyte(c.substr(slashPos));
+        m_name = StrFromUTF8(c.substr(slashPos));
 
         fRet = true;
 
@@ -2319,7 +2319,7 @@ namespace SCXSystemLib
         if (pathlen > 0)
         {
             ucomm.assign(pathname, pathlen);
-            SCX_LOGTRACE(m_log, wstring(L"Getting pathname from pstat_getpathname: ") + StrFromMultibyte(pathname));
+            SCX_LOGTRACE(m_log, wstring(L"Getting pathname from pstat_getpathname: ") + StrFromUTF8(pathname));
         }
 
         if (ucomm.empty())
@@ -2329,7 +2329,7 @@ namespace SCXSystemLib
             {
                 if (!c.empty())
                 {
-                    m_modulePath = StrFromMultibyte(c);
+                    m_modulePath = StrFromUTF8(c);
                 }
                 else if (!FindModuleFromPath(m_name))
                 {
@@ -2341,19 +2341,19 @@ namespace SCXSystemLib
         else if(wstring::npos == ucomm.find('/'))
         {
             // Executable file not fully qualified.  Find fully qualified file.
-            if (!ucomm.empty() && !FindModuleFromPath(StrFromMultibyte(ucomm)))
+            if (!ucomm.empty() && !FindModuleFromPath(StrFromUTF8(ucomm)))
             {
                 fRet = false;
             }
         }
         else
         {
-            m_modulePath = StrFromMultibyte(ucomm);
+            m_modulePath = StrFromUTF8(ucomm);
         }
 
         if (m_modulePath.empty() && m_pstatus.pst_ucomm[0] != '\0')
         {
-            m_modulePath = StrFromMultibyte(m_pstatus.pst_ucomm);
+            m_modulePath = StrFromUTF8(m_pstatus.pst_ucomm);
         }
 
         // First entry (argv[0]) is the basename
@@ -2363,14 +2363,14 @@ namespace SCXSystemLib
 
         c.assign(cmdline, cmdlen);
         std::vector<std::wstring> paramList;
-        StrTokenize(StrFromMultibyte(c), paramList, L" ", false, false, false);
+        StrTokenize(StrFromUTF8(c), paramList, L" ", false, false, false);
 
         // Copy paramList back into m_params
         // TODO: Sloppy - what's involved to change m_params to a std::vector<wstring>?
         m_params.clear();
         for (std::vector<std::wstring>::iterator it = paramList.begin(); it != paramList.end(); ++it)
         {
-            m_params.push_back(StrToMultibyte(*it));
+            m_params.push_back(StrToUTF8(*it));
         }
 
         return fRet;
@@ -2415,8 +2415,8 @@ namespace SCXSystemLib
             argP += strlen(argP) + 1;
         }
 
-        exeFilename.assign(StrFromMultibyte(m_psinfo.pr_fname));
-        c.assign(StrFromMultibyte(cmdbuf));
+        exeFilename.assign(StrFromUTF8(m_psinfo.pr_fname));
+        c.assign(StrFromUTF8(cmdbuf));
         fRet = ModulePathFromCommand(exeFilename, c);
 
         return fRet;
@@ -2471,7 +2471,7 @@ namespace SCXSystemLib
                     if (cit != matches.end())
                     {
                         SCXFileSystem::SCXStatStruct buf;
-                        int failure = SCXFileSystem::Stat(StrToMultibyte(*cit).c_str(), &buf );
+                        int failure = SCXFileSystem::Stat(StrToUTF8(*cit).c_str(), &buf );
 
                         if (!failure)
                         {
@@ -2527,7 +2527,7 @@ namespace SCXSystemLib
 
         wstring path;
         wstring delimiters(L":");
-        wstring envpath = StrFromMultibyte(getenv("PATH"));
+        wstring envpath = StrFromUTF8(getenv("PATH"));
         VECPATH pathelements;
         bool fFound = false;
     
@@ -2547,7 +2547,7 @@ namespace SCXSystemLib
                     continue;
                 }
                 wstring candidatePath = *cit + wstring(L"/") + fname;
-                if (access(StrToMultibyte(candidatePath).c_str(), X_OK) == 0)
+                if (access(StrToUTF8(candidatePath).c_str(), X_OK) == 0)
                 {
                     m_modulePath = candidatePath;
                     fFound = true;

@@ -114,8 +114,8 @@ namespace SCXSystemLib
     */
     void SCXKstat::Lookup(const std::wstring& module, const std::wstring& name, int instance /* = -1 */)
     {
-        Lookup(SCXCoreLib::StrToMultibyte(module).c_str(),
-               SCXCoreLib::StrToMultibyte(name).c_str(),
+        Lookup(SCXCoreLib::StrToUTF8(module).c_str(),
+               SCXCoreLib::StrToUTF8(name).c_str(),
                instance);
     }
 
@@ -130,7 +130,7 @@ namespace SCXSystemLib
     */
     void SCXKstat::Lookup(const std::wstring& module, int instance /* = -1 */)
     {
-        Lookup(SCXCoreLib::StrToMultibyte(module).c_str(),
+        Lookup(SCXCoreLib::StrToUTF8(module).c_str(),
                NULL,
                instance);
     }
@@ -155,9 +155,9 @@ namespace SCXSystemLib
         {
             throw SCXKstatNotFoundException(L"kstat_lookup() could not find kstat",
                                             errno,
-                                            SCXCoreLib::StrFromMultibyte(module),
+                                            SCXCoreLib::StrFromUTF8(module),
                                             instance,
-                                            ( name != NULL ? SCXCoreLib::StrFromMultibyte(name) : L""),
+                                            ( name != NULL ? SCXCoreLib::StrFromUTF8(name) : L""),
                                             SCXSRCLOCATION);
         }
 
@@ -184,9 +184,9 @@ namespace SCXSystemLib
             {
                 throw SCXKstatErrorException(L"kstat_read() failed",
                                              errno,
-                                             SCXCoreLib::StrFromMultibyte(module),
+                                             SCXCoreLib::StrFromUTF8(module),
                                              instance,
-                                             ( name != NULL ? SCXCoreLib::StrFromMultibyte(name) : L""),
+                                             ( name != NULL ? SCXCoreLib::StrFromUTF8(name) : L""),
                                              SCXSRCLOCATION);
             }
 

@@ -90,7 +90,7 @@ public:
             StrTokenize( lines[i], tokens, L"=" );
             CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(2), tokens.size() );
 
-            relFile[StrToMultibyte(tokens[0])] = StrToMultibyte(tokens[1]);
+            relFile[StrToUTF8(tokens[0])] = StrToUTF8(tokens[1]);
         }
 
         // We have lines like this (assuming an unrecognized system):

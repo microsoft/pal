@@ -267,7 +267,7 @@ public:
         size_t i;
         for(i = 2; i < match.size(); i++)
         {
-            std::string msg = SCXCoreLib::StrToMultibyte(L"For index [" + SCXCoreLib::StrFrom(i) + L"]");
+            std::string msg = SCXCoreLib::StrToUTF8(L"For index [" + SCXCoreLib::StrFrom(i) + L"]");
             CPPUNIT_ASSERT_EQUAL_MESSAGE( msg, false, match[i].matchFound);
             CPPUNIT_ASSERT_EQUAL_MESSAGE( msg, L"", match[i].matchString);
         }

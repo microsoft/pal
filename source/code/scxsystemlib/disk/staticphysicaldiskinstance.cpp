@@ -875,11 +875,11 @@ namespace SCXSystemLib
 
             if (0 == tag.compare("MF"))
             {
-                m_manufacturer = StrTrim(StrFromMultibyte(&value[0]));
+                m_manufacturer = StrTrim(StrFromUTF8(&value[0]));
             }
             else if (0 == tag.compare("TM"))
             {
-                m_model = StrTrim(StrFromMultibyte(&value[0]));
+                m_model = StrTrim(StrFromUTF8(&value[0]));
             }
 
             p += totalLen;
@@ -1559,7 +1559,7 @@ namespace SCXSystemLib
 #if defined(linux)
 
         // Open the device (Note: We must have privileges for this to work).
-        if (!m_deps->open(StrToMultibyte(m_rawDevice).c_str(), O_RDONLY))
+        if (!m_deps->open(StrToUTF8(m_rawDevice).c_str(), O_RDONLY))
         {
             throw SCXErrnoOpenException(m_rawDevice, errno, SCXSRCLOCATION);
         }
@@ -1603,19 +1603,19 @@ namespace SCXSystemLib
                     manufacturer = manufacturer.c_str();
                     // Trim the whitespaces. It is necessary because if property is not available it may not be just.
                     // empty string but a string of 'space' characters.
-                    m_manufacturer = StrTrim(StrFromMultibyte(manufacturer));
+                    m_manufacturer = StrTrim(StrFromUTF8(manufacturer));
 
                     // Treat PRODUCT REVISION LEVEL as firmware revision.
                     // PRODUCT REVISION LEVEL has 4 bytes, starting at byte 32.
                     string fwRev(reinterpret_cast<const char *>(rsp_buff) + 32, 4);
                     fwRev = fwRev.c_str();
-                    m_Properties.firmwareRevision = StrTrim(StrFromMultibyte(fwRev));
+                    m_Properties.firmwareRevision = StrTrim(StrFromUTF8(fwRev));
 
                     // Treat PRODUCT IDENTIFICATION as model.
                     // PRODUCT IDENTIFICATION has 16 bytes starting at byte 16 */
                     string model(reinterpret_cast<const char *>(rsp_buff) + 16, 16);
                     model = model.c_str();
-                    m_model = StrTrim(StrFromMultibyte(model));
+                    m_model = StrTrim(StrFromUTF8(model));
 
                     // Find out if media is removable.
                     // RMB bit 7 byte 1 indicate removable or not.
@@ -1640,7 +1640,7 @@ namespace SCXSystemLib
                     serialNumber = serialNumber.c_str();
                     // Trim the whitespaces. It is necessary because if property is not available it may not be just
                     // empty string but a string of 'space' characters.
-                    m_Properties.serialNumber = StrTrim(StrFromMultibyte(serialNumber));
+                    m_Properties.serialNumber = StrTrim(StrFromUTF8(serialNumber));
                 }
                 // Set the m_Properties.availability. Since this is our first attempt we do not have to check if this
                 // property is also set. Also, this is more advanced way of getting power state so we give it a priority.
@@ -1675,7 +1675,7 @@ namespace SCXSystemLib
                 serialNumberHDIO = serialNumberHDIO.c_str();
                 // Trim the whitespaces. It is necessary because if property is not available it may not be just
                 // empty string but a string of 'space' characters.
-                wstring serialNumber = StrTrim(StrFromMultibyte(serialNumberHDIO));
+                wstring serialNumber = StrTrim(StrFromUTF8(serialNumberHDIO));
                 // Check if we have a better serial number. Sometimes one set of ioctl-s gives less info than the other
                 // so we will usually go by size when determining what data is better.
                 if (serialNumber.size() > m_Properties.serialNumber.size())
@@ -1686,7 +1686,7 @@ namespace SCXSystemLib
                 // Try to get firmware revision.
                 string fwRevHDIO(reinterpret_cast<char*>(hdid.fw_rev), sizeof(hdid.fw_rev));
                 fwRevHDIO = fwRevHDIO.c_str();
-                wstring fwRev = StrTrim(StrFromMultibyte(fwRevHDIO));
+                wstring fwRev = StrTrim(StrFromUTF8(fwRevHDIO));
                 if (fwRev.size() > m_Properties.firmwareRevision.size())
                 {
                     m_Properties.firmwareRevision = fwRev;
@@ -1695,7 +1695,7 @@ namespace SCXSystemLib
                 // Try to get model name.
                 string modelHDIO(reinterpret_cast<char*>(hdid.model), sizeof(hdid.model));
                 modelHDIO = modelHDIO.c_str();
-                wstring model = StrTrim(StrFromMultibyte(modelHDIO));
+                wstring model = StrTrim(StrFromUTF8(modelHDIO));
                 if (model.size() > m_model.size())
                 {
                     m_model = model;
@@ -1841,7 +1841,7 @@ namespace SCXSystemLib
             // or "ide" (perhaps on AIX for x86).
 
             std::vector<wstring> parts;
-            StrTokenize(StrFromMultibyte(dvData.PdDvLn_Lvalue), parts, L"/");
+            StrTokenize(StrFromUTF8(dvData.PdDvLn_Lvalue), parts, L"/");
 
             if (0 == StrCompare(parts[1], L"scsi", true)
                 || 0 == StrCompare(parts[1], L"iscsi", true))
@@ -1942,7 +1942,7 @@ namespace SCXSystemLib
                 m_rawDevice = SCXCoreLib::StrAppend(L"/dev/rdisk/", GetId());
             }
         }
-        if (!m_deps->open(StrToMultibyte(m_rawDevice).c_str(), O_RDONLY))
+        if (!m_deps->open(StrToUTF8(m_rawDevice).c_str(), O_RDONLY))
         {
             throw SCXErrnoOpenException(m_rawDevice, errno, SCXSRCLOCATION);
         }
@@ -1968,8 +1968,8 @@ namespace SCXSystemLib
             memcpy(vendorID, scsiData.vendor_id, sizeof(vendorID)-1);
             memcpy(productID, scsiData.product_id, sizeof(productID)-1);
 
-            m_manufacturer = StrTrim(StrFromMultibyte(vendorID));
-            m_model = StrTrim(StrFromMultibyte(productID));
+            m_manufacturer = StrTrim(StrFromUTF8(vendorID));
+            m_model = StrTrim(StrFromUTF8(productID));
         }
         else
         {
@@ -2023,8 +2023,8 @@ namespace SCXSystemLib
             memcpy(vendorID, scsiData.vendor_id, sizeof(vendorID)-1);
             memcpy(productID, scsiData.product_id, sizeof(productID)-1);
 
-            m_manufacturer = StrTrim(StrFromMultibyte(vendorID));
-            m_model = StrTrim(StrFromMultibyte(productID));
+            m_manufacturer = StrTrim(StrFromUTF8(vendorID));
+            m_model = StrTrim(StrFromUTF8(productID));
         }
         else
         {
@@ -2087,7 +2087,7 @@ namespace SCXSystemLib
          */
 
         SCX_LOGHYSTERICAL(m_log, L"Update(): trying disk device " + m_rawDevice );
-        if (!m_deps->open((const char *)StrToMultibyte(m_rawDevice).c_str(), (int)O_RDONLY))
+        if (!m_deps->open((const char *)StrToUTF8(m_rawDevice).c_str(), (int)O_RDONLY))
         {
             /* Reconstruct the path from the name and try again */
             /* Note that we need to check several slices if the disk does not use all of them. */
@@ -2095,7 +2095,7 @@ namespace SCXSystemLib
             {
                 m_rawDevice = L"/dev/rdsk/" + GetId() + StrAppend(L"s", i);
                 SCX_LOGHYSTERICAL(m_log, L"Update(): re-trying disk device " + m_rawDevice );
-                if (!m_deps->open((const char *)StrToMultibyte(m_rawDevice).c_str(), (int)O_RDONLY))
+                if (!m_deps->open((const char *)StrToUTF8(m_rawDevice).c_str(), (int)O_RDONLY))
                 {
                     if ((EIO != errno && ENXIO != errno) || 15 <= i) // EIO _or_ ENXIO is received if the slice is not used.
                     {

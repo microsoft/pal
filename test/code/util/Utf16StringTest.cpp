@@ -313,8 +313,8 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
                     catch (InvalidCodeUnitException& e)
                     {
                         gotException = true;
-                        printf("\nEx = %s\n", SCXCoreLib::StrToMultibyte(e.What()).c_str());
-                        CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(e.What()).c_str());
+                        printf("\nEx = %s\n", SCXCoreLib::StrToUTF8(e.What()).c_str());
+                        CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(e.What()).c_str());
                     }
                     
                 }
@@ -382,7 +382,7 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
             }
             catch (SCXCoreLib::SCXException& e)
             {
-                CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(e.What()).c_str());
+                CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(e.What()).c_str());
             }
         }
 

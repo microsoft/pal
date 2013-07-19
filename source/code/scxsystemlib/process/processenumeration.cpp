@@ -461,7 +461,7 @@ namespace SCXSystemLib
         const unsigned short Terminated = 7;
         unsigned short state;
         std::string pname;
-        const std::string fname(SCXCoreLib::StrToMultibyte(name));
+        const std::string fname(SCXCoreLib::StrToUTF8(name));
 
         for (pi = m_procs.begin(); pi != m_procs.end(); ++pi) {
             if (pi->second->GetExecutionState(state) && (state != Terminated) &&

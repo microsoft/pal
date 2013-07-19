@@ -86,7 +86,7 @@ public:
 
     void tearDown(void)
     {
-        //unlink(SCXCoreLib::StrToMultibyte(fauxMntTab).c_str());
+        //unlink(SCXCoreLib::StrToUTF8(fauxMntTab).c_str());
 
         if (m_diskEnum != 0)
         {
@@ -166,7 +166,7 @@ public:
             res = di->GetFileSystemType(strFSType);
             CPPUNIT_ASSERT_MESSAGE("Method GetFileSystemType() failed", res);
             CPPUNIT_ASSERT_MESSAGE(
-                string("GetFileSystemType() value wrong: ").append(SCXCoreLib::StrToMultibyte(strFSType)),
+                string("GetFileSystemType() value wrong: ").append(SCXCoreLib::StrToUTF8(strFSType)),
                 strKnownFS.find(L"|" + strFSType + L"|") != std::wstring::npos );
 
             res = di->GetSizeInBytes(ulongSize);
@@ -280,7 +280,7 @@ public:
     {
         SCXCoreLib::SCXHandle<DiskDependTest> deps( new DiskDependTest() );
         SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
-        FILE* fp = fopen(SCXCoreLib::StrToMultibyte(fauxMntTab).c_str(), "wb");
+        FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
         CPPUNIT_ASSERT(fp != NULL);
         fputs("proc /proc proc rw 0 0\n"
               "sysfs /sys sysfs rw 0 0\n"
@@ -366,7 +366,7 @@ public:
     {
         SCXCoreLib::SCXHandle<DiskDependTest> deps( new DiskDependTest() );
         SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
-        FILE* fp = fopen(SCXCoreLib::StrToMultibyte(fauxMntTab).c_str(), "wb");
+        FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
         CPPUNIT_ASSERT(0 != fp);
         // Note: sample data comes from a Solaris 9 development box with a UFS CD
         // in the drive. The SPARC (not the x86) installation media is an example
@@ -434,7 +434,7 @@ public:
 
         // This file does not exist on sol 11 and later
 #if (PF_MAJOR <= 5 && PF_MINOR < 11)
-        FILE* fpDev = fopen(SCXCoreLib::StrToMultibyte(fauxDevTab).c_str(), "wb");
+        FILE* fpDev = fopen(SCXCoreLib::StrToUTF8(fauxDevTab).c_str(), "wb");
         CPPUNIT_ASSERT(0 != fpDev);
 
         //Taken from /etc/device.tab and touched up for testing
@@ -527,19 +527,19 @@ public:
 
         resBool = diskinst->GetDeviceID(deviceId);
         CPPUNIT_ASSERT_MESSAGE("Method GetDeviceID() failed", resBool);
-        CPPUNIT_ASSERT(SCXCoreLib::StrFromMultibyte(string(deviceIdExpected)) == deviceId);
+        CPPUNIT_ASSERT(SCXCoreLib::StrFromUTF8(string(deviceIdExpected)) == deviceId);
 
         resBool = diskinst->GetMountpoint(mountPoint);
         CPPUNIT_ASSERT_MESSAGE("Method GetMountpoint() failed", resBool);
-        CPPUNIT_ASSERT(SCXCoreLib::StrFromMultibyte(string(mountPointExpected)) == mountPoint);
+        CPPUNIT_ASSERT(SCXCoreLib::StrFromUTF8(string(mountPointExpected)) == mountPoint);
 
         resBool = diskinst->GetDeviceName(deviceName);
         CPPUNIT_ASSERT_MESSAGE("Method GetDeviceName() failed", resBool);
-        CPPUNIT_ASSERT(SCXCoreLib::StrFromMultibyte(string(deviceNameExpected)) == deviceName);
+        CPPUNIT_ASSERT(SCXCoreLib::StrFromUTF8(string(deviceNameExpected)) == deviceName);
 
         resBool = diskinst->GetFileSystemType(fileSystemType);
         CPPUNIT_ASSERT_MESSAGE("Method GetFileSystemType() failed", resBool);
-        CPPUNIT_ASSERT(SCXCoreLib::StrFromMultibyte(string(fileSystemTypeExpected)) == fileSystemType);
+        CPPUNIT_ASSERT(SCXCoreLib::StrFromUTF8(string(fileSystemTypeExpected)) == fileSystemType);
 #if !defined(sun)
         resBool = diskinst->GetQuotasDisabled(quotasDisabled);
         CPPUNIT_ASSERT_MESSAGE("Method GetQuotasDisabled() implemented", !resBool);
@@ -564,7 +564,7 @@ public:
         SCXCoreLib::SCXHandle<DiskDependTest> deps( new DiskDependTest() );
 	SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
 
-	FILE* fp = fopen(SCXCoreLib::StrToMultibyte(fauxMntTab).c_str(), "wb");
+	FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
 	CPPUNIT_ASSERT(fp != NULL);
 	fputs("proc /proc proc rw 0 0\n"
 	      "sysfs /sys sysfs rw 0 0\n"

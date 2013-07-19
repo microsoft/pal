@@ -171,14 +171,14 @@ public:
             bool mounted = true;
 #endif
             resBool = dp->GetPartitionBlockSize(blockSz);
-            CPPUNIT_ASSERT_MESSAGE("Method GetBlockSize() failed, " + SCXCoreLib::StrToMultibyte(diskDrive) + '.', resBool);
+            CPPUNIT_ASSERT_MESSAGE("Method GetBlockSize() failed, " + SCXCoreLib::StrToUTF8(diskDrive) + '.', resBool);
             if (mounted)
             {
-                CPPUNIT_ASSERT_MESSAGE("GetBlockSize() returned zero, " + SCXCoreLib::StrToMultibyte(diskDrive) + '.',
+                CPPUNIT_ASSERT_MESSAGE("GetBlockSize() returned zero, " + SCXCoreLib::StrToUTF8(diskDrive) + '.',
                     0 != blockSz);
 
                 /* Block size is generally power of 2 >= 512 and <= 8192 */
-                CPPUNIT_ASSERT_MESSAGE("Method GetBlockSize() invalid value, " + SCXCoreLib::StrToMultibyte(diskDrive) +
+                CPPUNIT_ASSERT_MESSAGE("Method GetBlockSize() invalid value, " + SCXCoreLib::StrToUTF8(diskDrive) +
                     '.',
                     blockSz == 512 || blockSz == 1024 || blockSz == 2048 ||
                     blockSz == 4096 || blockSz == 8192 ||
@@ -188,52 +188,52 @@ public:
             else
             {
                 // Partition is not mounted. Value must be 0.
-                CPPUNIT_ASSERT_MESSAGE("GetBlockSize() did not return 0, " + SCXCoreLib::StrToMultibyte(diskDrive) +
+                CPPUNIT_ASSERT_MESSAGE("GetBlockSize() did not return 0, " + SCXCoreLib::StrToUTF8(diskDrive) +
                     '.', 0 == blockSz);
             }
 
             resBool = dp->GetNumberOfBlocks(numBlks);
-            CPPUNIT_ASSERT_MESSAGE("Method GetNumberOfBlocks() failed, " + SCXCoreLib::StrToMultibyte(diskDrive) + '.',
+            CPPUNIT_ASSERT_MESSAGE("Method GetNumberOfBlocks() failed, " + SCXCoreLib::StrToUTF8(diskDrive) + '.',
                 resBool);
             if (mounted)
             {
                 CPPUNIT_ASSERT_MESSAGE("GetNumberOfBlocks() returned invalid value, " +
-                    SCXCoreLib::StrToMultibyte(diskDrive) + '.', 0 != numBlks);
+                    SCXCoreLib::StrToUTF8(diskDrive) + '.', 0 != numBlks);
             }
             else
             {
                 // Partition is not mounted. Value must be 0.
                 CPPUNIT_ASSERT_MESSAGE("GetNumberOfBlocks() did not return 0, " +
-                    SCXCoreLib::StrToMultibyte(diskDrive) + '.', 0 == numBlks);
+                    SCXCoreLib::StrToUTF8(diskDrive) + '.', 0 == numBlks);
             }
             
             resBool = dp->GetBootPartition(bootPflag);
-            CPPUNIT_ASSERT_MESSAGE("Method GetBootPartition() failed, " + SCXCoreLib::StrToMultibyte(diskDrive) + '.',
+            CPPUNIT_ASSERT_MESSAGE("Method GetBootPartition() failed, " + SCXCoreLib::StrToUTF8(diskDrive) + '.',
                 resBool);
 
             resBool = dp->GetIndex(partIdx);
             CPPUNIT_ASSERT_MESSAGE("Method GetIndex() failed", resBool);
-            CPPUNIT_ASSERT_MESSAGE("GetIndex() returned invalid value, " + SCXCoreLib::StrToMultibyte(diskDrive) + '.',
+            CPPUNIT_ASSERT_MESSAGE("GetIndex() returned invalid value, " + SCXCoreLib::StrToUTF8(diskDrive) + '.',
                 32 > partIdx);
 
             resBool = dp->GetPartitionSizeInBytes(partitionSz);
-            CPPUNIT_ASSERT_MESSAGE("Method GetPartitionSizeInBytes() failed, " + SCXCoreLib::StrToMultibyte(diskDrive) +
+            CPPUNIT_ASSERT_MESSAGE("Method GetPartitionSizeInBytes() failed, " + SCXCoreLib::StrToUTF8(diskDrive) +
                 '.', resBool);
-            CPPUNIT_ASSERT_MESSAGE("GetPartitionSizeInBytes() returned zero, " + SCXCoreLib::StrToMultibyte(diskDrive) +
+            CPPUNIT_ASSERT_MESSAGE("GetPartitionSizeInBytes() returned zero, " + SCXCoreLib::StrToUTF8(diskDrive) +
                 '.', 0 != partitionSz);
 
             // TODO: Check this is a 0 offset valid??
             resBool = dp->GetStartingOffset(startOffs);
-            CPPUNIT_ASSERT_MESSAGE("Method GetStartingOffset() failed, " + SCXCoreLib::StrToMultibyte(diskDrive) + '.',
+            CPPUNIT_ASSERT_MESSAGE("Method GetStartingOffset() failed, " + SCXCoreLib::StrToUTF8(diskDrive) + '.',
                 resBool);
 // Notice that for solaris versions 9 and 10 we don't do the offset value test since it can be either zero or non zero.
 #if defined(aix) || defined(hpux) || (defined(sun) && PF_MAJOR == 5 && PF_MINOR >= 11)
             // There's no offset in AIX, HPUX or Solaris 11 ZFS world. Partition ("logical volume") is spread over
             // multiple disks. In this case GetStartingOffset() succeeds and returns 0.
             CPPUNIT_ASSERT_MESSAGE("GetStartingOffset() did not return zero on AIX, HPUX or Solaris 11 ZFS, " +
-                SCXCoreLib::StrToMultibyte(diskDrive) + '.', 0 == startOffs);
+                SCXCoreLib::StrToUTF8(diskDrive) + '.', 0 == startOffs);
 #elif defined(linux)
-            CPPUNIT_ASSERT_MESSAGE("GetStartingOffset() returned zero, " + SCXCoreLib::StrToMultibyte(diskDrive) + '.',
+            CPPUNIT_ASSERT_MESSAGE("GetStartingOffset() returned zero, " + SCXCoreLib::StrToUTF8(diskDrive) + '.',
                 0 != startOffs);
 #endif
             dp->CleanUp();
@@ -266,7 +266,7 @@ public:
 
             resBool = dp->GetDeviceId(diskDrive);
             CPPUNIT_ASSERT_MESSAGE("Method GetDeviceId() failed", resBool);
-            CPPUNIT_ASSERT(SCXCoreLib::StrFromMultibyte(string(diskDriveExpected)) == diskDrive);
+            CPPUNIT_ASSERT(SCXCoreLib::StrFromUTF8(string(diskDriveExpected)) == diskDrive);
 
             resBool = dp->GetPartitionBlockSize(blockSz);
             CPPUNIT_ASSERT_MESSAGE("Method GetPartitionBlockSize() failed", resBool);

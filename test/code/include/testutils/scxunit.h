@@ -75,7 +75,7 @@ extern "C++" {
 #define SCXUNIT_ASSERT_BOTH_AT_OR_BOTH_ABOVE(value1, value2, ref) CPPUNIT_ASSERT((value1 == ref && value2 == ref) || (value1 > ref && value2 > ref))
 
 /** Regular assert with a wide string message. */
-#define SCXUNIT_ASSERT_MESSAGEW(message, expression) CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::StrToMultibyte(message), (expression))
+#define SCXUNIT_ASSERT_MESSAGEW(message, expression) CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::StrToUTF8(message), (expression))
 
 /** Extend CPPUNIT_ASSERT_THROW_MESSAGE macro with SCXException support */
 #ifdef CPPUNIT_ASSERT_THROW_MESSAGE
@@ -94,8 +94,8 @@ extern "C++" {
          cpputCorrectExceptionThrown_ = true;                                 \
       } catch ( const SCXCoreLib::SCXException& scxe) {                       \
          cpputMsg_.addDetail( "Actual  : SCXCoreLib::SCXException or derived"); \
-         cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToMultibyte(scxe.What())); \
-         cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToMultibyte(scxe.Where())); \
+         cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToUTF8(scxe.What())); \
+         cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToUTF8(scxe.Where())); \
       } catch ( const std::exception &e) {                                    \
          cpputMsg_.addDetail( "Actual  : " +                                  \
                               CPPUNIT_EXTRACT_EXCEPTION_TYPE_( e,             \
@@ -125,8 +125,8 @@ extern "C++" {
          expression;                                                          \
       } catch ( const SCXCoreLib::SCXException& scxe) {                       \
          cpputMsg_.addDetail( "Caught  : SCXCoreLib::SCXException or derived"); \
-         cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToMultibyte(scxe.What())); \
-         cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToMultibyte(scxe.Where())); \
+         cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToUTF8(scxe.What())); \
+         cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToUTF8(scxe.Where())); \
          CPPUNIT_NS::Asserter::fail( cpputMsg_,                               \
                                      CPPUNIT_SOURCELINE() );                  \
       } catch ( const std::exception &e ) {                                   \
@@ -161,13 +161,13 @@ extern "C++" {
                 cpputCorrectExceptionThrown_ = true;                            \
             else {                                                              \
                 cpputMsg_.addDetail( "Actual  : " CPPUNIT_GET_PARAMETER_STRING( ExceptionType ) " or derived" ); \
-                cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToMultibyte(correct.What())); \
-                cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToMultibyte(correct.Where())); \
+                cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToUTF8(correct.What())); \
+                cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToUTF8(correct.Where())); \
             }                                                                  \
         } catch ( const SCXCoreLib::SCXException& scxe) {                       \
             cpputMsg_.addDetail( "Actual  : SCXCoreLib::SCXException or derived"); \
-            cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToMultibyte(scxe.What())); \
-            cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToMultibyte(scxe.Where())); \
+            cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToUTF8(scxe.What())); \
+            cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToUTF8(scxe.Where())); \
         } catch ( const std::exception &e) {                                    \
             cpputMsg_.addDetail( "Actual  : " +                                  \
                                  CPPUNIT_EXTRACT_EXCEPTION_TYPE_( e,             \

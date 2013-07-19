@@ -27,7 +27,7 @@
 
 // Helper definitions used in the case of error to printout entire call stack.
 #define CALL_LOCATION(errMsg) (std::wstring(errMsg + (SCXSRCLOCATION).Where()))
-#define ERROR_MESSAGE (SCXCoreLib::StrToMultibyte(errMsg))
+#define ERROR_MESSAGE (SCXCoreLib::StrToUTF8(errMsg))
 
 class TestableInstance : public mi::Instance
 {
@@ -65,7 +65,7 @@ public:
     MI_Result FindProperty(const char *name, struct PropertyInfo& info) const;
     MI_Result FindProperty(const wchar_t *name, struct PropertyInfo& info) const
     {
-        return FindProperty(SCXCoreLib::StrToMultibyte(std::wstring(name)).c_str(), info);
+        return FindProperty(SCXCoreLib::StrToUTF8(std::wstring(name)).c_str(), info);
     }
     MI_Result FindProperty(MI_Uint32 index, struct PropertyInfo& info, bool keysOnly = false) const;
     PropertyInfo GetProperty(const char *name, std::wstring errMsg) const
@@ -76,7 +76,7 @@ public:
     }
     PropertyInfo GetProperty(const wchar_t *name, std::wstring errMsg) const
     {
-        return GetProperty(SCXCoreLib::StrToMultibyte(std::wstring(name)).c_str(), CALL_LOCATION(errMsg));
+        return GetProperty(SCXCoreLib::StrToUTF8(std::wstring(name)).c_str(), CALL_LOCATION(errMsg));
     }
     bool PropertyExists(const char *name) const
     {
@@ -89,7 +89,7 @@ public:
     }
     bool PropertyExists(const wchar_t *name) const
     {
-        return PropertyExists(SCXCoreLib::StrToMultibyte(std::wstring(name)).c_str());
+        return PropertyExists(SCXCoreLib::StrToUTF8(std::wstring(name)).c_str());
     }
     // Key handling methods.
     MI_Uint32 GetNumberOfKeys() const;
@@ -251,11 +251,11 @@ template<class T, class TN> MI_Result GetInstance(
     size_t k;
     for (k = 0; k < keyNames.size(); k++)
     {
-        std::string keyName = SCXCoreLib::StrToMultibyte(keyNames[k]);
+        std::string keyName = SCXCoreLib::StrToUTF8(keyNames[k]);
         Field* field;
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, FindFieldString(instanceName, keyName.c_str(), field));
         mi::Field<mi::String> *miField = reinterpret_cast<mi::Field<mi::String> *>(field);
-        mi::String keyValue(SCXCoreLib::StrToMultibyte(keyValues[k]).c_str());
+        mi::String keyValue(SCXCoreLib::StrToUTF8(keyValues[k]).c_str());
         miField->Set(keyValue);
     }
 
@@ -365,7 +365,7 @@ template<class T, class TN> void VerifyGetInstanceByPartialKeyFailure(const std:
         std::vector<std::wstring> notAllKeyNames(allKeyNames);
         notAllKeyNames.erase(notAllKeyNames.begin() + nr);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + " Didn't detect missing key " +
-            SCXCoreLib::StrToMultibyte(allKeyNames[nr]), MI_RESULT_INVALID_PARAMETER,
+            SCXCoreLib::StrToUTF8(allKeyNames[nr]), MI_RESULT_INVALID_PARAMETER,
             (VerifyGetInstanceByCompleteKeySuccess<T, TN>(
             notAllKeyNames, static_cast<size_t>(-1), CALL_LOCATION(errMsg))));
     }
@@ -383,7 +383,7 @@ template<class T, class TN> void VerifyGetInstanceByInvalidKeyFailure(const std:
     for (size_t nr = 0; nr < allKeyNames.size(); nr++)
     {
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + " Didn't detect invalid key " +
-            SCXCoreLib::StrToMultibyte(allKeyNames[nr]), MI_RESULT_NOT_FOUND,
+            SCXCoreLib::StrToUTF8(allKeyNames[nr]), MI_RESULT_NOT_FOUND,
             (VerifyGetInstanceByCompleteKeySuccess<T, TN>(allKeyNames, nr, CALL_LOCATION(errMsg))));
     }
 }

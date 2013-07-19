@@ -530,7 +530,7 @@ protected:
 
     void testFromMultibyte()
     {
-        CPPUNIT_ASSERT(SCXCoreLib::StrFromMultibyte("abc") == L"abc");
+        CPPUNIT_ASSERT(SCXCoreLib::StrFromUTF8("abc") == L"abc");
     }
 
     void testFromMultibyteNoThrow()
@@ -561,9 +561,9 @@ protected:
         CPPUNIT_ASSERT(SCXCoreLib::StrFromMultibyteNoThrow(std::string(badString)) == L"alxapfs34?");
     }
 
-    void testToMultibyte()
+    void testToUTF8()
     {
-        CPPUNIT_ASSERT(SCXCoreLib::StrToMultibyte(L"abc") == "abc");
+        CPPUNIT_ASSERT(SCXCoreLib::StrToUTF8(L"abc") == "abc");
     }
 
 

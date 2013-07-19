@@ -31,7 +31,7 @@
 #endif
 
 using SCXCoreLib::NameResolver;
-using SCXCoreLib::StrToMultibyte;
+using SCXCoreLib::StrToUTF8;
 using std::string;
 
 
@@ -137,7 +137,7 @@ public:
             std::wstringstream ss;
             ss << e.What() << std::endl << e.Where();
             std::wcout << ss.str() << std::endl;
-            CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(ss.str()));
+            CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(ss.str()));
         }
     }
 
@@ -153,7 +153,7 @@ public:
             mi.Update();
             std::string hostname_default = ""; 
             std::wstring hostname = mi.GetHostname(&hostname_default); 
-            std::wstring hostname_default_w = SCXCoreLib::StrFromMultibyte(hostname_default, true); 
+            std::wstring hostname_default_w = SCXCoreLib::StrFromUTF8(hostname_default); 
             CPPUNIT_ASSERT(hostname_default_w.compare(hostname) == 0); 
         }
         catch(SCXCoreLib::SCXException & e)
@@ -161,7 +161,7 @@ public:
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where();
             std::wcout << ss.str() << std::endl;
-            CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(ss.str()));
+            CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(ss.str()));
         }
      }
 
@@ -197,7 +197,7 @@ public:
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where();
             std::wcout << ss.str() << std::endl;
-            CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(ss.str()));
+            CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(ss.str()));
         }
     }
 
@@ -222,7 +222,7 @@ public:
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where();
             std::wcout << ss.str() << std::endl;
-            CPPUNIT_FAIL(SCXCoreLib::StrToMultibyte(ss.str()));
+            CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(ss.str()));
         }
     }
 

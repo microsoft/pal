@@ -89,7 +89,7 @@ public:
     void SetTestNameFilter(const std::string& s)
     {
         std::vector<std::wstring> vec;
-        SCXCoreLib::StrTokenize(SCXCoreLib::StrFromMultibyte(s), vec, L",");
+        SCXCoreLib::StrTokenize(SCXCoreLib::StrFromUTF8(s), vec, L",");
 
         for (std::vector<std::wstring>::iterator it = vec.begin(); it != vec.end(); it++)
         {
@@ -134,7 +134,7 @@ public:
 
         if (m_testNameFilters.size() > 0) {
             // All comparsisons are done case-insensitive ...
-            const std::wstring wTestName = SCXCoreLib::StrToLower(SCXCoreLib::StrFromMultibyte(testName));
+            const std::wstring wTestName = SCXCoreLib::StrToLower(SCXCoreLib::StrFromUTF8(testName));
 
             for (std::vector<std::wstring>::iterator it = m_testNameFilters.begin();
                  it != m_testNameFilters.end(); it++)
@@ -302,8 +302,8 @@ public:
             m_pMessageFromThread = new CPPUNIT_NS::Message( "unexpected exception caught" );
         
             m_pMessageFromThread->addDetail( "Caught  : SCXCoreLib::SCXException or derived");
-            m_pMessageFromThread->addDetail( "What()  : " + SCXCoreLib::StrToMultibyte(scxe.What()));
-            m_pMessageFromThread->addDetail( "Where() : " + SCXCoreLib::StrToMultibyte(scxe.Where()));
+            m_pMessageFromThread->addDetail( "What()  : " + SCXCoreLib::StrToUTF8(scxe.What()));
+            m_pMessageFromThread->addDetail( "Where() : " + SCXCoreLib::StrToUTF8(scxe.Where()));
         }
         catch (const std::exception& e) 
         { 
@@ -339,7 +339,7 @@ public:
                 if ( ! DoneThread(h)) {
                     StopThread(h);
                     CPPUNIT_NS::Message cpputMsg_( "Test timeout" );
-                    cpputMsg_.addDetail( " Timeout : " + SCXCoreLib::StrToMultibyte(SCXCoreLib::StrFrom(m_timeout)));
+                    cpputMsg_.addDetail( " Timeout : " + SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(m_timeout)));
                     FreeThread(h);
                     CPPUNIT_NS::Asserter::fail( cpputMsg_ );
                 } 
@@ -352,8 +352,8 @@ public:
             CPPUNIT_NS::Message cpputMsg_( "unexpected exception caught" );
         
             cpputMsg_.addDetail( "Caught  : SCXCoreLib::SCXException or derived");
-            cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToMultibyte(scxe.What()));
-            cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToMultibyte(scxe.Where()));
+            cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToUTF8(scxe.What()));
+            cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToUTF8(scxe.Where()));
             FreeThread(h);
             CPPUNIT_NS::Asserter::fail( cpputMsg_ );
         }
@@ -417,7 +417,7 @@ public:
     {
         SCXCoreLib::SCXLogHandle log = SCXCoreLib::SCXLogHandleFactory::Instance().GetLogHandle(L"scx.unittestcaller");
         std::string msg = "[" + phase + "] " + toString();
-        SCX_LOGINFO(log, SCXCoreLib::StrFromMultibyte(msg));
+        SCX_LOGINFO(log, SCXCoreLib::StrFromUTF8(msg));
     }
 
 private: 

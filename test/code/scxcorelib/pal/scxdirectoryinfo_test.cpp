@@ -127,7 +127,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         /* read the same with ls / instead */
         vector<SCXCoreLib::SCXFilePath> testDir;
         std::wstring wideRootDir = GetRootDir();
-        string narrowRootDir = SCXCoreLib::StrToMultibyte(wideRootDir);
+        string narrowRootDir = SCXCoreLib::StrToUTF8(wideRootDir);
 #ifdef WIN32
         CPPUNIT_ASSERT(true == listDirectoryWithDir(testDir, narrowRootDir.c_str(), 'a'));  // DIR /A:DHS
 #else
@@ -141,8 +141,8 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         for(pos = testDir.begin(), pos2 = files.begin(); pos != testDir.end(); ++pos, ++pos2) {
             /* Test that each and every name are equal in the OS-native encoding. */
             //std::wcout << L"** checking >" << pos->Get() << L"< == >" << pos2->Get() << L"<" << std::endl;
-            CPPUNIT_ASSERT_EQUAL(SCXCoreLib::StrToMultibyte(pos2->Get()),
-                                 SCXCoreLib::StrToMultibyte(pos->Get()));
+            CPPUNIT_ASSERT_EQUAL(SCXCoreLib::StrToUTF8(pos2->Get()),
+                                 SCXCoreLib::StrToUTF8(pos->Get()));
         }
 
         /* All elements should have been consumed */
@@ -290,7 +290,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
     {   
         // (1) Setup
         std::wstring wideDirName = CreateFauxDirectoryStructure();
-        string narrowDirName = SCXCoreLib::StrToMultibyte(wideDirName);
+        string narrowDirName = SCXCoreLib::StrToUTF8(wideDirName);
         SCXCoreLib::SCXFilePath fp(wideDirName);
         CPPUNIT_ASSERT(SCXCoreLib::SCXDirectory::Exists(fp));
         vector<SCXCoreLib::SCXFilePath> fpa;
@@ -310,7 +310,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         // (1) Setup
         std::wstring wideDirName = CreateFauxDirectoryStructure();
         wideDirName.append(L"dirmove").append(1, SCXCoreLib::SCXFilePath::GetFolderSeparator());
-        string narrowDirName = SCXCoreLib::StrToMultibyte(wideDirName);
+        string narrowDirName = SCXCoreLib::StrToUTF8(wideDirName);
         SCXCoreLib::SCXFilePath fp(wideDirName);
         CPPUNIT_ASSERT(SCXCoreLib::SCXDirectory::Exists(fp));
         vector<SCXCoreLib::SCXFilePath> fpa;
@@ -332,7 +332,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         std::wstring wideDirName = CreateFauxDirectoryStructure();
         wideDirName.append(L"dirmove").append(1, SCXCoreLib::SCXFilePath::GetFolderSeparator());
         wideDirName.append(L"A").append(1, SCXCoreLib::SCXFilePath::GetFolderSeparator());
-        string narrowDirName = SCXCoreLib::StrToMultibyte(wideDirName);
+        string narrowDirName = SCXCoreLib::StrToUTF8(wideDirName);
         SCXCoreLib::SCXFilePath fp(wideDirName);
         CPPUNIT_ASSERT(SCXCoreLib::SCXDirectory::Exists(fp));
         vector<SCXCoreLib::SCXFilePath> fpa;
@@ -380,7 +380,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
 
         vector<SCXCoreLib::SCXFilePath> fpb;
 #ifdef WIN32
-        string narrowRootDir = SCXCoreLib::StrToMultibyte(wideRootDir);
+        string narrowRootDir = SCXCoreLib::StrToUTF8(wideRootDir);
         CPPUNIT_ASSERT(true == listDirectoryWithDir(fpb, narrowRootDir.c_str(), 'f'));  // DIR /A:-S-D
 #else
         CPPUNIT_ASSERT(true == listDirectoryWithls(fpb, "/etc/", 'f'));
@@ -461,7 +461,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
 
         vector<SCXCoreLib::SCXFilePath> fpb;
 #ifdef WIN32
-        string narrowRootDir = SCXCoreLib::StrToMultibyte(wideRootDir);
+        string narrowRootDir = SCXCoreLib::StrToUTF8(wideRootDir);
         CPPUNIT_ASSERT(true == listDirectoryWithDir(fpb, narrowRootDir.c_str(), 'd'));
 #else
         CPPUNIT_ASSERT(true == listDirectoryWithls(fpb, "/etc/", 'd'));
@@ -531,7 +531,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
 
         vector<SCXCoreLib::SCXFilePath> fpb;
 #ifdef WIN32
-        string narrowRootDir = SCXCoreLib::StrToMultibyte(wideRootDir);
+        string narrowRootDir = SCXCoreLib::StrToUTF8(wideRootDir);
         CPPUNIT_ASSERT(true == listDirectoryWithDir(fpb, narrowRootDir.c_str(), 's'));
 #else
         CPPUNIT_ASSERT(true == listDirectoryWithls(fpb, "/dev/", 's'));
@@ -603,7 +603,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
 
             std::wstring deployDir = GetDeploymentDirectory().Get();
             std::stringstream createDirectoryStructure;
-            createDirectoryStructure << "mkdir " << SCXCoreLib::StrToMultibyte(deployDir);
+            createDirectoryStructure << "mkdir " << SCXCoreLib::StrToUTF8(deployDir);
             system(createDirectoryStructure.str().c_str());
 
             SCXCoreLib::SCXDirectoryInfo dir(deployDir);
@@ -851,7 +851,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         char* envValue = getenv("SYSTEMDRIVE");
         std::string rootNarrow(envValue);
         rootNarrow.append("\\");
-        std::wstring rootDir(SCXCoreLib::StrFromMultibyte(rootNarrow));
+        std::wstring rootDir(SCXCoreLib::StrFromUTF8(rootNarrow));
 #else
         std::wstring rootDir(L"/");
 #endif
@@ -868,11 +868,11 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         char* envValue = getenv("TMP");
         std::string tmpNarrow(envValue);
         tmpNarrow.append("\\");
-        std::wstring rootDir(SCXCoreLib::StrFromMultibyte(tmpNarrow));
+        std::wstring rootDir(SCXCoreLib::StrFromUTF8(tmpNarrow));
 #else
         std::stringstream tmpNarrow;
         tmpNarrow << "/tmp/scx-" << getenv("USER") << "/";
-        std::wstring rootDir(SCXCoreLib::StrFromMultibyte(tmpNarrow.str()));
+        std::wstring rootDir(SCXCoreLib::StrFromUTF8(tmpNarrow.str()));
 #endif
         return rootDir;
     }
@@ -1100,8 +1100,8 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
             }
 #endif
             SCXCoreLib::SCXFilePath sfp;
-            sfp.SetDirectory(SCXCoreLib::StrFromMultibyte(dir));
-            sfp.Append(SCXCoreLib::StrFromMultibyte(tmp));   // Append either directory or filename
+            sfp.SetDirectory(SCXCoreLib::StrFromUTF8(dir));
+            sfp.Append(SCXCoreLib::StrFromUTF8(tmp));   // Append either directory or filename
             target.push_back(sfp);
         }
 
@@ -1163,7 +1163,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
             } else {
                 tmp.resize(s - 2); // Remove two last char, a type specifier and '\n'.
             }
-            SCXCoreLib::SCXFilePath tmp2(SCXCoreLib::StrFromMultibyte(tmp));
+            SCXCoreLib::SCXFilePath tmp2(SCXCoreLib::StrFromUTF8(tmp));
             target.push_back(tmp2);
         }
 
@@ -1310,9 +1310,9 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
     {
         std::stringstream createDirectoryStructure;
         std::wstring wideDeployDir = GetDeploymentDirectory().Get();
-        std::string narrowDeployDir = SCXCoreLib::StrToMultibyte(wideDeployDir);
+        std::string narrowDeployDir = SCXCoreLib::StrToUTF8(wideDeployDir);
         std::wstring wideFolderSeparator(1, SCXCoreLib::SCXFilePath::GetFolderSeparator());
-        std::string narrowFolderSeparator = SCXCoreLib::StrToMultibyte(wideFolderSeparator);
+        std::string narrowFolderSeparator = SCXCoreLib::StrToUTF8(wideFolderSeparator);
         RemoveFauxDirectoryStructure();
 
 #if defined(WIN32)
@@ -1381,7 +1381,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
     {
         std::stringstream removeDirectoryStructure;
         std::wstring wideDeployDir = GetDeploymentDirectory().Get();
-        std::string narrowDeployDir = SCXCoreLib::StrToMultibyte(wideDeployDir);
+        std::string narrowDeployDir = SCXCoreLib::StrToUTF8(wideDeployDir);
 
 #if defined( WIN32 )
         removeDirectoryStructure << "rmdir /S /Q " << narrowDeployDir;

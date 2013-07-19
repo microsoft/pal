@@ -113,7 +113,7 @@ namespace SCXSystemLib
             for (vector<SCXFilePath>::iterator it = poptPaths.begin(); it != poptPaths.end(); it++)
             {
                 wstring wlibname = it->Get();
-                string libname = StrToMultibyte(wlibname);
+                string libname = StrToUTF8(wlibname);
                 gs_popt.m_handle.Open(libname.c_str());
                 if (!gs_popt.m_handle.IsOpen())
                 {
@@ -150,7 +150,7 @@ namespace SCXSystemLib
             for (vector<SCXFilePath>::iterator it = rpmPaths.begin(); it != rpmPaths.end(); it++)
             {
                 wstring wlibname = it->Get();
-                string libname = StrToMultibyte(wlibname);
+                string libname = StrToUTF8(wlibname);
                 gs_rpm.m_handle.Open(libname.c_str());
                 if (!gs_rpm.m_handle.IsOpen())
                 {
@@ -590,7 +590,7 @@ Homepage: http://nfs.sourceforge.net/
             throw SCXInternalErrorException(UnexpectedErrno(L"dup(1) failed", errno), SCXSRCLOCATION);
         }
         // Open new stdout destination.
-        int fileFD = open(SCXCoreLib::StrToMultibyte(tempFileName).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRUSR | S_IWUSR);
+        int fileFD = open(SCXCoreLib::StrToUTF8(tempFileName).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fileFD == -1)
         {
             throw SCXInternalErrorException(UnexpectedErrno(L"open(" + tempFileName + L") failed", errno), SCXSRCLOCATION);
@@ -684,7 +684,7 @@ Summary:%{Summary}\n\
 ";
 
         int argc = 4;
-        std::string nSoftwareName = SCXCoreLib::StrToMultibyte(softwareName);
+        std::string nSoftwareName = SCXCoreLib::StrToUTF8(softwareName);
         char * argv[] = {const_cast<char*>(rpmCommandName.c_str()),
             const_cast<char*>(rpmCommandType.c_str()),
             const_cast<char*>(rpmQueryFormat.c_str()),
@@ -757,8 +757,8 @@ Summary:%{Summary}\n\
                 std::transform(sInstallDate.begin(), sInstallDate.end(), sInstallDate.begin(), InstalledSoftwareDependencies::SemiToColon);
 
                 const wchar_t * sDateTime = sInstallDate.c_str();
-                const char * strpResult = strptime(StrToMultibyte(sDateTime).c_str(), "%x %X", &installtm);
-                const std::wstring wStrpResult = StrFromMultibyte(strpResult);
+                const char * strpResult = strptime(StrToUTF8(sDateTime).c_str(), "%x %X", &installtm);
+                const std::wstring wStrpResult = StrFromUTF8(strpResult);
                 const wchar_t * sRet  = wStrpResult.c_str();
                 if (sRet >= sDateTime + sInstallDate.length())
                 {
@@ -861,7 +861,7 @@ Summary:%{Summary}\n\
             {
                 if (!!processOutput)
                 {
-                    wistringstream lines(StrFromMultibyte(processOutput.str()));
+                    wistringstream lines(StrFromUTF8(processOutput.str()));
                     wstring line;
 
                     if (!lines) 
@@ -906,7 +906,7 @@ Summary:%{Summary}\n\
             {
                 if (!!processOutput)
                 {
-                    wistringstream lines(StrFromMultibyte(processOutput.str()));
+                    wistringstream lines(StrFromUTF8(processOutput.str()));
                     wstring line;
 
                     if (!lines) 
@@ -1012,7 +1012,7 @@ Summary:%{Summary}\n\
 
         bool fRet = false;
     
-        std::wifstream fsIndex(StrToMultibyte(indexFile).c_str());
+        std::wifstream fsIndex(StrToUTF8(indexFile).c_str());
         wstring propertyKey;
         wstring propertyValue;
         int  size = 0;

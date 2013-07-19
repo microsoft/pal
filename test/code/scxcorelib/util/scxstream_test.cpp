@@ -195,7 +195,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             vector<wstring> linesExpected;
             CPPUNIT_ASSERT(linesRead == linesExpected);
         } catch (SCXException& e) {
-            cout << StrToMultibyte(e.What()) <<  " occured at " << StrToMultibyte(e.Where());
+            cout << StrToUTF8(e.What()) <<  " occured at " << StrToUTF8(e.Where());
             CPPUNIT_ASSERT(!"throws exception");
         }
     }
@@ -243,7 +243,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             unicodeChar = SCXStream::ReadCharAsUTF8(source);
             CPPUNIT_ASSERT(unicodeChar == 'B');
         } catch (SCXException& e) {
-            cout << StrToMultibyte(e.What()) <<  " occured at " << StrToMultibyte(e.Where());
+            cout << StrToUTF8(e.What()) <<  " occured at " << StrToUTF8(e.Where());
             CPPUNIT_ASSERT(!"throws exception");
         }
     }
@@ -313,7 +313,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             SCXStream::ReadLineAsUTF8(source, line, nlf);
             CPPUNIT_ASSERT(line == L"Row 9" && nlf == SCXStream::eUnknown);
         } catch (SCXException& e) {
-            cout << StrToMultibyte(e.What()) <<  " occured at " << StrToMultibyte(e.Where());
+            cout << StrToUTF8(e.What()) <<  " occured at " << StrToUTF8(e.Where());
             CPPUNIT_ASSERT(!"throws exception");
         }
     }
@@ -338,7 +338,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             SCXStream::ReadLineAsUTF8(source, line, nlf);
             CPPUNIT_ASSERT(line == L"Row 2" && nlf == SCXStream::eUnknown);
         } catch (SCXException& e) {
-            cout << StrToMultibyte(e.What()) <<  " occured at " << StrToMultibyte(e.Where());
+            cout << StrToUTF8(e.What()) <<  " occured at " << StrToUTF8(e.Where());
             CPPUNIT_ASSERT(!"throws exception");
         }
     }
@@ -356,7 +356,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             linesExpected.push_back(L"Row 2");
             CPPUNIT_ASSERT(linesRead == linesExpected && nlfs.count(SCXStream::eCR) == 1);
         } catch (SCXException& e) {
-            cout << StrToMultibyte(e.What()) <<  " occured at " << StrToMultibyte(e.Where());
+            cout << StrToUTF8(e.What()) <<  " occured at " << StrToUTF8(e.Where());
             CPPUNIT_ASSERT(!"throws exception");
         }
     }
@@ -370,7 +370,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             vector<wstring> linesExpected;
             CPPUNIT_ASSERT(linesRead == linesExpected);
         } catch (SCXException& e) {
-            cout << StrToMultibyte(e.What()) <<  " occured at " << StrToMultibyte(e.Where());
+            cout << StrToUTF8(e.What()) <<  " occured at " << StrToUTF8(e.Where());
             CPPUNIT_ASSERT(!"throws exception");
         }
     }
@@ -468,7 +468,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             SCXStream::ReadLineAsUTF8(source, line, nlf);
             CPPUNIT_ASSERT(line == L"Row 2" && nlf == SCXStream::eUnknown);
         } catch (SCXException& e) {
-            cout << StrToMultibyte(e.What()) <<  " occured at " << StrToMultibyte(e.Where());
+            cout << StrToUTF8(e.What()) <<  " occured at " << StrToUTF8(e.Where());
             CPPUNIT_ASSERT(!"throws exception");
         }
     }
@@ -540,7 +540,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
             } catch (SCXException& e) {
                 wostringstream ss;
                 ss << e.What() << "--" << e.Where();
-                CPPUNIT_FAIL( StrToMultibyte(ss.str()) );
+                CPPUNIT_FAIL( StrToUTF8(ss.str()) );
             }
             CheckEnvironmentLocaleConversion(intstr); 
         }
@@ -553,7 +553,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
     void CheckEnvironmentLocaleConversion(const wstring &text) {
         const string filename = "CheckEnvironmentLocaleConversion";
         // Make sure the file is deleted 
-        SelfDeletingFilePath RAIIFile(StrFromMultibyte(filename));
+        SelfDeletingFilePath RAIIFile(StrFromUTF8(filename));
         wofstream outfs(filename.c_str(), ios_base::out);
 
         outfs << text.c_str();
@@ -731,7 +731,7 @@ class SCXStreamTest : public CPPUNIT_NS::TestFixture
                 reference << c;
             }
             target.str(L"");
-            adapter << StrToMultibyte(reference.str()).c_str();
+            adapter << StrToUTF8(reference.str()).c_str();
             adapter.flush();
             CPPUNIT_ASSERT(target.str() == reference.str());
         }

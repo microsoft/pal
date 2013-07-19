@@ -186,16 +186,16 @@ namespace SCXSystemLib
                strncpy(m_PathName, pathname, MAXPATHLEN);
                SCXASSERT(0 == strncmp(m_PathName, pathname, MAXPATHLEN));
                m_PathName[MAXPATHLEN - 1] = '\0'; // z-term in case original string was not z-term'ed.
-               SCX_LOGTRACE(m_log, SCXCoreLib::StrFromMultibyte(std::string("Opened \"") + pathname + " flags: ")
+               SCX_LOGTRACE(m_log, SCXCoreLib::StrFromUTF8(std::string("Opened \"") + pathname + " flags: ")
                             + SCXCoreLib::StrFrom(flags)
                             + L" stored as\""
-                            + SCXCoreLib::StrFromMultibyte(m_PathName)
+                            + SCXCoreLib::StrFromUTF8(m_PathName)
                             + L"\"");
           }
           else
           {
                fRet = false;
-               SCX_LOGERROR(m_log, SCXCoreLib::StrFromMultibyte(std::string("Failed to open \"") + pathname + "\" flags: ") + SCXCoreLib::StrFrom(flags));
+               SCX_LOGERROR(m_log, SCXCoreLib::StrFromUTF8(std::string("Failed to open \"") + pathname + "\" flags: ") + SCXCoreLib::StrFrom(flags));
           }
 
           return fRet;
@@ -221,11 +221,11 @@ namespace SCXSystemLib
                if (CLOSED_DESCRIPTOR != (fd = ::open(m_PathName, m_OpenFlags)))
                {
                     m_fd = fd;
-                    SCX_LOGTRACE(m_log, SCXCoreLib::StrFromMultibyte(std::string("re-opened \"") + m_PathName + "\" flags: ") + SCXCoreLib::StrFrom(m_OpenFlags));
+                    SCX_LOGTRACE(m_log, SCXCoreLib::StrFromUTF8(std::string("re-opened \"") + m_PathName + "\" flags: ") + SCXCoreLib::StrFrom(m_OpenFlags));
                }
                else
                {
-                    SCX_LOGERROR(m_log, SCXCoreLib::StrFromMultibyte(std::string("Failed to re-open \"") + m_PathName + "\" flags: ") + SCXCoreLib::StrFrom(m_OpenFlags));
+                    SCX_LOGERROR(m_log, SCXCoreLib::StrFromUTF8(std::string("Failed to re-open \"") + m_PathName + "\" flags: ") + SCXCoreLib::StrFrom(m_OpenFlags));
                }
           }
      }
@@ -281,7 +281,7 @@ namespace SCXSystemLib
                this->reopen();
                rc = (m_fd == CLOSED_DESCRIPTOR) ? -1 : 0;
                // Preserve errno
-               SCX_LOG(m_log, SCXCoreLib::eTrace, SCXCoreLib::StrFromMultibyte(std::string("Opened \"") + m_PathName + "\" rc: ") + SCXCoreLib::StrFrom(rc));
+               SCX_LOG(m_log, SCXCoreLib::eTrace, SCXCoreLib::StrFromUTF8(std::string("Opened \"") + m_PathName + "\" rc: ") + SCXCoreLib::StrFrom(rc));
           }
 
           if (rc != -1)
@@ -323,7 +323,7 @@ namespace SCXSystemLib
                this->reopen();
                rc = (m_fd == CLOSED_DESCRIPTOR) ? -1 : 0;
                // Preserve errno
-               SCX_LOGTRACE(m_log, SCXCoreLib::StrFromMultibyte(std::string("Opened \"") + m_PathName + "\" rc: ") + SCXCoreLib::StrFrom(rc));
+               SCX_LOGTRACE(m_log, SCXCoreLib::StrFromUTF8(std::string("Opened \"") + m_PathName + "\" rc: ") + SCXCoreLib::StrFrom(rc));
           }
 
           if (rc != -1)
@@ -510,8 +510,8 @@ namespace SCXSystemLib
                          std::string device(p+vmt->vmt_data[VMT_OBJECT].vmt_off, vmt->vmt_data[VMT_OBJECT].vmt_size);
                          std::string mountPoint(p+vmt->vmt_data[VMT_STUB].vmt_off, vmt->vmt_data[VMT_STUB].vmt_size);
 
-                         entry.device = SCXCoreLib::StrFromMultibyte(device);
-                         entry.mountPoint = SCXCoreLib::StrFromMultibyte(mountPoint);
+                         entry.device = SCXCoreLib::StrFromUTF8(device);
+                         entry.mountPoint = SCXCoreLib::StrFromUTF8(mountPoint);
                          entry.fileSystem = m_fsMap.find(fs)->second;
                          m_MntTab.push_back(entry);
                     }
@@ -869,7 +869,7 @@ namespace SCXSystemLib
                int r = perfstat_disk(&id, &data, sizeof(data), 1);
                if (1 == r && 0 != strncmp(data.name, "cd", 2)) // TODO: better way to exclude CD/DVD!
                {
-                    name = SCXCoreLib::StrFromMultibyte(data.name);
+                    name = SCXCoreLib::StrFromUTF8(data.name);
                     devices[name] = L"/dev/" + name;
                }
                // TODO: Error handling?
@@ -908,7 +908,7 @@ namespace SCXSystemLib
                          {
                               rawDevice = SCXCoreLib::StrAppend(L"/dev/rdisk/", path.GetFilename());
                          }
-                         if (this->open(SCXCoreLib::StrToMultibyte(rawDevice).c_str(), O_RDONLY))
+                         if (this->open(SCXCoreLib::StrToUTF8(rawDevice).c_str(), O_RDONLY))
                          {
                               devices[name] = path.Get();
                               this->close();
@@ -1045,7 +1045,7 @@ namespace SCXSystemLib
         std::wstringstream out;
 
         SCXStatVfs fsStats;
-        if (statvfs(SCXCoreLib::StrToMultibyte(mountpoint).c_str(), &fsStats) != 0)
+        if (statvfs(SCXCoreLib::StrToUTF8(mountpoint).c_str(), &fsStats) != 0)
         {
             std::wstringstream message;
             message << L"statvfs failed for device " << dev_path
@@ -1188,7 +1188,7 @@ namespace SCXSystemLib
 
         char buf[1024];
         memset(buf, 0, sizeof(buf));
-        if (-1 == readlink(SCXCoreLib::StrToMultibyte(dpath).c_str(), buf, sizeof(buf)))
+        if (-1 == readlink(SCXCoreLib::StrToUTF8(dpath).c_str(), buf, sizeof(buf)))
         {
             std::wstringstream message;
             message << L"readlink failed for " << (isDisk ? L"disk" : L"logical") << L" device path "
@@ -1201,7 +1201,7 @@ namespace SCXSystemLib
             throw SCXCoreLib::SCXErrnoException(message.str(), errno, SCXSRCLOCATION);
         }
 
-        SCXCoreLib::SCXFilePath link_path(SCXCoreLib::StrFromMultibyte(buf));
+        SCXCoreLib::SCXFilePath link_path(SCXCoreLib::StrFromUTF8(buf));
         if (link_path.GetDirectory().find(L"pseudo") != std::wstring::npos)
         {
             // there is no way to determine the the kstat module, instance and

@@ -88,9 +88,9 @@ namespace SCXCoreLib
 
         ss << 
             L"Conditon: " <<
-            SCXCoreLib::StrFromMultibyte(c ? c : "") << 
+            SCXCoreLib::StrFromUTF8(c ? c : "") << 
             L"; File: " <<
-            SCXCoreLib::StrFromMultibyte(f ? f : "") <<
+            SCXCoreLib::StrFromUTF8(f ? f : "") <<
             L": " <<
             l <<
             L"; " << 

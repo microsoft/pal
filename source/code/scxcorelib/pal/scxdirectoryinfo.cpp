@@ -112,7 +112,7 @@ namespace
         virtual void UpdateStat(const SCXCoreLib::SCXFilePath& path)
         {
             
-            if (0 == DoStat(SCXCoreLib::StrToMultibyte(path.Get()).c_str()))
+            if (0 == DoStat(SCXCoreLib::StrToUTF8(path.Get()).c_str()))
             {
                 if (errno == ENOENT)
                 { // Someone has removed the file before we got a chance to look at it. silently ignore
@@ -439,7 +439,7 @@ namespace
 
             // Extract "char *" representation of directory name from SCXFilePath.
             std::wstring wdirname(path.GetDirectory());
-            std::string dirname(SCXCoreLib::StrToMultibyte(wdirname)); // May throw, but that's ok?
+            std::string dirname(SCXCoreLib::StrToUTF8(wdirname)); // May throw, but that's ok?
             strncpy(filenamebuf, dirname.c_str(), sizeof(filenamebuf));
             // In the future I expect to be able to just do the following and be done with it
             // path.GetLocalEncoding(filenamebuf, sizeof(filenamebuf));
@@ -463,12 +463,12 @@ namespace
                 std::string errtxt(strerror(eno));
 
                 if (eno == EACCES || eno == ENOTDIR) {
-                    throw SCXCoreLib::SCXInvalidArgumentException(wdirname, SCXCoreLib::StrFromMultibyte(errtxt), SCXSRCLOCATION);
+                    throw SCXCoreLib::SCXInvalidArgumentException(wdirname, SCXCoreLib::StrFromUTF8(errtxt), SCXSRCLOCATION);
                 } else {
                     // All other errno's are resource related. Memory, descriptors, etc.
                     // Note that the parameters supplied to the exception are not a very good
                     // match to what it expects.
-                    throw SCXCoreLib::SCXResourceExhaustedException(SCXCoreLib::StrFromMultibyte(errtxt), wdirname, SCXSRCLOCATION);
+                    throw SCXCoreLib::SCXResourceExhaustedException(SCXCoreLib::StrFromUTF8(errtxt), wdirname, SCXSRCLOCATION);
                 }
             }
 
@@ -534,7 +534,7 @@ namespace
 
                 // make new SCXFilePath structure with current path and filename, add to result
                 std::string dname(dentp->d_name);
-                std::wstring wdname(SCXCoreLib::StrFromMultibyte(dname));
+                std::wstring wdname(SCXCoreLib::StrFromUTF8(dname));
 
                 SCXCoreLib::SCXFilePath f(path);             // Use current path and filename
                 if (isdir) {

@@ -49,7 +49,9 @@ namespace SCXCoreLib
 
     std::wstring StrFromMultibyte(const std::string& str, bool useDefaultLocale = false);
     std::wstring StrFromMultibyteNoThrow(const std::string& str);
+// #ifdef USE_STR_TO_MULTIBYTE
     std::string StrToMultibyte(const std::wstring& str, bool useDefaultLocale = false);
+// #endif
 
     std::wstring StrTrimL(const std::wstring& str);
     std::wstring StrTrimR(const std::wstring& str);

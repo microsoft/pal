@@ -144,7 +144,7 @@ public:
         if (SCXCoreLib::SCXAssertCounter::GetFailedAsserts() > 0)
         {        
             m_eventManager->addFailure(test, new SCXUnexpectedAssertionFailureException(
-                test->getName() + "; " + SCXCoreLib::StrToMultibyte(SCXCoreLib::SCXAssertCounter::GetLastMessage()) ));
+                test->getName() + "; " + SCXCoreLib::StrToUTF8(SCXCoreLib::SCXAssertCounter::GetLastMessage()) ));
         }
         BriefTestProgressListener::endTest(test);
     }
@@ -198,7 +198,7 @@ int main (int argc, char** argv)
                 scxoutDir += cPathDelim;
             }
 /*            SCXCoreLib::SCXLogBackendSimple::s_configFileName = scxoutDir + "scxlog.conf";
-              SCXCoreLib::SCXLogBackendSimple::s_logFileName = SCXCoreLib::StrFromMultibyte(scxoutDir + "scx.log");*/
+              SCXCoreLib::SCXLogBackendSimple::s_logFileName = SCXCoreLib::StrFromUTF8(scxoutDir + "scx.log");*/
         }
         else if (0 == strncmp(argv[i], "-test=", strlen("-test=")))
         {

@@ -543,7 +543,7 @@ namespace SCXSystemLib
         for(size_t i=0; i < files.size(); ++i)
         {
             struct stat s;
-            if (0 == m_deps->lstat(SCXCoreLib::StrToMultibyte(files[i].Get()).c_str(), &s))
+            if (0 == m_deps->lstat(SCXCoreLib::StrToUTF8(files[i].Get()).c_str(), &s))
             {
                 m_pathToRdev[files[i].Get()] = s.st_rdev;
             }

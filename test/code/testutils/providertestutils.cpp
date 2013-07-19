@@ -182,7 +182,7 @@ MI_Result TestableInstance::FindProperty(const char* name, struct PropertyInfo& 
         // Did we find the field being requested?
         if (0 == strcmp(name, pd->name))
         {
-            info.name = SCXCoreLib::StrFromMultibyte(std::string(pd->name));
+            info.name = SCXCoreLib::StrFromUTF8(std::string(pd->name));
             info.isKey = (pd->flags & MI_FLAG_KEY);
             info.type = static_cast<MI_Type> (pd->type);
             Field_Extract(field, info.type, &info.value, &info.exists, &info.flags);
@@ -211,7 +211,7 @@ MI_Result TestableInstance::FindProperty(MI_Uint32 index, struct PropertyInfo& i
         {
             if (index == propCount)
             {
-                info.name = SCXCoreLib::StrFromMultibyte(std::string(pd->name));
+                info.name = SCXCoreLib::StrFromUTF8(std::string(pd->name));
                 info.isKey = (pd->flags & MI_FLAG_KEY);
                 info.type = static_cast<MI_Type> (pd->type);
                 Field_Extract(field, info.type, &info.value, &info.exists, &info.flags);
@@ -239,11 +239,11 @@ std::wstring TestableInstance::GetKey(const wchar_t *name, std::wstring errMsg) 
 {
     struct PropertyInfo info;
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK,
-        FindProperty(SCXCoreLib::StrToMultibyte(name).c_str(), info));
+        FindProperty(SCXCoreLib::StrToUTF8(name).c_str(), info));
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, info.isKey);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRING, info.type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, info.exists);
-    return SCXCoreLib::StrFromMultibyte(std::string(info.value.string));
+    return SCXCoreLib::StrFromUTF8(std::string(info.value.string));
 }
 
 void TestableInstance::GetKey(MI_Uint32 index, std::wstring &name, std::wstring &value, std::wstring errMsg) const
@@ -254,7 +254,7 @@ void TestableInstance::GetKey(MI_Uint32 index, std::wstring &name, std::wstring 
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_STRING, info.type);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, info.exists);
     name = info.name;
-    value = SCXCoreLib::StrFromMultibyte(std::string(info.value.string));
+    value = SCXCoreLib::StrFromUTF8(std::string(info.value.string));
 }
 
 std::wstring TestableInstance::GetKeyName(MI_Uint32 index, std::wstring errMsg) const
@@ -421,7 +421,7 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
     {
         TestableInstance::PropertyInfo info;
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, instance.FindProperty(i, info));
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Property mismatch: " + SCXCoreLib::StrToMultibyte(info.name),
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Property mismatch: " + SCXCoreLib::StrToUTF8(info.name),
             1u, expectedProperties.count(info.name));
     }
 
@@ -430,9 +430,9 @@ void VerifyInstancePropertyNames(const TestableInstance &instance, const std::ws
          iter != expectedProperties.end(); ++iter)
     {
         TestableInstance::PropertyInfo info;
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Missing property: " + SCXCoreLib::StrToMultibyte(*iter),
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Missing property: " + SCXCoreLib::StrToUTF8(*iter),
             MI_RESULT_OK, instance.FindProperty((*iter).c_str(), info));
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Property exists flag not set: " + SCXCoreLib::StrToMultibyte(*iter),
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "Property exists flag not set: " + SCXCoreLib::StrToUTF8(*iter),
             true, info.exists);
     }
 }
@@ -474,17 +474,17 @@ std::wstring GetFQHostName(std::wstring errMsg)
     {
         std::string command = std::string("sh -c \"nslookup ") + hostName + " | grep \'Name:\' | awk \'{print $2}\'\"";
         std::istringstream processInput;
-        int status = SCXCoreLib::SCXProcess::Run(SCXCoreLib::StrFromMultibyte(command),
+        int status = SCXCoreLib::SCXProcess::Run(SCXCoreLib::StrFromUTF8(command),
             processInput, processOutput, processErr, 15000);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 0, status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE + "; stderr: " + processErr.str(), 0u, processErr.str().size());
-        fqHostName = SCXCoreLib::StrTrim(SCXCoreLib::StrFromMultibyte(processOutput.str()));
+        fqHostName = SCXCoreLib::StrTrim(SCXCoreLib::StrFromUTF8(processOutput.str()));
         fqHostName = SCXCoreLib::StrToLower(fqHostName);
     }
     catch(SCXCoreLib::SCXException &e)
     {
         fqHostName.clear();
-        CPPUNIT_FAIL(ERROR_MESSAGE + SCXCoreLib::StrToMultibyte(L" In GetFQHostName(), executing nslookup threw " +
+        CPPUNIT_FAIL(ERROR_MESSAGE + SCXCoreLib::StrToUTF8(L" In GetFQHostName(), executing nslookup threw " +
             e.What() + L" " + e.Where()) + "; stderr: " + processErr.str() + "; stdout: " + processOutput.str());
     }
     return fqHostName;
@@ -519,7 +519,7 @@ std::wstring GetDistributionName(std::wstring errMsg)
 #if defined(sun) || defined(aix) || defined(hpux)
     struct utsname utsName;
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 0 <= uname(&utsName));
-    distributionName = SCXCoreLib::StrFromMultibyte(utsName.sysname);
+    distributionName = SCXCoreLib::StrFromUTF8(utsName.sysname);
 #elif defined(linux)
 #if defined(PF_DISTRO_SUSE)
     distributionName =  L"SuSE Distribution";

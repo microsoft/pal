@@ -352,7 +352,7 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
         SCXFilePath systemEncodedFile(SearchExistingFilename(L"./testfiles/",
                                                              localeEncodedFileName));
         CPPUNIT_ASSERT_MESSAGE("Missing locale test file  " +
-                               StrToMultibyte(systemEncodedFile.Get()),
+                               StrToUTF8(systemEncodedFile.Get()),
                                SCXFile::Exists(systemEncodedFile));
 
         i = 0;
@@ -394,7 +394,7 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
         SCXFilePath isoEncodedFile(SearchExistingFilename(L"./testfiles/",
                                                           isoEncodedFileName));
         CPPUNIT_ASSERT_MESSAGE("Missing locale test file  " +
-                               StrToMultibyte(isoEncodedFile.Get()),
+                               StrToUTF8(isoEncodedFile.Get()),
                                SCXFile::Exists(isoEncodedFile));
 
 

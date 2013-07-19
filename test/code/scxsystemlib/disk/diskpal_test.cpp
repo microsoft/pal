@@ -51,7 +51,7 @@
 #endif
 
 using SCXCoreLib::SCXException;
-using SCXCoreLib::StrToMultibyte;
+using SCXCoreLib::StrToUTF8;
 
 #if defined(aix)
 class TestDiskDependDefault : public SCXSystemLib::DiskDependDefault
@@ -256,7 +256,7 @@ public:
                 SCXCoreLib::SCXHandle<TestDisk> disk(0);
                 memset(buf, 0, sizeof(buf));
                 fgets(buf, sizeof(buf), fp);
-                std::wstring line = SCXCoreLib::StrFromMultibyte(buf);
+                std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
                 SCXCoreLib::StrTokenize(line, parts, L" \n\t");
 #if defined(aix)
@@ -388,14 +388,14 @@ loop1      0      0       0       0      0      0       0       0      0      0
                          * we just bag it.
                          */
 
-                        if (0 > (fd = open(StrToMultibyte(id).c_str(), O_RDONLY)))
+                        if (0 > (fd = open(StrToUTF8(id).c_str(), O_RDONLY)))
                         {
                             /* Reconstruct the path from the name and try again */
                             /* Note that we need to check several slices if the disk does not use all of them. */
                             for (int i = 0; i<=9 && fd < 0; ++i)
                             {
                                 std::wstring rawDevice = L"/dev/rdsk/" + parts[10] + SCXCoreLib::StrAppend(L"s", i);
-                                if (0 > (fd = open(StrToMultibyte(rawDevice).c_str(), O_RDONLY)))
+                                if (0 > (fd = open(StrToUTF8(rawDevice).c_str(), O_RDONLY)))
                                 {
                                     if ((EIO != errno && ENXIO != errno) || 9 <= i) // EIO _or_ ENXIO is received if the slice is not used.
                                         break;  // will skip it
@@ -439,14 +439,14 @@ loop1      0      0       0       0      0      0       0       0      0      0
     {
         char buf[256];
         std::stringstream command("");
-        command << "grep -l " << SCXCoreLib::StrToMultibyte(path) << " /etc/lvmtab";
+        command << "grep -l " << SCXCoreLib::StrToUTF8(path) << " /etc/lvmtab";
         FILE *fp = popen(command.str().c_str(), "r");
         
         if (0 != fp)
         {
             memset(buf, 0, sizeof(buf));
             fgets(buf, sizeof(buf), fp);
-            std::wstring line = SCXCoreLib::StrTrim(SCXCoreLib::StrFromMultibyte(buf));
+            std::wstring line = SCXCoreLib::StrTrim(SCXCoreLib::StrFromUTF8(buf));
             if (line == L"/etc/lvmtab")
             {
                 pclose(fp);
@@ -485,7 +485,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
                 SCXCoreLib::SCXHandle<TestDisk> disk(0);
                 memset(buf, 0, sizeof(buf));
                 fgets(buf, sizeof(buf), fp);
-                std::wstring line = SCXCoreLib::StrFromMultibyte(buf);
+                std::wstring line = SCXCoreLib::StrFromUTF8(buf);
 
 #if !defined(sun)
                 std::vector<std::wstring> parts;
@@ -643,7 +643,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
             disk->m_blockSize = 4096; 
             continue;
 #endif
-            std::string mp = SCXCoreLib::StrToMultibyte(disk->m_mountPoint);
+            std::string mp = SCXCoreLib::StrToUTF8(disk->m_mountPoint);
 #if defined(hpux) || defined(sun)
             command << "df -g " << mp;
 #elif defined(linux)
@@ -691,7 +691,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
             {
                 memset(buf, 0, sizeof(buf));
                 fgets(buf, sizeof(buf), fp);
-                std::wstring line = SCXCoreLib::StrFromMultibyte(buf);
+                std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
 #if defined(sun)
                 SCXCoreLib::StrTokenize(line, parts, L" \n\t");
@@ -735,7 +735,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
             {
                 memset(buf, 0, sizeof(buf));
                 fgets(buf, sizeof(buf), fp);
-                std::wstring line = SCXCoreLib::StrFromMultibyte(buf);
+                std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
                 SCXCoreLib::StrTokenize(line, parts, L" \n\t");
                 if (parts.size() > 3)
@@ -792,7 +792,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
             {
                 memset(buf, 0, sizeof(buf));
                 fgets(buf, sizeof(buf), fp);
-                std::wstring line = SCXCoreLib::StrFromMultibyte(buf);
+                std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
                 SCXCoreLib::StrTokenize(line, parts, L" \n\t");
                 if (parts.size() > 3)
@@ -1173,7 +1173,7 @@ public:
         for (int i = 0; FS[i].size() != 0; i++)
         {
             std::string msg = "File system should be ignored: ";
-            msg.append(SCXCoreLib::StrToMultibyte(FS[i]));
+            msg.append(SCXCoreLib::StrToUTF8(FS[i]));
             CPPUNIT_ASSERT_MESSAGE(msg, deps.FileSystemIgnored(FS[i]));
         }
     }
@@ -1192,7 +1192,7 @@ public:
         {
             std::wstring fs = RandomizeCase(FS[i]);
             std::string msg = "File system should NOT be ignored: ";
-            msg.append(SCXCoreLib::StrToMultibyte(fs));
+            msg.append(SCXCoreLib::StrToUTF8(fs));
             CPPUNIT_ASSERT_MESSAGE(msg, ! deps.FileSystemIgnored(fs));
         }
     }
@@ -1210,7 +1210,7 @@ public:
         {
             std::wstring fs = RandomizeCase(FS[i]);
             std::string msg = "File system used: ";
-            msg.append(SCXCoreLib::StrToMultibyte(fs));
+            msg.append(SCXCoreLib::StrToUTF8(fs));
             CPPUNIT_ASSERT_MESSAGE(msg, ! deps.LinkToPhysicalExists(fs, L"diff", L"erent"));
         }
     }
@@ -1234,7 +1234,7 @@ public:
         SCXCoreLib::SCXLogItem i = logframework.GetLastLogItem();
         CPPUNIT_ASSERT_EQUAL(SCXCoreLib::eWarning, i.GetSeverity());
         std::wstring expected(L"No link exists between the logical device \"/\" at mount point \"/\" with filesystem \"something\". Some statistics will be unavailable.");
-        CPPUNIT_ASSERT_MESSAGE("Expected: \"" + StrToMultibyte(expected) + "\"\nReceived: \"" + StrToMultibyte(i.GetMessage()) + "\"",
+        CPPUNIT_ASSERT_MESSAGE("Expected: \"" + StrToUTF8(expected) + "\"\nReceived: \"" + StrToUTF8(i.GetMessage()) + "\"",
                                expected == i.GetMessage());
     }
 
@@ -1295,7 +1295,7 @@ public:
         {
             std::wstring fs = RandomizeCase(FS[i]);
             std::string msg = "File system should be ignored: ";
-            msg.append(SCXCoreLib::StrToMultibyte(fs));
+            msg.append(SCXCoreLib::StrToUTF8(fs));
             CPPUNIT_ASSERT_MESSAGE(msg, deps.FileSystemIgnored(fs));
         }
     }
@@ -1359,7 +1359,7 @@ public:
                         m_diskEnumPhysical->GetInstance(j)->GetDiskDeviceID(dev);
                     }
                 }
-                CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(GetExpectFoundPhysical(disks1)), 0 != disk);
+                CPPUNIT_ASSERT_MESSAGE(StrToUTF8(GetExpectFoundPhysical(disks1)), 0 != disk);
                 CPPUNIT_ASSERT(td1->m_dev == td2->m_dev);
                 std::wstring diskDevice;
                 CPPUNIT_ASSERT(disk->GetDiskDeviceID(diskDevice));
@@ -1376,7 +1376,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToMultibyte(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
         }
     }
 
@@ -1461,7 +1461,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToMultibyte(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
         }
     }
 
@@ -1505,7 +1505,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToMultibyte(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
         }
     }
 
@@ -1531,7 +1531,7 @@ public:
             {
                 SCXCoreLib::SCXHandle<TestDisk> td = disks.physical[i];
                 SCXCoreLib::SCXHandle<SCXSystemLib::StatisticalPhysicalDiskInstance> disk = m_diskEnumPhysical->FindDiskByDevice(td->m_dev);
-                CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(GetExpectFoundPhysical(disks)), 0 != disk);
+                CPPUNIT_ASSERT_MESSAGE(StrToUTF8(GetExpectFoundPhysical(disks)), 0 != disk);
 
                 // Disk size
                 scxulong mbFree, mbUsed;
@@ -1551,7 +1551,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToMultibyte(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
         }
     }
 
@@ -1607,7 +1607,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToMultibyte(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
         }
     }
 
@@ -1665,7 +1665,7 @@ public:
 
                     ss << "]";
 
-                    CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(ss.str()), 0 != disk);
+                    CPPUNIT_ASSERT_MESSAGE(StrToUTF8(ss.str()), 0 != disk);
                 }
                 CPPUNIT_ASSERT(disk->GetLastMetrics(td_pre->read.num,td_pre->write.num,td_pre->read.bytes,td_pre->write.bytes,td_pre->read.ms,td_pre->write.ms));
             }
@@ -1769,7 +1769,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToMultibyte(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
         }
     }
 
@@ -1955,7 +1955,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToMultibyte(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
         }
     }
 
@@ -2332,7 +2332,7 @@ public:
         for (size_t i = 0; i< numElements; i++)
         {
             std::string name = std::string(dev_array[i]);
-            CPPUNIT_ASSERT_MESSAGE("Cannot find disk with name " + name, m_diskEnumPhysical->FindDiskByDevice(L"/dev/" + SCXCoreLib::StrFromMultibyte(name)) != 0);       
+            CPPUNIT_ASSERT_MESSAGE("Cannot find disk with name " + name, m_diskEnumPhysical->FindDiskByDevice(L"/dev/" + SCXCoreLib::StrFromUTF8(name)) != 0);       
         }
 
         CPPUNIT_ASSERT_NO_THROW(m_diskEnumPhysical->Update(true));

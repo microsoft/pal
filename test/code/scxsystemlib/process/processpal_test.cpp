@@ -78,7 +78,7 @@ namespace SCXSystemLib
     {
     public:
         TestProcessInstance(bool inGlobal, zoneid_t zoneID)
-            : ProcessInstance(SCXProcess::GetCurrentProcessID(), StrToMultibyte(StrFrom(SCXProcess::GetCurrentProcessID())).c_str()),
+            : ProcessInstance(SCXProcess::GetCurrentProcessID(), StrToUTF8(StrFrom(SCXProcess::GetCurrentProcessID())).c_str()),
               m_inGlobalZone(inGlobal),
               m_zoneID(zoneID)
         { }
@@ -415,8 +415,8 @@ public:
         ctCurrentTime += timeFudge;
 
         errStream << std::endl;
-        errStream << "Boot time: " << StrToMultibyte(ctBootTime.ToExtendedISO8601()) << std::endl;
-        errStream << "Cur  time: " << StrToMultibyte(ctCurrentTime.ToExtendedISO8601()) << std::endl;
+        errStream << "Boot time: " << StrToUTF8(ctBootTime.ToExtendedISO8601()) << std::endl;
+        errStream << "Cur  time: " << StrToUTF8(ctCurrentTime.ToExtendedISO8601()) << std::endl;
 
         for (ProcessEnumeration::EntityIterator iter = m_procEnum->Begin(); iter != m_procEnum->End(); ++iter) {
             ostringstream subStream;
@@ -473,7 +473,7 @@ public:
 
             CPPUNIT_ASSERT(inst->GetCreationDate(ctTime));
             ctTime.MakeUTC();
-            subStream << ", CreationTime=" << StrToMultibyte(ctTime.ToExtendedISO8601());
+            subStream << ", CreationTime=" << StrToUTF8(ctTime.ToExtendedISO8601());
             // WI 18796: Don't bother validating process creation date/time.  In a VM enviroment,
             // it's just wrong too much, and never worked right for SLES 9 anyway.
 
@@ -482,7 +482,7 @@ public:
                 // If supported, it should be between boot time and now
                 ctTime.MakeUTC();
 
-                subStream << ", TermTime=" << StrToMultibyte(ctTime.ToExtendedISO8601());
+                subStream << ", TermTime=" << StrToUTF8(ctTime.ToExtendedISO8601());
                 SCXUNIT_ASSERT_BETWEEN_MESSAGE(subStream.str().c_str(), ctTime, ctBootTime, ctCurrentTime);
             }
 
@@ -513,7 +513,7 @@ public:
             if (inst->GetOtherExecutionDescription(wstrVal))
             {
                 // If platform supports this, it should return something
-                subStream << ", ExecDesc=\"" << StrToMultibyte(wstrVal) << "\"";
+                subStream << ", ExecDesc=\"" << StrToUTF8(wstrVal) << "\"";
                 CPPUNIT_ASSERT_MESSAGE(subStream.str().c_str(), wstrVal.size());
             }
 
@@ -1240,7 +1240,7 @@ public:
         m_procEnum->Update(true);
 
         std::vector<SCXCoreLib::SCXHandle<ProcessInstance> > namelist =
-            m_procEnum->Find(StrFromMultibyte(procname));
+            m_procEnum->Find(StrFromUTF8(procname));
         msg = "Failed to find process: '" + procname + "'";
         CPPUNIT_ASSERT_MESSAGE(msg.c_str(), namelist.size() == 1);
 
@@ -1312,7 +1312,7 @@ public:
         CPPUNIT_ASSERT(pid == curpid);
 
         std::vector<SCXCoreLib::SCXHandle<ProcessInstance> > namelist =
-            m_procEnum->Find(StrFromMultibyte(cmdname));
+            m_procEnum->Find(StrFromUTF8(cmdname));
         CPPUNIT_ASSERT(namelist.size() > 0);
 
         int found = 0;
@@ -1439,7 +1439,7 @@ public:
         m_procEnum->Update(true);
 
         std::vector<SCXCoreLib::SCXHandle<ProcessInstance> > namelist =
-            m_procEnum->Find(StrFromMultibyte(procname));
+            m_procEnum->Find(StrFromUTF8(procname));
         string msg = "Failed to find process: '" + procname + "'";
         CPPUNIT_ASSERT_MESSAGE(msg.c_str(), namelist.size() == 1);
 

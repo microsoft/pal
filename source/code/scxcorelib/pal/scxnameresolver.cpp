@@ -243,14 +243,14 @@ namespace SCXCoreLib
         {
             m_hostnameSource = eUname;
             m_hostname_raw = buf.nodename;
-            m_hostname = StrFromMultibyte(buf.nodename);
+            m_hostname = StrFromUTF8(buf.nodename);
         }
 
 #if defined(linux)
         if('\0' != buf.domainname[0]) 
         {
             m_domainnameSource = eUname;
-            m_domainname = StrFromMultibyte(buf.domainname, true);
+            m_domainname = StrFromUTF8(buf.domainname);
         }
 #endif
 
@@ -274,7 +274,7 @@ namespace SCXCoreLib
         if(0 == rc)
         {
             m_hostname_raw = std::string(&buf[0]);
-            m_hostname = StrFromMultibyte(&buf[0], true);
+            m_hostname = StrFromUTF8(&buf[0]);
             m_hostnameSource = eGethostname;
         }
     }
@@ -439,11 +439,11 @@ namespace SCXCoreLib
         struct hostent h;
         struct hostent * ph = 0;
         int herrno;
-        int rc = gethostbyname_r(StrToMultibyte(name, true).c_str(), &h, &abuf[0], bufsize,
+        int rc = gethostbyname_r(StrToUTF8(name).c_str(), &h, &abuf[0], bufsize,
                                  &ph, &herrno);
         if((0 == rc) && (0 != ph)) 
         {
-            return StrFromMultibyte(h.h_name, true);
+            return StrFromUTF8(h.h_name);
         }
         else if(ERANGE == rc)
         {
@@ -473,14 +473,14 @@ namespace SCXCoreLib
         
         struct hostent h;
         int herrno;
-        struct hostent *ph = gethostbyname_r(StrToMultibyte(name, true).c_str(),
+        struct hostent *ph = gethostbyname_r(StrToUTF8(name).c_str(),
                                              &h,
                                              &abuf[0],
                                              bufsize,
                                              &herrno);
         if(0 != ph)
         {
-            return StrFromMultibyte(h.h_name, true);
+            return StrFromUTF8(h.h_name);
         }
         return L"";
     }
@@ -496,10 +496,10 @@ namespace SCXCoreLib
     */
     std::wstring NameResolverInternal::GetHostByName(const std::wstring & name) const
     {
-        struct hostent *ph = gethostbyname(StrToMultibyte(name, true).c_str());
+        struct hostent *ph = gethostbyname(StrToUTF8(name).c_str());
         if(0 != ph)
         {
-            return StrFromMultibyte(ph->h_name, true);
+            return StrFromUTF8(ph->h_name);
         }
         return L"";
     }
@@ -516,12 +516,12 @@ namespace SCXCoreLib
     {
         struct hostent h;
         struct hostent_data h_data;
-        int res = gethostbyname_r(StrToMultibyte(name).c_str(),
+        int res = gethostbyname_r(StrToUTF8(name).c_str(),
                                   &h,
                                   &h_data);
         if(0 == res)
         {
-            return StrFromMultibyte(h.h_name, true);
+            return StrFromUTF8(h.h_name);
         }
         return L"";
     }
@@ -610,7 +610,7 @@ namespace SCXCoreLib
         std::string line;
         while( is && getline(is, line) )
         {
-            std::wstring wline = SCXCoreLib::StrFromMultibyte(line.c_str(), true);
+            std::wstring wline = SCXCoreLib::StrFromUTF8(line.c_str());
             std::wstring::size_type pos;
 
             // Strip off any comment ("#" and anything after it)
@@ -679,7 +679,7 @@ namespace SCXCoreLib
         string line;
         while( is && getline(is, line) )
         {
-            wstring wline = SCXCoreLib::StrFromMultibyte(line, true); 
+            wstring wline = SCXCoreLib::StrFromUTF8(line); 
 
             if(0 == wline.find(L"domain"))
             {

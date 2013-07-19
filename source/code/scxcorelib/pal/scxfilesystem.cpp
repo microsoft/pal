@@ -499,7 +499,7 @@ namespace SCXCoreLib {
        is temporary. Currently it assumes UTF8 encoding.
     */
     string SCXFileSystem::EncodePath(const SCXFilePath& path) {
-        return StrToMultibyte(path.Get());
+        return StrToUTF8(path.Get());
     }
 
     /*-----------------------------------------------------------*/
@@ -514,7 +514,7 @@ namespace SCXCoreLib {
        is temporary. Currently it assumes UTF8 encoding.
     */
     SCXFilePath SCXFileSystem::DecodePath(const string& path) {
-        return SCXFilePath(StrFromMultibyte(path));
+        return SCXFilePath(StrFromUTF8(path));
     }
 
     /*-----------------------------------------------------------*/

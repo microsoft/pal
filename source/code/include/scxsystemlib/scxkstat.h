@@ -105,7 +105,7 @@ namespace SCXSystemLib
               */
         virtual void* DataLookup(kstat_t* pKS, const std::wstring& statistic) {
             SCXCoreLib::SCXThreadLock lock(m_lock);
-            return kstat_data_lookup(pKS, const_cast<char*>(SCXCoreLib::StrToMultibyte(statistic).c_str()));
+            return kstat_data_lookup(pKS, const_cast<char*>(SCXCoreLib::StrToUTF8(statistic).c_str()));
         }
 
         private:
@@ -422,7 +422,7 @@ namespace SCXSystemLib
             std::ostringstream errmsg;
             errmsg << "Size of data for kstat module " << m_KstatPointer->ks_module
                    << " doesn't match datatype \"" << typeid(T).name() << "\":";
-            throw SCXCoreLib::SCXNotSupportedException(SCXCoreLib::StrFromMultibyte(
+            throw SCXCoreLib::SCXNotSupportedException(SCXCoreLib::StrFromUTF8(
                 errmsg.str()), SCXSRCLOCATION);
         }
 

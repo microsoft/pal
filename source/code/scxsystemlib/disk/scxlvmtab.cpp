@@ -71,7 +71,7 @@ namespace SCXSystemLib
             fs->seekg(file_pos);
             fs->read(volumeGroupRaw, sizeof(volumeGroupRaw)-1);
             file_pos += sizeof(volumeGroupRaw)-1;
-            vg.m_name = SCXCoreLib::StrFromMultibyte(std::string(volumeGroupRaw));
+            vg.m_name = SCXCoreLib::StrFromUTF8(std::string(volumeGroupRaw));
             SCX_LOGHYSTERICAL(m_log, L"SCXLvmTab:  Volume group name" + vg.m_name);
             // Skip 17 bytes
             file_pos += 17;
@@ -91,9 +91,9 @@ namespace SCXSystemLib
                 fs->seekg(file_pos);
                 fs->read(partitionRaw, sizeof(partitionRaw)-1);
                 file_pos += sizeof(partitionRaw)-1;
-                vg.m_part.push_back(SCXCoreLib::StrFromMultibyte(std::string(partitionRaw)));
+                vg.m_part.push_back(SCXCoreLib::StrFromUTF8(std::string(partitionRaw)));
                 SCX_LOGHYSTERICAL(m_log, L"SCXLvmTab:      Part: " + SCXCoreLib::StrFrom((int) (part_idx + 1)) + L": "
-                                  + SCXCoreLib::StrFromMultibyte(std::string(partitionRaw)));
+                                  + SCXCoreLib::StrFromUTF8(std::string(partitionRaw)));
                 // Skip 4 bytes.
                 file_pos += 4;
             }

@@ -130,12 +130,12 @@ namespace SCXSystemLib
                 {
                     continue;
                 }
-                if (strptime(SCXCoreLib::StrToMultibyte(tokens[2]).c_str(), "%x", &date) == 0)
+                if (strptime(SCXCoreLib::StrToUTF8(tokens[2]).c_str(), "%x", &date) == 0)
                 {
                     // If strptime could not determine localized date, default to %Y%m%d
                     date = parseYmd(tokens[2]);
                 }
-                strptime(SCXCoreLib::StrToMultibyte(tokens[3]).c_str(), "%X", &time);
+                strptime(SCXCoreLib::StrToUTF8(tokens[3]).c_str(), "%X", &time);
                 m_expiration = SCXCalendarTime(date.tm_year+1900, date.tm_mon+1, date.tm_mday, time.tm_hour, time.tm_min, 0, SCXRelativeTime());
             }
             else if (tokens[0].compare(L"renew") == 0)
@@ -147,12 +147,12 @@ namespace SCXSystemLib
                 {
                     continue;
                 }
-                if (strptime(SCXCoreLib::StrToMultibyte(tokens[2]).c_str(), "%x", &date) == 0)
+                if (strptime(SCXCoreLib::StrToUTF8(tokens[2]).c_str(), "%x", &date) == 0)
                 {
                     // If strptime could not determine localized date, default to %Y%m%d
                     date = parseYmd(tokens[2]);
                 }
-                strptime(SCXCoreLib::StrToMultibyte(tokens[3]).c_str(), "%X", &time);
+                strptime(SCXCoreLib::StrToUTF8(tokens[3]).c_str(), "%X", &time);
                 m_renew = SCXCalendarTime(date.tm_year+1900, date.tm_mon+1, date.tm_mday, time.tm_hour, time.tm_min, 0, SCXRelativeTime());
             }
         }
@@ -203,15 +203,15 @@ namespace SCXSystemLib
             }
             else if (tokens[0].compare(L"LEASEDFROM") == 0)
             {
-                sscanf(StrToMultibyte(tokens[1]).c_str(),"%d", &posixLeaseFrom);
+                sscanf(StrToUTF8(tokens[1]).c_str(),"%d", &posixLeaseFrom);
             }
             else if (tokens[0].compare(L"LEASETIME") == 0)
             {
-                sscanf(StrToMultibyte(tokens[1]).c_str(), "%d", &leaseTime);
+                sscanf(StrToUTF8(tokens[1]).c_str(), "%d", &leaseTime);
             }
             else if (tokens[0].compare(L"RENEWALTIME") == 0)
             {
-                sscanf(StrToMultibyte(tokens[1]).c_str(), "%d", &renewalTime);
+                sscanf(StrToUTF8(tokens[1]).c_str(), "%d", &renewalTime);
             }
             else if (tokens[0].compare(L"DHCPSID") == 0)
             {
@@ -347,7 +347,7 @@ namespace SCXSystemLib
             lines.clear();
             SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(dhcpResult, lines, nlfs);
             
-            std::wstring errOut = StrFromMultibyte(processErr.str());
+            std::wstring errOut = StrFromUTF8(processErr.str());
             for (int i = 0; i < (int) lines.size(); i++)
             {
                 StrTokenize(lines[i], tokens);
@@ -521,10 +521,10 @@ namespace SCXSystemLib
        struct tm edate;
        // This ugly thing is needed because strptime appears to choke on some legal strings
        // Try US date version, then localized date, then default %Y%m%d
-       if (strptime(SCXCoreLib::StrToMultibyte(date).c_str(), "%m/%d/%Y", &edate) == 0)
+       if (strptime(SCXCoreLib::StrToUTF8(date).c_str(), "%m/%d/%Y", &edate) == 0)
        {
            struct tm edateLoc;
-           if (strptime(SCXCoreLib::StrToMultibyte(date).c_str(), "%x", &edateLoc) == 0)
+           if (strptime(SCXCoreLib::StrToUTF8(date).c_str(), "%x", &edateLoc) == 0)
            {
                edate = parseYmd(date);
            }
@@ -535,7 +535,7 @@ namespace SCXSystemLib
        }
        
        struct tm etime;
-       strptime(SCXCoreLib::StrToMultibyte(time).c_str(), "%H:%M", &etime); // 24 hour clock
+       strptime(SCXCoreLib::StrToUTF8(time).c_str(), "%H:%M", &etime); // 24 hour clock
        
        return SCXCalendarTime(edate.tm_year+1900, edate.tm_mon+1, edate.tm_mday, etime.tm_hour, etime.tm_min, 0, SCXRelativeTime());
    }

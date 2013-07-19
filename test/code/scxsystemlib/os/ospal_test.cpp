@@ -175,7 +175,7 @@ public:
                 codePageSpecified ? StrFrom(TestValues[i].CodePage).compare(codeSet) != 0 : TestValues[i].CodePage != 0)
             {
                 std::string msg("Failure in LANG string parser test of LANG = ");
-                msg += StrToMultibyte(TestValues[i].LangStr);
+                msg += StrToUTF8(TestValues[i].LangStr);
                 CPPUNIT_FAIL(msg);
             }
         }

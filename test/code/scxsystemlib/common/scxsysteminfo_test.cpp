@@ -342,10 +342,10 @@ public:
             if (strlen(buf) > 0)
             {
                 std::vector<wstring> parts;
-                SCXCoreLib::StrTokenize(SCXCoreLib::StrFromMultibyte(buf), parts, L":");
+                SCXCoreLib::StrTokenize(SCXCoreLib::StrFromUTF8(buf), parts, L":");
 
                 // If we got what we expected, set the resultant bit size
-                if (parts[0] == SCXCoreLib::StrFromMultibyte(sysctlName))
+                if (parts[0] == SCXCoreLib::StrFromUTF8(sysctlName))
                 {
                     if (parts[1] == L"1")
                     {
@@ -503,8 +503,8 @@ public:
         // Note that we only test on the current platform.  Since the build is run
         // on all platforms, a full build on all platforms will test all platforms.
 
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(s_defaultSudoPath),
-                             StrToMultibyte(si.GetDefaultSudoPath()));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(s_defaultSudoPath),
+                             StrToUTF8(si.GetDefaultSudoPath()));
     }
 
     void TestGetShellCommandWithNoShellDefined()
@@ -516,7 +516,7 @@ public:
         // Verify that the shell properly defaults to sh
         SystemInfo si(deps);
         CPPUNIT_ASSERT_EQUAL(string("/bin/sh -c \"ls -lR\""),
-                             StrToMultibyte(si.GetShellCommand(L"ls -lR")));
+                             StrToUTF8(si.GetShellCommand(L"ls -lR")));
     }
 
     void TestGetShellCommandWithEmptyShellDefined()
@@ -529,7 +529,7 @@ public:
         // Verify that the shell properly defaults to sh
         SystemInfo si(deps);
         CPPUNIT_ASSERT_EQUAL(string("/bin/sh -c \"ls -lR\""),
-                             StrToMultibyte(si.GetShellCommand(L"ls -lR")));
+                             StrToUTF8(si.GetShellCommand(L"ls -lR")));
     }
 
     void TestGetShellCommandWithShellDefined()
@@ -542,7 +542,7 @@ public:
         // Verify that GetShellCommand() uses the ksh shell
         SystemInfo si(deps);
         CPPUNIT_ASSERT_EQUAL(string("/bin/ksh -c \"ls -lR\""),
-                             StrToMultibyte(si.GetShellCommand(L"ls -lR")));
+                             StrToUTF8(si.GetShellCommand(L"ls -lR")));
     }
 
     void TestGetElevatedCommandWithoutPrivs()
@@ -556,8 +556,8 @@ public:
         wstring expectedCommand(s_defaultSudoPath);
         expectedCommand.append(L" ls -lR");
 
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(expectedCommand),
-                             StrToMultibyte(si.GetElevatedCommand(wstring(L"ls -lR"))));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(expectedCommand),
+                             StrToUTF8(si.GetElevatedCommand(wstring(L"ls -lR"))));
     }
 
     void TestGetElevatedCommandWithoutPrivsAndShell()
@@ -575,8 +575,8 @@ public:
         wstring expectedCommand(s_defaultSudoPath);
         expectedCommand.append(L" ls -lR");
 
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(expectedCommand),
-                             StrToMultibyte(si.GetElevatedCommand(wstring(L"ls -lR"))));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(expectedCommand),
+                             StrToUTF8(si.GetElevatedCommand(wstring(L"ls -lR"))));
     }
 
     void TestGetElevatedCommandWithPrivs()
@@ -587,7 +587,7 @@ public:
 
         // If we're elevated, input and output commands should be identical ...
         SystemInfo si(deps);
-        CPPUNIT_ASSERT_EQUAL(string("ls -lR"), StrToMultibyte(si.GetElevatedCommand(L"ls -lR")));
+        CPPUNIT_ASSERT_EQUAL(string("ls -lR"), StrToUTF8(si.GetElevatedCommand(L"ls -lR")));
     }
 
     void TestGetElevatedCommandWithPrivsAndShell()
@@ -599,8 +599,8 @@ public:
         // Test TestGetElevatedCommandWithPrivs() tests the specific command.
         // Here, make sure that forcing a shell gives us a shell ...
         SystemInfo si(deps);
-        CPPUNIT_ASSERT_EQUAL(StrToMultibyte(si.GetShellCommand(L"ls -lR")),
-                             StrToMultibyte(si.GetElevatedCommand(si.GetShellCommand(L"ls -lR"))));
+        CPPUNIT_ASSERT_EQUAL(StrToUTF8(si.GetShellCommand(L"ls -lR")),
+                             StrToUTF8(si.GetElevatedCommand(si.GetShellCommand(L"ls -lR"))));
     }
 
 #if defined(aix)

@@ -16,6 +16,7 @@
 #include <scxcorelib/scxlogitem.h>
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxproductdependencies.h>
+#include <iomanip> // for setw
 
 #include <stdexcept>
 #include <stdlib.h>
@@ -35,7 +36,8 @@ namespace SCXCoreLib
         SCXLogBackend(),
         m_FilePath(),
         m_LogFileRunningNumber(1),
-        m_procStartTimestamp(SCXCalendarTime::CurrentUTC())
+        m_procStartTimestamp(SCXCalendarTime::CurrentUTC()),
+        m_LogAllCharacters(false)
     {
     }
 
@@ -49,7 +51,8 @@ namespace SCXCoreLib
         m_FilePath(filePath),
         m_FileStream(0),
         m_LogFileRunningNumber(1),
-        m_procStartTimestamp(SCXCalendarTime::CurrentUTC())
+        m_procStartTimestamp(SCXCalendarTime::CurrentUTC()),
+        m_LogAllCharacters(false)
     {
     }
 
@@ -140,6 +143,12 @@ namespace SCXCoreLib
             m_FilePath.Set(value);
             //AddUserNameToFilePath();
         }
+
+        if (L"LOGALLCHARACTERS" == key)
+        {
+            m_LogAllCharacters = true;
+            //AddUserNameToFilePath();
+        }
     }
 
     /*----------------------------------------------------------------------------*/
@@ -198,28 +207,46 @@ namespace SCXCoreLib
 
         // JWF -- Try and convert the string.  If this call fails, then we cannot print the string
         const std::wstring in_message(item.GetMessage());
-        std::wstring message(in_message);
+        std::wstring message;
 
         bool messageHadUnprintable = false;
-        const wchar_t replacementSymbol(L'?');
+
+        ss << L" [" << item.GetModule() << L":" << item.GetLocation().WhichLine() << L":" << SCXProcess::GetCurrentProcessID() << L":" << item.GetThreadId() << L"] ";
+
         for (size_t i = 0; i < in_message.size(); i++)
         {
             wchar_t currentChar = in_message[i];
 
-            if (currentChar < 32 || currentChar > 126)
+            if (!m_LogAllCharacters)
             {
-                message[i] = replacementSymbol;
-                messageHadUnprintable = true;
+                if (currentChar < 32 || currentChar > 126)
+                {
+                    ss << "[0x" << std::hex << std::setfill(L'0') << std::setw(3) << (unsigned short)currentChar << "]";
+                    messageHadUnprintable = true;
+                }
+                else
+                {
+                    ss << currentChar;
+                }
+            }
+            else
+            {
+                if (currentChar > 255)
+                {
+                    ss << "[0x" << std::hex << std::setfill(L'0') << std::setw(3) << (unsigned short)currentChar << "]";
+                    messageHadUnprintable = true;
+                }
+                else
+                {
+                    ss << currentChar;
+                }
             }
         }
+
         if (messageHadUnprintable)
         {
-            message += L" (* Message contained unprintable (?) characters *)";
+            ss << L" (* Message contained unprintable (?) characters *)";
         }
-
-        ss << L" [" << item.GetModule() << L":" << item.GetLocation().WhichLine() << L":" << SCXProcess::GetCurrentProcessID() << L":" << item.GetThreadId() << L"] " 
-         << message;
-         // << item.GetMessage();
 
         return ss.str();
     }

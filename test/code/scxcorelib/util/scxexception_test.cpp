@@ -704,7 +704,7 @@ class SCXExceptionCoverageCalls :public CPPUNIT_NS::TestFixture
     {
         wstring msg = L"\"" + what + L"\" not found in \"" + e->What() + L"\"";
         if ( ! what.empty()) {
-            CPPUNIT_ASSERT_MESSAGE(StrToMultibyte(msg), e->What().find(what) != wstring::npos);
+            CPPUNIT_ASSERT_MESSAGE(StrToUTF8(msg), e->What().find(what) != wstring::npos);
         }
     }
 
@@ -734,7 +734,7 @@ public:
         SCXHandle<SCXErrnoException> e(new SCXErrnoException(L"FUNCTION", EINVAL, SCXSRCLOCATION));
         VerifyException(e, L"FUNCTION");
         VerifyException(e, StrFrom(EINVAL));
-        VerifyException(e, StrFromMultibyte(strerror(EINVAL)));
+        VerifyException(e, StrFromUTF8(strerror(EINVAL)));
         CPPUNIT_ASSERT_EQUAL(EINVAL, e->ErrorNumber());
         CPPUNIT_ASSERT_EQUAL(string(strerror(EINVAL)), e->ErrorText());
     }
@@ -745,7 +745,7 @@ public:
         VerifyException(e, L"FUNCTION");
         VerifyException(e, L"PATH");
         VerifyException(e, StrFrom(EINVAL));
-        VerifyException(e, StrFromMultibyte(strerror(EINVAL)));
+        VerifyException(e, StrFromUTF8(strerror(EINVAL)));
         VerifyException(e, e->GetFnkcall());
         VerifyException(e, e->GetPath());
     }

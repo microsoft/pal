@@ -208,7 +208,7 @@ namespace SCXSystemLib
     void *SCXodm::Get(CLASS_SYMBOL cs, const std::wstring &wCriteria, void *returnData, eGetMode mode)
     {
         // Convert criteria into a form for the odm_get_* functions (non-const C-style string)
-        std::string sCriteria = SCXCoreLib::StrToMultibyte(wCriteria);
+        std::string sCriteria = SCXCoreLib::StrToUTF8(wCriteria);
         std::vector<char> criteria(sCriteria.c_str(), sCriteria.c_str() + sCriteria.length() + 1);
         return Get(cs, &criteria[0], returnData, mode);
     }

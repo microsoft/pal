@@ -41,13 +41,13 @@ namespace SCXCoreLib
 
         if (0 == m)
         {
-            errText = L"Assertion failed: " + SCXCoreLib::StrFromMultibyte(std::string(c)) + L", file "
-                + SCXCoreLib::StrFromMultibyte(std::string(f)) + L", line " + SCXCoreLib::StrFrom(l);
+            errText = L"Assertion failed: " + SCXCoreLib::StrFromUTF8(std::string(c)) + L", file "
+                + SCXCoreLib::StrFromUTF8(std::string(f)) + L", line " + SCXCoreLib::StrFrom(l);
         }
         else
         {
-            errText = L"Assertion failed: " + SCXCoreLib::StrFromMultibyte(std::string(c)) + L", file "
-                + SCXCoreLib::StrFromMultibyte(std::string(f)) + L", line " + SCXCoreLib::StrFrom(l)
+            errText = L"Assertion failed: " + SCXCoreLib::StrFromUTF8(std::string(c)) + L", file "
+                + SCXCoreLib::StrFromUTF8(std::string(f)) + L", line " + SCXCoreLib::StrFrom(l)
                 + L", Message: " + m;
         }
 

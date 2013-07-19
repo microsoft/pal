@@ -547,7 +547,7 @@ namespace SCXSystemLib
         unsigned int& osLanguage,
         wstring& codeSet)
     {
-        std::string localLangSetting = StrToMultibyte(langSetting);
+        std::string localLangSetting = StrToUTF8(langSetting);
         bool codePageSpecified = false;
 
         // set defaults
@@ -841,7 +841,7 @@ namespace SCXSystemLib
         char *sRet = getenv("LANG");
         if (sRet != NULL)
         {
-            lang = StrFromMultibyte(sRet);
+            lang = StrFromUTF8(sRet);
             if (!lang.empty())
             {
                 return true;
@@ -1064,11 +1064,11 @@ namespace SCXSystemLib
         #error Platform not supported
 #endif
 
-        wstring tmp( StrFromMultibyte(m_unameInfo.release) );
+        wstring tmp( StrFromUTF8(m_unameInfo.release) );
         tmp.append(L" ");
-        tmp.append( StrFromMultibyte(m_unameInfo.version) );
+        tmp.append( StrFromUTF8(m_unameInfo.version) );
         tmp.append(L" ");
-        tmp.append( StrFromMultibyte(m_unameInfo.machine) );
+        tmp.append( StrFromUTF8(m_unameInfo.machine) );
         tmp.append(L" ");
         tmp.append(m_osInfo.GetProcessor());
         tmp.append(L" ");
@@ -1103,7 +1103,7 @@ namespace SCXSystemLib
             oss << PF_MAJOR;
             oss << ".";
             oss << PF_MINOR;
-            ver.assign(StrFromMultibyte(oss.str()));
+            ver.assign(StrFromUTF8(oss.str()));
             fRet = true;
             
 #elif defined(PF_DISTRO_ULINUX)
@@ -1113,18 +1113,18 @@ namespace SCXSystemLib
             const char *sminv = strrchr(m_unameInfo.release, '.');
             if (sminv != NULL && sminv[1] != '\0')
             {
-                ver.assign(StrFromMultibyte(&sminv[1]));
+                ver.assign(StrFromUTF8(&sminv[1]));
             }
             else
             {
-                ver.assign(StrFromMultibyte(m_unameInfo.release));
+                ver.assign(StrFromUTF8(m_unameInfo.release));
             }
             fRet = true;
 #elif defined(aix)
             scxulong release = 0;
             scxulong version = 0;
-            wstringstream ssv(StrFromMultibyte(m_unameInfo.version));
-            wstringstream ssr(StrFromMultibyte(m_unameInfo.release));
+            wstringstream ssv(StrFromUTF8(m_unameInfo.version));
+            wstringstream ssr(StrFromUTF8(m_unameInfo.release));
             wstringstream ss;
             if ((ssv >> version) && (ssr >> release))
             {
@@ -1161,7 +1161,7 @@ namespace SCXSystemLib
 #if defined(SCX_UNIX)
         if (m_unameIsValid)
         {
-            buildNumber.assign(StrFromMultibyte(m_unameInfo.release));
+            buildNumber.assign(StrFromUTF8(m_unameInfo.release));
             fRet = true;
         }
 #else

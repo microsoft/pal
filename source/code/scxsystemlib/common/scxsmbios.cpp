@@ -256,7 +256,7 @@ namespace SCXSystemLib
         }
 
         std::string curString = reinterpret_cast<char*>(ptablebuf + curLength); 
-        strRet = StrFromMultibyte(curString);
+        strRet = StrFromUTF8(curString);
         SCX_LOGTRACE(m_log, StrAppend(L"ReadSpecifiedString() - ParsedStr is : ", strRet));
 
         return strRet;
