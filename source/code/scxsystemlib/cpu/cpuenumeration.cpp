@@ -345,14 +345,6 @@ namespace SCXSystemLib
         {
             CPUEnumerationThreadParam* params = new CPUEnumerationThreadParam(this);
             m_dataAquisitionThread = new SCXCoreLib::SCXThread(CPUEnumeration::DataAquisitionThreadBody, params);
-#if defined(aix)
-            // if the thread didn't start immediately, give it time to start, up to 1/2 second
-            int n = 0;
-            while (Size() == 0 && n < 100)
-            {
-                SCXCoreLib::SCXThread::Sleep(5);
-            }
-#endif
         }
     }
 
@@ -1082,21 +1074,8 @@ namespace SCXSystemLib
 
 #elif defined(aix)
 
-        unsigned int conf_cpus = 0;
-        unsigned int cpucount = 0;
-        perfstat_partition_total_t partTot;
-        int rc = m_deps->perfstat_partition_total(NULL, &partTot, (int)sizeof (partTot), 1);
-        if (rc)
-        {
-            cpucount = partTot.online_cpus;
-            conf_cpus = partTot.max_cpus;
-        }
-        else
-        {
-            wstring errmsg(L"perfstat_partition_total failed: " + StrFrom(rc));
-            SCX_LOGERROR(m_log, errmsg);
-            throw SCXInternalErrorException(errmsg, SCXSRCLOCATION);
-        }
+        unsigned int conf_cpus = m_deps->sysconf(_SC_NPROCESSORS_CONF);
+        unsigned int cpucount = ProcessorCountLogical(m_deps);
 
         /* Sanity check: The number of CPUs online can never be greater than
            the number of configured CPUs. This is a fatal error. */
