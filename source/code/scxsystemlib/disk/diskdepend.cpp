@@ -494,10 +494,12 @@ namespace SCXSystemLib
           {
                std::vector<char> buf(needed);
                char* p = &buf[0];
-
                // Returns number of structs in buffer; use that to limit data walk
                r = mntctl(MCTL_QUERY, needed, &buf[0]);
-
+               if (r < 0)
+               {
+                   SCX_LOGERROR(m_log, L"mntctl(MCTL_QUERY) failed with errno = " + SCXCoreLib::StrFrom(errno));
+               }
                for (int i = 0; i < r; i++)
                {
                     struct vmount* vmt = reinterpret_cast<struct vmount*>(p);
@@ -507,8 +509,8 @@ namespace SCXSystemLib
                         m_fsMap.find(fs) != m_fsMap.end())
                     {
                          MntTabEntry entry;
-                         std::string device(p+vmt->vmt_data[VMT_OBJECT].vmt_off, vmt->vmt_data[VMT_OBJECT].vmt_size);
-                         std::string mountPoint(p+vmt->vmt_data[VMT_STUB].vmt_off, vmt->vmt_data[VMT_STUB].vmt_size);
+                         std::string device(p + vmt->vmt_data[VMT_OBJECT].vmt_off);
+                         std::string mountPoint(p + vmt->vmt_data[VMT_STUB].vmt_off);
 
                          entry.device = SCXCoreLib::StrFromUTF8(device);
                          entry.mountPoint = SCXCoreLib::StrFromUTF8(mountPoint);
@@ -518,7 +520,10 @@ namespace SCXSystemLib
                     p += vmt->vmt_length;
                }
           }
-          // TODO: Error handling?
+          else
+          {
+              SCX_LOGERROR(m_log, L"mntctl(MCTL_QUERY) failed with errno = " + SCXCoreLib::StrFrom(errno));
+          }
 #else
           SCXCoreLib::SCXHandle<std::wfstream> fs(SCXCoreLib::SCXFile::OpenWFstream(
                                                        LocateMountTab(), std::ios::in));
