@@ -756,11 +756,9 @@ Summary:%{Summary}\n\
 
                 std::transform(sInstallDate.begin(), sInstallDate.end(), sInstallDate.begin(), InstalledSoftwareDependencies::SemiToColon);
 
-                const wchar_t * sDateTime = sInstallDate.c_str();
-                const char * strpResult = strptime(StrToUTF8(sDateTime).c_str(), "%x %X", &installtm);
-                const std::wstring wStrpResult = StrFromUTF8(strpResult);
-                const wchar_t * sRet  = wStrpResult.c_str();
-                if (sRet >= sDateTime + sInstallDate.length())
+                string dateTime = StrToUTF8(sInstallDate);
+                const char * strpResult = strptime(dateTime.c_str(), "%x %X", &installtm);
+                if (strpResult == (dateTime.c_str() + dateTime.size()))
                 {
                     try
                     {
@@ -779,7 +777,7 @@ Summary:%{Summary}\n\
                 }
                 else
                 {
-                    SCX_LOGERROR(m_log, wstring(L"Bad install date ") + sDateTime);
+                    SCX_LOGERROR(m_log, wstring(L"Bad install date ") + sInstallDate);
                 }
             }
             else
@@ -854,8 +852,8 @@ Summary:%{Summary}\n\
             std::istringstream processInput;
             std::ostringstream processOutput;
             std::ostringstream processErr;
-            const wstring  cmdListing(L"lslpp -Lcq all");
-            const wstring  cmdHistory(L"lslpp -hcq all");
+            const wstring  cmdListing(L"/usr/bin/lslpp -Lcq all");
+            const wstring  cmdHistory(L"/usr/bin/lslpp -hcq all");
 
             if (0 == (rc = SCXCoreLib::SCXProcess::Run(cmdListing, processInput, processOutput, processErr, 15000)))
             {
