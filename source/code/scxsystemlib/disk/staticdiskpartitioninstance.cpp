@@ -78,8 +78,8 @@ StaticDiskPartitionInstance::StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<S
 #if defined(linux)
         ,m_fdiskResult("")
         ,c_cmdFdiskStr(L"/bin/sh -c \"/sbin/fdisk -u -l\" ")
-        ,c_cmdBlockDevSizeStr(L"blockdev --getsize ")
-        ,c_cmdBlockDevBszStr(L"blockdev --getbsz ")
+        ,c_cmdBlockDevSizeStr(L"/sbin/blockdev --getsize ")
+        ,c_cmdBlockDevBszStr(L"/sbin/blockdev --getbsz ")
         ,c_RedHSectorSizePattern(L"^Units =[^=]*=[ ]*([0-9]+)")
         ,c_RedHBootPDetailPattern(L"(^/dev/[^ ]*) [ ]*(\\*) [ ]*([0-9]+) [ ]*([0-9]+) [ ]*([0-9]+)")
         ,c_RedHDetailPattern(L"(^/dev/[^ ]*) [ ]*([0-9]+) [ ]*([0-9]+) [ ]*([0-9]+)")
@@ -292,7 +292,13 @@ void StaticDiskPartitionInstance::Update_Solaris()
         // Execute 'df -g' and retrieve result to determine filesystem that is mounted on
         // and block size.  Then, go through output of prtvtoc for this filesystem to
         // retrieve the remaining partition information.
-        wstring cmdStringDf = L"df -g";
+#if PF_MAJOR == 5 && (PF_MINOR  == 9 || PF_MINOR == 10)
+        wstring cmdStringDf = L"/usr/sbin/df -g";
+#elif PF_MAJOR == 5 && PF_MINOR  == 11
+        wstring cmdStringDf = L"/sbin/df -g";
+#else
+#error "Platform not supported"
+#endif
         int status;
         std::istringstream processInputDf;
         std::ostringstream processOutputDf;
@@ -379,7 +385,13 @@ void StaticDiskPartitionInstance::Update_Solaris()
 
 
         //The next (and last) step is to do a prtvtoc [dir] command to retrieve the rest of the partition info:
-        wstring cmdStringPrtvToc = L"prtvtoc " + m_deviceID;
+#if PF_MAJOR == 5 && (PF_MINOR  == 9 || PF_MINOR == 10)
+        wstring cmdStringPrtvToc = L"/usr/sbin/prtvtoc " + m_deviceID;
+#elif PF_MAJOR == 5 && PF_MINOR  == 11
+        wstring cmdStringPrtvToc = L"/sbin/prtvtoc " + m_deviceID;
+#else
+#error "Platform not supported"
+#endif
         std::istringstream processInputPrtvtoc;
         std::ostringstream processOutputPrtvtoc;
         std::ostringstream processErrPrtvtoc;
@@ -493,9 +505,15 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         // Determine Solaris boot disk using 'prtconf' and 'ls /dev/dsk'
         // cmdString stores the current process we are running via SCXProcess::Run()
 #if defined(sparc)
-        wstring cmdPrtString = L"prtconf -pv"; 
+#if PF_MAJOR == 5 && (PF_MINOR  == 9 || PF_MINOR == 10)
+        wstring cmdPrtString = L"/usr/sbin/prtconf -pv"; 
+#elif PF_MAJOR == 5 && PF_MINOR  == 11
+        wstring cmdPrtString = L"/sbin/prtconf -pv"; 
 #else
-        wstring cmdPrtString = L"grep bootpath /boot/solaris/bootenv.rc"; 
+#error "Platform not supported"
+#endif
+#else// sparc
+        wstring cmdPrtString = L"/usr/bin/grep bootpath /boot/solaris/bootenv.rc"; 
 #endif
 
         std::string prtconfResult;
@@ -601,7 +619,7 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
 
 
         // Retrieve the bootdrive using the bootInterface and driveLetter
-        wstring cmdStringLs = L"ls -l /dev/dsk";
+        wstring cmdStringLs = L"/usr/bin/ls -l /dev/dsk";
         std::string devDskResult;
         bool foundIt = false;
         wstring bootDisk;

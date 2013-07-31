@@ -1160,10 +1160,10 @@ const char* mountPoint1_devName = "rpool/export";
             {
                 std::cout<<"Run() "<<endl;
             }
-            CPPUNIT_ASSERT(std::wstring(L"vgdisplay -v") == command || std::wstring(L"lvlnboot -v") == command);
+            CPPUNIT_ASSERT(std::wstring(L"/sbin/vgdisplay -v") == command || std::wstring(L"/sbin/lvlnboot -v") == command);
             CPPUNIT_ASSERT(SCXCoreLib::SCXFilePath() == cwd);
             CPPUNIT_ASSERT(SCXCoreLib::SCXFilePath() == chrootPath);
-            if(std::wstring(L"vgdisplay -v") == command)
+            if(std::wstring(L"/sbin/vgdisplay -v") == command)
             {
                 mystdout<<"--- Volume groups ---"<<endl;
                 mystdout<<"VG Name                     /dev/vg00"<<endl;

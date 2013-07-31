@@ -305,8 +305,14 @@ namespace SCXSystemLib
         {
             std::stringstream strIn; 
             std::stringstream strOut, strErr;
-            
-            if (SCXCoreLib::SCXProcess::Run(std::wstring(L"route -n get gateway"), strIn, strOut, strErr) == 0)
+#if PF_MAJOR == 5 && PF_MINOR  == 9
+            std::wstring cmdStringRoute = L"/usr/sbin/route -n get gateway";
+#elif PF_MAJOR == 5 && (PF_MINOR == 10 || PF_MINOR  == 11)
+            std::wstring cmdStringRoute = L"/sbin/route -n get gateway";
+#else
+#error "Platform not supported"
+#endif
+            if (SCXCoreLib::SCXProcess::Run(cmdStringRoute, strIn, strOut, strErr) == 0)
             {
                 std::string line; 
                 while (strOut.good())

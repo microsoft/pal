@@ -333,7 +333,7 @@ namespace SCXSystemLib
         std::ostringstream processOutput;
         std::ostringstream processErr;
 
-        std::wstring cmdDHCP(L"netstat -D");
+        std::wstring cmdDHCP(L"/usr/bin/netstat -D");
         if (input.size() != 0)
         {
             cmdDHCP = input;

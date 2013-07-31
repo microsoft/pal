@@ -319,7 +319,13 @@ namespace SCXSystemLib
     bool CpuPropertiesEnumeration::GetCpuCount(unsigned int& numCpus)
     {
         SCX_LOGTRACE(m_log, L"CpuPropertiesEnumeration GetCpuCount()");
-        wstring cmdStringPsrinfo = L"psrinfo -p";
+#if PF_MAJOR == 5 && (PF_MINOR  == 9 || PF_MINOR == 10)
+        wstring cmdStringPsrinfo = L"/usr/sbin/psrinfo -p";
+#elif PF_MAJOR == 5 && PF_MINOR  == 11
+        wstring cmdStringPsrinfo = L"/sbin/psrinfo -p";
+#else
+#error "Platform not supported"
+#endif
         std::istringstream processInputPsrinfo;
         std::ostringstream processOutputPsrinfo;
         std::ostringstream processErrPsrinfo;

@@ -579,7 +579,7 @@ namespace SCXSystemLib
         std::istringstream lvProcIn;
         std::ostringstream lvProcOut;
         std::ostringstream lvProcErr;
-        std::wstring procCmd = L"lvlnboot -v";
+        std::wstring procCmd = L"/sbin/lvlnboot -v";
         int procRet = m_deps->Run(procCmd, lvProcIn, lvProcOut, lvProcErr, 15000);
         std::string lvlnbootStr = lvProcOut.str();
         std::string errStr = lvProcErr.str();
@@ -811,7 +811,7 @@ namespace SCXSystemLib
         std::istringstream lvProcIn;
         std::ostringstream lvProcOut;
         std::ostringstream lvProcErr;
-        std::wstring procCmd = L"vgdisplay -v";
+        std::wstring procCmd = L"/sbin/vgdisplay -v";
         int procRet = deps->Run(procCmd, lvProcIn, lvProcOut, lvProcErr, 15000);
         std::string vgStr = lvProcOut.str();
         std::string errStr = lvProcErr.str();
