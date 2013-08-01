@@ -310,7 +310,8 @@ namespace SCXSystemLib
         bool GetPID(scxulong& x) const;
         bool GetName(std::string&) const;
         bool GetUserName(std::wstring& username) const;
-        bool GetPriority(unsigned int& prio) const;
+        bool GetNormalizedWin32Priority(unsigned int& prio) const;
+        bool GetNativePriority(int& prio) const;
         bool GetExecutionState(unsigned short& state) const;
         bool GetCreationDate(SCXCoreLib::SCXCalendarTime& cre) const;
         bool GetTerminationDate(SCXCoreLib::SCXCalendarTime& term) const;
@@ -370,7 +371,10 @@ namespace SCXSystemLib
         bool m_found;                           //!< Found during iteration
         bool m_accessViolationEncountered;      //!< Flag that we've had problems with access
         struct timeval m_timeOfDeath;           //!< When did process die
-
+        
+        bool m_scxPriorityValid;                //!< Native priority successfuly mapped to windows priority levels.
+        unsigned int m_scxPriority;             //!< Value of the native priority mapped to windows priority levels.
+        template<class t> void PriorityOutOfRangeError(t rawPriority);  // Error handling helper.
 #if defined(linux)
         char m_procStatName[MAXPATHLEN];        //!< Name of /proc/#/stat file
         char m_procStatMName[MAXPATHLEN];       //!< Name of /proc/#/statm file
@@ -397,6 +401,8 @@ namespace SCXSystemLib
                                        const struct timeval& elapsedTime) const;
         unsigned int ComputePercentageOfTime(scxulong consumedTime,     // Defined below
                                              const struct timeval& elapsedTime) const;
+
+        bool LinuxProcessPriority2SCXProcessPriority(long linuxPriority, unsigned int &scxPriority);
 #endif
 
 #if defined(sun)
@@ -435,6 +441,8 @@ namespace SCXSystemLib
                                        const timeval& elapsedTime) const;
         unsigned int ComputePercentageOfTime(const scx_timestruc_t& consumedTime,//  Below
                                              const struct timeval& elapsedTime) const;
+
+        bool SolarisProcessPriority2SCXProcessPriority(int solarisPriority, unsigned int &scxPriority);
 
         /**
            Helper class to insure that a file descriptor is closed properly regardless of exceptions
@@ -487,6 +495,8 @@ namespace SCXSystemLib
                                        const struct timeval& elapsedTime) const;
         unsigned int ComputePercentageOfTime(scxulong consumedTime,     // Defined below
                                              const struct timeval& elapsedTime) const;
+
+        bool HPUXProcessPriority2SCXProcessPriority(_T_LONG_T hpuxPriority, unsigned int &scxPriority);
 #endif
 
 #if defined(aix) || defined(hpux)
@@ -539,6 +549,8 @@ namespace SCXSystemLib
                                        const timeval& elapsedTime) const;
         unsigned int ComputePercentageOfTime(const scx_timestruc_t& consumedTime,// Inline
                                              const struct timeval& elapsedTime) const;
+
+        bool AIXProcessPriority2SCXProcessPriority(uint aixPriority, unsigned int &scxPriority);
 #endif
 
     };

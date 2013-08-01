@@ -79,6 +79,32 @@ namespace SCXSystemLib
     */
     bool ProcessInstance::m_inhibitAccessViolationCheck = false;
 
+    /**
+     * Helper, used to write error into a log file in case process priority is out of range.
+     *
+     * \param rawPriority invalid process priority value to be reported in the log file.
+     *
+     */
+    template<class t> void ProcessInstance::PriorityOutOfRangeError(t rawPriority)
+    {
+        static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
+        std::wostringstream error;
+        std::wostringstream suppressorID;
+        error << L"Process priority " << rawPriority << L" out of range.";
+        suppressorID << rawPriority;
+        scxulong pid = 0;
+        if (GetPID(pid))
+        {
+            error << L" PID = " << pid << L".";
+        }
+        std::string modulePath;
+        if (GetModulePath(modulePath))
+        {
+            error << L" Module path = " << StrFromUTF8(modulePath) << L".";
+        }
+        SCX_LOG(m_log, suppressor.GetSeverity(suppressorID.str()), error.str());
+    }
+
     /*----------------------------------------------------------------------------*/
 #if defined(linux)
     SCXCoreLib::SCXCalendarTime ProcessInstance::m_system_boot;
@@ -260,7 +286,7 @@ namespace SCXSystemLib
      */
     ProcessInstance::ProcessInstance(scxpid_t pid, const char* basename) :
         EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
-        m_uid(0), m_gid(0), m_delta_UserTime(0), m_delta_SystemTime(0),
+        m_scxPriorityValid(false), m_scxPriority(0), m_uid(0), m_gid(0), m_delta_UserTime(0), m_delta_SystemTime(0),
         m_delta_HardPageFaults(0)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
@@ -298,6 +324,52 @@ namespace SCXSystemLib
 
         m_timeOfDeath.tv_sec = 0; m_timeOfDeath.tv_usec = 0;
         m_delta_RealTime.tv_sec = 0; m_delta_RealTime.tv_usec = 0;
+    }
+
+    /**
+     * Translates linux process priority values to windows values.
+     *
+     * \linuxPriority   linux priority
+     * \scxPriority     returned windows priority
+     *
+     * \returns         true if successful or false if priority was out of the expected range.
+     *
+     * NOTE: We have an odd case here. According to include/linux/sched/rt.h number of possible priority levels is
+     * MAX_PRIO, and that is 140. On the other hand /proc/[pid]/stat.priority allows values -2 to -100 for real time and
+     * 0 to 39 for non real time processes. Value -1 is not allowed and this gives only 139 possible levels.
+     * NOTE: linuxPriority + 60 gives same value as "ps -aefl".
+     *
+     */
+    bool ProcessInstance::LinuxProcessPriority2SCXProcessPriority(long linuxPriority, unsigned int &scxPriority)
+    {
+        scxPriority = 0;
+        // According to documentation for /proc/[pid]/stat.priority, the priority field can have values -100 to -2 for
+        // real time threads and 0 to 39 for non real time threads. Apparently value of -1 is not used. Lower value means
+        // higher priority.
+        if((linuxPriority < -100) || (linuxPriority > 39) || (linuxPriority == -1))
+        {
+            // Priority is out of the expected range.
+            PriorityOutOfRangeError(linuxPriority);
+            return false;
+        }        
+        else if(linuxPriority < -1)
+        {
+            // Real time priority. Values -2 to -100 need to be mapped to 16 to 31 range.
+
+            // (-linuxPriority -2) gives 0 to 98 that needs to be scaled to 0 to 15.
+            scxPriority = static_cast<unsigned int>(((-linuxPriority -2) * 15) / 98);
+            // add 16 to have real time range of 16 -31.
+            scxPriority += 16;
+            return true;
+        }
+        else
+        {
+            // Non real time priority. Values 39 to 0 need to be mapped to 0 to 15 range.
+
+            // (-linuxPriority + 39) gives 0 to 39 that needs to be scaled to 0 to 15.
+            scxPriority = static_cast<unsigned int>(((-linuxPriority + 39) * 15) / 39);
+            return true;        
+        }
     }
 
     /**
@@ -353,6 +425,8 @@ namespace SCXSystemLib
 
         // test if file was deleted before we had a chance to read it
         if (!found) { m_found = false; return false; }
+
+        m_scxPriorityValid = LinuxProcessPriority2SCXProcessPriority(m.priority, m_scxPriority);
 
         if (m.state != 'Z')
         {
@@ -437,7 +511,8 @@ namespace SCXSystemLib
      */
     ProcessInstance::ProcessInstance(scxpid_t pid, const char* basename) :
         EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
-        m_logged64BitError(false), m_delta_BlockOut(0), m_delta_BlockInp(0), m_delta_HardPageFaults(0)
+        m_scxPriorityValid(false), m_scxPriority(0), m_logged64BitError(false), m_delta_BlockOut(0),
+        m_delta_BlockInp(0), m_delta_HardPageFaults(0)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
         SCX_LOGTRACE(m_log, L"ProcessInstance constructor");
@@ -464,6 +539,44 @@ namespace SCXSystemLib
         m_delta_RealTime.tv_sec = 0; m_delta_RealTime.tv_usec = 0;
         m_delta_UserTime.tv_sec = 0; m_delta_UserTime.tv_nsec = 0;
         m_delta_SystemTime.tv_sec = 0; m_delta_SystemTime.tv_nsec = 0;
+    }
+
+    /**
+     * Translates solaris process priority values to windows values.
+     *
+     * \solarisPriority solaris priority
+     * \scxPriority     returned windows priority
+     *
+     * \returns         true if successful or false if priority was out of the expected range.
+     */
+    bool ProcessInstance::SolarisProcessPriority2SCXProcessPriority(int solarisPriority, unsigned int &scxPriority)
+    {
+        // Solaris process priorities range from 0 to 169. Higher values mean higher priorities. Real time processes
+        // use priorities 100 to 169.
+        scxPriority = 0;
+        if((solarisPriority < 0) || (solarisPriority > 169))
+        {
+            // Priority is out of the expected range.
+            PriorityOutOfRangeError(solarisPriority);
+            return false;
+        }        
+        else if(solarisPriority < 100)
+        {
+            // Non real time process.
+            // solarisPriority 0 to 99 needs to be scaled to 0 to 15.
+            scxPriority = static_cast<unsigned int>((solarisPriority * 15) / 99);
+            return true;
+        }
+        else
+        {
+            // Real time process priority. Values 100 to 169 need to be mapped to 16 to 31 range.
+        
+            // (solarisPriority - 100) gives 0 to 69 that needs to be scaled to 0 to 15.
+            scxPriority = static_cast<unsigned int>(((solarisPriority - 100) * 15) / 69);
+            // add 16 to have real time range of 16 to 31.
+            scxPriority += 16;
+            return true;        
+        }
     }
 
     /**
@@ -497,6 +610,8 @@ namespace SCXSystemLib
             throw SCXInternalErrorException(L"Getting wrong size when reading parameters from "
                                             L"/proc/#/psinfo file", SCXSRCLOCATION);
         }
+
+        m_scxPriorityValid = SolarisProcessPriority2SCXProcessPriority(m_psinfo.pr_lwp.pr_pri, m_scxPriority);
 
         return true;
     }
@@ -750,7 +865,7 @@ namespace SCXSystemLib
      */
     ProcessInstance::ProcessInstance(scxpid_t pid, struct pst_status *) :
         EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
-        m_delta_UserTime(0), m_delta_SystemTime(0), m_delta_BlockOut(0),
+        m_scxPriorityValid(false), m_scxPriority(0), m_delta_UserTime(0), m_delta_SystemTime(0), m_delta_BlockOut(0),
         m_delta_BlockInp(0), m_delta_HardPageFaults(0)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
@@ -765,6 +880,53 @@ namespace SCXSystemLib
 
         m_timeOfDeath.tv_sec = 0; m_timeOfDeath.tv_usec = 0;
         m_delta_RealTime.tv_sec = 0; m_delta_RealTime.tv_usec = 0;
+    }
+
+    /**
+     * Translates hpux process priority values to windows values.
+     *
+     * \hpuxPriority    hpux priority
+     * \scxPriority     returned windows priority
+     *
+     * \returns         true if successful or false if priority was out of the expected range.
+     */
+    bool ProcessInstance::HPUXProcessPriority2SCXProcessPriority(_T_LONG_T hpuxPriority, unsigned int &scxPriority)
+    {
+        scxPriority = 0;
+        // HPUX process priority values are -512 to 255. Priorities -512 to 127 are for real time processes. Lower value
+        // means higher priority. Apparently highest priority real time values of less than -32 are not used. Just in
+        // case we do encounter these values, we will reserve highest windows value of 31 for that range.
+        if((hpuxPriority < -512) || (hpuxPriority > 255))
+        {
+            // Priority is out of the expected range.
+            PriorityOutOfRangeError(hpuxPriority);
+            return false;
+        }        
+        else if(hpuxPriority < -32)
+        {
+            // Unused range of -33 to -512. Just in case we do encounter it, map it to highest windows value of 31.
+
+            scxPriority = 31;
+            return true;
+        }
+        else if(hpuxPriority < 128)
+        {
+            // Real time priorities 127 to -32 need to be mapped to windows range 16 to 30.
+        
+            // (-hpuxPriority + 127) gives 0 to 159 that needs to be scaled to 0 to 14.
+            scxPriority = static_cast<unsigned int>(((-hpuxPriority + 127) * 14) / 159);
+            // add 16 to have real time range of 16 -30.
+            scxPriority += 16;
+            return true;
+        }
+        else
+        {
+            // Non real time priorities 255 to 128 need to be mapped to windows range 0 to 15.
+
+            // (-hpuxPriority + 255) gives 0 to 127 that needs to be scaled to 0 to 15.
+            scxPriority = static_cast<unsigned int>(((-hpuxPriority + 255) * 15) / 127);
+            return true;        
+        }
     }
 
     /**
@@ -783,8 +945,8 @@ namespace SCXSystemLib
     {
         // Save the full structure so that we can pick values on demand
         memcpy(&m_pstatus, pstatus, sizeof(struct pst_status));
-
         UpdateParameters();
+        m_scxPriorityValid = HPUXProcessPriority2SCXProcessPriority(m_pstatus.pst_pri, m_scxPriority);
         m_found = true;                         // Mark as processed
         return m_found;
     }
@@ -873,7 +1035,8 @@ namespace SCXSystemLib
      * the ProcessEnumerator class.
      */
     ProcessInstance::ProcessInstance(scxpid_t pid, struct procentry64 *procInfo) :
-        EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false)
+        EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
+        m_scxPriorityValid(false), m_scxPriority(0)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
         SCX_LOGTRACE(m_log, L"ProcessInstance constructor");
@@ -898,6 +1061,46 @@ namespace SCXSystemLib
         m_delta_RealTime.tv_sec = 0; m_delta_RealTime.tv_usec = 0;
         m_delta_UserTime.tv_sec = 0; m_delta_UserTime.tv_nsec = 0;
         m_delta_SystemTime.tv_sec = 0; m_delta_SystemTime.tv_nsec = 0;
+    }
+
+    /**
+     * Translates AIX process priority values to windows values.
+     *
+     * \aixPriority     AIX priority
+     * \scxPriority     returned windows priority
+     *
+     * \returns         true if successful or false if priority was out of the expected range.
+     *
+     */
+    bool ProcessInstance::AIXProcessPriority2SCXProcessPriority(uint aixPriority, unsigned int &scxPriority)
+    {
+        scxPriority = 0;
+        // AIX process priority values are 0 to 255. Lower value means higher priority. Real time processes have
+        // priorities 0 to 39.
+        if(aixPriority > 255)
+        {
+            // Priority is out of the expected range.
+            PriorityOutOfRangeError(aixPriority);
+            return false;
+        }        
+        else if(aixPriority < 40)
+        {
+            // Real time process. Priority values 39 to 0 need to be mapped to 16 to 31 range.
+        
+            // (-AIXPriority + 39) gives 0 to 39 and needs to be scaled to 0 to 15.
+            scxPriority = ((-aixPriority + 39) * 15) / 39;
+            // add 16 to have real time range of 16 to 31.
+            scxPriority += 16;
+            return true;
+        }
+        else
+        {
+            // Non real time process. Priority values 255 to 40 need to be mapped to 0 to 15 range.
+
+            // (-AIXPriority + 255) gives 0 to 215 that needs to be scaled to 0 to 15.
+            scxPriority = ((-aixPriority + 255) * 15) / 215;
+            return true;        
+        }
     }
 
     /**
@@ -1029,6 +1232,7 @@ namespace SCXSystemLib
         }
 
         UpdateParameters();
+        m_scxPriorityValid = AIXProcessPriority2SCXProcessPriority(pe.pi_pri, m_scxPriority);
         m_found = true;                            // Mark as processed
         return m_found;                            // All was read. Process still exists.
     }
@@ -1342,43 +1546,54 @@ namespace SCXSystemLib
     }
 
     /**
-       Gets the priority of this process instance.
+       Gets the normalized priority of this process instance.
 
-       \param[out]  prio Return parameter for the priority
-       \returns     true if this value is supported by the implementation
+       \param[out]  pri return parameter for the normalized priority
+       \returns     true on success.
 
-       According to the CIM model: "Priority indicates the urgency or importance
-       of execution of a Process. Lower values reflect more favorable process scheduling."
-
-       Most modern UNIX versions have scheduling mechanisms that can't reflect
-       process priority as a single number. It is also not clear if we fullfill
-       the requirement that a lower number is higher priority. In other words, don't
-       attach too much meaning to this number.
+       Method returns normalized process priority. Various UNIX and LINUX systems return process priorities of
+       different ranges. These priorities are mapped into windows range of 0 to 31. Processes with priorities of
+       0 to 15 are regular processes and processes with priorities of 16 to 31 are real time processes. Higher value
+       means a process of higher priority.
     */
-    bool ProcessInstance::GetPriority(unsigned int& prio) const
+    bool ProcessInstance::GetNormalizedWin32Priority(unsigned int& pri) const
+    {
+        if (m_scxPriorityValid)
+        {
+            pri = m_scxPriority;
+        }
+        return m_scxPriorityValid;
+    }
+
+    /**
+       Gets the native priority of this process instance.
+
+       \param[out]  pri return parameter for the native priority
+       \returns     true if this property is supported by the implementation.
+
+       Method returns native process priority, as reported by various system calls. For linux we add 60 so
+       returned priority would be the same as priority reported by the "ps" command. This function returns
+       same priority as 'ps -el' on Linux and HPUX. On AIX and Solaris it returns same priorities as 'ps -eo "pid,pri"'.
+    */
+    bool ProcessInstance::GetNativePriority(int& pri) const
     {
 #if defined(linux)
-        /* By chance we found out that 'ps' adds 60 to priority field. */
-        prio = static_cast<unsigned int>(m.priority + 60);
+        // 'ps' adds 60 to priority field.
+        pri = static_cast<int>(m.priority + 60);
         return true;
 #elif defined(aix)
-        prio = m_procentry.pi_pri;
+        pri = static_cast<int>(m_procentry.pi_pri);
         return true;
 #elif defined(sun)
-        prio = m_psinfo.pr_lwp.pr_pri;
+        pri = static_cast<int>(m_psinfo.pr_lwp.pr_pri);
         return true;
 #elif defined(hpux)
-        if (m_pstatus.pst_pri >= 0)
-        {
-            prio = m_pstatus.pst_pri;
-            return true;
-        }
-        return false;
+        pri = static_cast<int>(m_pstatus.pst_pri);
+        return true;
 #else
         return false;
 #endif
     }
-
 
     /**
        Gets the execution state of this process instance.

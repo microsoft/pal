@@ -143,6 +143,7 @@ class ProcessPAL_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testBug2277 );
     CPPUNIT_TEST( testNamedFind );
     CPPUNIT_TEST( testKillByName );
+    CPPUNIT_TEST( testProcessPriorities );
     SCXUNIT_TEST( testGetParameters, 0 );
 #ifndef hpux
     SCXUNIT_TEST( testGetParametersGreaterThan1024, 0 );
@@ -171,6 +172,7 @@ class ProcessPAL_Test : public CPPUNIT_NS::TestFixture
     SCXUNIT_TEST_ATTRIBUTE(testBug2277, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(testNamedFind, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(testKillByName, SLOW);
+    SCXUNIT_TEST_ATTRIBUTE(testProcessPriorities, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(testGetParameters, SLOW);
 #ifndef hpux
     SCXUNIT_TEST_ATTRIBUTE(testGetParametersGreaterThan1024, SLOW);
@@ -444,28 +446,23 @@ public:
             CPPUNIT_ASSERT(inst->GetName(strVal));
             CPPUNIT_ASSERT(strVal.size());
 
-            // On Linux:
-            //   Docs on 'man 5 proc' state that this is standard nice value
-            //   (19 to -19) + 15, but testing indicates this is wrong ...
-            //
-            // HPUX may return false, so don't check on that platform
-            result = inst->GetPriority(uiVal);
-#if !defined(hpux)
+            result = inst->GetNormalizedWin32Priority(uiVal);
             CPPUNIT_ASSERT( result );
-            subStream << ", Prio=" << uiVal;
+            subStream << ", PrioNorm=" << uiVal;
+            CPPUNIT_ASSERT_MESSAGE(subStream.str().c_str(), uiVal <= 31);
 
-            // vmware processes has sometimes very strange priority values
-            if (strVal.find("vmware") == strVal.npos)
-            {
-                CPPUNIT_ASSERT_MESSAGE(subStream.str().c_str(), uiVal <= 255);
-            }
-#else
-            if (result)
-            {
-                subStream << ", Prio=" << uiVal;
-                SCXUNIT_ASSERT_BETWEEN_MESSAGE(subStream.str().c_str(), static_cast<int> (uiVal), -32, 255);
-            }
-#endif // !defined(hpux)
+            result = inst->GetNativePriority(iVal);
+            CPPUNIT_ASSERT( result );
+            subStream << ", PrioNat=" << iVal;
+#if defined(linux)
+                SCXUNIT_ASSERT_BETWEEN_MESSAGE(subStream.str().c_str(), iVal, -40, 99);
+#elif defined(sun)
+                SCXUNIT_ASSERT_BETWEEN_MESSAGE(subStream.str().c_str(), iVal, 0, 169);
+#elif defined(hpux)
+                SCXUNIT_ASSERT_BETWEEN_MESSAGE(subStream.str().c_str(), iVal, -512, 255);
+#elif defined(aix)
+                SCXUNIT_ASSERT_BETWEEN_MESSAGE(subStream.str().c_str(), iVal, 0, 255);
+#endif
 
             CPPUNIT_ASSERT(inst->GetExecutionState(usVal));
             subStream << ", ExecState=" << usVal;
@@ -1663,9 +1660,8 @@ public:
 
     bool VerifyProcessInstance(SCXCoreLib::SCXHandle<ProcessInstance> inst, bool checkfirst = false)
     {
-        bool result;
         string icmdstr, jcmdstr;
-        unsigned int ipri; unsigned short istate; int ippid;
+        unsigned short istate; int ippid;
         scxulong ipid, iuid; unsigned int inice;
         int juid, jppid, jpri, jnice; char jstate;
 
@@ -1684,12 +1680,6 @@ public:
             }
         }
 
-        // HPUX may return false, so don't check on that platform
-        result = inst->GetPriority(ipri);
-#if !defined(hpux)
-        CPPUNIT_ASSERT(result);
-#endif // !defined(hpux)
-
         CPPUNIT_ASSERT(inst->GetExecutionState(istate));
         CPPUNIT_ASSERT(inst->GetParentProcessID(ippid));
         CPPUNIT_ASSERT(inst->GetRealUserID(iuid));
@@ -1699,13 +1689,7 @@ public:
         ostringstream msg;
         msg << "jcmdstr: " << jcmdstr << ", icmdstr: " << icmdstr << endl;
         CPPUNIT_ASSERT_MESSAGE(msg.str().c_str(), compareCmdNames(jcmdstr, icmdstr));
-#if defined(aix)
-        CPPUNIT_ASSERT_MESSAGE("Measured prio should be equal or higher than base priority", jpri<=(int)ipri); 
-#elif ! defined(sun)
-        // The pri field found in ps can't really be related to anything
-        // Observation: This field changes during runtime and thus fails occasionally
-        //CPPUNIT_ASSERT_EQUAL(jpri, (int)ipri);
-#endif
+
         CPPUNIT_ASSERT(istate < 12);
         CPPUNIT_ASSERT_EQUAL(jppid, ippid);
         // Observation: iuid is unexpectedly zero sometimes. Maybe because of setuid?
@@ -1737,7 +1721,8 @@ public:
 
         inst->GetPID(Ascxulong);
         inst->GetName(Astring);
-        inst->GetPriority(Aunsignedint);
+        inst->GetNormalizedWin32Priority(Aunsignedint);
+        inst->GetNativePriority(Aint);
         inst->GetExecutionState(Aunsignedshort);
         inst->GetCreationDate(ASCXCalendarTime);
         inst->GetTerminationDate(ASCXCalendarTime);
@@ -1961,6 +1946,129 @@ public:
         errno = eno;            // Just for documentation purposes!
         CPPUNIT_ASSERT_MESSAGE(strerror(eno), errno == 0);
         CPPUNIT_ASSERT_MESSAGE("Didn't find pid", done);
+    }
+
+    /*
+      Verifies that reported process priorities are close to what "ps" command reports. Note that OS may modify the
+      priority value so for that reason we allow for some slack.
+    */
+    void testProcessPriorities()
+    {
+        // First we get the collection of processes and their prioriries from "ps" command line.
+        //
+#if defined(linux)
+        char psecmd[] = "/bin/ps -el";
+#elif defined(sun)
+        // On sun, we sometimes get a "Broken Pipe"
+        // fname truncates to 8 chars and comm includes the path. Standards!
+        char psecmd[] = "trap '' PIPE;/bin/ps -eo \"pid,pri\"";
+#elif defined(hpux)
+        char psecmd[] = "/bin/ps -el";
+#elif defined(aix)
+        char psecmd[] = "/bin/ps -Aeo \"pid,pri\"";
+#else
+        #error "Unsupported platform"
+#endif
+        errno = 0;
+        FILE* psEFile = popen(psecmd, "r");
+        if (psEFile == 0)
+        {
+            CPPUNIT_ASSERT(psEFile);
+            CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
+            return;
+        }
+
+        std::stringstream errMsg;
+        std::map<scxulong,int> priritiesFromPS;
+        char buf[256];
+        // Get rid of first line, then iterate over rest of lines until no more.
+        CPPUNIT_ASSERT(fgets(buf, sizeof(buf), psEFile));
+        CPPUNIT_ASSERT(feof(psEFile) == 0);
+        CPPUNIT_ASSERT(ferror(psEFile) == 0);
+        CPPUNIT_ASSERT(strlen(buf) < 255);
+        errMsg << "Processes reported by 'PS'" << std::endl << "PID\tPRI" << std::endl;
+        while(fgets(buf, sizeof(buf), psEFile))
+        {
+            CPPUNIT_ASSERT(feof(psEFile) == 0);
+            CPPUNIT_ASSERT(ferror(psEFile) == 0);
+            CPPUNIT_ASSERT(strlen(buf) < 255);
+
+            scxulong pid;
+            int pri;
+#if defined(linux) || defined(hpux)
+            string skip;
+            istringstream scan(buf);
+            // On Linux and HPUX the output from 'ps' is in the format:
+            // F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD            
+            // 4 S     0     1     0  0  80   0 -   252 -      ?        00:00:49 init           
+            scan >> skip >> skip >> skip >> pid >> skip >> skip >> pri;
+            CPPUNIT_ASSERT(scan.good());
+#else
+            istringstream scan(buf);
+            // OnSOlaris and AIX the output from 'ps' is in the format:
+            //  PID PRI                                                                        
+            //    0  96                                                                        
+            scan >> pid;
+            CPPUNIT_ASSERT(scan.good());
+            scan >>  pri;
+            CPPUNIT_ASSERT(scan.eof() || scan.good());
+#endif
+            errMsg << pid << '\t' << pri << std::endl;
+
+            std::pair<std::map<scxulong,int>::iterator, bool> ret;
+            ret = priritiesFromPS.insert(std::pair<scxulong, int>(pid, pri));
+            ostringstream msg;
+            msg << "process id repeats, pid = " << pid;
+            CPPUNIT_ASSERT_MESSAGE(msg.str(), ret.second);
+        }
+        
+        errMsg << "Processes reported by PAL" << std::endl << "PID\tPRI" << std::endl;
+        // Now we have the collection of processes and priorities from "ps" command. Loop through processes reported by
+        // the provider and verify the values are ok.
+        m_procEnum = new ProcessEnumeration();
+        m_procEnum->Init();
+        m_procEnum->Update(true);
+        vector<scxulong> palPid;
+        vector<int> palPri;
+        for (ProcessEnumeration::EntityIterator iter = m_procEnum->Begin(); iter != m_procEnum->End(); ++iter)
+        {
+            SCXCoreLib::SCXHandle<ProcessInstance> inst = *iter;
+            scxulong pid;
+            CPPUNIT_ASSERT(inst->GetPID(pid));
+            int pri;
+            CPPUNIT_ASSERT(inst->GetNativePriority(pri));
+            palPid.push_back(pid);
+            palPri.push_back(pri);
+            errMsg << pid << '\t' << pri << std::endl;
+        }
+        size_t noPSProcessCount = 0;
+        size_t priorityMismatchCount = 0;
+        size_t i;
+        for( i = 0; i < palPid.size(); i++)
+        {
+            scxulong pid = palPid[i];
+            int pri = palPri[i];
+            if(priritiesFromPS.count(pid) == 0)
+            {
+                // This process did not exist when PS command was called. We allow only few occurances.
+                noPSProcessCount++;
+                CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Too many processes not reported by PS command.\n" + errMsg.str(),
+                    0, static_cast<double>(noPSProcessCount), 5);
+                continue;
+            }
+            int pspri = priritiesFromPS[pid];
+
+            unsigned int priDelta = abs(pri - pspri);
+            // OS can modify the process priority. Only if priority is off by more than 2 we count it as a mismatch.
+            if (priDelta > 2)
+            {
+                priorityMismatchCount++;
+                // We allow for up to 9 processes to be off by more than 2.
+                CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+                    "Too many processes priorities differ from priorities reported by PS command.\n" + errMsg.str(),
+                    0, static_cast<double>(priorityMismatchCount), 9);
+            }
+        }
     }
 
     /*
