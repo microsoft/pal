@@ -121,6 +121,7 @@ GetLinuxInfo() {
         # Do we have the (newer) os-release standard file?
         # If so, that trumps everything else
         if [ -e "${EtcPath}/os-release" ]; then
+            ReleaseFile="${EtcPath}/os-release"
             GetKitType
 
             # The os-release files contain TAG=VALUE pairs; just read it in
@@ -138,6 +139,11 @@ GetLinuxInfo() {
                 debian)
                     OSManufacturer="Softare in the Public Interest, Inc."
        	            OSAlias="UniversalD"
+                    ;;
+
+                opensuse)
+                    OSManufacturer="SUSE GmbH"
+       	            OSAlias="UniversalR"
                     ;;
             esac
 

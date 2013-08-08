@@ -56,6 +56,7 @@ class SCXGetLinuxOS_Test : public CPPUNIT_NS::TestFixture
     // CPPUNIT_TEST( TestPlatform_Fedora );
     CPPUNIT_TEST( TestPlatform_CentOS_5 );
     CPPUNIT_TEST( TestPlatform_Debian_7_0 );
+    CPPUNIT_TEST( TestPlatform_openSUSE_12_3 );
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -88,7 +89,7 @@ public:
         {
             vector<wstring> tokens;
             StrTokenize( lines[i], tokens, L"=" );
-            CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(2), tokens.size() );
+            CPPUNIT_ASSERT_EQUAL_MESSAGE( StrToUTF8(StrAppend(L"On line `" + lines[i] + L"\", only received token count of ", tokens.size())), static_cast<size_t>(2), tokens.size() );
 
             relFile[StrToUTF8(tokens[0])] = StrToUTF8(tokens[1]);
         }
@@ -424,6 +425,27 @@ public:
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Debian") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalD"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Softare in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
+    }
+
+    // Platform openSUSE 12.3:
+    void TestPlatform_openSUSE_12_3()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/openSUSE_12.3", releaseFile );
+
+        // Verify our data:
+        //      OSName = openSUSE
+        //      OSVersion = 12.3
+        //      OSFullName = openSUSE 12.3 (Dartmouth)
+        //      OSAlias = UniversalR
+        //      OSManufacturer = SUSE GmbH
+
+        CPPUNIT_ASSERT_EQUAL( string("openSUSE"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("12.3"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("openSUSE 12.3") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
     }
 };
 

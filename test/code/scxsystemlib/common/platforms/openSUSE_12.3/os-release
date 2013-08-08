@@ -1,0 +1,7 @@
+NAME=openSUSE
+VERSION="12.3 (Dartmouth)"
+VERSION_ID="12.3"
+PRETTY_NAME="openSUSE 12.3 (Dartmouth) (x86_64)"
+ID=opensuse
+ANSI_COLOR="0;32"
+CPE_NAME="cpe:/o:opensuse:opensuse:12.3"
