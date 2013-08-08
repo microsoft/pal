@@ -3,10 +3,11 @@
 //run:
 //#sudo ./ioctl_scan /dev/hda
 
-
 //#include <stdlib.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <linux/hdreg.h>
 #include <linux/fs.h>
 #include <fcntl.h>
@@ -19,9 +20,65 @@
 #include <linux/types.h>
 #include <scsi/scsi.h>
 #include <scsi/sg.h>
-#include <sys/ioctl.h>
+#include <dirent.h>
+#include <linux/cdrom.h>
 
 using namespace std;
+
+std::string GetCDIds()
+{
+    cout<<"GetCDIds()--------------->"<<endl;
+    errno = 0;
+    string CDIds;
+    DIR *pd = NULL;
+    pd = opendir("/dev");
+    if (pd == NULL)
+    {
+        cout<<"opendir(\"/dev\") "<<pd<<" "<<errno<<endl;
+        cout<<"GetCDIds()---------------<"<<endl;
+        return CDIds;
+    }
+    struct dirent *pde = NULL;
+    while(pde = readdir(pd))
+    {
+//cout<<"  --"<<pde->d_name<<"--"<<endl;
+        int ret = 0;
+        struct stat fileStatus;
+        memset(&fileStatus, 0, sizeof(fileStatus));
+        string fullName = "/dev/";
+        fullName += pde->d_name;
+        ret = lstat(fullName.c_str(), &fileStatus);
+//cout<<"  ----"<<endl;
+        if (ret != 0)
+        {
+            cout<<"stat() "<<ret<<" "<<errno<<endl;
+            continue;
+        }
+        if (!(S_ISBLK(fileStatus.st_mode)))
+        {
+            continue;
+        }
+        int fd;
+        fd = open(fullName.c_str(), O_RDONLY|O_NONBLOCK);
+        if (fd == -1)
+        {
+            cout<<"open("<<fullName<<") "<<fd<<endl;
+            continue;
+        }
+//        cout<<pde->d_name<<" "<<S_ISCHR(fileStatus.st_mode)<<" "<<S_ISBLK(fileStatus.st_mode)<<" "<<fileStatus.st_mode<<endl;
+        ret=ioctl(fd, CDROM_GET_CAPABILITY, 0);
+        cout<<"CDROM_GET_CAPABILITY "<<ret<<" "<<errno<<endl;
+        if (ret != -1)
+        {
+            cout<<"####################################################################################### "<<endl;
+            cout<<"Detected CD-ROM: "<<fullName<<endl;
+        }
+        
+        close(fd);
+    }
+    cout<<"readdir() errno"<<errno<<endl;
+    cout<<"GetCDIds()---------------<"<<endl;
+}
 
 // HDIO power mode codes:
 static const unsigned char POWERMODE_UNSET    = (unsigned char)0xF0;
@@ -319,6 +376,8 @@ void writeString(const char* mem, size_t sz)
 
 int main(int argc, char* argv[])
 {
+    std::string cdIds = GetCDIds();
+
     if(argc < 2)
     {
         cout<<"Error, use with device path parameter."<<endl;
@@ -328,8 +387,9 @@ int main(int argc, char* argv[])
     char *dev = argv[1];
     int fd;
 
-    fd = open(dev, O_RDONLY);
-    cout<<"open("<<dev<<") "<<fd<<endl;
+    fd = open(dev, O_RDONLY|O_NONBLOCK);
+//    fd = open(dev, 3);
+    cout<<"open("<<dev<<") "<<fd<<" errno: "<<errno<<endl;
     if(fd == -1)return -2;
     WriteOneRecord(dev, "open()", fd, (fd >= 0)?0:errno, fd);
 
@@ -505,9 +565,34 @@ int main(int argc, char* argv[])
     WriteOneRecord(dev, "ioctl(SCSI_IOCTL_GET_IDLUN).SCSILogicalUnit", ret, (ret == 0)?0:errno, (idlun.dev_id >> 8) & 0x00ff);
     WriteOneRecord(dev, "ioctl(SCSI_IOCTL_GET_IDLUN).SCSITargetId", ret, (ret == 0)?0:errno, idlun.dev_id & 0x00ff);
     
+    errno = 0;
+    ret=ioctl(fd, CDROM_GET_CAPABILITY, 0);
+    cout<<"CDROM_GET_CAPABILITY "<<ret<<" "<<errno<<endl;
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_CLOSE_TRAY", ret, (ret == 0)?0:errno, ret&CDC_CLOSE_TRAY);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_OPEN_TRAY", ret, (ret == 0)?0:errno, ret&CDC_OPEN_TRAY);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_LOCK", ret, (ret == 0)?0:errno, ret&CDC_LOCK);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_SELECT_SPEED", ret, (ret == 0)?0:errno, ret&CDC_SELECT_SPEED);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_SELECT_DISC", ret, (ret == 0)?0:errno, ret&CDC_SELECT_DISC);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_MULTI_SESSION", ret, (ret == 0)?0:errno, ret&CDC_MULTI_SESSION);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_MCN", ret, (ret == 0)?0:errno, ret&CDC_MCN);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_MEDIA_CHANGED", ret, (ret == 0)?0:errno, ret&CDC_MEDIA_CHANGED);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_PLAY_AUDIO", ret, (ret == 0)?0:errno, ret&CDC_PLAY_AUDIO);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_RESET", ret, (ret == 0)?0:errno, ret&CDC_RESET);
+//    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_IOCTLS", ret, (ret == 0)?0:errno, ret&CDC_IOCTLS);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_DRIVE_STATUS", ret, (ret == 0)?0:errno, ret&CDC_DRIVE_STATUS);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_GENERIC_PACKET", ret, (ret == 0)?0:errno, ret&CDC_GENERIC_PACKET);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_CD_R", ret, (ret == 0)?0:errno, ret&CDC_CD_R);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_CD_RW", ret, (ret == 0)?0:errno, ret&CDC_CD_RW);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_DVD", ret, (ret == 0)?0:errno, ret&CDC_DVD);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_DVD_R", ret, (ret == 0)?0:errno, ret&CDC_DVD_R);
+    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_DVD_RAM", ret, (ret == 0)?0:errno, ret&CDC_DVD_RAM);
+//    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_MO_DRIVE", ret, (ret == 0)?0:errno, ret&CDC_MO_DRIVE);
+//    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_MRW", ret, (ret == 0)?0:errno, ret&CDC_MRW);
+//    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_MRW_W", ret, (ret == 0)?0:errno, ret&CDC_MRW_W);
+//    WriteOneRecord(dev, "ioctl(CDROM_GET_CAPABILITY)|CDC_RAM", ret, (ret == 0)?0:errno, ret&CDC_RAM);
 
     close(fd);
-        
+
     cout<<"---------------------------------------------------"<<endl;
     return 0;
 }
