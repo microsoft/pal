@@ -52,6 +52,7 @@ class SCXStaticPhysicalDiskPalTest : public CPPUNIT_NS::TestFixture
 #endif
     CPPUNIT_TEST(TestPhysicalDiskGeometry);
     CPPUNIT_TEST(TestPhysicalDiskVendorSNumber);
+    CPPUNIT_TEST(TestPhysicalDiskOpticalDrive);
     SCXUNIT_TEST_ATTRIBUTE(TestDumpString, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(TestGetMethods, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(TestSamePhysicalDisksAsStatisticalDisks, SLOW);
@@ -1128,6 +1129,164 @@ public:
             CPPUNIT_ASSERT_MESSAGE(msg, resDiskDevice);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, SCXCoreLib::StrToUTF8(Tests[i].strDiskDevice),
                 SCXCoreLib::StrToUTF8(strDiskDevice));
+
+            resManufacturer = di->GetManufacturer(strManufacturer);
+            CPPUNIT_ASSERT_MESSAGE(msg, resManufacturer);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, SCXCoreLib::StrToUTF8(Tests[i].strManufacturer),
+                SCXCoreLib::StrToUTF8(strManufacturer));
+
+            resSerialNumber = di->GetSerialNumber(strSerialNumber);
+            CPPUNIT_ASSERT_MESSAGE(msg, resSerialNumber);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, SCXCoreLib::StrToUTF8(Tests[i].strSerialNumber),
+                SCXCoreLib::StrToUTF8(strSerialNumber));
+        }
+#endif    
+    }
+    void TestPhysicalDiskOpticalDrive()
+    {
+#if defined(linux)
+        // Build test case with three drives, one HD, one unmounted CD/DVD drive and one mounted CD/DVD drive.
+        // CD/DVDs should return 0 for disk geometry.
+
+        std::vector<PhysicalDiskSimulationDepend::PhysicalDiskSimulationExpectedResults> Tests;
+        PhysicalDiskSimulationDepend::PhysicalDiskSimulationExpectedResults OneTestCase;
+
+        // Mounted CD/DVD
+        OneTestCase.Clear();
+        // Expected results first and always explicit, never calculated.            
+        OneTestCase.strDiskName = L"/dev/cda";
+        OneTestCase.strDiskDevice = L"/dev/cda";
+        OneTestCase.valSizeInBytes = 0;
+        OneTestCase.valCylCount = 0;
+        OneTestCase.valHeadCount = 0;
+        OneTestCase.valSectorCount = 0;
+        OneTestCase.valTracksPerCylinder = 0;
+        OneTestCase.valTotalTracks = 0;
+        OneTestCase.valSectorSize = 0;
+        OneTestCase.valSectorsPerTrack = 0;
+        OneTestCase.strManufacturer = L"CD Co.";
+        OneTestCase.strSerialNumber = L"CDF6G7H8";
+        // Mock OS internal variables.
+        OneTestCase.totalSize = 1024*1024*1024;
+        OneTestCase.sectorSize = 1024;
+        OneTestCase.ioctl_SG_IO_OK = true;
+        OneTestCase.cdDrive = true;
+        // Add to the test list.
+        Tests.push_back(OneTestCase);
+
+        // Unmounted CD/DVD
+        OneTestCase.Clear();
+        // Expected results first and always explicit, never calculated.            
+        OneTestCase.strDiskName = L"/dev/cdb";
+        OneTestCase.strDiskDevice = L"/dev/cdb";
+        OneTestCase.valSizeInBytes = 0;
+        OneTestCase.valCylCount = 0;
+        OneTestCase.valHeadCount = 0;
+        OneTestCase.valSectorCount = 0;
+        OneTestCase.valTracksPerCylinder = 0;
+        OneTestCase.valTotalTracks = 0;
+        OneTestCase.valSectorSize = 0;
+        OneTestCase.valSectorsPerTrack = 0;
+        OneTestCase.strManufacturer = L"CD1 Co.";
+        OneTestCase.strSerialNumber = L"CD7777H8";
+        // Mock OS internal variables.
+        OneTestCase.totalSize = 1024*1024*1024;
+        OneTestCase.sectorSize = 1024;
+        OneTestCase.ioctl_SG_IO_OK = true;
+        OneTestCase.mounted = false;
+        OneTestCase.cdDrive = true;
+        // Add to the test list.
+        Tests.push_back(OneTestCase);
+
+        // Hard Disk
+        OneTestCase.Clear();
+        // Expected results first and always explicit, never calculated.            
+        OneTestCase.strDiskName = L"/dev/hdg1";
+        OneTestCase.strDiskDevice = L"/dev/hdg";
+        OneTestCase.valSizeInBytes = 1024*1024*1024;
+        OneTestCase.valCylCount = (1024*1024*1024)/(255*63*1024);
+        OneTestCase.valHeadCount = 255;
+        OneTestCase.valSectorCount = (1024*1024*1024)/1024;
+        OneTestCase.valTracksPerCylinder = 255;
+        OneTestCase.valTotalTracks = (1024*1024*1024)/(63*1024);
+        OneTestCase.valSectorSize = 1024;
+        OneTestCase.valSectorsPerTrack = 63;
+        OneTestCase.strManufacturer = L"Disk Co.";
+        OneTestCase.strSerialNumber = L"DSF6G7H8";
+        // Mock OS internal variables.
+        OneTestCase.totalSize = 1024*1024*1024;
+        OneTestCase.sectorSize = 1024;
+        OneTestCase.ioctl_SG_IO_OK = true;
+        // Add to the test list.
+        Tests.push_back(OneTestCase);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // End of test definitions, now do the tests.
+
+        SCXCoreLib::SCXHandle<PhysicalDiskSimulationDependCD> deps( new PhysicalDiskSimulationDependCD() );
+        deps->SetupMockOS(Tests);
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum = new SCXSystemLib::StaticPhysicalDiskEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
+        CPPUNIT_ASSERT_EQUAL(Tests.size(), m_diskEnum->Size());
+
+        size_t i;
+        for (i = 0; i < m_diskEnum->Size(); i++)
+        {
+            SCXCoreLib::SCXHandle<SCXSystemLib::StaticPhysicalDiskInstance> di = m_diskEnum->GetInstance(i);
+            //std::wcout << std::endl << di->DumpString();// Keep this around for debugging.
+
+            bool resDiskName, resDiskDevice, resSizeBytes, resSectorSize, resCylCount, resHeadCount, resSectorsPerTrack,
+                resSectorCount, resTracksPerCylinder, resTotalTracks, resManufacturer, resSerialNumber;
+            std::wstring strDiskName, strDiskDevice, strManufacturer, strSerialNumber;
+            scxulong valSizeInBytes, valCylCount, valHeadCount, valSectorCount, valTracksPerCylinder, valTotalTracks;
+            unsigned int valSectorSize, valSectorsPerTrack;
+            
+            stringstream str;
+            str << "For iteration " << i << " , disk " << SCXCoreLib::StrToUTF8(Tests[i].strDiskName);
+            string msg = str.str();
+
+            resDiskName = di->GetDiskName(strDiskName);
+            CPPUNIT_ASSERT_MESSAGE(msg, resDiskName);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, SCXCoreLib::StrToUTF8(Tests[i].strDiskName),
+                SCXCoreLib::StrToUTF8(strDiskName));
+
+            resDiskDevice = di->GetDiskDevice(strDiskDevice);
+            CPPUNIT_ASSERT_MESSAGE(msg, resDiskDevice);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, SCXCoreLib::StrToUTF8(Tests[i].strDiskDevice),
+                SCXCoreLib::StrToUTF8(strDiskDevice));
+
+            resSizeBytes = di->GetSizeInBytes(valSizeInBytes);
+            CPPUNIT_ASSERT_MESSAGE(msg, resSizeBytes);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valSizeInBytes, valSizeInBytes);
+
+            resSectorSize = di->GetSectorSize(valSectorSize);
+            CPPUNIT_ASSERT_MESSAGE(msg, resSectorSize);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valSectorSize, valSectorSize);
+
+            resCylCount = di->GetTotalCylinders(valCylCount);
+            CPPUNIT_ASSERT_MESSAGE(msg, resCylCount);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valCylCount, valCylCount);
+
+            resHeadCount = di->GetTotalHeads(valHeadCount);
+            CPPUNIT_ASSERT_MESSAGE(msg, resHeadCount);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valHeadCount, valHeadCount);
+
+            resSectorsPerTrack = di->GetSectorsPerTrack(valSectorsPerTrack);
+            CPPUNIT_ASSERT_MESSAGE(msg, resSectorsPerTrack);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valSectorsPerTrack, valSectorsPerTrack);
+
+            resSectorCount = di->GetTotalSectors(valSectorCount);
+            CPPUNIT_ASSERT_MESSAGE(msg, resSectorCount);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valSectorCount, valSectorCount);
+
+            resTracksPerCylinder = di->GetTracksPerCylinder(valTracksPerCylinder);
+            CPPUNIT_ASSERT_MESSAGE(msg, resTracksPerCylinder);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valTracksPerCylinder, valTracksPerCylinder);
+
+            resTotalTracks = di->GetTotalTracks(valTotalTracks);
+            CPPUNIT_ASSERT_MESSAGE(msg, resTotalTracks);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, Tests[i].valTotalTracks, valTotalTracks);
 
             resManufacturer = di->GetManufacturer(strManufacturer);
             CPPUNIT_ASSERT_MESSAGE(msg, resManufacturer);

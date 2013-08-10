@@ -586,6 +586,15 @@ namespace SCXSystemLib
         virtual int statvfs64(const char* path, struct statvfs64* buf) = 0;
 
 #endif
+#if defined(linux)
+        /**
+           Returns an input stream.
+
+           \param name of the stream to be returned. This is usualy a filename.
+           \returns stream identified by the name.
+        */
+        virtual SCXCoreLib::SCXHandle<std::wistream> GetWIStream(const char *name) = 0;
+#endif
     protected:
         DiskDepend() { } //!< Protected default constructor
     };
@@ -824,6 +833,15 @@ namespace SCXSystemLib
             return ::statvfs64(path, buf);
         }
 
+#endif
+#if defined(linux)
+        /**
+           \copydoc SCXSystemLib::DiskDepend::GetWIStream
+        */
+        virtual SCXCoreLib::SCXHandle<std::wistream> GetWIStream(const char *name)
+        {
+            return SCXCoreLib::SCXHandle<std::wistream>(new std::wifstream(name));
+        }
 #endif
     private:
         SCXCoreLib::SCXLogHandle m_log; //!< Log handle.

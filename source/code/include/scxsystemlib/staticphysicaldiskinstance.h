@@ -229,6 +229,9 @@ namespace SCXSystemLib
         bool m_online;                           //!< Tells if disk is still connected.
         std::wstring m_device;                   //!< Device ID (i.e. /dev/sda)
         std::wstring m_rawDevice;                //!< Raw device name (internal use only)
+#if defined(linux)
+        bool m_cdDrive;                          //!< Optical drive
+#endif
 
         bool m_isMBR;                            //!< indicate if it is a MBR
         DiskInterfaceType m_intType;             //!< Interface type of device (IDE, SCSI, etc)

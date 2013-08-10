@@ -45,7 +45,12 @@ ance>
     private:
         //! Private constructor. Should not be used.
         StaticPhysicalDiskEnumeration();        //!< Private constructor (intentionally not implemented)
-        SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> AddDiskInstance(const std::wstring& name, const std::wstring& device);
+        SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> AddDiskInstance(
+            const std::wstring& name, const std::wstring& device
+#if defined(linux)
+            , bool cdDrive = false
+#endif
+            );
 
         SCXCoreLib::SCXHandle<DiskDepend> m_deps; //!< Disk dependency object used for dependency injection.
         SCXCoreLib::SCXLogHandle m_log;         //!< Log handle

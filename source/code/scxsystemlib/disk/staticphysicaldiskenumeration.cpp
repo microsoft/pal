@@ -81,10 +81,65 @@ namespace SCXSystemLib
             disk->m_online = false;
         }
 
+#if defined(linux)
+        // First detect optical devices so later we can just skip the mount points which we determined are optical disks.
+        // Various projects may or may not require optical drive detection. We check if iso9660 file system is to be
+        // ignored to determine if optical drives should be detected.
+        std::vector<std::wstring> drives;
+        if ( ! m_deps->FileSystemIgnored(L"iso9660") )
+        {
+            // Get CD-ROM and DVD drives directly from the kernel interface in /proc.
+            SCXCoreLib::SCXHandle<std::wistream> cdStrm = m_deps->GetWIStream("/proc/sys/dev/cdrom/info");
+            std::vector<std::wstring> cdStrmLines;
+            SCXCoreLib::SCXStream::NLFs nlfs;
+            // /proc/sys/dev/cdrom/info format:
+            // CD-ROM information, Id: cdrom.c 3.20 2003/12/17
+            //
+            // drive name:             sr0      hdc
+            // drive speed:            0        0
+            // drive # of slots:       1        1
+            // ...
+            SCXCoreLib::SCXStream::ReadAllLines(*cdStrm, cdStrmLines, nlfs);
+            std::wstring lineID(L"drive name:");
+            size_t i;
+            for (i = 0; i < cdStrmLines.size(); i++)
+            {
+                if (cdStrmLines[i].substr(0, lineID.size()) == lineID)
+                {
+                    std::wstring drivesLine = cdStrmLines[i].substr(lineID.size(), std::wstring::npos);
+                    SCXCoreLib::StrTokenize(drivesLine, drives, L" \t");
+                    size_t d;
+                    for (d = 0; d < drives.size(); d++)
+                    {
+                        AddDiskInstance(L"/dev/" + drives[d], L"/dev/" + drives[d], true);
+                    }                
+                    break;
+                }
+            }
+        }
+#endif
+
         m_deps->RefreshMNTTab();
         for (std::vector<MntTabEntry>::const_iterator it = m_deps->GetMNTTab().begin(); 
              it != m_deps->GetMNTTab().end(); it++)
         {
+#if defined(linux)
+            // It this is an optical device just skip it. We already processed it.
+            size_t d;
+            bool found = false;
+            for (d = 0; d < drives.size(); d++)
+            {
+                if ((L"/dev/" + drives[d]) == it->device)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (found)
+            {
+                continue;
+            }
+#endif
             if ( ! m_deps->FileSystemIgnored(it->fileSystem) &&
                  ! m_deps->DeviceIgnored(it->device) &&
                  m_deps->LinkToPhysicalExists(it->fileSystem, it->device, it->mountPoint) )
@@ -174,11 +229,17 @@ namespace SCXSystemLib
 
        \param   name name of instance.
        \param   device device string (only used if new instance created).
+       \param   cdDrive device is an optical drive.
        \returns NULL if a disk with the given name already exists - otherwise the new disk.
 
        \note The disk will be marked as online if found.
     */
-    SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> StaticPhysicalDiskEnumeration::AddDiskInstance(const std::wstring& name, const std::wstring& device)
+    SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> StaticPhysicalDiskEnumeration::AddDiskInstance(
+        const std::wstring& name, const std::wstring& device
+#if defined(linux)
+        , bool cdDrive
+#endif
+        )
     {
         SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = GetInstance(name);
         if (0 == disk)
@@ -187,6 +248,9 @@ namespace SCXSystemLib
             disk->SetId(name);
             disk->m_device = device;
             disk->m_online = true;
+#if defined(linux)
+            disk->m_cdDrive = cdDrive;
+#endif
             AddInstance(disk);
             return disk;
         }

@@ -1373,8 +1373,19 @@ namespace
             size_t i;
             for (i = 0; i < m_Tests.size(); i++)
             {
+                if (m_Tests[i].mounted == false)
+                {
+                    continue;
+                }
 #if defined(linux)
-                mte.fileSystem = L"ext3";
+                if (m_Tests[i].cdDrive)
+                {
+                    mte.fileSystem = L"iso9660";
+                }
+                else
+                {
+                    mte.fileSystem = L"ext3";
+                }
 #elif defined(sun)
                 mte.fileSystem = L"ufs";
 #endif
@@ -1436,9 +1447,13 @@ namespace
         virtual bool open(const char* pathName, int flags)
         {
             stringstream ss;
-            ss << flags;
-            string msg = "Invalid flags argument when calling PhysicalDiskSimulationDepend::open(): " + ss.str() + ".";
-            CPPUNIT_ASSERT_EQUAL_MESSAGE(msg, O_RDONLY, flags);
+            ss << "Invalid flags argument when calling PhysicalDiskSimulationDepend::open(" <<
+                pathName << ", " << flags << ").";
+#if defined(linux)
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(ss.str(), O_RDONLY | O_NONBLOCK, flags);
+#elif defined(sun)
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(ss.str(), O_RDONLY, flags);
+#endif
 
             close();
             m_OpenFlags = flags;
@@ -1686,8 +1701,10 @@ namespace
             unsigned int valSectorSize, valSectorsPerTrack;
             // Inputs feed into the mock OS.
             scxulong totalSize, sectorSize, headCnt, sectPerTrackCnt, cylCnt;
+            bool mounted;
 #if defined(linux)            
             bool ioctl_HDIO_GET_IDENTITY_OK, ioctl_SG_IO_OK;// Determines if ioctl will succeed.
+            bool cdDrive;
 #endif
             void Clear()
             {
@@ -1695,8 +1712,10 @@ namespace
                 valSizeInBytes = valCylCount = valHeadCount = valSectorCount = valTracksPerCylinder = valTotalTracks = 0;
                 valSectorSize = valSectorsPerTrack = 0;
                 totalSize = sectorSize = headCnt = sectPerTrackCnt = cylCnt = 0;
+                mounted = true;
 #if defined(linux)            
                 ioctl_HDIO_GET_IDENTITY_OK = ioctl_SG_IO_OK = false;
+                cdDrive = false;
 #endif
                 strSerialNumber = strManufacturer = L"";
             }
@@ -1708,12 +1727,51 @@ namespace
         {
             m_Tests = tests;
         }
-    private:
+    protected:
         // List of test cases to be executed. Each test case represents one physical disc.
         std::vector<PhysicalDiskSimulationExpectedResults> m_Tests;
     };
 }
 #endif// defined(linux) || defined(sun)
-
+#if defined(linux)
+namespace
+{
+    // This class enables CD drive detection in PhysicalDiskSimulationDepend class.
+    class PhysicalDiskSimulationDependCD : public PhysicalDiskSimulationDepend
+    {
+        // Signal that optical devices should not be ignored.
+        // This will allow detection of all optical devices, not only CD with iso9660.
+        virtual bool FileSystemIgnored(const std::wstring& fs)
+        {
+            if (fs == L"iso9660")
+            {
+                return false;
+            }
+            return PhysicalDiskSimulationDepend::FileSystemIgnored(fs);
+        }
+        // Create mock /proc/sys/dev/cdrom/info stream.
+        virtual SCXCoreLib::SCXHandle<std::wistream> GetWIStream(const char *name)
+        {
+            CPPUNIT_ASSERT_EQUAL("/proc/sys/dev/cdrom/info", std::string(name));
+            std::wstring cdromInfoStr =
+                L"CD-ROM information, Id: cdrom.c 3.20 2003/12/17\n"
+                L"drive name:";
+            size_t i;
+            for (i = 0; i < m_Tests.size(); i++)
+            {
+                if (m_Tests[i].cdDrive)
+                {
+                    cdromInfoStr += L"  ";
+                    cdromInfoStr += m_Tests[i].strDiskDevice.substr(5);
+                }
+            }
+            std::wistringstream* pStr = new std::wistringstream;
+            pStr->str(cdromInfoStr);
+            SCXCoreLib::SCXHandle<std::wistream> ret(pStr);
+            return ret;
+        }
+    };
+}
+#endif
 #endif /* DISKDEPEND_MOCK_H */
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/

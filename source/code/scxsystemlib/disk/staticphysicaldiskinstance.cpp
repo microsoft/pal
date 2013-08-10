@@ -73,6 +73,9 @@ namespace SCXSystemLib
 */
     StaticPhysicalDiskInstance::StaticPhysicalDiskInstance(SCXCoreLib::SCXHandle<DiskDepend> deps)
         : m_deps(deps), m_online(0), m_rawDevice(L"")
+#if defined(linux)
+        , m_cdDrive(false)
+#endif
     {
         m_log = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(
                 L"scx.core.common.pal.system.disk.staticphysicaldiskinstance");
@@ -1559,7 +1562,7 @@ namespace SCXSystemLib
 #if defined(linux)
 
         // Open the device (Note: We must have privileges for this to work).
-        if (!m_deps->open(StrToUTF8(m_rawDevice).c_str(), O_RDONLY))
+        if (!m_deps->open(StrToUTF8(m_rawDevice).c_str(), O_RDONLY | O_NONBLOCK))
         {
             throw SCXErrnoOpenException(m_rawDevice, errno, SCXSRCLOCATION);
         }
@@ -1778,7 +1781,11 @@ namespace SCXSystemLib
         }
 
         // Determine remaining properties.
-        DiskSizeAndGeometryFromKernel();
+        if (!m_cdDrive)
+        {
+            // Not CD or DVD, get geometry.
+            DiskSizeAndGeometryFromKernel();
+        }
         CheckSupportWriting();
         UpdateDiskSignature();
         ParsePartitions();
