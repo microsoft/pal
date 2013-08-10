@@ -2052,8 +2052,8 @@ public:
             {
                 // This process did not exist when PS command was called. We allow only few occurances.
                 noPSProcessCount++;
-                CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Too many processes not reported by PS command.\n" + errMsg.str(),
-                    0, static_cast<double>(noPSProcessCount), 5);
+                CPPUNIT_ASSERT_MESSAGE("Too many processes not reported by PS command.\n" + errMsg.str(),
+                    noPSProcessCount <= 5);
                 continue;
             }
             int pspri = priritiesFromPS[pid];
@@ -2064,9 +2064,9 @@ public:
             {
                 priorityMismatchCount++;
                 // We allow for up to 9 processes to be off by more than 2.
-                CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+                CPPUNIT_ASSERT_MESSAGE(
                     "Too many processes priorities differ from priorities reported by PS command.\n" + errMsg.str(),
-                    0, static_cast<double>(priorityMismatchCount), 9);
+                    priorityMismatchCount <= 9);
             }
         }
     }
