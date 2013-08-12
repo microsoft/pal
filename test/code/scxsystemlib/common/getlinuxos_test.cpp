@@ -50,12 +50,12 @@ class SCXGetLinuxOS_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestPlatform_Oracle_5 );
     CPPUNIT_TEST( TestPlatform_Oracle_6 );
     CPPUNIT_TEST( TestPlatform_NeoKylin );
-    // CPPUNIT_TEST( TestPlatform_OpenSUSE );
     CPPUNIT_TEST( TestPlatform_Debian_5_0_10 );
     CPPUNIT_TEST( TestPlatform_Ubuntu_11 );
     // CPPUNIT_TEST( TestPlatform_Fedora );
     CPPUNIT_TEST( TestPlatform_CentOS_5 );
     CPPUNIT_TEST( TestPlatform_Debian_7_0 );
+    CPPUNIT_TEST( TestPlatform_openSUSE_11_4 );
     CPPUNIT_TEST( TestPlatform_openSUSE_12_3 );
     CPPUNIT_TEST_SUITE_END();
 
@@ -427,6 +427,27 @@ public:
         CPPUNIT_ASSERT_EQUAL( string("Softare in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
     }
 
+    // Platform openSUSE 11.4:
+    void TestPlatform_openSUSE_11_4()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/openSUSE_11.4", releaseFile );
+
+        // Verify our data:
+        //      OSName = openSUSE
+        //      OSVersion = 11.4
+        //      OSFullName = openSUSE 11.4 (x86_64)
+        //      OSAlias = UniversalR
+        //      OSManufacturer = SUSE GmbH
+
+        CPPUNIT_ASSERT_EQUAL( string("openSUSE"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("11.4"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("openSUSE 11.4") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
+    }
+
     // Platform openSUSE 12.3:
     void TestPlatform_openSUSE_12_3()
     {
@@ -437,7 +458,7 @@ public:
         // Verify our data:
         //      OSName = openSUSE
         //      OSVersion = 12.3
-        //      OSFullName = openSUSE 12.3 (Dartmouth)
+        //      OSFullName = openSUSE 12.3 (x86_64)
         //      OSAlias = UniversalR
         //      OSManufacturer = SUSE GmbH
 
