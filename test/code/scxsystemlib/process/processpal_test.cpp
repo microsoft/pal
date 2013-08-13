@@ -300,6 +300,7 @@ public:
         string cmdname;
         int pidsMissing = 0;
         unsigned int namesWrong = 0;
+        ostringstream msg;
 
         map<scxulong, string> psOutput;
         map<scxulong, string>::iterator pos;
@@ -328,14 +329,14 @@ public:
                 //   OR Process state <> 7 (terminated) - terminated == defunct
                 if ( ! compareCmdNames(pos->second, cmdname)
                      && (!inst->GetExecutionState(procState) || procState != 7)) {
-                    std::cout << std::endl << "Warning - Process names differ for pid: " 
-                              << pid << " (" << pos->second << " != >" << cmdname << "<)";
+                    msg << "Warning - Process names differ for pid: " 
+                        << pid << " (" << pos->second << " != >" << cmdname << "<)" << std::endl;
                     ++namesWrong;
                 }
             }
             else
             {
-                // For debug: cout << "PID not found " << pid << endl;
+                msg << "PID not found " << pid << std::endl;
                 ++pidsMissing;
             }
 
@@ -353,11 +354,12 @@ public:
         // cout << "Number of wrong names: " << namesWrong << endl;
 
         // Sometimes processes change names. More specifically when exec() is called
-#if defined(aix) || defined(hpux)
-        // AIX & HP platform APIs behave somewhat differently than 'ps' does; be slightly more forgiving
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0, namesWrong, 10);
+#if defined(aix)
+        // AIX platform APIs behave somewhat differently than 'ps' does; be slightly more forgiving
+        // (HP does too, but since HP ignores all sh/bash processes, it doesn't need special treatment)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg.str(), 0, namesWrong, 10);
 #else
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0, namesWrong, 2);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg.str(), 0, namesWrong, 2);
 #endif
     }
 
@@ -1587,12 +1589,21 @@ public:
         if (psoutput == "sshd") return true;
 #endif
 
+#if defined(hpux)
+        // On HP platform, shell scripts and shell commands (echo, etc) are
+        // returned by 'ps', but our agent will just return 'bash' or 'sh'
+
+        if ((instanceName == "bash") || (instanceName == "sh"))
+            return true;
+#endif
+
 #if defined(aix) || defined(hpux)
         // On AIX & HP, we have differences like ps="-bash", but agent="bash"
         // Be a little more forgiving for these sorts of differences
         //
         // The second compare will match on things like "-bash" vs. "bash"
         // The find will find substrings (i.e. "ksh" vs. "master.ksh")
+
         return (instanceName.compare(0, psoutput.length(), psoutput) == 0
                 || psoutput.compare(1, psoutput.length()-1, instanceName) == 0
                 || instanceName.find(psoutput) != string::npos
