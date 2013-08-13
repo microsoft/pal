@@ -1159,7 +1159,13 @@ void NetworkInterfaceInfo::Refresh() {
                 break;
             default:
                 // other values do not have correspond values defined in Win32_NetworkAdapter.
-                SCX_LOGERROR(m_log, StrAppend(wstring(L"for net device ") + m_name + L" can not map sa_family to AdapterType, sa_family is : ", ifr.ifr_hwaddr.sa_family));
+                static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eInfo, SCXCoreLib::eTrace);
+                std::wstringstream errMsg;
+
+                errMsg << L"For net device " << m_name << L", can not map sa_family to AdapterType, sa_family is: " << ifr.ifr_hwaddr.sa_family;
+                SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(errMsg.str()));
+                SCX_LOG(m_log, severity, errMsg.str());
+
                 m_adapterTypeID = eNetworkAdapterTypeInvalid;
             }
             if (eNetworkAdapterTypeInvalid == m_adapterTypeID)
