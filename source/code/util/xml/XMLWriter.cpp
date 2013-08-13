@@ -18,6 +18,7 @@ static const std::string c_XmlGT   = "&gt;"  ;
 static const std::string c_XmlApos = "&apos;";
 static const std::string c_XmlQuot = "&quot;";
 static const std::string c_XmlTab  = "&#";
+static const std::string c_XmlEsc  = "\\\\";
 
 /*
 **==============================================================================
@@ -49,30 +50,35 @@ static inline void EncodeChar(CodePoint cp, Utf8String& Out)
         case '\"':
             Out = c_XmlQuot;
             break;
-        case 0x09:
-        case 0x0A:
-        case 0x0D:
-            {
-                // Encode the control characters
-                std::stringstream ss;
-                ss << "&#x0" << std::hex << cp << ";";
-                Out = ss.str();
-            }
+        case '\\':
+            Out = c_XmlEsc;
             break;
         default:
             // UTF-8 Characters are valid as per XML Specification. So for those, encode the individual characters
             // However, as stated above, control characters other than 0x09, 0x0A and 0x0D are invalid, so do not include them
-            if (cp >= 0x20)
+            if ( ((0x0020  <= cp) && (cp <= 0xD7FF  )) ||
+                 ((0xE000  <= cp) && (cp <= 0xFFFD  )) ||
+                  (0x09    == cp) ||
+                  (0x0A    == cp) ||
+                  (0x0d    == cp) )
             {
-                Out.Clear();
-                Utf8Char str[8];
-                size_t bytes = CodePointToUtf8(cp, str);
-                str[bytes] = '\0';
-                Out += str;
-            }
-            else
-            {
-                // Should we throw here ?
+                if (cp <= 0x20)
+                {
+                    Out = "&#x";
+
+                    std::stringstream ss;
+                    ss << std::hex << std::setw(4) << std::setfill('0') << cp;
+
+                    Out += ss.str();
+                    Out += ";";
+                }
+                else
+                {
+                    Utf8Char str[8];
+                    size_t bytes = CodePointToUtf8(cp, str);
+                    str[bytes] = '\0';
+                    Out = str;
+                }
             }
             break;
     }
@@ -271,6 +277,7 @@ void CXElement::PutText(Utf8String& sOut, Utf8String& TextIn)
 
         sOut += replacementString;
     }
+
 }
 
 /*

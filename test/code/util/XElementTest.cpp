@@ -957,7 +957,7 @@ class XElementTest : public CPPUNIT_NS::TestFixture
             }
 
             // Check the file for known contents.
-            std::string GrepCommand("grep '<Child312 ChildAttr3121=\"Child Attr 3121 Value\" ChildAttr3122=\"Child Attr 3122 Value\">' " + TestFileName + " > /dev/null");
+            std::string GrepCommand("grep '<Child312 ChildAttr3121=\"Child&#x0020;Attr&#x0020;3121&#x0020;Value\" ChildAttr3122=\"Child&#x0020;Attr&#x0020;3122&#x0020;Value\"' " + TestFileName + "> /dev/null");
             if (system(GrepCommand.c_str()) != 0)
             {
                 CPPUNIT_FAIL("Error in XML output file");
