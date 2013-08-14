@@ -700,7 +700,10 @@ void NetworkInterfaceInfo::GetAttributesUsingKstat(SCXCoreLib::SCXHandle<Network
     }
     catch (SCXCoreLib::SCXException& e)
     {
-        SCX_LOGWARNING(m_log, wstring(L"kstat error: ").append(L" - ").append(e.What()));
+        static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eInfo, SCXCoreLib::eTrace);
+        wstring msg(wstring(L"Unable to determine autosense attribute: ").append(e.What()));
+        SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(msg));
+        SCX_LOG(m_log, severity, msg);
     }
 }
 
