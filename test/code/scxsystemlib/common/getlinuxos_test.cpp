@@ -46,17 +46,17 @@ class SCXGetLinuxOS_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestPlatform_RHEL_61 );
     CPPUNIT_TEST( TestPlatform_SLES_9_0 );
     CPPUNIT_TEST( TestPlatform_SLES_10 );
-    // CPPUNIT_TEST( TestPlatform_ALT_Linux );
     CPPUNIT_TEST( TestPlatform_Oracle_5 );
     CPPUNIT_TEST( TestPlatform_Oracle_6 );
     CPPUNIT_TEST( TestPlatform_NeoKylin );
     CPPUNIT_TEST( TestPlatform_Debian_5_0_10 );
     CPPUNIT_TEST( TestPlatform_Ubuntu_11 );
-    // CPPUNIT_TEST( TestPlatform_Fedora );
     CPPUNIT_TEST( TestPlatform_CentOS_5 );
     CPPUNIT_TEST( TestPlatform_Debian_7_0 );
     CPPUNIT_TEST( TestPlatform_openSUSE_11_4 );
     CPPUNIT_TEST( TestPlatform_openSUSE_12_3 );
+    CPPUNIT_TEST( TestPlatform_ALT_Linux_6_0_0 );
+    CPPUNIT_TEST( TestPlatform_Fedora_8 );
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -467,6 +467,46 @@ public:
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("openSUSE 12.3") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
+    }
+
+    void TestPlatform_ALT_Linux_6_0_0()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/ALT_Linux_6.0.0", releaseFile );
+
+        // Verify our data:
+        //      OSName = ALT Linux
+        //      OSVersion = 6.0.0
+        //      OSFullName = ALT Linux 6.0.0
+        //      OSAlias = UniversalR
+        //      OSManufacturer = ALT Linux Ltd
+
+        CPPUNIT_ASSERT_EQUAL( string("ALT Linux"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("6.0.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("ALT Linux 6.0.0") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("ALT Linux Ltd"), releaseFile["OSManufacturer"] );
+    }
+
+    void TestPlatform_Fedora_8()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/fedora_8", releaseFile );
+
+        // Verify our data:
+        //      OSName = Fedora
+        //      OSVersion = 8.0
+        //      OSFullName = Fedora 8.0
+        //      OSAlias = UniversalR
+        //      OSManufacturer = Red Hat, Inc.
+
+        CPPUNIT_ASSERT_EQUAL( string("Fedora"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("8.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Fedora 8.0") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("Red Hat, Inc."), releaseFile["OSManufacturer"] );
     }
 };
 

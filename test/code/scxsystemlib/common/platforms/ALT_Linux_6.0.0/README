@@ -1,0 +1,12 @@
+Files in /etc:
+altlinux-release
+fedora-release -> altlinux-release
+redhat-release -> altlinux-release
+system-release -> altlinux-release
+ 
+ Contents:
+ALT Linux 6.0.0 Centarus  (Cheiron)
+
+
+Because we can't deal with hard links well in TFS, the files are just stored
+as copies, all identical.
