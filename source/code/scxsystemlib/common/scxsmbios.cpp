@@ -52,13 +52,17 @@ namespace SCXSystemLib
         SCX_LOGTRACE(m_log, StrAppend(L"SMBIOSPALDependencies ReadSpecialMemory() - length: ", length));
         SCX_LOGTRACE(m_log, StrAppend(L"SMBIOSPALDependencies ReadSpecialMemory() - offsetStart: ", offsetStart));
 
-        bool readSuccessfully= SCXFile::ReadAvailableBytesAsUnsigned(devicePath,&(buf[0]),length,offsetStart);
-        SCX_LOGTRACE(m_log, StrAppend(L"ReadSpecialMemory() -status of reading is: ", readSuccessfully));
-        if(!readSuccessfully)
+        int readReturnCode = SCXFile::ReadAvailableBytesAsUnsigned(devicePath,&(buf[0]),length,offsetStart);
+        if(readReturnCode == 0)
         {
+            SCX_LOGTRACE(m_log, L"ReadSpecialMemory() - status of reading is: success");
+        }
+        else
+        {
+            SCX_LOGTRACE(m_log, L"ReadSpecialMemory() - status of reading is: failure");
+            SCX_LOGTRACE(m_log, StrAppend(L"ReadSpecialMemory() - reason for read failure: ", readReturnCode));
             return false;
         }
-
 
         return true;
     }
@@ -92,14 +96,18 @@ namespace SCXSystemLib
         //Read Smbios Table from device system file according to info inside SmbiosEntry.
         //
         SCXFilePath devicePath(m_deviceName); 
-        bool readSuccessfully = SCXFile::ReadAvailableBytesAsUnsigned(devicePath,&(buf[0]),
+        int readReturnCode = SCXFile::ReadAvailableBytesAsUnsigned(devicePath,&(buf[0]),
                 entryPoint.tableLength,entryPoint.tableAddress);
-        SCX_LOGTRACE(m_log, StrAppend(L"GetSmbiosTable() -the status of reading is : ", readSuccessfully));
-        if(!readSuccessfully)
+        if(readReturnCode == 0)
         {
+            SCX_LOGTRACE(m_log, L"GetSmbiosTable() -the status of reading is : success");
+        }
+        else
+        {
+            SCX_LOGTRACE(m_log, L"GetSmbiosTable() -the status of reading is : failure");
+            SCX_LOGTRACE(m_log, StrAppend(L"GetSmbiosTable() - reason for read failure: ", readReturnCode));
             return false;
         }
-
 
         return true;
     }

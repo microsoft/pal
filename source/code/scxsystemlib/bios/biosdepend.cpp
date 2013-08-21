@@ -13,7 +13,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 /*----------------------------------------------------------------------------*/
 #include <scxcorelib/scxcmn.h>
 #include <scxsystemlib/biosdepend.h>
-#include <scxcorelib/scxlog.h>
+#include <scxcorelib/logsuppressor.h>
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxstream.h>
 #include <scxcorelib/scxoserror.h>
@@ -47,6 +47,9 @@ namespace SCXSystemLib
     */
     BiosDependencies::BiosDependencies()
     {
+#if defined(sun) && defined(sparc)
+        m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.bios.biosdepend"));
+#endif
     }
 
     /*----------------------------------------------------------------------------*/
@@ -68,6 +71,10 @@ namespace SCXSystemLib
     */
     void BiosDependencies::GetPromVersion(wstring& version)
     {
+        static LogSuppressor suppressor(eInfo, eTrace);
+
+        version.clear();
+
         struct openpromio* opp;
         int fd;
         int proplen;
@@ -76,21 +83,29 @@ namespace SCXSystemLib
         fd = open(PROM_DEV, O_RDONLY);
         if (fd < 0)
         {
-            throw SCXInternalErrorException(L"open of /dev/openprom failed", SCXSRCLOCATION);
+            std::wstring errMsg(L"open of /dev/openprom failed");
+            SCXErrnoException e(errMsg, errno, SCXSRCLOCATION);
+            SCX_LOG(m_log, suppressor.GetSeverity(errMsg), e.What());
+            return;
         }
 
          /* Allocate an openpromio structure big enough to get the PROM version string */
         opp = (struct openpromio*)malloc(sizeof (struct openpromio) + MAXVALSZ);
         if (opp == NULL)
         {
+            (void)close(fd);
             throw SCXInternalErrorException(L"could not allocate memory", SCXSRCLOCATION);
         }
         (void)memset(opp, 0, sizeof (struct openpromio) + MAXVALSZ);
         opp->oprom_size = MAXVALSZ;
         if (ioctl(fd, OPROMGETVERSION, opp) < 0)
         {
+            std::wstring errMsg(L"ioctl on /dev/openprom failed");
+            SCXErrnoException e(errMsg, errno, SCXSRCLOCATION);
             free(opp);
-            throw SCXInternalErrorException(L"ioctl on /dev/openprom failed", SCXSRCLOCATION);
+            (void)close(fd);
+            SCX_LOG(m_log, suppressor.GetSeverity(errMsg), e.What());
+            return;
         }
         (void)close(fd);
         version = StrFromUTF8((char*)opp->oprom_array);
@@ -121,6 +136,10 @@ namespace SCXSystemLib
     */
     void BiosDependencies::GetPromPropertyValue(const wstring& propName, wstring& retValue)
     {
+        static LogSuppressor suppressor(eInfo, eTrace);
+
+        retValue.clear();
+
         di_node_t root_node = NULL;
         di_node_t promNode = NULL;
         di_prom_handle_t ph = NULL;
@@ -131,14 +150,20 @@ namespace SCXSystemLib
         // Snapshot with all information
         if ((root_node = di_init(DI_ROOT_PATH, DINFOCPYALL)) == DI_NODE_NIL)
         {
-            throw SCXInternalErrorException(L"di_init() failed", SCXSRCLOCATION);
+            std::wstring errMsg(L"di_init() failed");
+            SCXErrnoException e(errMsg, errno, SCXSRCLOCATION);
+            SCX_LOG(m_log, suppressor.GetSeverity(errMsg), e.What());
+            return;
         }
 
         // Create handle to PROM
         if ((ph = di_prom_init()) == DI_PROM_HANDLE_NIL)
         {
+            std::wstring errMsg(L"di_prom_init() failed");
+            SCXErrnoException e(errMsg, errno, SCXSRCLOCATION);
             di_fini(root_node);
-            throw SCXInternalErrorException(L"di_prom_init() failed", SCXSRCLOCATION);
+            SCX_LOG(m_log, suppressor.GetSeverity(errMsg), e.What());
+            return;
         }
 
         // Verify that the node is present.
@@ -166,18 +191,24 @@ namespace SCXSystemLib
         }
         else
         {
+            di_prom_fini(ph);
             di_fini(root_node);
-            wstring exmsg(L"Search for propery \"");
-            exmsg += propName + L"\" failed.";
-            throw SCXInternalErrorException(exmsg.c_str(), SCXSRCLOCATION);
+            wstring errMsg(L"Search for propery \"");
+            errMsg += propName + L"\" failed.";
+            SCX_LOG(m_log, suppressor.GetSeverity(errMsg), errMsg);
+            return;
         }
 #else
         // open openprom node
         const std::string nodePath = DI_PROM_PATH;
         if ((promNode = di_lookup_node(root_node, const_cast<char*>(nodePath.c_str()))) == DI_NODE_NIL)
         {
+            std::wstring errMsg(L"di_lookup_node for /openprom failed");
+            SCXErrnoException e(errMsg, errno, SCXSRCLOCATION);
+            di_prom_fini(ph);
             di_fini(root_node);
-            throw SCXInternalErrorException(L"di_lookup_node for /openprom failed", SCXSRCLOCATION);
+            SCX_LOG(m_log, suppressor.GetSeverity(errMsg), e.What());
+            return;
         }
 
 #endif
@@ -185,9 +216,12 @@ namespace SCXSystemLib
         rval = di_prom_prop_lookup_strings(ph, promNode, const_cast<char*>(StrToUTF8(propName).c_str()), &strp);
         if (rval == -1)
         {
+            std::wstring errMsg(L"di_prom_prop_lookup_strings() failed for property name :version");
+            SCXErrnoException e(errMsg, errno, SCXSRCLOCATION);
             di_prom_fini(ph);
             di_fini(root_node);
-            throw SCXInternalErrorException(L"di_prom_prop_lookup_strings() failed for property name :version", SCXSRCLOCATION);
+            SCX_LOG(m_log, suppressor.GetSeverity(errMsg), e.What());
+            return;
         }
 
         retValue = StrFromUTF8(strp);

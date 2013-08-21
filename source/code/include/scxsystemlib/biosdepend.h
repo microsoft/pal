@@ -12,6 +12,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 */
 /*----------------------------------------------------------------------------*/
 #include <scxcorelib/scxcmn.h>
+#include <scxcorelib/scxlog.h>
 #include <stdio.h>
 #include <vector>
 
@@ -48,6 +49,7 @@ namespace SCXSystemLib
         */
         void GetPromPropertyValue(const std::wstring& propName,std::wstring& retValue);
 
+        SCXCoreLib::SCXLogHandle m_log;  //!< Log handle
 #endif
     };
 }

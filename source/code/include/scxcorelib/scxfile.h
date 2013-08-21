@@ -91,7 +91,7 @@ namespace SCXCoreLib {
         static void ReadAllLines(const SCXFilePath& source, std::vector<std::wstring>& lines, SCXStream::NLFs&);
         static void ReadAllLinesAsUTF8(const SCXFilePath& source, std::vector<std::wstring>& lines, SCXStream::NLFs&);
         static size_t ReadAvailableBytes(const SCXFilePath& path, char* buf, size_t size, size_t offset = 0);
-        static bool ReadAvailableBytesAsUnsigned(const SCXFilePath& path, unsigned char* buf, size_t size, size_t offset = 0);
+        static int ReadAvailableBytesAsUnsigned(const SCXFilePath& path, unsigned char* buf, size_t size, size_t offset = 0);
         static void SeekG(std::wfstream& source, std::wstreampos pos);
 
 #if !defined(DISABLE_WIN_UNSUPPORTED)        

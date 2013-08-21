@@ -495,20 +495,19 @@ namespace SCXCoreLib {
       \param buf Buffer to read data to as unsigned char.
       \param size Size of the given buffer.
       \param offset Offset in file where to start read. Default: 0 (start of file)
-      \returns true,if it's successful to read;otherwise,false. 
-      \throws SCXErrnoException if any system call fails with an unexpected error.
+      \returns 0 if read was successfull, otherwise UNIX errno code of the error that caused failure. 
 
       \date 11-01-26 15:45:00
       \author kesheng tao
      */
 #if defined(DISABLE_WIN_UNSUPPORTED)
-    bool SCXFile::ReadAvailableBytesAsUnsigned(const SCXFilePath& , unsigned char* , size_t , size_t /*= 0*/) {
+    int SCXFile::ReadAvailableBytesAsUnsigned(const SCXFilePath& , unsigned char* , size_t , size_t /*= 0*/) {
             throw SCXNotSupportedException(L"Reads not supported on windows", SCXSRCLOCATION);
 #else
-    bool SCXFile::ReadAvailableBytesAsUnsigned(const SCXFilePath& path, unsigned char* buf, size_t size, size_t offset /*= 0*/) {
+    int SCXFile::ReadAvailableBytesAsUnsigned(const SCXFilePath& path, unsigned char* buf, size_t size, size_t offset /*= 0*/) {
         int fd = open(SCXFileSystem::EncodePath(path).c_str(),O_RDONLY);
         if (-1 == fd) {
-            throw SCXErrnoException(L"open(" + path.Get() + L")", errno, SCXSRCLOCATION);
+            return errno;
         }
 
         size_t remainder;
@@ -524,7 +523,9 @@ namespace SCXCoreLib {
         size_t mmapoffset = offset - remainder;
         pDevice = mmap(NULL, remainder + size, PROT_READ, MAP_SHARED, fd, mmapoffset);
         if (MAP_FAILED == pDevice) {
-            return false;
+            int ret = errno;
+            close(fd); 
+            return ret;
         }
 
         memcpy(buf, reinterpret_cast<unsigned char*>(pDevice) + remainder, size);
@@ -532,7 +533,7 @@ namespace SCXCoreLib {
         munmap(reinterpret_cast<char*>(pDevice), remainder + size);
         close(fd); 
 
-        return true;
+        return 0;
 #endif
     }
 
