@@ -1,6 +1,8 @@
 // To compile:
 // Solaris:
 // CC zombie.cpp -o zombie
+// Linux:
+// g++ zombie.cpp -o zombie
 #include<unistd.h>
 #include<stdio.h>
 int main(int argc, char *argv[])
