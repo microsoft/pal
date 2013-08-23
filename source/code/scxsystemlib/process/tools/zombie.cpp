@@ -3,6 +3,10 @@
 // CC zombie.cpp -o zombie
 // Linux:
 // g++ zombie.cpp -o zombie
+// AIX:
+// xlC zombie.cpp -o zombie
+// HPUX:
+// aCC zombie.cpp -o zombie
 #include<unistd.h>
 #include<stdio.h>
 int main(int argc, char *argv[])
