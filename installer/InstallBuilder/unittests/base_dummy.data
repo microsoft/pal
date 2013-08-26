@@ -1,0 +1,29 @@
+%Variables
+VERSION: '1.0.1'
+RELEASE: '123'
+SHORT_NAME: 'dummytest'
+LONG_NAME: 'Dummy Test Package'
+SHELL_HEADER: '#!/bin/sh'
+SHORT_NAME_PREFIX: 'MSFT'
+VENDOR: 'MSFT'
+GROUP: 'MSFT'
+LICENSE: 'C'
+MAINTAINER: 'scxteam'
+PROVIDES: 'dummytestpkg'
+DESCRIPTION: 'This dummy test package is part of the unit test framework for the install builder'
+COPYRIGHT_FILE: 'COPYRIGHT1'
+HPUX_COPYRIGHT: 'COPYRIGHT2'
+
+
+%Files
+/tmp/dummy.txt; dummy.txt; 777; root; root
+
+%Directories
+/tmp; 777; root; root; sysdir
+#if PF == AIX
+/usr/lpp; 777; root; root; sysdir
+/usr/lpp/${{SHORT_NAME}}.rte; 777; root; root
+#endif
+
+%Links
+%Dependencies

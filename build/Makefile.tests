@@ -182,6 +182,15 @@ testrun : testrun_setup $(BUILD_TESTRUN_PACKAGE)
 	$(ECHO) "========================= Performing PAL testrun execution"
 	cd $(TARGET_DIR);testfiles/testrun_wrapper .
 	$(MAKE) testrun_copycovfile
+	cd $(SCX_BRD)/installer/InstallBuilder/unittests; \
+	python ib_unittests.py \
+		--PF=$(PF) \
+		--PFDISTRO=$(PF_DISTRO) \
+		--PFARCH=$(PF_ARCH) \
+		--PFMAJOR=$(PF_MAJOR) \
+		--PFMINOR=$(PF_MINOR) \
+		--PF_DISTRO_ULINUX_D=$(PF_DISTRO_ULINUX_D) \
+		--PF_DISTRO_ULINUX_R=$(PF_DISTRO_ULINUX_R)
 
 # Make a little more compatible with other projects
 test : testrun
@@ -199,13 +208,6 @@ testrun_nosudo : testrun_setup
 testrun_core : $(TARGET_DIR)/testrunner_core testrun_copy
 	$(ECHO) "========================= Performing PAL testrun execution"
 	cd $(TARGET_DIR);./testrunner_core
-
-
-#================================================================================
-# Test parts of the installer builder framework
-#================================================================================
-test_installerbuilder:
-	cd ${SCX_BRD}/installer/InstallerBuilder/tests;python testrunner.py
 
 #================================================================================
 # Enable/disable profiling

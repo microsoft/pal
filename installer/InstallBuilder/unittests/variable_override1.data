@@ -1,0 +1,5 @@
+%Variables
+VAR_TO_OVERRIDE: 'INVALID'
+
+%Postinstall_1
+echo ${{VAR_TO_OVERRIDE}}

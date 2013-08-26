@@ -1,0 +1,8 @@
+%Preinstall_100
+echo 100
+%Preinstall_1000
+echo 1000
+%Preinstall_500
+echo 500
+%Preinstall_3
+echo 3

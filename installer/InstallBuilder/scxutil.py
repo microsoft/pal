@@ -1,17 +1,7 @@
 # coding: utf-8
-#
-# Copyright (c) Microsoft Corporation.  All rights reserved.
-#
-##
-# Module containing utility functions.
-#
-# Date:   2007-09-25 13:36:05
-#
-
 import shutil
 import os
 import fnmatch
-from scxexceptions import PlatformNotImplementedError
 
 ##
 # Copy all files in srcDir matching pattern to dstDir.
@@ -45,7 +35,10 @@ def CopyPattern(srcDir, pattern, dstDir):
 # \param[in] dstPath Absolute destination path.
 #
 def Copy(srcPath, dstPath):
-    os.system("cp -p \"" + srcPath + "\" \"" + dstPath + "\"")
+    retval = os.system("cp -p \"" + srcPath + "\" \"" + dstPath + "\"")
+    if retval != 0:
+        print("Unable to copy from %s to %s." % (srcPath, dstPath))
+        exit(1)
     
 ##
 # Utility method to move files with all permissions retained
@@ -53,7 +46,10 @@ def Copy(srcPath, dstPath):
 # \param[in] dstPath Absolute destination path.
 #
 def Move(srcPath, dstPath):
-    os.system("mv \"" + srcPath + "\" \"" + dstPath + "\"")
+    retval = os.system("mv \"" + srcPath + "\" \"" + dstPath + "\"")
+    if retval != 0:
+        print("Unable to move from %s to %s." % (srcPath, dstPath))
+        exit(1)
     
 ##
 # Utility method to create a soft link
@@ -61,14 +57,20 @@ def Move(srcPath, dstPath):
 # \param[in] dstPath Absolute destination path.
 #
 def Link(path, dstPath):
-    os.system("ln -s \"" + path + "\" \"" + dstPath + "\"")
+    retval = os.system("ln -s \"" + path + "\" \"" + dstPath + "\"")
+    if retval != 0:
+        print("Unable to ln -s %s %s." % (path, dstPath))
+        exit(1)
     
 ##
 # Utility method to touch a file
 # \param[in] path Absolute path.
 #
 def Touch(path):
-    os.system("touch \"" + path + "\"")
+    retval = os.system("touch \"" + path + "\"")
+    if retval != 0:
+        print("Unable to touch %s." % path)
+        exit(1)
 
 ##
 # Utility method to change owner/group on a file.
@@ -80,7 +82,10 @@ def Touch(path):
 def ChOwn(path,uid,gid):
     # Must use 'os.system' rather than os.chown because 'root' will be passed
     # (and we use 'sudo' to allow things like uid=root)
-    os.system('sudo chown %s:%s %s' % (uid,gid,path))
+    retval = os.system('sudo chown %s:%s %s' % (uid,gid,path))
+    if retval != 0:
+        print("Unable to chown %s." % path)
+        exit(1)
 
 ##
 # Utility method to change permissions on a file
@@ -89,7 +94,10 @@ def ChOwn(path,uid,gid):
 #
 def ChMod(path,mode):
     # Muse use 'os.system' rather than os.chmod because we may need 'sudo' ...
-    os.system('sudo chmod %s %s' % (mode, path))
+    retval = os.system('sudo chmod %s %s' % (mode, path))
+    if retval != 0:
+        print("Unable to chmod %s." % path)
+        exit(1)
 
 ##
 # Utility method to create a new directory
@@ -113,21 +121,4 @@ def MkAllDirs(path):
 #
 def RmTree(path):
     shutil.rmtree(path, 1)
-
-##
-# Utility method to return the path of 'sh' on the destination system
-#
-def Get_sh_path(platform):
-    if platform == "SunOS":
-        return '#!/usr/bin/sh'
-    elif platform == "Linux":
-        return '#!/bin/sh'
-    elif platform == "HPUX":
-        return '#!/usr/bin/sh'
-    elif platform == "AIX":
-        return '#!/bin/sh'
-    elif platform == "MacOS":
-        return '#!/bin/sh'
-    else:
-        raise PlatformNotImplementedError(platform)
 

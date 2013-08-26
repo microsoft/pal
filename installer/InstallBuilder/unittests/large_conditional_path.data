@@ -1,0 +1,29 @@
+%Variables
+TRUE: '1'
+FALSE: '0'
+
+%Defines
+TRUTH
+
+%Preuninstall
+#if TRUE == 0
+echo FALSE PATH 1
+#elseif TRUE == 1
+echo TRUE PATH 2
+#if TRUE != 0
+echo TRUE PATH 3
+#if FALSE == lkjdsfh
+echo FALSE PATH 4
+#elseif FALSE != 0
+echo FALSE PATH 5
+#else
+echo TRUE PATH 6
+#endif
+#elseif TRUE == 0
+echo NOT TAKEN PATH 7
+#else
+echo FALSE PATH 8
+#endif
+#else
+echo FALSE PATH 9
+#endif
