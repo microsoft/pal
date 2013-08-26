@@ -7,7 +7,7 @@ def error(s):
     exit(1)
 
 def RunInstallBuilder(datafiles):
-	os.system("rm -rf ./staging")
+    os.system("rm -rf ./staging")
     retval = os.system("""python ../installbuilder.py \
                 --BASE_DIR=. \
                 --TARGET_DIR=./target \
