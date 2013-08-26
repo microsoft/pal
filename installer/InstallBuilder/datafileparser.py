@@ -173,7 +173,7 @@ class ConditionalStack:
 # Description:
 #  This class reads the datafiles, parses them, and evaluates the commands.
 class DataFileParser:
-    def __init__(self);
+    def __init__(self):
         self.variables = dict()
         self.defines = []
         
