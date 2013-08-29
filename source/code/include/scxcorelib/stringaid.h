@@ -76,6 +76,8 @@ namespace SCXCoreLib
     std::wstring StrToUpper(const std::wstring& str);
     std::wstring StrToLower(const std::wstring& str);
 
+    void StrReplaceAll(std::wstring &str, const std::wstring &what, const std::wstring &with);
+
     int StrCompare(const std::wstring& str1, const std::wstring& str2, bool ci=false);
 
     void StrTokenize(const std::wstring& str, std::vector<std::wstring>& tokens, const std::wstring& delimiters = L" \n", bool trim=true, bool emptyTokens=false, bool keepDelimiters = false);

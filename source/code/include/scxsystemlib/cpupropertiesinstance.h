@@ -393,6 +393,8 @@ namespace SCXSystemLib
 #if defined(linux)
         ProcfsCpuInfo m_cpuinfo;
 		ProcfsCpuInfoReader m_cpuinfoTable;
+		unsigned short m_family;
+		unsigned short GetFamily();
 #elif defined(hpux)
 		std::wstring m_socketId;
 #elif defined(sun) 

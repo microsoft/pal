@@ -546,6 +546,32 @@ namespace SCXCoreLib
 
     /*----------------------------------------------------------------------------*/
     /**
+        Replaces all occurances of a substring. String is searched for the occurences of a substring in the parameter 'what'
+        and if found the substring is then replaced with the substring in the parameter 'with'. After that the current
+        string search position is set after the replacement string 'with'. The search for a substring 'what' then continues
+        until the end of the string.
+
+        \param       str  String in which to replace all occurances of a substring.
+        \param       what Substring to be replaced.
+        \param       with Replacing substring.
+    */
+    void StrReplaceAll(std::wstring &str, const std::wstring &what, const std::wstring &with)
+    {
+        size_t i = 0;
+        while (true)
+        {
+            i = str.find(what, i);
+            if (i == wstring::npos)
+            {
+                return;
+            }
+            str.replace(i, what.size(), with);
+            i += with.size();
+        }
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
         Compare strings case insensitive
 
         \param       str1   First string to compare

@@ -153,6 +153,47 @@ public:
 private:
 	int m_cpuInfoFileType;
 };
+
+/**
+    Class for injecting processor family behavior into the cpuproperties PAL.
+ */
+class CPUFamilyTestDependencies: public CPUInfoDependencies
+{
+public:
+    string m_vendorString;
+    string m_brandString;
+	SCXCoreLib::SCXHandle<std::wistream> OpenCpuinfoFile() const
+    {
+        SCXHandle<wstringstream> cpuInfoStream( new wstringstream );
+        *cpuInfoStream 
+            << L"processor       : 0" << endl
+            << L"vendor_id       : " << StrFromMultibyte(m_vendorString) << endl
+            << L"cpu family      : 6" << endl
+            << L"model           : 12" << endl;
+        
+        if (m_brandString.empty() != true)
+        {
+            *cpuInfoStream << L"model name      : " << StrFromMultibyte(m_brandString) << endl;
+        }
+        
+        *cpuInfoStream 
+            << L"stepping        : 2" << endl
+            << L"cpu MHz         : 2104.008" << endl
+            << L"cache size      : 0 KB" << endl
+            << L"fpu             : yes" << endl
+            << L"fpu_exception   : yes" << endl
+            << L"cpuid level     : 11" << endl
+            << L"wp              : yes" << endl
+            << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx lm pni cx16 ts" << endl
+            << L"bogomips        : 3145.72" << endl
+            << L"clflush size    : 64" << endl
+            << L"cache_alignment : 64" << endl
+            << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
+            << L"power management:" << endl;
+
+        return cpuInfoStream; 
+    }
+};
 #endif
 
 
@@ -161,12 +202,66 @@ class CpuProperties_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE(CpuProperties_test);
 
     CPPUNIT_TEST(testGetCpuPropertiesAttr);
+    CPPUNIT_TEST(testGetCpuFamilyAttr);
 
     SCXUNIT_TEST_ATTRIBUTE(testGetCpuPropertiesAttr,SLOW);
+    SCXUNIT_TEST_ATTRIBUTE(testGetCpuFamilyAttr,SLOW);
 
     CPPUNIT_TEST_SUITE_END();
 
 public:
+
+#if defined(linux)
+    void OneFamilyTest(const char *vendorString, const char *brandString, unsigned short family)
+    {
+        std::ostringstream errMsg;
+        errMsg << "Failed running test for vendor string \'" << vendorString << "\", brand string \"" << brandString <<"\"";
+        
+		SCXHandle<CPUFamilyTestDependencies> deps(new CPUFamilyTestDependencies());
+        deps->m_vendorString = vendorString;
+        deps->m_brandString = brandString;
+        SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> filehandle =
+            SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
+        SCXSystemLib::CpuPropertiesEnumeration cpuPropertiesEnum(filehandle);
+        cpuPropertiesEnum.Init();
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(errMsg.str(), 1u, cpuPropertiesEnum.Size());
+        SCXCoreLib::SCXHandle<CpuPropertiesInstance> inst = cpuPropertiesEnum.GetInstance(0);
+
+        unsigned short retFamily;
+        CPPUNIT_ASSERT_MESSAGE(errMsg.str(), inst->GetFamily(retFamily));
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(errMsg.str(), family, retFamily);
+    }
+#endif
+
+	void testGetCpuFamilyAttr()
+    {
+#if defined(linux)
+        OneFamilyTest("GenuineIntel", "", 2); // Unknown family.
+        OneFamilyTest("GenuineIntel", "Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz", 179);
+        OneFamilyTest("GenuineIntel", "Xeon(R) CPU           L5630  @ 2.13GHz", 2);
+        OneFamilyTest("GenuineIntel", "Mobile Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz", 179);
+        OneFamilyTest("GenuineIntel", "Genuine Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz", 179);
+        OneFamilyTest("GenuineIntel", "Intel(R) Pentium(R) CPU @ 2.13GHz", 11);
+        OneFamilyTest("GenuineIntel", "Intel(R) Pentium(R) III CPU @ 2.13GHz", 17);
+        OneFamilyTest("GenuineIntel", "Intel(R) Pentium(R) III Xeon CPU @ 2.13GHz", 176);
+        OneFamilyTest("GenuineIntel", "Intel(R) Pentium(R) 4 CPU @ 2.13GHz", 178);
+        OneFamilyTest("GenuineIntel", "Intel(R) Pentium(R) M CPU @ 2.13GHz", 185);
+        OneFamilyTest("GenuineIntel", "Intel(R) Celeron(R) CPU @ 2.13GHz", 15);
+
+        OneFamilyTest("AuthenticAMD", "", 2);
+        OneFamilyTest("AuthenticAMD", "AMD-K5(tm) Processor", 25);
+        OneFamilyTest("AuthenticAMD", "MOBILE AMD-K5(tm) Processor", 25);
+        OneFamilyTest("AuthenticAMD", "DUAL CORE AMD-K5(tm) Processor", 25);
+        OneFamilyTest("AuthenticAMD", "AMD-K6(tm) Processor", 26);
+        OneFamilyTest("AuthenticAMD", "AMD-K7(tm) Processor", 190);
+        OneFamilyTest("AuthenticAMD", "AMD Processor", 2);
+        OneFamilyTest("AuthenticAMD", "AMD Athlon(tm) Processor", 29);
+        OneFamilyTest("AuthenticAMD", "AMD Athlon(tm) 64 Processor", 131);
+        OneFamilyTest("AuthenticAMD", "AMD Athlon(tm) XP Processor", 182);
+        OneFamilyTest("AuthenticAMD", "AMD Duron(tm) Processor", 24);
+        OneFamilyTest("AuthenticAMD", "AMD Opteron(tm) Processor", 132);
+#endif
+    }
 
 #if defined(linux)
 	void testGetCpuInfoWithoutPhysicalid()
@@ -192,7 +287,7 @@ public:
 
         unsigned short tmp = 0;
         CPPUNIT_ASSERT(inst->GetFamily(tmp));
-        CPPUNIT_ASSERT_EQUAL(6, tmp);
+        CPPUNIT_ASSERT_EQUAL(179, tmp);
          
         CPPUNIT_ASSERT(inst->GetStepping(strtmp));
         CPPUNIT_ASSERT_EQUAL("2",StrToUTF8(strtmp));

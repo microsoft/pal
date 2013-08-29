@@ -56,10 +56,152 @@ namespace SCXSystemLib
     CpuPropertiesInstance::CpuPropertiesInstance(const  wstring& id, const ProcfsCpuInfo &cpuinfo) :
         EntityInstance(id),
         m_cpuinfo(cpuinfo),
+        m_family(2), // Unknown family.
         m_log(SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.cpuproperties.cpupropertiesinstance")))
 
     {
         SCX_LOGTRACE(m_log, L"Enter CpuPropertiesInstance(ProcfsCpuInfo) constructor");
+        
+        m_family = GetFamily();
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
+      GetFamily gets the family number as defined by Win32_Processor class.
+
+      Returns:     processor family.
+     */
+    unsigned short CpuPropertiesInstance::GetFamily()
+    {
+        std::wstring vendorId;
+        bool vendorIdResult = m_cpuinfo.VendorId(vendorId);
+        std::wstring modelName;
+        bool modelNameResult = m_cpuinfo.ModelName(modelName);
+
+        if ((vendorIdResult == false) || (modelNameResult == false))
+        {
+            return 2; // Unknown family.
+        }
+
+        if (vendorId == L"GenuineIntel")
+        {
+            // Typical brand string for Intel processor is:
+            // "Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz"
+
+            // Find terminating "CPU"
+            size_t pos = modelName.find(L"CPU");
+            if (pos == wstring::npos)
+            {
+                return 2; // Unknown family.
+            }
+            modelName = modelName.substr(0, pos);
+            modelName = StrToUpper(modelName);
+
+            // Remove from brand string parts we don't care about.
+            StrReplaceAll(modelName, L"(R)", L" ");
+            StrReplaceAll(modelName, L"(TM)", L" ");
+            StrReplaceAll(modelName, L"MOBILE", L" ");
+            StrReplaceAll(modelName, L"GENUINE", L" ");
+
+            std::vector<std::wstring> tokens;
+            StrTokenize(modelName, tokens);
+            if ((tokens.size() < 2) || (tokens[0] != L"INTEL"))
+            {
+                return 2; // Unknown family.
+            }
+
+            if (tokens[1] == L"XEON")
+            {
+                return 179; // Intel Xeon family.
+            }
+            else if (tokens[1] == L"PENTIUM")
+            {
+                if (tokens.size() >= 3)
+                {
+                    if (tokens[2] == L"III")
+                    {
+                        if ((tokens.size() >= 4) && tokens[3] == L"XEON")
+                        {
+                            return 176; // Intel Pentium III Xeon family.
+                        }
+                        return 17; // Intel Pentium III family.
+                    }
+                    else if (tokens[2] == L"4")
+                    {
+                        return 178; // Intel Pentium 4 family.
+                    }                
+                    else if (tokens[2] == L"M")
+                    {
+                        return 185; // Intel Pentium M family.
+                    }                
+                }
+                return 11; // Intel Pentium Brand family.
+            }
+            else if (tokens[1] == L"CELERON")
+            {
+                return 15; // Intel Celeron Family.
+            }
+        }
+        else if (vendorId == L"AuthenticAMD")
+        {
+            // Typical brand string for AMD processor is:
+            // "Dual-Core AMD Opteron(tm) Processor 2210"
+
+            modelName = StrToUpper(modelName);
+
+            // Remove from processor name parts we don't care about.
+            StrReplaceAll(modelName, L"(R)", L" ");
+            StrReplaceAll(modelName, L"(TM)", L" ");
+            StrReplaceAll(modelName, L"MOBILE", L" ");
+            StrReplaceAll(modelName, L"DUAL CORE", L" ");
+            StrReplaceAll(modelName, L"DUAL-CORE", L" ");
+
+            std::vector<std::wstring> tokens;
+            StrTokenize(modelName, tokens);
+            if (tokens.size() == 0)
+            {
+                return 2; // Unknown family.
+            }
+            if (tokens[0] == L"AMD-K5")
+            {
+                return 25; // AMD K5 family.
+            }
+            else if (tokens[0] == L"AMD-K6")
+            {
+                return 26; // AMD K6 family.
+            }
+            else if (tokens[0] == L"AMD-K7")
+            {
+                return 190; // AMD K7 family.
+            }
+            else if ((tokens.size() >= 2) && tokens[0] == L"AMD")
+            {
+                if (tokens[1] == L"ATHLON")
+                {
+                    if (tokens.size() >= 3)
+                    {
+                        if (tokens[2] == L"64")
+                        {
+                            return 131; // AMD Athlon 64 family.
+                        }
+                        else if (tokens[2] == L"XP")
+                        {
+                            return 182; // AMD Athlon XP family.
+                        }                            
+                    }
+                    return 29; // AMD Athlon family.
+                }
+                else if (tokens[1] == L"DURON")
+                {
+                    return 24; // AMD Duron family.
+                }
+                else if (tokens[1] == L"OPTERON")
+                {
+                    return 132; // AMD Opteron family.
+                }
+            }
+        }
+        return 2; // Unknown family.
     }
 
 #elif defined(sun) 
@@ -1221,7 +1363,8 @@ namespace SCXSystemLib
     {
         bool fRet = false;
 #if defined(linux) 
-        fRet = m_cpuinfo.CpuFamily(family);
+        family = m_family;
+        fRet = true;
 #elif defined(sun) 
         family = m_processorAttr.family; 
         fRet = true;
