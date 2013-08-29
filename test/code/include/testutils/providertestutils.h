@@ -164,6 +164,10 @@ std::wstring GetFQHostName(std::wstring errMsg);
 //! \returns    distribution name.
 std::wstring GetDistributionName(std::wstring errMsg);
 
+/*----------------------------------------------------------------------------*/
+//! Helper, creates a zombie process to verify we work fine with zombies around.
+void MakeZombie();
+
 template<class T> void SetUpAgent(TestableContext &context, std::wstring errMsg)
 {
     mi::Module Module;

@@ -15,11 +15,13 @@
 
 #include <scxcorelib/scxcmn.h>
 #include <scxcorelib/scxprocess.h>
+#include <scxcorelib/scxthread.h>
 #include <testutils/scxunit.h>
 #include <testutils/providertestutils.h>
 #include <netdb.h>
 #include <limits.h>
 #include <sys/utsname.h>
+#include <sys/wait.h>
 
 // Declare storage for static members of class
 
@@ -530,5 +532,63 @@ std::wstring GetDistributionName(std::wstring errMsg)
 #endif // defined(PF_DISTRO_SUSE)
 #endif // defined(sun) || defined(aix) || defined(HPUX)
     return distributionName;
+}
+
+void MakeZombie()
+{
+    static bool zombieCreated = false;
+    if (zombieCreated == false)
+    {
+        pid_t zombiePid = fork();
+        if (zombiePid == 0)
+        {
+            exit(EXIT_SUCCESS);
+        }
+        CPPUNIT_ASSERT_MESSAGE("Failed to create zombie process", -1 != zombiePid );
+#if defined(linux) && defined(PF_DISTRO_SUSE) && (PF_MAJOR == 9)
+        // Suse 9 has kernel older than 2.6.9 so WNOWAIT is not working, special case. We read /proc/[pid]/stat.
+        std::stringstream pidStr;
+        pidStr << "/proc/" << zombiePid << "/stat";
+        unsigned int timeout = 100;
+        unsigned int t;
+        for (t = 0; t < timeout; t++)
+        {
+            std::ifstream proc(pidStr.str().c_str());
+            // Stream should be good.
+            CPPUNIT_ASSERT_EQUAL_MESSAGE("Error opening file " + pidStr.str(), true, proc.good());
+            pid_t procPid = 0;
+            std::string procName;
+            char procState;
+            // We read first three fields, usualy something like this:
+            // 5555 (processname) Z some other fields ...
+            proc >> procPid >> procName >> procState;
+            // Stream should still be good.
+            CPPUNIT_ASSERT_EQUAL_MESSAGE("Error reading file " + pidStr.str(), true, proc.good());
+            // Just a sanity check, does the file name match the pid in the file. It always should.
+            CPPUNIT_ASSERT_EQUAL(zombiePid, procPid);
+            if (procState == 'Z')
+            {
+                // Our child process became a zombie process.
+                break;
+            }
+            SCXCoreLib::SCXThread::Sleep(100);
+        }
+        CPPUNIT_ASSERT_MESSAGE("Timeout while waiting for the zombie to become undead, process file " + pidStr.str(),
+            t < timeout);
+#else
+        siginfo_t info;
+        memset(&info, 0, sizeof(info));
+        int waitRet = waitid(P_PID, zombiePid, &info, WEXITED|WNOWAIT);
+        int savedErrno = errno;
+        std::wstringstream errMsg;
+        errMsg << L"waitid(pid = " << zombiePid << L")";
+        SCXCoreLib::SCXErrnoException e(errMsg.str() ,savedErrno, SCXSRCLOCATION);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Error waiting for zombie to become undead, " + SCXCoreLib::StrToUTF8(e.What()),
+            0, waitRet);
+        // Sanity check. Should never really fail since child exits immediately.
+        CPPUNIT_ASSERT_EQUAL(static_cast<int>(CLD_EXITED), info.si_code);
+#endif
+        zombieCreated = true;
+    }
 }
 

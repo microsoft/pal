@@ -2069,16 +2069,35 @@ namespace SCXSystemLib
     {        // XXX We could cache all of this!
 #if defined(sun) && PF_MAJOR == 5 && PF_MINOR <= 9
         // Solaris 9 doesn't have the same entries in /proc fs as later releases.
-        // Use module path from psinfo or AS file.
-        if (m_params.size() == 0)
+        // Use m_psinfo.pr_psargs if we have it, else try to use the parameters.
+        bool fRet = false;
+        string modulePath(m_psinfo.pr_psargs);
+        if (modulePath.empty())
         {
-            modpath.assign(m_psinfo.pr_psargs);
+            if (m_params.size() > 0 && !(m_params[0].empty()))
+            {
+                modpath = m_params[0];
+                fRet = true;
+            }
+            else
+            {
+                std::wostringstream msg;
+                msg << L"No module available";
+                scxulong pid = 0;
+                if (GetPID(pid))
+                {
+                    msg << L" for process " << pid;
+                }
+                msg << ".";
+                SCX_LOGTRACE(m_log, msg.str());
+            }
         }
         else
         {
-            modpath.assign(m_params.front());
+            modpath = modulePath;
+            fRet = true;
         }
-        return true;
+        return fRet;
 #elif defined(linux) || defined(sun)
         char pathbuf[MAXPATHLEN] = { '\0' };
         char procExeName[MAXPATHLEN] = { '\0' };
