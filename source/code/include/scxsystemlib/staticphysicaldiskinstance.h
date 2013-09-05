@@ -134,9 +134,37 @@ namespace SCXSystemLib
         
         virtual void  SetUnexpectedException( const SCXCoreLib::SCXException& e );
 
+        /*----------------------------------------------------------------------------*/
+        /**
+           Test aid. Gets the number of instances that currently exist.
+        
+           \returns     number of instances currently in existance.
+        */
+        static size_t GetCurrentInstancesCount()
+        {
+            return m_currentInstancesCount;
+        }
+        /*----------------------------------------------------------------------------*/
+        /**
+           Test aid. Gets the number of instances created since the module was started and static varables
+           were initialized.
+        
+           \returns     number of instances created since the start of the module.
+        */
+        static size_t GetInstancesCountSinceModuleStart()
+        {
+            return m_instancesCountSinceModuleStart;
+        }
     private:
+        // For testing purposes we count the number of instances currently in existance.
+        static size_t m_currentInstancesCount;
+        // For testing purposes we count the number of instances created since the module was started and static varables
+        // were initialized.
+        static size_t m_instancesCountSinceModuleStart;
+
         //! Private constructor (this should never be called!)
         StaticPhysicalDiskInstance();            //!< Default constructor (intentionally not implemented)
+        StaticPhysicalDiskInstance(const StaticPhysicalDiskInstance&); //!< Copy constructor (intentionally not implemented)
         void Clear();
 
 #if defined(linux)

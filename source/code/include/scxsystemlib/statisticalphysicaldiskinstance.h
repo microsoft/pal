@@ -27,6 +27,10 @@ namespace SCXSystemLib
         friend class StatisticalPhysicalDiskEnumeration;
     public:
         StatisticalPhysicalDiskInstance(SCXCoreLib::SCXHandle<DiskDepend> deps, bool isTotal = false);
+        virtual ~StatisticalPhysicalDiskInstance()
+        {
+            m_currentInstancesCount--;
+        }
 
         virtual bool GetReadsPerSecond(scxulong& value) const;
         virtual bool GetWritesPerSecond(scxulong& value) const;
@@ -37,6 +41,40 @@ namespace SCXSystemLib
         virtual void Sample();
 
         virtual bool GetLastMetrics(scxulong& numR, scxulong& numW, scxulong& bytesR, scxulong& bytesW, scxulong& msR, scxulong& msW) const;
+
+        /*----------------------------------------------------------------------------*/
+        /**
+           Test aid. Gets the number of instances that currently exist.
+        
+           \returns     number of instances currently in existance.
+        */
+        static size_t GetCurrentInstancesCount()
+        {
+            return m_currentInstancesCount;
+        }
+        /*----------------------------------------------------------------------------*/
+        /**
+           Test aid. Gets the number of instances created since the module was started and static varables
+           were initialized.
+        
+           \returns     number of instances created since the start of the module.
+        */
+        static size_t GetInstancesCountSinceModuleStart()
+        {
+            return m_instancesCountSinceModuleStart;
+        }
+    private:
+        // For testing purposes we count the number of instances currently in existance.
+        static size_t m_currentInstancesCount;
+        // For testing purposes we count the number of instances created since the module was started and static varables
+        // were initialized.
+        static size_t m_instancesCountSinceModuleStart;
+        // Don't allow any compiler-generated constructors since those wouldn't update static counters.
+        // Default private constructor may not be necessary since we already have a constructor for this class, but we
+        // have to deal with a dozen platforms with old compilers that may not be fully compliant.
+        // So just in case we'll add one.
+        StatisticalPhysicalDiskInstance();
+        StatisticalPhysicalDiskInstance(const StatisticalPhysicalDiskInstance&);
     };
 }
 #endif /* STATISTICALPHYSICALDISKINSTANCE_H */

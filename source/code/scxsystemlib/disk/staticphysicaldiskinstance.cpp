@@ -64,6 +64,9 @@ using namespace std;
 
 namespace SCXSystemLib
 {
+    size_t StaticPhysicalDiskInstance::m_currentInstancesCount = 0;
+    size_t StaticPhysicalDiskInstance::m_instancesCountSinceModuleStart = 0;
+
 /*----------------------------------------------------------------------------*/
 /**
    Constructor.
@@ -77,6 +80,8 @@ namespace SCXSystemLib
         , m_cdDrive(false)
 #endif
     {
+        m_currentInstancesCount++;
+        m_instancesCountSinceModuleStart++;
         m_log = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(
                 L"scx.core.common.pal.system.disk.staticphysicaldiskinstance");
 
@@ -96,6 +101,7 @@ namespace SCXSystemLib
 */
     StaticPhysicalDiskInstance::~StaticPhysicalDiskInstance()
     {
+        m_currentInstancesCount--;
     }
 
 /*----------------------------------------------------------------------------*/

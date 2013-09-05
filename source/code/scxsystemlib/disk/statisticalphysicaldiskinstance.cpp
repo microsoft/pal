@@ -23,12 +23,18 @@
 
 namespace SCXSystemLib
 {
+
+    size_t StatisticalPhysicalDiskInstance::m_currentInstancesCount = 0;
+    size_t StatisticalPhysicalDiskInstance::m_instancesCountSinceModuleStart = 0;
+
 /*----------------------------------------------------------------------------*/
 /**
    \copydoc SCXSystemLib::StatisticalDiskInstance::StatisticalDiskInstance
 */
     StatisticalPhysicalDiskInstance::StatisticalPhysicalDiskInstance(SCXCoreLib::SCXHandle<DiskDepend> deps, bool isTotal /* = false*/) : StatisticalDiskInstance(deps, isTotal)
     {
+        m_currentInstancesCount++;
+        m_instancesCountSinceModuleStart++;
         m_log = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.system.disk.statisticalphysicaldiskinstance");
     }
 
