@@ -182,6 +182,7 @@ testrun : testrun_setup $(BUILD_TESTRUN_PACKAGE)
 	$(ECHO) "========================= Performing PAL testrun execution"
 	cd $(TARGET_DIR);testfiles/testrun_wrapper .
 	$(MAKE) testrun_copycovfile
+ifeq ($(SCX_TESTRUN_NAMES),)
 	cd $(SCX_BRD)/installer/InstallBuilder/unittests; \
 	python ib_unittests.py \
 		--PF=$(PF) \
@@ -191,6 +192,7 @@ testrun : testrun_setup $(BUILD_TESTRUN_PACKAGE)
 		--PFMINOR=$(PF_MINOR) \
 		--PF_DISTRO_ULINUX_D=$(PF_DISTRO_ULINUX_D) \
 		--PF_DISTRO_ULINUX_R=$(PF_DISTRO_ULINUX_R)
+endif
 
 # Make a little more compatible with other projects
 test : testrun

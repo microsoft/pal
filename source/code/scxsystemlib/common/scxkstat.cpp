@@ -29,7 +29,6 @@ using namespace SCXCoreLib;
 
 namespace SCXSystemLib
 {
-
     /*----------------------------------------------------------------------------*/
     /**
         Constructor
@@ -56,12 +55,12 @@ namespace SCXSystemLib
         {
             m_ChainControlStructure = m_deps->Open();
             if (0 == m_ChainControlStructure)
-        {
+            {
                 SCXASSERT( ! "kstat_open() failed");
                 throw SCXKstatErrorException(L"kstat_open() failed", errno, SCXSRCLOCATION);
             }
         }
-        }
+    }
 
     /*----------------------------------------------------------------------------*/
     /**
@@ -96,11 +95,11 @@ namespace SCXSystemLib
         if (-1 == m_deps->Update(m_ChainControlStructure))
         {
             if (errno != EAGAIN)
-        {
+            {
                 throw SCXKstatErrorException(L"kstat_chain_update() failed", errno, SCXSRCLOCATION);
             }
         }
-        }
+    }
 
     /*----------------------------------------------------------------------------*/
     /**
@@ -194,7 +193,7 @@ namespace SCXSystemLib
             // Otherwise, try to update our chain (hoping that will clear up the error)
 
             if (EAGAIN != errno)
-        {
+            {
                 // If success or fail, we don't care; retry kstat_read regardless
                 m_deps->Update(m_ChainControlStructure);
             }
@@ -223,7 +222,7 @@ namespace SCXSystemLib
             throw SCXCoreLib::SCXNotSupportedException(L"Unsupported kstat type \"raw\" in this method", SCXSRCLOCATION);
         case KSTAT_TYPE_NAMED:
             if (!TryGetValue(statistic, results))
-    {
+            {
                 SCXASSERT( ! "kstat_data_lookup() failed");
                 throw SCXKstatStatisticNotFoundException(SCXCoreLib::StrAppend(L"kstat_data_lookup() failed: ", statistic), errno, SCXSRCLOCATION);
             }
@@ -519,7 +518,7 @@ namespace SCXSystemLib
             {
                 m_deps->Read(m_ChainControlStructure, m_KstatPointer, NULL);
             }
-    }
+        }
 
         return m_KstatPointer;
     }

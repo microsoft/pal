@@ -505,19 +505,19 @@ namespace SCXSystemLib
         if (LONG_MAX == numPhysicalProcs || fForceComputation)
         {
             SCXHandle<SCXSystemLib::SCXKstat> kstat = deps->CreateKstat();
-            size_t logicalInstances = ProcessorCountLogical(deps);
             set<scxulong> uniquePhysicalIDs;
 
-            for (int i = 0; i < logicalInstances; i++)
+            for (kstat_t* cur = kstat->ResetInternalIterator(); cur; cur = kstat->AdvanceInternalIterator())
             {
-                kstat->Lookup(L"cpu_info", i);
+                if (strcmp(cur->ks_module, "cpu_info") != 0 || cur->ks_type != KSTAT_TYPE_NAMED )
+                    continue;
+
                 scxulong thisID = kstat->GetValue(L"chip_id");
                 uniquePhysicalIDs.insert(thisID);
             }
 
             numPhysicalProcs = uniquePhysicalIDs.size();
         }
-
         return numPhysicalProcs;
 
 #elif defined(hpux) && ((PF_MAJOR > 11) || (PF_MINOR >= 31))
@@ -626,7 +626,20 @@ namespace SCXSystemLib
         {
             throw SCXInternalErrorException(L"pstat_getprocessor() failed", SCXSRCLOCATION);
         }
-#elif defined(linux) || defined(WIN32) || defined(sun) || defined (aix)
+#elif defined(sun)
+        size_t count = 0;
+
+        SCXHandle<SCXSystemLib::SCXKstat> kstat = deps->CreateKstat();
+        for (kstat_t* cur = kstat->ResetInternalIterator(); cur; cur = kstat->AdvanceInternalIterator())
+        {
+            if (strcmp(cur->ks_module, "cpu_info") != 0 || cur->ks_type != KSTAT_TYPE_NAMED )
+                continue;
+
+            count++;
+        }
+
+        return count;
+#elif defined(linux) || defined(WIN32) || defined (aix)
         size_t count = deps->sysconf(_SC_NPROCESSORS_ONLN);
 #else
 
@@ -758,10 +771,19 @@ namespace SCXSystemLib
 #elif defined(sun)
         // Enumerate all possible CPUs allowed by the system and add any new instances that
         // are enabled.
-        size_t max_cpus = m_deps->sysconf(_SC_CPUID_MAX);
         size_t num_cpu_avail = 0;
-        for (size_t i = 0; i < max_cpus; i++)
+
+        // Refresh the Kstat chain - adding/removing instances
+        m_kstatHandle->Update();
+
+        for (kstat_t* cur = m_kstatHandle->ResetInternalIterator(); cur; cur = m_kstatHandle->AdvanceInternalIterator())
         {
+            if (strcmp(cur->ks_module, "cpu_info") != 0 || cur->ks_type != KSTAT_TYPE_NAMED )
+                continue;
+
+            // Look up instance ID for consistency with existing code
+            size_t i = cur->ks_instance;
+
             // a given processor ID is assigned by the OS as "available" if it has a status
             // that is != -1
             SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration::Update() - calling p_online(", i).append(L", P_STATUS)"));
@@ -861,6 +883,17 @@ namespace SCXSystemLib
     */
     void CPUEnumeration::SampleData()
     {
+#if defined(sun)
+        // Update our collection so we sample something rational
+        // This is needed to handle dynamic CPUs on Solaris, which
+        // may have added new CPUs (and removed all old CPUs) since
+        // our last update.  At least this way, we sample something
+        // rational ...
+        //
+        // Note: Need to do this before grabbing SCXThreadLock!
+        Update();
+#endif
+
         SCX_LOGTRACE(m_log, L"CPUEnumeration - Start SampleData");
         SCX_LOGHYSTERICAL(m_log, L"CPUEnumeration SampleData - Acquire lock ");
 
@@ -989,6 +1022,8 @@ namespace SCXSystemLib
 
 #elif defined(sun) || defined(hpux)
 
+        SCX_LOGTRACE(m_log, L"CPUEnumeration::SampleData() entry");
+
         scxulong user_tot = 0;
         scxulong system_tot = 0;
         scxulong idle_tot = 0;
@@ -1024,10 +1059,13 @@ namespace SCXSystemLib
                     irq_tot     += stat.Irq;
                     softirq_tot += stat.SoftIrq;
 
-                    // cerr << endl << "Total tics: " << stat.Total << endl;
-                    // cerr << "idle: " << stat.Idle << endl;
-
-                    SCX_LOGHYSTERICAL(m_log, StrAppend(L"    Calculate total = ", stat.Total));
+                    wostringstream output;
+                    output << L"Instance: " << inst->GetProcNumber()
+                           << L", Total tics: " << stat.Total
+                           << L", User: " << stat.User
+                           << L", System: " << stat.System
+                           << L", Idle: " << stat.Idle;
+                    SCX_LOGHYSTERICAL(m_log, L"CPUEnumeration::SampleData(): " + output.str());
 
                     // Add new values using friendship declared on the
                     // instance class (the m_*_tics properties are private)
@@ -1056,10 +1094,13 @@ namespace SCXSystemLib
         scxulong total_tics = user_tot + nice_tot + system_tot +
             iowait_tot + irq_tot + softirq_tot + idle_tot;
 
-        // cerr << endl << "Total tics: " << total_tics << endl;
-        // cerr << "idle: " << idle_tot << endl;
-
-        SCX_LOGHYSTERICAL(m_log, StrAppend(L"    Calculate total = ", total_tics));
+        wostringstream totals;
+        totals << L"Instance: _total"
+               << L", Total tics: " << total_tics
+               << L", User: " << user_tot
+               << L", System: " << system_tot
+               << L", Idle: " << idle_tot;
+        SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration::SampleData(): ", totals.str()));
 
         // Add new values using friendship declared on the
         // instance class (the m_*_tics properties are private)

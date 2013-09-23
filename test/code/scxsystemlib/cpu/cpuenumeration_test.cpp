@@ -68,12 +68,12 @@ static const wstring s_LogModuleName = L"scx.core.common.pal.system.cpu.cpuenume
 #define HPUX_PHYSICAL_PROC_COUNT_SUPPORTED 1
 #endif
 
+class CPUPALTestDependencies;
+
 /**
     Mock SCXodm
 */
 #if defined(aix)
-
-class CPUPALTestDependencies;
 
 class MockOdm : public SCXodm
 {
@@ -82,7 +82,6 @@ public:
         SCXodm(),
         m_pTestdeps(NULL)
     {
-        // Need to remove constness introduced since the CreateKstat() is const-declared
         m_pTestdeps = const_cast<CPUPALTestDependencies*>(pDeps);
     }
     void* Get(CLASS_SYMBOL cs, const wstring &wCriteria, void* returnData, eGetMode mode);
@@ -93,22 +92,22 @@ private:
 
 #endif // defined(aix)
 
+#if defined(sun)
+
 /**
     Mock SCXKstat
 */
-#if defined(sun)
-
-class CPUPALTestDependencies;
 
 class MockKstat : public SCXKstat
 {
 public:
     MockKstat(const CPUPALTestDependencies* pDeps) :
         SCXKstat(),
-                m_pTestdeps(NULL)
+        m_pTestdeps(NULL),
+        iteratorPosition(0)
     {
-                // Need to remove constness introduced since the CreateKstat() is const-declared
-                m_pTestdeps = const_cast<CPUPALTestDependencies*>(pDeps);
+        // Need to remove constness introduced since the CreateKstat() is const-declared
+        m_pTestdeps = const_cast<CPUPALTestDependencies*>(pDeps);
     }
 
     void SetStatistic(const wstring& statistic, scxulong value, int tag)
@@ -117,10 +116,7 @@ public:
         mock_statistics.cpu_sysinfo.cpu[tag] = value;
     }
 
-    scxulong GetValue(const wstring& statistic) const
-    {
-        return statisticMap.find(statistic)->second;
-    }
+    scxulong GetValue(const wstring& statistic) const;
 
     void Lookup(const wstring& module, const wstring& name, int instance = -1);
 
@@ -136,10 +132,17 @@ public:
         return &mock_statistics;
     }
 
-private:
+protected:
+    virtual kstat_t* ResetInternalIterator();
+    virtual kstat_t* AdvanceInternalIterator();
+
     map<wstring, scxulong> statisticMap;
     cpu_stat_t mock_statistics;
-        CPUPALTestDependencies* m_pTestdeps;
+
+    CPUPALTestDependencies* m_pTestdeps;
+    size_t iteratorPosition;
+
+    friend class CPUPALTestDependencies;
 };
 
 #endif // defined(sun)
@@ -147,6 +150,22 @@ private:
 /**
     Class for injecting test behavior into the CPU PAL.
  */
+
+// Notes for Solaris:
+//
+// This class provides a framework for dynamic CPU support on Solaris. Solaris
+// zones can support dynamic CPUs. In this configuration, CPU IDs need not start
+// at zero, and need not be monotonically increasing. This class allows a kstat
+// chain to be created in which CPUs can be created and deleted at will, and then
+// passed on to implementation to check for proper behavior.
+//
+// Note that we don't implement a "complete" kstat chain in this code. For
+// simplicity, we implement just what we need to test the production code on
+// Solaris. In particular, we do not implement "real" independent data lookup
+// of values (only specific ones), complete kstat_t data (unique ks_kid), nor
+// actually chaining of kstat values (ks_next).  Instead, we overload the
+// existing iterators to make things work.
+
 class CPUPALTestDependencies : public CPUPALDependencies
 {
 public:
@@ -205,200 +224,268 @@ public:
 
         switch (m_cpuInfoFileType)
         {
-        case 0:
-            // In the first case, we give the whole shebang.
-            // In the future, we cheat (only give enough for the caller to be
-            // satisfied) to avoid needlessly increasing length.
+            case 0:
+                // In the first case, we give the whole shebang.
+                // In the future, we cheat (only give enough for the caller to be
+                // satisfied) to avoid needlessly increasing length.
 
-            *cpufilecontent << L"processor       : 0" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"cpu family      : 6" << endl
-                            << L"model           : 15" << endl
-                            << L"model name      : Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz" << endl
-                            << L"stepping        : 7" << endl
-                            << L"cpu MHz         : 2333.414" << endl
-                            << L"cache size      : 4096 KB" << endl
-                            << L"fdiv_bug        : no" << endl
-                            << L"hlt_bug         : no" << endl
-                            << L"f00f_bug        : no" << endl
-                            << L"coma_bug        : no" << endl
-                            << L"fpu             : yes" << endl
-                            << L"fpu_exception   : yes" << endl
-                            << L"cpuid level     : 10" << endl
-                            << L"wp              : yes" << endl
-                            << L"flags           : fpu de tsc msr pae cx8 apic cmov pat clflush acpi mmx fxsr sse sse2 ss ht nx constant_tsc pni" << endl
-                            << L"bogomips        : 5838.53" << endl
-                            << endl
-                            << L"processor       : 1" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"cpu family      : 6" << endl
-                            << L"model           : 15" << endl
-                            << L"model name      : Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz" << endl
-                            << L"stepping        : 7" << endl
-                            << L"cpu MHz         : 2333.414" << endl
-                            << L"cache size      : 4096 KB" << endl
-                            << L"fdiv_bug        : no" << endl
-                            << L"hlt_bug         : no" << endl
-                            << L"f00f_bug        : no" << endl
-                            << L"coma_bug        : no" << endl
-                            << L"fpu             : yes" << endl
-                            << L"fpu_exception   : yes" << endl
-                            << L"cpuid level     : 10" << endl
-                            << L"wp              : yes" << endl
-                            << L"flags           : fpu de tsc msr pae cx8 apic cmov pat clflush acpi mmx fxsr sse sse2 ss ht nx constant_tsc pni" << endl
-                            << L"bogomips        : 5838.53" << endl;
-            break;
+                *cpufilecontent << L"processor       : 0" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"cpu family      : 6" << endl
+                                << L"model           : 15" << endl
+                                << L"model name      : Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz" << endl
+                                << L"stepping        : 7" << endl
+                                << L"cpu MHz         : 2333.414" << endl
+                                << L"cache size      : 4096 KB" << endl
+                                << L"fdiv_bug        : no" << endl
+                                << L"hlt_bug         : no" << endl
+                                << L"f00f_bug        : no" << endl
+                                << L"coma_bug        : no" << endl
+                                << L"fpu             : yes" << endl
+                                << L"fpu_exception   : yes" << endl
+                                << L"cpuid level     : 10" << endl
+                                << L"wp              : yes" << endl
+                                << L"flags           : fpu de tsc msr pae cx8 apic cmov pat clflush acpi mmx fxsr sse sse2 ss ht nx constant_tsc pni" << endl
+                                << L"bogomips        : 5838.53" << endl
+                                << endl
+                                << L"processor       : 1" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"cpu family      : 6" << endl
+                                << L"model           : 15" << endl
+                                << L"model name      : Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz" << endl
+                                << L"stepping        : 7" << endl
+                                << L"cpu MHz         : 2333.414" << endl
+                                << L"cache size      : 4096 KB" << endl
+                                << L"fdiv_bug        : no" << endl
+                                << L"hlt_bug         : no" << endl
+                                << L"f00f_bug        : no" << endl
+                                << L"coma_bug        : no" << endl
+                                << L"fpu             : yes" << endl
+                                << L"fpu_exception   : yes" << endl
+                                << L"cpuid level     : 10" << endl
+                                << L"wp              : yes" << endl
+                                << L"flags           : fpu de tsc msr pae cx8 apic cmov pat clflush acpi mmx fxsr sse sse2 ss ht nx constant_tsc pni" << endl
+                                << L"bogomips        : 5838.53" << endl;
+                break;
 
-        case 1:
-            *cpufilecontent << L"processor       : 0" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"physical id     : 0" << endl
-                            << L"siblings        : 1" << endl
-                            << L"core id         : 0" << endl
-                            << L"cpu cores       : 1" << endl;
-            break;
+            case 1:
+                *cpufilecontent << L"processor       : 0" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"physical id     : 0" << endl
+                                << L"siblings        : 1" << endl
+                                << L"core id         : 0" << endl
+                                << L"cpu cores       : 1" << endl;
+                break;
 
-        case 2:
-            *cpufilecontent << L"processor       : 0" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"physical id     : 0" << endl
-                            << L"siblings        : 2" << endl
-                            << L"core id         : 0" << endl
-                            << L"cpu cores       : 2" << endl
-                            << endl
-                            << L"processor       : 1" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"physical id     : 0" << endl
-                            << L"siblings        : 2" << endl
-                            << L"core id         : 0" << endl
-                            << L"cpu cores       : 2" << endl;
-            break;
+            case 2:
+                *cpufilecontent << L"processor       : 0" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"physical id     : 0" << endl
+                                << L"siblings        : 2" << endl
+                                << L"core id         : 0" << endl
+                                << L"cpu cores       : 2" << endl
+                                << endl
+                                << L"processor       : 1" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"physical id     : 0" << endl
+                                << L"siblings        : 2" << endl
+                                << L"core id         : 0" << endl
+                                << L"cpu cores       : 2" << endl;
+                break;
 
-        case 3:
-            *cpufilecontent << L"processor       : 0" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"physical id     : 0" << endl
-                            << L"siblings        : 3" << endl
-                            << L"core id         : 0" << endl
-                            << L"cpu cores       : 4" << endl
-                            << endl
-                            << L"processor       : 1" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"physical id     : 0" << endl
-                            << L"siblings        : 3" << endl
-                            << L"core id         : 1" << endl
-                            << L"cpu cores       : 4" << endl
-                            << endl
-                            << L"processor       : 2" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"physical id     : 1" << endl
-                            << L"siblings        : 3" << endl
-                            << L"core id         : 2" << endl
-                            << L"cpu cores       : 4" << endl
-                            << endl
-                            << L"processor       : 3" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"physical id     : 1" << endl
-                            << L"siblings        : 3" << endl
-                            << L"core id         : 3" << endl
-                            << L"cpu cores       : 4" << endl;
-            break;
+            case 3:
+                *cpufilecontent << L"processor       : 0" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"physical id     : 0" << endl
+                                << L"siblings        : 3" << endl
+                                << L"core id         : 0" << endl
+                                << L"cpu cores       : 4" << endl
+                                << endl
+                                << L"processor       : 1" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"physical id     : 0" << endl
+                                << L"siblings        : 3" << endl
+                                << L"core id         : 1" << endl
+                                << L"cpu cores       : 4" << endl
+                                << endl
+                                << L"processor       : 2" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"physical id     : 1" << endl
+                                << L"siblings        : 3" << endl
+                                << L"core id         : 2" << endl
+                                << L"cpu cores       : 4" << endl
+                                << endl
+                                << L"processor       : 3" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"physical id     : 1" << endl
+                                << L"siblings        : 3" << endl
+                                << L"core id         : 3" << endl
+                                << L"cpu cores       : 4" << endl;
+                break;
 
-        case 44326:
-            // WI 44326: 3 physical cores with two physical processors?
-            //
-            // Turns out that physical IDs of CPU Cores need not be
-            // monotonically increasing.  Changed algorithm to accomodate.
+            case 44326:
+                // WI 44326: 3 physical cores with two physical processors?
+                //
+                // Turns out that physical IDs of CPU Cores need not be
+                // monotonically increasing.  Changed algorithm to accomodate.
 
-            *cpufilecontent << L"processor       : 0" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"cpu family      : 6" << endl
-                            << L"model           : 26" << endl
-                            << L"model name      : Intel(R) Xeon(R) CPU           E5530  @ 2.40GHz" << endl
-                            << L"stepping        : 5" << endl
-                            << L"cpu MHz         : 2400.357" << endl
-                            << L"cache size      : 8192 KB" << endl
-                            << L"physical id     : 0" << endl
-                            << L"siblings        : 1" << endl
-                            << L"core id         : 0" << endl
-                            << L"cpu cores       : 1" << endl
-                            << L"apicid          : 0" << endl
-                            << L"initial apicid  : 0" << endl
-                            << L"fpu             : yes" << endl
-                            << L"fpu_exception   : yes" << endl
-                            << L"cpuid level     : 11" << endl
-                            << L"wp              : yes" << endl
-                            << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat clflush mmx fxsr sse sse2 ht syscall nx rdtscp lm constant_tsc rep_good unfair_spinlock pni ssse3 cx16 sse4_1 sse4_2 popcnt hypervisor lahf_lm" << endl
-                            << L"bogomips        : 4800.71" << endl
-                            << L"clflush size    : 64" << endl
-                            << L"cache_alignment : 64" << endl
-                            << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
-                            << L"power management:" << endl
-                            << endl
-                            << L"processor       : 1" << endl
-                            << L"vendor_id       : GenuineIntel" << endl
-                            << L"cpu family      : 6" << endl
-                            << L"model           : 26" << endl
-                            << L"model name      : Intel(R) Xeon(R) CPU           E5530  @ 2.40GHz" << endl
-                            << L"stepping        : 5" << endl
-                            << L"cpu MHz         : 2400.357" << endl
-                            << L"cache size      : 8192 KB" << endl
-                            << L"physical id     : 2" << endl
-                            << L"siblings        : 1" << endl
-                            << L"core id         : 0" << endl
-                            << L"cpu cores       : 1" << endl
-                            << L"apicid          : 2" << endl
-                            << L"initial apicid  : 2" << endl
-                            << L"fpu             : yes" << endl
-                            << L"fpu_exception   : yes" << endl
-                            << L"cpuid level     : 11" << endl
-                            << L"wp              : yes" << endl
-                            << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat clflush mmx fxsr sse sse2 ht syscall nx rdtscp lm constant_tsc rep_good unfair_spinlock pni ssse3 cx16 sse4_1 sse4_2 popcnt hypervisor lahf_lm" << endl
-                            << L"bogomips        : 4799.68" << endl
-                            << L"clflush size    : 64" << endl
-                            << L"cache_alignment : 64" << endl
-                            << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
-                            << L"power management:" << endl;
-            break;
+                *cpufilecontent << L"processor       : 0" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"cpu family      : 6" << endl
+                                << L"model           : 26" << endl
+                                << L"model name      : Intel(R) Xeon(R) CPU           E5530  @ 2.40GHz" << endl
+                                << L"stepping        : 5" << endl
+                                << L"cpu MHz         : 2400.357" << endl
+                                << L"cache size      : 8192 KB" << endl
+                                << L"physical id     : 0" << endl
+                                << L"siblings        : 1" << endl
+                                << L"core id         : 0" << endl
+                                << L"cpu cores       : 1" << endl
+                                << L"apicid          : 0" << endl
+                                << L"initial apicid  : 0" << endl
+                                << L"fpu             : yes" << endl
+                                << L"fpu_exception   : yes" << endl
+                                << L"cpuid level     : 11" << endl
+                                << L"wp              : yes" << endl
+                                << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat clflush mmx fxsr sse sse2 ht syscall nx rdtscp lm constant_tsc rep_good unfair_spinlock pni ssse3 cx16 sse4_1 sse4_2 popcnt hypervisor lahf_lm" << endl
+                                << L"bogomips        : 4800.71" << endl
+                                << L"clflush size    : 64" << endl
+                                << L"cache_alignment : 64" << endl
+                                << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
+                                << L"power management:" << endl
+                                << endl
+                                << L"processor       : 1" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"cpu family      : 6" << endl
+                                << L"model           : 26" << endl
+                                << L"model name      : Intel(R) Xeon(R) CPU           E5530  @ 2.40GHz" << endl
+                                << L"stepping        : 5" << endl
+                                << L"cpu MHz         : 2400.357" << endl
+                                << L"cache size      : 8192 KB" << endl
+                                << L"physical id     : 2" << endl
+                                << L"siblings        : 1" << endl
+                                << L"core id         : 0" << endl
+                                << L"cpu cores       : 1" << endl
+                                << L"apicid          : 2" << endl
+                                << L"initial apicid  : 2" << endl
+                                << L"fpu             : yes" << endl
+                                << L"fpu_exception   : yes" << endl
+                                << L"cpuid level     : 11" << endl
+                                << L"wp              : yes" << endl
+                                << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat clflush mmx fxsr sse sse2 ht syscall nx rdtscp lm constant_tsc rep_good unfair_spinlock pni ssse3 cx16 sse4_1 sse4_2 popcnt hypervisor lahf_lm" << endl
+                                << L"bogomips        : 4799.68" << endl
+                                << L"clflush size    : 64" << endl
+                                << L"cache_alignment : 64" << endl
+                                << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
+                                << L"power management:" << endl;
+                break;
 
-        default:
-            std::stringstream ss;
-            ss << "Unknown stat filetype during call to OpenCpuinfoFile(): " << m_cpuInfoFileType;
-            CPPUNIT_FAIL( ss.str() );
+            default:
+                std::stringstream ss;
+                ss << "Unknown stat filetype during call to OpenCpuinfoFile(): " << m_cpuInfoFileType;
+                CPPUNIT_FAIL( ss.str() );
         }
 
         return cpufilecontent;
     }
 #endif // defined(linux)
 
+// Solaris has it's own version - keeps things easier
+#if !defined(sun)
     virtual long sysconf(int name) const
     {
-#if defined(linux) || defined(sun) || defined(aix)
+#if defined(linux) || defined(aix)
         switch (name)
         {
-        case _SC_NPROCESSORS_ONLN:
-            return m_numProcs - m_disabledProcs;
-#if defined(sun) || defined(aix)
-        case _SC_NPROCESSORS_CONF:
-            return m_numProcs;
-#endif /* sun || aix */
+            case _SC_NPROCESSORS_ONLN:
+                return m_numProcs - m_disabledProcs;
+#if defined(aix)
+            case _SC_NPROCESSORS_CONF:
+                return m_numProcs;
+#endif /* aix */
 
-#if defined(sun)
-        case _SC_CPUID_MAX:
-            return m_numProcs;
-#endif /* sun */
-        default:
-            std::stringstream ss;
-            ss << "CPUPALTestDependencies::sysconf - the mock is not designed to handle sysconf ID: " << name;
-            CPPUNIT_FAIL( ss.str() );
-            return -1;
+            default:
+                std::stringstream ss;
+                ss << "CPUPALTestDependencies::sysconf - the mock is not designed to handle sysconf ID: " << name;
+                CPPUNIT_FAIL( ss.str() );
+                return -1;
         }
 #else
         return -1;
-#endif
+#endif // defined(linux) || defined(aix)
     }
+#endif // !defined(sun)
 
 #if defined(sun)
+    void Reset()
+    {
+        m_vKstat.clear();
+        m_vChipID.clear();
+        m_numProcs = 0;
+    }
+
+    void AddInstance(int instanceID, int chipID)
+    {
+        kstat_t kst;
+
+        // Populate the kstat structure
+        memset( &kst, 0, sizeof(kst) );
+        strncpy( kst.ks_module, "cpu_info", KSTAT_STRLEN );
+        strncpy( kst.ks_class, "misc", KSTAT_STRLEN );
+        kst.ks_instance = instanceID;
+        kst.ks_type = KSTAT_TYPE_NAMED;
+
+        std::ostringstream stream;
+        stream << "cpu_info" << instanceID;
+        strncpy( kst.ks_name, stream.str().c_str(), KSTAT_STRLEN );
+
+        // And insert (not bothering to check for duplicates)
+        CPPUNIT_ASSERT( m_vKstat.size() == m_numProcs );
+        m_vKstat.push_back( kst );
+
+        CPPUNIT_ASSERT( m_vChipID.size() == m_numProcs );
+        m_vChipID.push_back( chipID );
+
+        m_numProcs++;
+    }
+
+    // The Dynamic CPU implementation for Solaris no longer relies on sysconf() API.
+    // Let's be certain that's actually the case.
+
+    virtual long sysconf(int name) const
+    {
+        switch (name)
+        {
+            case _SC_NPROCESSORS_CONF:
+                return m_vKstat.size();
+
+            case _SC_NPROCESSORS_ONLN:
+            case _SC_CPUID_MAX:
+            default:
+                std::stringstream ss;
+                ss << "CPUPALTestDependencies::sysconf - the mock is not designed to handle sysconf ID: " << name;
+                CPPUNIT_FAIL( ss.str() );
+                return -1;
+        }
+    }
+
+    virtual int p_online(processorid_t processorid, int flag) const
+    {
+        // Check if the processor ID is in our kstat chain
+        int returnState = P_OFFLINE;
+
+        for (std::vector<kstat_t>::const_iterator it = m_vKstat.begin(); it != m_vKstat.end(); ++it)
+        {
+            if (processorid == (*it).ks_instance)
+            {
+                returnState = P_ONLINE;
+                break;
+            }
+        }
+
+        return returnState;
+    }
+
     virtual const SCXHandle<SCXKstat> CreateKstat() const
     {
         // Despite its name, the MockKstat depends on the running system
@@ -406,23 +493,26 @@ public:
         // existing entities. And "sys" and "cpu" does not exist on Sparc V8.
         // Before: SCXHandle<MockKstat> kstat = new MockKstat(L"cpu", L"sys", cpuid);
         SCXHandle<MockKstat> kstat( new MockKstat(this) );
-
         return kstat;
     }
 
-    virtual int p_online(processorid_t processorid, int flag) const
+#elif defined(hpux)
+#if defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
+    void Reset()
     {
-        if (processorid < m_numProcs - m_disabledProcs)
-        {
-            return P_ONLINE;
-        }
-        else
-        {
-            return P_OFFLINE;
-        }
+        m_vChipID.clear();
+        m_numProcs = 0;
     }
 
-#elif defined(hpux)
+    void AddInstance(int instanceID, int chipID)
+    {
+        (void) instanceID;
+        CPPUNIT_ASSERT( m_vChipID.size() == m_numProcs );
+
+        m_vChipID.push_back( chipID );
+        m_numProcs++;
+    }
+#endif // defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
     virtual int pstat_getprocessor(struct pst_processor* buf,
                                    size_t elemsize,
                                    size_t elemcount,
@@ -438,7 +528,7 @@ public:
             buf[i].psp_cpu_time[CP_SYS]  = m_system;
             buf[i].psp_cpu_time[CP_WAIT] = m_iowait;
 #if HPUX_PHYSICAL_PROC_COUNT_SUPPORTED
-            buf[i].psp_socket_id = m_chipIdVector[i];
+            buf[i].psp_socket_id = m_vChipID[i];
 #endif
         }
         return elemcount;
@@ -457,7 +547,6 @@ public:
     virtual const SCXHandle<SCXodm> CreateOdm() const
     {
         SCXHandle<MockOdm> odm( new MockOdm(this) );
-
         return odm;
     }
 
@@ -529,10 +618,31 @@ public:
     void SetNice(scxulong val) { m_nice = val; }
     void SetIrq(scxulong val) { m_irq = val; }
     void SetSoftIrq(scxulong val) { m_softirq = val; }
-    void SetNumProcs(int numProcs) { m_numProcs = numProcs; }
-    void SetDisabledProcs(int disabledProcs) { m_disabledProcs = disabledProcs; }
+
+    void SetNumProcs(int numProcs)
+    {
+        m_numProcs = numProcs;
+#if defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
+        Reset();
+        for (int i = 0; i < numProcs; i++)
+            AddInstance(i, 1);
+#endif // defined(sun)
+    }
+
+    void SetDisabledProcs(int disabledProcs)
+    {
+        m_disabledProcs = disabledProcs;
+
+#if defined(sun)
+        // Let's make sure we're not disabling more than we've got
+        CPPUNIT_ASSERT(m_vKstat.size() >= disabledProcs);
+
+        for (int i = 0; i < disabledProcs; i++)
+            m_vKstat.pop_back();
+#endif // defined(sun)
+    }
+
     void SetCpuInfoFileType(int type) { m_cpuInfoFileType = type; }
-    void SetChipIdVector(vector<scxulong>& chipIds) { m_chipIdVector = chipIds; }
 #if defined(aix)
     void SetAixDeviceVector(vector<struct CuDv>& devices)
     {
@@ -546,11 +656,19 @@ public:
     scxulong m_system;
     scxulong m_idle;
     scxulong m_iowait;
-    vector<scxulong> m_chipIdVector;
 #if defined(aix)
     vector<struct CuDv> m_aixDevices;
     int m_aixDeviceIndex;
 #endif // defined(aix)
+
+#if defined(sun)
+    vector<kstat_t> m_vKstat;           //!< Vector of kstat_t data structures
+    vector<int> m_vChipID;              //!< Vector of chip ID's (named data)
+
+    friend class MockKstat;
+#elif defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
+    vector<int> m_vChipID;              //!< Vector of chip ID's
+#endif
 
 private:
     scxulong m_nice;
@@ -589,28 +707,62 @@ void* MockOdm::Get(CLASS_SYMBOL cs, const wstring &wCriteria, void* returnData, 
 
 #if defined(sun)
 // Need to be here due to mutal dependencies
+scxulong MockKstat::GetValue(const wstring& statistic) const
+{
+    if (L"chip_id" == statistic)
+    {
+        // Validate we're called properly
+        SCXUNIT_ASSERT_BETWEEN_MESSAGE("iteratorPosition out of range",
+            iteratorPosition, 0, m_pTestdeps->m_vKstat.size() - 1);
+
+        return m_pTestdeps->m_vChipID[iteratorPosition];
+    }
+
+    return statisticMap.find(statistic)->second;
+}
+
 void MockKstat::Lookup(const wstring& module, const wstring& name, int instance)
 {
-        // Call the real kstat lookup to make sure accesses of m_KstatPointer in SCXKstat::GetValueRaw()
-        // will get proper values for all but the mock values below
-        SCXKstat::Lookup(module, name, instance);
+    // Call the real kstat lookup to make sure accesses of m_KstatPointer in SCXKstat::GetValueRaw()
+    // will get proper values for all but the mock values below
+    SCXKstat::Lookup(module, name, instance);
 
-        SetStatistic(L"user", m_pTestdeps->m_user, CPU_USER);
-        SetStatistic(L"kernel", m_pTestdeps->m_system, CPU_KERNEL);
-        SetStatistic(L"idle", m_pTestdeps->m_idle, CPU_IDLE);
-        SetStatistic(L"wait", m_pTestdeps->m_iowait, CPU_WAIT);
+    SetStatistic(L"user", m_pTestdeps->m_user, CPU_USER);
+    SetStatistic(L"kernel", m_pTestdeps->m_system, CPU_KERNEL);
+    SetStatistic(L"idle", m_pTestdeps->m_idle, CPU_IDLE);
+    SetStatistic(L"wait", m_pTestdeps->m_iowait, CPU_WAIT);
 }
 
 void MockKstat::Lookup(const wstring& module, int instance)
 {
-    // Call the real kstat lookup to make sure that the accesses are valid, but fake the return values
-    // (Note: This is used for Physical CPU counts; we only call with instance 0 since we don't know
-    //  how many processors the real (underlying) system has.)
+    // Call the real kstat lookup to make sure that the accesses are valid, but
+    // fake the return values (Note: This is used for Physical CPU counts; we
+    // only call with instance 0 since we don't know how many processors the
+    // real (underlying) system has.)
     SCXKstat::Lookup(module, 0);
 
     SetStatistic(L"chip_id",
-                 m_pTestdeps->m_chipIdVector[instance],
+                 m_pTestdeps->m_vChipID[instance],
                  0 /* "Zero is to satisfy "fake" CPU statistic */);
+}
+
+kstat_t* MockKstat::ResetInternalIterator()
+{
+    iteratorPosition = 0;
+    if (iteratorPosition >= m_pTestdeps->m_vKstat.size())
+    {
+        return NULL;
+    }
+    return &m_pTestdeps->m_vKstat[iteratorPosition];
+}
+
+kstat_t* MockKstat::AdvanceInternalIterator()
+{
+    if (++iteratorPosition >= m_pTestdeps->m_vKstat.size())
+    {
+        return NULL;
+    }
+    return &m_pTestdeps->m_vKstat[iteratorPosition];
 }
 #endif
 
@@ -649,56 +801,31 @@ public:
 
 
 #if defined(sun)
-class CPUPALTestDependenciesWI367214 : public CPUPALDependencies
+
+class CPUPALTestDependenciesWI367214 : public CPUPALTestDependencies
 {
 public:
-    void SetNumProcessorsAvailable(size_t count)
+    CPUPALTestDependenciesWI367214(int maxProcessorId)
+        : CPUPALTestDependencies(),
+          m_status(-1),
+          m_maxCallCount(-1),
+          m_currentCallCount(0)
     {
-        CPPUNIT_ASSERT(count <= (m_maxProcessorId + 1));
-
-        m_numProcessorsAvail = count;
+        for (int i = 0; i < maxProcessorId; i++)
+            AddInstance(i, 1);
     }
 
     void SetStatus(int status) { m_status = status; }
-
     int GetCurrentPOnlineCallCount(void) const { return m_currentCallCount; }
-
     void EnablePOnlineCallChecking(int maxCallCount) { m_maxCallCount = maxCallCount; }
-
-    bool IsPOnlineCallCheckingEnabled(void) { return m_maxCallCount != -1; }
-
-    virtual long sysconf(int name) const
-    {
-        long result = -1;
-
-        switch (name)
-        {
-            case _SC_NPROCESSORS_ONLN:
-            case _SC_NPROCESSORS_CONF:
-                result = m_numProcessorsAvail;
-                break;
-
-            case _SC_CPUID_MAX:
-                result = m_maxProcessorId;
-                break;
-
-            default:
-                std::stringstream ss;
-                ss << "CPUPALTestDependenciesWI367214::sysconf - the mock is not designed to handle sysconf ID: " << name;
-                CPPUNIT_FAIL( ss.str() );
-                break;
-        }
-
-        return result;
-    }
 
     virtual int p_online(processorid_t processorid, int flag) const
     {
-        const_cast< CPUPALTestDependenciesWI367214 * >(this)->m_currentCallCount;
+        const_cast <CPUPALTestDependenciesWI367214 *>(this)->m_currentCallCount;
 
         // If hit, these indicates that a loop condition is failing.
         CPPUNIT_ASSERT((m_maxCallCount == -1) || (m_currentCallCount < m_maxCallCount));
-        CPPUNIT_ASSERT(processorid <= m_maxProcessorId);
+        CPPUNIT_ASSERT(processorid <= CPUPALTestDependencies::m_vKstat.size());
 
         // If hit, this would indicate that the mock is being used for something
         // it doesn't currently handle.
@@ -717,23 +844,12 @@ public:
         return m_status;
     }
 
-    CPUPALTestDependenciesWI367214(int maxProcessorId)
-        : CPUPALDependencies(),
-          m_maxProcessorId(maxProcessorId),
-          m_numProcessorsAvail(0),
-          m_status(-1),
-          m_maxCallCount(-1),
-          m_currentCallCount(0)
-    {
-    }
-
 private:
-    int m_maxProcessorId;
-    int m_numProcessorsAvail;
     int m_status;
     int m_maxCallCount;
     int m_currentCallCount;
 };
+
 #endif
 
 
@@ -753,6 +869,7 @@ class CPUEnumeration_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testPhysicalProcCountWithTwoCoreProcessors );
     CPPUNIT_TEST( testPhysicalProcCountWithGapInPhysicalIDs );
     CPPUNIT_TEST( testPhysicalProcCountWithMassiveProcessors );
+    CPPUNIT_TEST( testPhysicalLogicalProcCountsWithDynamicCPUs );
     CPPUNIT_TEST( TestNoProcessorsOnlineDuringUpdate );
 
     SCXUNIT_TEST_ATTRIBUTE(testMockedValues,SLOW);
@@ -819,6 +936,10 @@ public:
 
         // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
+#if defined(sun)
+        // On Solaris, let's have at least one CPU (probably harmless elsewhere)
+        deps->SetNumProcs(1);
+#endif
 
         // Set up values for first snapshot
         deps->SetUser(user1);
@@ -1231,12 +1352,7 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetAixDeviceVector(devices);
 #elif defined(sun)
-        vector<scxulong> chipIds;
-
-        // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetNumProcs(0);
-        deps->SetChipIdVector(chipIds);
 #endif
 
 #if defined(linux) || defined(aix) || defined(sun)
@@ -1266,13 +1382,9 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetAixDeviceVector(devices);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
-        vector<scxulong> chipIds;
-        chipIds.push_back(1);
-
-        // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetNumProcs(1);
-        deps->SetChipIdVector(chipIds);
+        deps->Reset();
+        deps->AddInstance(1, 1);
 #endif
 
 #if defined(linux) || defined(aix) || defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
@@ -1303,14 +1415,10 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetAixDeviceVector(devices);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
-        vector<scxulong> chipIds;
-        chipIds.push_back(1);
-        chipIds.push_back(1);
-
-        // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetNumProcs(2);
-        deps->SetChipIdVector(chipIds);
+        deps->Reset();
+        deps->AddInstance(1, 1);
+        deps->AddInstance(2, 1);
 #endif
 
 #if defined(linux) || defined(aix) || defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
@@ -1343,18 +1451,14 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetAixDeviceVector(devices);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
-        vector<scxulong> chipIds;
-        chipIds.push_back(1);
-        chipIds.push_back(2);
-        chipIds.push_back(1);
-        chipIds.push_back(2);
-        chipIds.push_back(1);
-        chipIds.push_back(2);
-
-        // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetNumProcs(6);
-        deps->SetChipIdVector(chipIds);
+        deps->Reset();
+        deps->AddInstance(1, 1);
+        deps->AddInstance(2, 2);
+        deps->AddInstance(3, 1);
+        deps->AddInstance(4, 2);
+        deps->AddInstance(5, 1);
+        deps->AddInstance(6, 2);
 #endif
 
 #if defined(linux) || defined(aix) || defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
@@ -1389,16 +1493,12 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetAixDeviceVector(devices);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
-        vector<scxulong> chipIds;
-        chipIds.push_back(1);
-        chipIds.push_back(5);
-        chipIds.push_back(1);
-        chipIds.push_back(5);
-
-        // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetNumProcs(4);
-        deps->SetChipIdVector(chipIds);
+        deps->Reset();
+        deps->AddInstance(1, 1);
+        deps->AddInstance(2, 5);
+        deps->AddInstance(3, 1);
+        deps->AddInstance(4, 5);
 #endif
 
 #if defined(linux) || defined(aix) || defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
@@ -1465,6 +1565,71 @@ public:
 #endif // defined(aix)
     }
 
+    void testPhysicalLogicalProcCountsWithDynamicCPUs()
+    {
+        // Solaris-specific test for wi592494
+        //
+        // On Solaris, dynamic CPUs need not start with instance 0, and need not
+        // be monotonically increasing.  Build a test case for this and be certain
+        // that we get the correct counts of physical and logical CPUs.
+        //
+        // See associated WI for actual kstat output on associated system.
+
+#if defined(sun)
+        SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
+        deps->Reset();
+        deps->AddInstance(  7, 0);
+        deps->AddInstance( 13, 0);
+        deps->AddInstance( 30, 0);
+        deps->AddInstance( 41, 0);
+        deps->AddInstance( 52, 0);
+        deps->AddInstance( 65, 1);
+        deps->AddInstance( 67, 1);
+        deps->AddInstance( 71, 1);
+        deps->AddInstance( 88, 1);
+        deps->AddInstance( 91, 1);
+        deps->AddInstance( 95, 1);
+        deps->AddInstance( 97, 1);
+        deps->AddInstance(110, 1);
+        deps->AddInstance(112, 1);
+        deps->AddInstance(113, 1);
+        deps->AddInstance(124, 1);
+        deps->AddInstance(131, 2);
+        deps->AddInstance(134, 2);
+        deps->AddInstance(147, 2);
+        deps->AddInstance(152, 2);
+        deps->AddInstance(154, 2);
+        deps->AddInstance(158, 2);
+        deps->AddInstance(159, 2);
+        deps->AddInstance(210, 3);
+        deps->AddInstance(211, 3);
+        deps->AddInstance(213, 3);
+        deps->AddInstance(217, 3);
+        deps->AddInstance(219, 3);
+        deps->AddInstance(222, 3);
+        deps->AddInstance(223, 3);
+        deps->AddInstance(234, 3);
+        deps->AddInstance(242, 3);
+
+        // Verify that the physical count of processors matches
+        SCXCoreLib::SCXLogHandle logH = SCXLogHandleFactory::GetLogHandle(s_LogModuleName);
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), CPUEnumeration::ProcessorCountPhysical(deps, logH, true));
+
+        // Verify that the logical count of processors matches
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(32), CPUEnumeration::ProcessorCountLogical(deps));
+
+        // Finally, take snapshot, and verify the count of processors that way
+        m_pEnum = new CPUEnumeration(deps);
+        m_pEnum->Init();
+        m_pEnum->SampleData();
+        m_pEnum->Update();
+
+        // Verify the count of processors
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(32), m_pEnum->Size());
+
+#endif // defined(sun)
+    }
+
     void TestNoProcessorsOnlineDuringUpdate()
     {
         // Solaris specific test fow WI# 367214
@@ -1479,8 +1644,6 @@ public:
 
         // Setup the first call to update so that at least one CPU is added to
         // the enumeration.
-        size_t numProcessorsAvail = (MAX_PROCESSORS / 2) + 1;
-        deps->SetNumProcessorsAvailable(numProcessorsAvail);
         deps->SetStatus(P_ONLINE);
 
         // This test only *needs* to test the Update path.  However CPUEnumeration
