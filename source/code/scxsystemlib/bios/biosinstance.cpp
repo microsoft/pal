@@ -43,7 +43,6 @@ namespace SCXSystemLib
     /** offset where the BIOS Characteristics in BIOS Info Structure is (Bits 32-39) */
     const int cCharacteristicsHigh = 0x12;
     // The length of SMBIO Structure used to extract the BIOS characteristics.
-    // (Ref: dmidecode-2.1.tar.gz; http://download.savannah.gnu.org/releases/dmidecode/)
     const int cSMBIOSStructLen = 0x13;
 
     /*----------------------------------------------------------------------------*/
@@ -630,7 +629,6 @@ namespace SCXSystemLib
         scxulong characteristicsLow = MAKELONG(MAKEWORD(pcur+cCharacteristicsLow,pcur+cCharacteristicsLow+1),MAKEWORD(pcur+cCharacteristicsLow+2,pcur+cCharacteristicsLow+3));
 #endif
         // Find the upper portion of the BIOS characteristics.
-        // (Ref: dmidecode-2.1.tar.gz; http://download.savannah.gnu.org/releases/dmidecode/)
         unsigned char characteristicsHigh = 0x0;
         if (SMBIOSStructPointLen > cSMBIOSStructLen )        
         {
