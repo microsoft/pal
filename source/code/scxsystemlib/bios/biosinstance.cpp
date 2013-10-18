@@ -17,6 +17,14 @@
 #include <scxcorelib/stringaid.h>
 #include <scxsystemlib/biosinstance.h>
 #include <scxsystemlib/biosenumeration.h>
+#include <scxcorelib/scxprocess.h>
+#include <scxcorelib/logsuppressor.h>
+
+#if defined(aix)
+#include <scxsystemlib/scxodm.h>
+#elif defined(hpux)
+#include <unistd.h>
+#endif
 
 using namespace SCXCoreLib;
 using namespace std;
@@ -28,8 +36,12 @@ namespace SCXSystemLib
     const size_t cCharacteristicsLength = 40;
     /** The type value of BIOS Information structure*/
     const unsigned short cBIOSInformation = 0;
+    /** The type value of System Information structure*/
+    const unsigned short cSystemInformation = 1;
     /** The type value of BIOS Language structure*/
     const unsigned short cBIOSLanguage = 13;
+    /** offset where the string number of the System's Serial Number is*/
+    const int cStrSystemInfoSerialNumber = 0x07;
     /** offset where the number of languages available in BIOS Language Info Structure is*/
     const int cLanguagesAavialable = 0x04;
     /** offset where the string number of the BIOS Vendor's Name in BIOS Info Structure is*/
@@ -58,28 +70,37 @@ namespace SCXSystemLib
     {
         m_biosPro.smbiosPresent = false;
         m_biosPro.installableLanguages = 0;
-        m_biosPro.smbiosBiosVersion = wstring(L"");
         m_biosPro.biosCharacteristics.clear();
         m_biosPro.smbiosMajorVersion = 0;
         m_biosPro.smbiosMinorVersion = 0;
-        m_biosPro.manufacturer = wstring(L"");
         m_biosPro.installDate = SCXCalendarTime::FromPosixTime(0L);
-        m_biosPro.name = wstring(L"");
-        m_biosPro.version = wstring(L"");
 
         m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.bios.biosinstance"));
-
     }
 #elif defined(sun) && defined(sparc)
     BIOSInstance::BIOSInstance(SCXCoreLib::SCXHandle<BiosDependencies> deps) :
         m_deps(deps),
         m_existBiosLanguage(false)
     {
-        memset(&m_biosPro, 0, sizeof (m_biosPro));
-        m_biosPro.smbiosBiosVersion = wstring(L"");
-        m_biosPro.manufacturer = wstring(L"");
-        m_biosPro.name = wstring(L"");
-        m_biosPro.version = wstring(L"");
+        m_biosPro.smbiosPresent = false;
+        m_biosPro.installableLanguages = 0;
+        m_biosPro.biosCharacteristics.clear();
+        m_biosPro.smbiosMajorVersion = 0;
+        m_biosPro.smbiosMinorVersion = 0;
+        m_biosPro.installDate = SCXCalendarTime::FromPosixTime(0L);
+
+        m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.bios.biosinstance"));
+    }
+#else
+    BIOSInstance::BIOSInstance()
+    {
+        m_biosPro.smbiosPresent = false;
+        m_biosPro.installableLanguages = 0;
+        m_biosPro.biosCharacteristics.clear();
+        m_biosPro.smbiosMajorVersion = 0;
+        m_biosPro.smbiosMinorVersion = 0;
+        m_biosPro.installDate = SCXCalendarTime::FromPosixTime(0L);
+
         m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.bios.biosinstance"));
     }
 #endif
@@ -99,6 +120,9 @@ namespace SCXSystemLib
     */
     void BIOSInstance::Update()
     {
+        static LogSuppressor errorSuppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
+        static LogSuppressor warningSuppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
+        static LogSuppressor infoSuppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
 #if defined(linux) || (defined(sun) && !defined(sparc))
         struct SmbiosEntry smbiosEntry;
         smbiosEntry.tableAddress = 0;
@@ -150,6 +174,82 @@ namespace SCXSystemLib
         //analyze installDate
 
         ParseInstallDate();
+       
+        std::istringstream processInput;
+        std::ostringstream processOutput;
+        std::ostringstream processErr;
+        int result;
+        try
+        {
+            result = SCXProcess::Run(L"prtfru", processInput, processOutput, processErr, 15000);
+            if (processErr.str().size() > 0 || result != 0)
+            {
+                SCX_LOG(m_log, warningSuppressor.GetSeverity(L"prtfru error"), StrAppend(L"Error when running 'prtfru': ", processErr.str().c_str()));
+            }
+        }
+        catch (SCXException &e)
+        {
+            SCX_LOG(m_log, warningSuppressor.GetSeverity(L"prtfru exception"), StrAppend(StrAppend(L"Exception thrown when attempting to run command 'prtfru'.", result), e.What()));
+        }
+        
+        // prtfru parsing
+        // We're looking for a line that contains 'System_Id', and then we're taking the last token on the right
+        // 
+        // Example output:
+        //       /InstallationR[0]/System_Id: SERIALNUMBER
+        
+        vector<wstring> lines, tokens;
+        StrTokenize(StrFromUTF8(processOutput.str()), lines, L"\n");
+        bool serialNumberFound = false;
+        for (vector<wstring>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+        {
+            if (it->find(L"System_Id:") != string::npos)
+            {
+                StrTokenize(*it, tokens, L" ");
+                m_biosPro.systemSerialNumber = tokens[tokens.size() - 1];
+                serialNumberFound = true;
+                break;
+            }
+        }
+
+        if (serialNumberFound == false)
+        {
+            SCX_LOG(m_log, infoSuppressor.GetSeverity(L"serial not found"), L"Unable to find serial number in prtfru.");
+        }
+        
+#elif defined(hpux)
+        char buf[BUFSIZ];
+        buf[BUFSIZ-1] = '\0';
+        confstr(_CS_MACHINE_SERIAL, buf, BUFSIZ-1);
+        m_biosPro.systemSerialNumber = StrTrim(StrFromUTF8(buf));
+
+#elif defined(aix)
+        // odm lookup on CuAt where attribute=systemid
+        try 
+        {
+
+            SCXodm odm;
+            struct CuAt atData;
+            memset(&atData, '\0', sizeof(atData));
+            void * pResult = odm.Get(CuAt_CLASS, L"attribute=systemid", &atData);
+            if (pResult != NULL)
+            {
+                if (atData.value[0] != '\0')
+                {
+                    m_biosPro.systemSerialNumber = StrFromUTF8(atData.value);
+                }
+            }
+            else
+            {
+                SCX_LOG(m_log, warningSuppressor.GetSeverity(L"no odm entry"), L"Unable to find odm entry for CuAt where attribute=systemid.");
+            }
+        }
+        catch (SCXodmException &e)
+        {
+            SCX_LOG(m_log, infoSuppressor.GetSeverity(L"odm exception"), StrAppend(L"When looking up odm entry for CuAt where attribute=systemid, an exception was thrown: ", e.What()));
+        }
+#else
+#error No implementation for platform.
 #endif
     }
 
@@ -159,7 +259,6 @@ namespace SCXSystemLib
 
       \param[out]   smbiosPresent - whether SMBIOS is available
       \returns      whether the implementation for this platform supports the value.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
    bool BIOSInstance::GetSmbiosPresent(bool &smbiosPresent) const
     {
@@ -168,9 +267,6 @@ namespace SCXSystemLib
         smbiosPresent = m_biosPro.smbiosPresent;
         // Implemented platform,and the property can be supported.
         fRet = true;
-#else
-        // Not implemented platform
-        throw SCXNotSupportedException(L"SMBIOSPresent", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -181,7 +277,6 @@ namespace SCXSystemLib
 
       \param[out]   smbiosBiosVersion - BIOS version as reported by SMBIOS.
       \returns      whether the implementation for this platform supports the value.
-      \throws      SCXNotSupportException - For not implemented platform.
     */
     bool BIOSInstance::GetSmbiosBiosVersion(wstring &smbiosBiosVersion) const
     {
@@ -191,8 +286,6 @@ namespace SCXSystemLib
         fRet = true;
 #elif defined(sun) && defined(sparc)
         fRet = false;
-#else
-        throw SCXNotSupportedException(L"SMBIOSBIOSVersion", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -203,7 +296,6 @@ namespace SCXSystemLib
 
       \param[out]   biosCharacteristics - Array of BIOS characteristics supported by the system as defined by the System Management BIOS Reference Specification.
       \returns      whether the implementation for this platform supports the value.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetBiosCharacteristics(vector<unsigned short> &biosCharacteristics) const
     {
@@ -213,8 +305,6 @@ namespace SCXSystemLib
         fRet = true;
 #elif defined(sun) && defined(sparc)
         fRet = false;
-#else
-        throw SCXNotSupportedException(L"BiosCharacteristics", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -225,7 +315,6 @@ namespace SCXSystemLib
 
       \param[out]   installableLanguages - Number of languages available for installation on this system.
       \returns      whether the implementation for this platform supports the value.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetInstallableLanguages(unsigned short &installableLanguages) const
     {
@@ -238,8 +327,6 @@ namespace SCXSystemLib
         }
 #elif defined(sun) && defined(sparc)
         fRet = false;
-#else
-        throw SCXNotSupportedException(L"InstallableLanguages", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -250,7 +337,6 @@ namespace SCXSystemLib
 
       \param[out]   smbiosMajorVersion - Major SMBIOS version number.
       \returns      whether the implementation for this platform supports the value.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetSMBIOSMajorVersion(unsigned short &smbiosMajorVersion) const
     {
@@ -260,8 +346,6 @@ namespace SCXSystemLib
         fRet = true;
 #elif defined(sun) && defined(sparc)
         fRet = false;
-#else
-        throw SCXNotSupportedException(L"SMBIOSMajorVersion", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -272,7 +356,6 @@ namespace SCXSystemLib
 
       \param[out]   smbiosMinorVersion - Minor SMBIOS version number.
       \returns      whether the implementation for this platform supports the value or not.
-      \throws       SCXNotSupportException - For not implemented platform.
     */
     bool BIOSInstance::GetSMBIOSMinorVersion(unsigned short &smbiosMinorVersion) const
     {
@@ -282,8 +365,6 @@ namespace SCXSystemLib
         fRet = true;
 #elif defined(sun) && defined(sparc)
         fRet = false;
-#else
-        throw SCXNotSupportedException(L"SMBIOSMinorVersion", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -294,7 +375,6 @@ namespace SCXSystemLib
 
       \param[out]   manufacturer - Manufacturer of this software element.
       \returns      whether the implementation for this platform supports the value or not.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetManufacturer(wstring &manufacturer) const
     {
@@ -302,8 +382,6 @@ namespace SCXSystemLib
 #if defined(linux) || defined(sun)
         manufacturer = m_biosPro.manufacturer;
         fRet = true;
-#else
-        throw SCXNotSupportedException(L"Manufacturer", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -314,7 +392,6 @@ namespace SCXSystemLib
 
       \param[out]   installDate - Date and time the object was installed.
       \returns      whether the implementation for this platform supports the value or not.
-      \throws       SCXNotSupportException - support for the platform is not implemented
 
       In fact, the exact meaning of Installdate is the release time of BIOS provided by manufacturer.
     */
@@ -329,8 +406,6 @@ namespace SCXSystemLib
 
 #if defined(linux) || defined(sun)
         fRet = true;
-#else
-        throw SCXNotSupportedException(L"InstallDate", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -341,7 +416,6 @@ namespace SCXSystemLib
 
       \param[out]   name - Name used to identify this software element.
       \returns      whether the implementation for this platform supports the value or not.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetName(wstring &name) const
     {
@@ -349,18 +423,22 @@ namespace SCXSystemLib
 #if defined(linux) || defined(sun)
         name = m_biosPro.name;
         fRet = true;
-#else
-        throw SCXNotSupportedException(L"Name", SCXSRCLOCATION);
 #endif
         return fRet;
     }
+
+    bool BIOSInstance::GetSystemSerialNumber(wstring &sn) const
+    {
+        sn = m_biosPro.systemSerialNumber;
+        return true;
+    }
+
     /*----------------------------------------------------------------------------*/
     /**
       Get the BIOS version.
 
       \param[out]   version - version of BIOS.
       \returns      whether the implementation for this platform supports the value or not.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetVersion(wstring &version) const
     {
@@ -368,8 +446,6 @@ namespace SCXSystemLib
 #if defined(linux) || defined(sun)
         version = m_biosPro.version;
         fRet = true;
-#else
-        throw SCXNotSupportedException(L"Version", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -380,7 +456,6 @@ namespace SCXSystemLib
 
       \param[out]   targetOperatingSystem- TargetOperatingSystem of BIOS.
       \returns      whether the implementation for this platform supports the value or not.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetTargetOperatingSystem(unsigned short &targetOperatingSystem) const
     {
@@ -391,8 +466,6 @@ namespace SCXSystemLib
 #elif defined(linux) || (defined(sun) && !defined(sparc))
         targetOperatingSystem = targetOperatingSystem; // Silence warning of unused arg.
         fRet = false;
-#else
-        throw SCXNotSupportedException(L"TargetOperatingSystem", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -403,7 +476,6 @@ namespace SCXSystemLib
 
       \param[out]   softwareElementState - softwareElementState of BIOS.
       \returns      whether the implementation for this platform supports the value or not.
-      \throws       SCXNotSupportException - support for the platform is not implemented
     */
     bool BIOSInstance::GetSoftwareElementState(unsigned short &softwareElementState) const
     {
@@ -412,8 +484,6 @@ namespace SCXSystemLib
 #if defined(linux) || defined(sun)
         softwareElementState = eRunning;
         fRet = true;
-#else
-        throw SCXNotSupportedException(L"SoftwareElementState", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -493,6 +563,15 @@ namespace SCXSystemLib
                             //
                             size_t strStartPos = curLength + length;
                             SetBiosInfo(smbiosTable,strStartPos,pcur, length);
+                            break;
+                        }
+                    case cSystemInformation:
+                        {
+                            //
+                            //Text strings appear closely after current structure, so read string from curLength+length.
+                            //
+                            size_t strStartPos = curLength + length;
+                            SetSystemInfo(smbiosTable, strStartPos, pcur);
                             break;
                         }
                     case cBIOSLanguage:
@@ -575,6 +654,18 @@ namespace SCXSystemLib
                 }
             }
         }
+
+        return true;
+    }
+
+    bool BIOSInstance::SetSystemInfo(const MiddleData& smbiosTable, const size_t structureStringStart,
+                                   const unsigned char* structureStart)
+    {
+        const unsigned char *pcur = structureStart;
+
+        size_t stringIndex = pcur[cStrSystemInfoSerialNumber];
+        SCX_LOGTRACE(m_log, StrAppend(L"ParseSmbiosTable() - string index is: ", stringIndex));
+        m_biosPro.systemSerialNumber = m_scxsmbios->ReadSpecifiedString(smbiosTable,structureStringStart,stringIndex);
 
         return true;
     }

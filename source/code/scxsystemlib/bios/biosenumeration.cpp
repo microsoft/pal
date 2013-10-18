@@ -43,6 +43,8 @@ namespace SCXSystemLib
 #elif (defined(sun) && defined(sparc))
         SCXCoreLib::SCXHandle<BiosDependencies> deps(new BiosDependencies());
         SetTotalInstance(SCXCoreLib::SCXHandle<BIOSInstance>(new BIOSInstance(deps)));
+#else
+        SetTotalInstance(SCXCoreLib::SCXHandle<BIOSInstance>(new BIOSInstance()));
 #endif
     }
 

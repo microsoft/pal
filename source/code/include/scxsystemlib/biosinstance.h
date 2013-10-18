@@ -43,6 +43,7 @@ namespace SCXSystemLib
     {
         bool smbiosPresent;
         std::wstring smbiosBiosVersion;
+        std::wstring systemSerialNumber;
         vector<unsigned short> biosCharacteristics;
         unsigned short installableLanguages;
         unsigned short smbiosMajorVersion;
@@ -77,6 +78,8 @@ namespace SCXSystemLib
         explicit BIOSInstance(SCXCoreLib::SCXHandle<SCXSmbios> scxsmbios = SCXCoreLib::SCXHandle<SCXSmbios>(new SCXSmbios()) );
 #elif defined(sun) && defined(sparc)
         explicit BIOSInstance(SCXCoreLib::SCXHandle<BiosDependencies> deps);
+#else
+        explicit BIOSInstance();
 #endif
         virtual ~BIOSInstance();
 
@@ -166,6 +169,16 @@ namespace SCXSystemLib
           ThrowException: SCXNotSupportException - For not implemented platform.
          */
         bool GetName(std::wstring &name) const;
+
+        /*----------------------------------------------------------------------------*/
+        /**
+          Get the System's Serial Number
+
+          Parameters:  sn- System's serial number
+          Returns:     whether the implementation for this platform supports the value or not.
+         */
+        bool GetSystemSerialNumber(std::wstring &sn) const;
+
         /*----------------------------------------------------------------------------*/
         /**
           Get Version of BIOS. 
@@ -223,7 +236,18 @@ namespace SCXSystemLib
           Returns:     true,successful to set it;otherwise,false. 
          */
         bool SetBiosInfo(const MiddleData& smbiosTable,const size_t structureStringStart,
-                         const unsigned char* structureStart, const unsigned short SMBIOSStructPointLen); 
+                         const unsigned char* structureStart, const unsigned short SMBIOSStructPointLen);
+
+        /**
+          Set the attributes of BIOS Information . 
+
+          Parameters:  smbiosTable- SMBIOS Table. 
+          Parameters:  structureStringStart- offset of the string-set start postion of current SMBIOS structure to smbiosTable. 
+          Parameters:  structureStart- the start address of current SMBIOS structure. 
+          Returns:     true,successful to set it;otherwise,false. 
+         */
+        bool SetSystemInfo(const MiddleData& smbiosTable,const size_t structureStringStart,
+                         const unsigned char* structureStart);
 
         SCXCoreLib::SCXHandle<SCXSmbios> m_scxsmbios; //!< Collects external dependencies of this class and analyse it.
 #elif defined(sun) && defined(sparc)
