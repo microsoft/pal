@@ -197,18 +197,18 @@ namespace SCXSystemLib
         // 
         // Example output:
         //       /InstallationR[0]/System_Id: SERIALNUMBER
-        
-        vector<wstring> lines, tokens;
-        StrTokenize(StrFromUTF8(processOutput.str()), lines, L"\n");
         bool serialNumberFound = false;
-        for (vector<wstring>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+        string outputstr = processOutput.str();
+        size_t system_id_loc = outputstr.find("System_Id:");
+        if (system_id_loc != string::npos)
         {
-            if (it->find(L"System_Id:") != string::npos)
+            // get end of line
+            size_t end_of_line_loc = outputstr.find_first_of("\n", system_id_loc);
+            if (end_of_line_loc != string::npos)
             {
-                StrTokenize(*it, tokens, L" ");
-                m_biosPro.systemSerialNumber = tokens[tokens.size() - 1];
+                size_t after_system_id_loc = system_id_loc + 11;
+                m_biosPro.systemSerialNumber = StrTrim(StrFromUTF8(outputstr.substr(after_system_id_loc, end_of_line_loc - after_system_id_loc)));
                 serialNumberFound = true;
-                break;
             }
         }
 
