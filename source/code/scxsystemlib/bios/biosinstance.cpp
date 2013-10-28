@@ -398,13 +398,13 @@ namespace SCXSystemLib
     bool BIOSInstance::GetInstallDate(SCXCalendarTime& installDate) const
     {
         bool fRet = false;
+
+#if defined(linux) || defined(sun)
         if (m_biosPro.installDate.IsInitialized())
         {
             installDate = m_biosPro.installDate;
-            fRet = true;
         }
 
-#if defined(linux) || defined(sun)
         fRet = true;
 #endif
         return fRet;
