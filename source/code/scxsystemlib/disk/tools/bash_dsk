@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+
 #scripts used to execute ioctl_scan on a number of linux machines
 #this file is for backup purposes and some of the paths and names are hardcoded and may have to be changed.
 #user must have paswordless root access

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
-    Copyright (C) 2012, Microsoft Corp.
+    Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 
  */
 /**

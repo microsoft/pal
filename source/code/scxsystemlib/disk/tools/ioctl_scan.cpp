@@ -1,3 +1,8 @@
+/*--------------------------------------------------------------------------------
+    Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+    
+*/
+
 //compile:
 //#g++ ioctl_scan.cpp -o ioctl_scan
 //run:

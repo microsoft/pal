@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------
-;    Copyright (c) Microsoft Corporation.  All rights reserved.
+;    Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 ;
 ; Provides assembler funcions needed for HPPA spinlocks.    
 ; Date        2008-01-24 11:11:11

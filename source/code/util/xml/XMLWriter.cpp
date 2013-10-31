@@ -1,5 +1,5 @@
 //******************************************************************************
-//  Copyright (c), Microsoft Corporation
+//  Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 //  File: XMLWriter.cpp
 //  Implementation of the direct-to-file XML document writer
 //  Declaration  : XMLWriter.h

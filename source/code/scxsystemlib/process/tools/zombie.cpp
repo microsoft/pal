@@ -1,3 +1,8 @@
+/*----------------------------------------------------------------------------
+  Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+
+*/
+
 // To compile:
 // Solaris:
 // CC zombie.cpp -o zombie
@@ -9,6 +14,7 @@
 // xlC zombie.cpp -o zombie
 // HPUX:
 // aCC zombie.cpp -o zombie
+
 #include<unistd.h>
 #include<stdio.h>
 #include<string.h>
