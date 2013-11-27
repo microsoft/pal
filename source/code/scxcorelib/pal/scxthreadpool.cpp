@@ -115,6 +115,11 @@ namespace SCXCoreLib
         SCXConditionHandle h( m_cond );
         while ( !m_isTerminating )
         {
+            // If we need to throttle down (reduce number of threads), then do so
+            // Test prior to the condition wait in case we missed broadcast due to queue execution
+            if ( m_threadCount > m_threadLimit )
+                break;
+
             // If the queue isn't empty, don't wait - keep on going
             if ( m_tasks.empty() || m_deps->IsWorkerTaskExecutionDelayed() )
             {
@@ -146,6 +151,7 @@ namespace SCXCoreLib
                 if (task->m_proc != 0)
                 {
                     // Unlock the condition while we call the ThreadProc
+                    // NOTE: We can miss broadcasts while ThreadProc is executing ...
                     m_threadBusyCount++;
                     h.Unlock();
 
