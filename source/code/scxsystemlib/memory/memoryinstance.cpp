@@ -35,6 +35,7 @@
 
 #if defined(aix)
 #include <libperfstat.h>
+#include <sys/vminfo.h>
 #endif
 
 using namespace SCXCoreLib;
@@ -343,8 +344,43 @@ namespace SCXSystemLib
             throw SCXCoreLib::SCXInternalErrorException(L"Could not do perfstat_memory_total()", SCXSRCLOCATION);
         }
 
+        // WI 617621: AIX available memory calculation incorrectly handles FS cache
+        //
+        // Previously, we consider free pages to be mem.real_free + mem.numperm
+        // (the idea is that mem.numperm reflected the amount of FS cache that
+        // we wanted to consider as "free").  However, this isn't necessarily
+        // accurate.
+        //
+        // AIX has a concept of "minimum cache size" (based on configuration
+        // parameter "lru_free_repage"). Briefly, vm setting minperm is the
+        // smallest that the cache will be allowed to go unless things get
+        // seriously desperate.  As a result, we've modified free memory
+        // calculations to take minperm into account.
+        //
+        // See "Overview of AIX page replacement" for more info:
+        //   http://www.ibm.com/developerworks/aix/library/au-vmm
+
+        // Look up "minperm" setting (minimum size of the cache)
+        //   (Interactively, use 'vmo -L' for this)
+        struct vminfo vm;
+        if (vmgetinfo(&vm, VMINFO_ABRIDGED, sizeof(vm)) != 0)
+        {
+            throw SCXCoreLib::SCXInternalErrorException(L"Could not do vmgetinfo()", SCXSRCLOCATION);
+        }
+
         total_pages = static_cast<scxulong>(mem.real_total);
-        free_pages = static_cast<scxulong>(mem.real_free + mem.numperm); // take in account file buffers
+
+        // Take into account file buffers.  Algorithm:
+        //   if (numperm > minperm), consider (numperm - minperm) to be free
+        //   otherwise, consider the cache to be completely empty
+        if (mem.numperm > vm.minperm)
+        {
+            free_pages = static_cast<scxulong>(mem.real_free + (mem.numperm - vm.minperm));
+        }
+        else
+        {
+            free_pages = static_cast<scxulong>(mem.real_free);
+        }
 
         max_swap_pages = static_cast<scxulong>(mem.pgsp_total);
         free_swap_pages = static_cast<scxulong>(mem.pgsp_free);
@@ -503,8 +539,8 @@ namespace SCXSystemLib
         if (startThread)
         {
             MemoryInstanceThreadParam* params = new MemoryInstanceThreadParam(&m_pageReads, &m_pageWrites, m_deps, this);
-        m_dataAquisitionThread = new SCXCoreLib::SCXThread(MemoryInstance::DataAquisitionThreadBody, params);
-    }
+            m_dataAquisitionThread = new SCXCoreLib::SCXThread(MemoryInstance::DataAquisitionThreadBody, params);
+        }
     }
 
 
