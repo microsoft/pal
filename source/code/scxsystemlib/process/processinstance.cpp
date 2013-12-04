@@ -2627,15 +2627,35 @@ namespace SCXSystemLib
 
         processBuffer.pi_pid = m_pid;
 
-        if (0 != getargs(&processBuffer, sizeof(processBuffer), &cmdbuf[0], sizeof(cmdbuf)))
+        const int max_retries = 3;
+        bool successful_getargs = false;
+
+        // Attempt to get the arguments for this process.  If getargs fails, retry 'max_retries' number of times.
+        for (int current_retry_number = 0; current_retry_number <= max_retries; ++current_retry_number)
         {
-            // Race: Process may already have died
-            if (ESRCH == errno) {
-                return fRet;
-            } else {
-                throw SCXErrnoException(L"getargs", errno, SCXSRCLOCATION);
+            if (0 == getargs(&processBuffer, sizeof(processBuffer), &cmdbuf[0], sizeof(cmdbuf)))
+            {
+                successful_getargs = true;
+                break;
+            }
+            else if (errno == ESRCH)
+            {
+                // Race: Process may already have died (in which case ESRCH is returned)
+                return false;
             }
         }
+
+        if (! successful_getargs)
+        {
+            SCXErrnoException e(L"getargs", errno, SCXSRCLOCATION);
+            wstringstream errMsg;
+            errMsg << L"For process PID " << m_pid
+                   << L", error occurred reading arguments; argument data not returned. "
+                   << "Error details: " << e.What();
+            SCX_LOGERROR(m_log, errMsg.str());
+            return false;
+        }
+
 
         // Let's be certain we can't possibly read beyond our buffer
         // (Set the last two bytes of buffer to null to signfy end)
