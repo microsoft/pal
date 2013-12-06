@@ -18,6 +18,10 @@ class HPUXPackageFile:
         self.unconfigurePath = os.path.join(self.tempDir, "unconfigure.sh")
         self.preinstallPath = os.path.join(self.tempDir, "preinstall.sh")
         self.postremovePath = os.path.join(self.tempDir, "postremove.sh")
+        self.fullversion_dashed = self.fullversion = self.variables["VERSION"]
+        if "RELEASE" in self.variables:
+            self.fullversion = self.variables["VERSION"] + "." + self.variables["RELEASE"]
+            self.fullversion_dashed = self.variables["VERSION"] + "-" + self.variables["RELEASE"]
 
     def GeneratePackageDescriptionFiles(self):
         self.GenerateSpecificationFile()
@@ -90,20 +94,19 @@ RestoreConfigurationFile() {
         specfile.write('  title         ' + self.variables["VENDOR"] + '\n')
         specfile.write('category\n')
         specfile.write('  tag           ' + self.variables["SHORT_NAME"] + '\n')
-        specfile.write('  revision      ' + self.variables["VERSION"] + \
-                           '-' + self.variables["RELEASE"] + '\n')
+        specfile.write('  revision      ' + self.fullversion_dashed + '\n')
         specfile.write('end\n')
         specfile.write('\n')
         specfile.write('# Product definition:\n')
         specfile.write('product\n')
         specfile.write('  tag            ' + self.variables["SHORT_NAME"] + '\n')
-        specfile.write('  revision       ' + self.variables["VERSION"]  + \
-                       '-' + self.variables["RELEASE"] + '\n')
+        specfile.write('  revision       ' + self.fullversion_dashed + '\n')
         specfile.write('  architecture   HP-UX_B.11.00_32/64\n')
         specfile.write('  vendor_tag     ' + self.variables["SHORT_NAME_PREFIX"] + '\n')
         specfile.write('\n')
         specfile.write('  title          ' + self.variables["SHORT_NAME"] + '\n')
-        specfile.write('  number         ' + self.variables["RELEASE"] + '\n')
+        if "RELEASE" in self.variables:
+            specfile.write('  number         ' + self.variables["RELEASE"] + '\n')
         specfile.write('  category_tag   ' + self.variables["SHORT_NAME"] + '\n')
         specfile.write('\n')
         specfile.write('  description    ' + self.variables["DESCRIPTION"] + '\n')
@@ -123,8 +126,7 @@ RestoreConfigurationFile() {
         specfile.write('  fileset\n')
         specfile.write('    tag          core\n')
         specfile.write('    title        ' + self.variables["SHORT_NAME"] + ' Core\n')
-        specfile.write('    revision     ' + self.variables["VERSION"] + \
-                       '-' + self.variables["RELEASE"] + '\n')
+        specfile.write('    revision     ' + self.fullversion_dashed + '\n')
         specfile.write('\n')
         specfile.write('    # Dependencies\n')
         for dep in self.sections["Dependencies"]:
@@ -164,8 +166,7 @@ RestoreConfigurationFile() {
             arch = self.variables["PFARCH"]
 
         depotbasefilename = self.variables["SHORT_NAME"] + '-' + \
-                                     self.variables["VERSION"] + '-' + \
-                                     self.variables["RELEASE"] + \
+                                     self.fullversion_dashed + \
                                      '.hpux.' + osversion + '.' + arch + '.depot'
         depotfilename = os.path.join(self.targetDir, depotbasefilename)
 

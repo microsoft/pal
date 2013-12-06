@@ -78,8 +78,11 @@ set_ulinux_pf()
     PF_DISTRO_ULINUX_D=`[ -e /usr/bin/dpkg ] && echo 1`
     if [ -n "$PF_DISTRO_ULINUX_D" ]; then
         PF_DISTOR_ULINUX_R=
+	BUILD_DPKG=1
+	PKG_SUFFIX=deb
     else
         PF_DISTRO_ULINUX_R=`[ -e /usr/bin/rpmbuild ] && echo 1`
+	BUILD_RPM=1
     fi
 }
 
@@ -87,6 +90,7 @@ uname=`uname`
 case $uname in
     Linux)
         PF=Linux
+	PKG_SUFFIX=rpm
         if [ -e /etc/SuSE-release ]; then 
             CHECK_SUSE=1
         fi
@@ -102,6 +106,8 @@ case $uname in
 
         if [ "$ULINUX" = "1" ]; then
 	    set_ulinux_pf
+	    BUILD_RPM=1
+	    BUILD_DPKG=1
         elif [ -n "$CHECK_SUSE" ]; then
             PF_MAJOR=`head -n 1 /etc/SuSE-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
             PF_MINOR=`(head -n 1 /etc/SuSE-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
@@ -142,6 +148,7 @@ case $uname in
 
     SunOS)
         PF=SunOS
+	PKG_SUFFIX=pkg
         uname_r=`uname -r`
         PF_MAJOR=`echo $uname_r | awk -F. '{print $1}'`
         PF_MINOR=`echo $uname_r | awk -F. '{print $2}'`
@@ -161,6 +168,7 @@ case $uname in
     
     HP-UX)
         PF=HPUX
+	PKG_SUFFIX=depot
         uname_r=`uname -r` 
         PF_MAJOR=`echo $uname_r | awk -F. '{print $2}'`
         PF_MINOR=`echo $uname_r | awk -F. '{print $3}'`
@@ -176,6 +184,7 @@ case $uname in
 
     AIX)
         PF=AIX
+	PKG_SUFFIX=lpp
         PF_MAJOR=`uname -v`
         PF_MINOR=`uname -r`
         PF_ARCH=ppc
@@ -209,6 +218,9 @@ PF_DISTRO_ULINUX_R=$PF_DISTRO_ULINUX_R
 BUILD_CONFIGURATION=$BUILD_CONFIGURATION
 SCXPAL_INTERMEDIATE_DIR=`cd ..; pwd -P`/intermediate/$BUILD_CONFIGURATION
 SCXPAL_TARGET_DIR=`cd ..; pwd -P`/target/$BUILD_CONFIGURATION
+PACKAGE_SUFFIX=$PKG_SUFFIX
+BUILD_RPM=$BUILD_RPM
+BUILD_DPKG=$BUILD_DPKG
 EOF
 
 echo "Configured SCXPAL for ${BUILD_CONFIGURATION}"

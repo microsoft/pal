@@ -9,7 +9,11 @@ class LinuxRPMFile:
         self.variables = variables
         self.sections = sections
         self.specfileName = self.intermediateDir + "/" + "rpm.spec"
-
+        self.fullversion_dashed = self.fullversion = self.variables["VERSION"]
+        if "RELEASE" in self.variables:
+            self.fullversion = self.variables["VERSION"] + "." + self.variables["RELEASE"]
+            self.fullversion_dashed = self.variables["VERSION"] + "-" + self.variables["RELEASE"]
+            
     def GeneratePackageDescriptionFiles(self):
         self.GenerateSpecFile()
 
@@ -71,10 +75,13 @@ class LinuxRPMFile:
         specfile.write('Name: ' + self.variables["SHORT_NAME"] + '\n')
         specfile.write('Version: ' + self.variables["VERSION"] + '\n')
 
-        if self.variables["PFDISTRO"] == "REDHAT":
-            specfile.write('Release: ' + self.variables["RELEASE"] + '.%{?dist}\n')
+        if "RELEASE" in self.variables:
+            if self.variables["PFDISTRO"] == "REDHAT":
+                specfile.write('Release: ' + self.variables["RELEASE"] + '.%{?dist}\n')
+            else:
+                specfile.write('Release: ' + self.variables["RELEASE"] + '\n')
         else:
-            specfile.write('Release: ' + self.variables["RELEASE"] + '\n')
+            specfile.write('Release: 1\n')
 
         specfile.write('Summary: ' + self.variables["LONG_NAME"] + '\n')
         specfile.write('Group: ' + self.variables["GROUP"] + '\n')
@@ -130,18 +137,15 @@ class LinuxRPMFile:
     def StageAndProperlyNameRPM(self):
         if self.variables['PFDISTRO'] == 'SUSE':
             rpmNewFileName = self.variables['SHORT_NAME'] + '-' + \
-                self.variables['VERSION'] + '-' + \
-                self.variables['RELEASE'] + '.sles.' + \
+                self.fullversion_dashed + '.sles.' + \
                 str(self.variables['PFMAJOR']) + '.' + self.variables['PFARCH'] + '.rpm'
         elif self.variables['PFDISTRO'] == 'REDHAT':
             rpmNewFileName = self.variables['SHORT_NAME'] + '-' + \
-                self.variables['VERSION'] + '-' + \
-                self.variables['RELEASE'] + '.rhel.' + \
+                self.fullversion_dashed + '.rhel.' + \
                 str(self.variables['PFMAJOR'])  + '.' + self.variables['PFARCH'] + '.rpm'
         elif self.variables['PFDISTRO'] == 'ULINUX':
             rpmNewFileName = self.variables['SHORT_NAME'] + '-' + \
-                self.variables['VERSION'] + '-' + \
-                self.variables['RELEASE'] + '.universalr.' + \
+                self.fullversion_dashed + '.universalr.' + \
                 str(self.variables['PFMAJOR'])  + '.' + self.variables['PFARCH'] + '.rpm'
 
         retval = os.system("mv `find %s/RPM-packages/ -name *.rpm` %s" % (self.intermediateDir, self.targetDir + '/' + rpmNewFileName))

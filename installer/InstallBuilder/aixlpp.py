@@ -25,6 +25,10 @@ class AIXLPPFile:
         self.postInstallPath = os.path.join(self.tempDir, self.filesetName + '.config')
         self.preUninstallPath = os.path.join(self.tempDir, self.filesetName + '.unconfig')
         self.preUpgradePath = os.path.join(self.tempDir, self.filesetName + '.pre_rm')
+        self.fullversion_dashed = self.fullversion = self.variables["VERSION"]
+        if "RELEASE" in self.variables:
+            self.fullversion = self.variables["VERSION"] + "." + self.variables["RELEASE"]
+            self.fullversion_dashed = self.variables["VERSION"] + "-" + self.variables["RELEASE"]
 
     def WriteScriptFile(self, filePath, section):
         scriptfile = open(filePath, 'w')
@@ -50,7 +54,7 @@ class AIXLPPFile:
         specfile = open(self.lppNameFileName, 'w')
 
         specfile.write('4 R I ' + self.filesetName + ' {\n')
-        specfile.write(self.filesetName + ' ' + self.variables["VERSION"] + '.' + self.variables["RELEASE"] + ' 1 N U en_US ' + self.variables["LONG_NAME"] + '\n')
+        specfile.write(self.filesetName + ' ' + self.fullversion + ' 1 N U en_US ' + self.variables["LONG_NAME"] + '\n')
         specfile.write('[\n')
         # Requisite information would go here.
 
@@ -166,13 +170,12 @@ class AIXLPPFile:
     def GenerateProductidFile(self):
         productidfile = open(self.productidFileName, 'w')
 
-        productidfile.write(self.variables["SHORT_NAME"] + ',' + self.variables["VERSION"] + '-' + self.variables["RELEASE"])
+        productidfile.write(self.variables["SHORT_NAME"] + ',' + self.fullversion)
 
 
     def BuildPackage(self):
         lppbasefilename = self.variables["SHORT_NAME"] + '-' + \
-                          self.variables["VERSION"] + '-' + \
-                          self.variables["RELEASE"] + \
+                          self.fullversion_dashed + \
                           '.aix.' + str(self.variables["PFMAJOR"]) + '.' + \
                           self.variables['PFARCH'] + '.lpp'
         lppfilename = os.path.join(self.targetDir, lppbasefilename)

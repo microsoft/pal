@@ -21,6 +21,10 @@ class SunOSPKGFile:
         self.postUninstallPath = os.path.join(self.tempDir, "postuninstall.sh")
         self.iConfigFileName = os.path.join(self.tempDir, 'i.config')
         self.rConfigFileName = os.path.join(self.tempDir, 'r.config')
+        self.fullversion_dashed = self.fullversion = self.variables["VERSION"]
+        if "RELEASE" in self.variables:
+            self.fullversion =  self.variables["VERSION"] + "." + self.variables["RELEASE"]
+            self.fullversion_dashed =  self.variables["VERSION"] + "-" + self.variables["RELEASE"]
 
     def GeneratePackageDescriptionFiles(self):
         self.GeneratePrototypeFile()
@@ -47,7 +51,7 @@ class SunOSPKGFile:
         for d in self.sections["Directories"]:
             if d.type != "sysdir":
                 prototype.write('d none')
-                prototype.write(' /' + d.stagedLocation)
+                prototype.write(' ' + d.stagedLocation)
                 prototype.write(' ' + str(d.permissions) + \
                                 ' ' + d.owner + \
                                 ' ' + d.group + '\n')
@@ -57,14 +61,14 @@ class SunOSPKGFile:
                 prototype.write('f config')
             else:
                 prototype.write('f none')
-            prototype.write(' /' + f.stagedLocation)
+            prototype.write(' ' + f.stagedLocation)
             prototype.write(' ' + str(f.permissions) + \
                             ' ' + f.owner + \
                             ' ' + f.group + '\n')
 
         for l in self.sections["Links"]:
             prototype.write("s none")
-            prototype.write(' /' + l.stagedLocation)
+            prototype.write(' ' + l.stagedLocation)
             prototype.write('=' + l.baseLocation + '\n')
                
     def GenerateDepFile(self):
@@ -111,8 +115,7 @@ class SunOSPKGFile:
             exit(1)
 
         basepkgfilename = self.variables['SHORT_NAME'] + '-' + \
-            self.variables['VERSION'] + '-' + \
-            self.variables['RELEASE'] + \
+            self.fullversion_dashed + \
             '.solaris.' + str(self.variables['PFMINOR']) + '.' + \
             self.variables['PFARCH'] + '.pkg'
 
@@ -140,6 +143,11 @@ class PKGInfoFile:
         self.filename = os.path.join(directory, 'pkginfo')
         self.properties = []
 
+        self.fullversion_dashed = self.fullversion = variables["VERSION"]
+        if "RELEASE" in variables:
+            self.fullversion =  variables["VERSION"] + "." + variables["RELEASE"]
+            self.fullversion_dashed =  variables["VERSION"] + "-" + variables["RELEASE"]
+
         short_name_prefix = ""
         if "SHORT_NAME_PREFIX" in variables.keys():
             short_name_prefix = variables["SHORT_NAME_PREFIX"]
@@ -147,10 +155,10 @@ class PKGInfoFile:
         # Required entries
         self.AddProperty('PKG', short_name_prefix + variables['SHORT_NAME'])
         self.AddProperty('ARCH', variables['PFARCH'])
-        self.AddProperty('CLASSES', 'application config none')
+        self.AddProperty('CLASSES', 'none config')
         self.AddProperty('PSTAMP', strftime("%Y%m%d-%H%M"))
         self.AddProperty('NAME', variables['LONG_NAME'])
-        self.AddProperty('VERSION', variables['VERSION'] + "-" + variables['RELEASE'])
+        self.AddProperty('VERSION', self.fullversion_dashed)
         self.AddProperty('CATEGORY', 'system')
         
         # Optional entries:

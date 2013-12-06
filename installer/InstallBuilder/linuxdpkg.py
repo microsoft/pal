@@ -19,6 +19,10 @@ class LinuxDebFile:
         self.postInstallPath = os.path.join(self.controlDir, 'postinst')
         self.preUninstallPath = os.path.join(self.controlDir, 'prerm')
         self.postUninstallPath = os.path.join(self.controlDir, 'postrm')
+        self.fullversion_dashed = self.fullversion = self.variables["VERSION"]
+        if "RELEASE" in self.variables:
+            self.fullversion = self.variables["VERSION"] + "." + self.variables["RELEASE"]
+            self.fullversion_dashed = self.variables["VERSION"] + "-" + self.variables["RELEASE"]
 
     def GeneratePackageDescriptionFiles(self):
         self.GenerateScripts()
@@ -109,7 +113,7 @@ class LinuxDebFile:
 
         controlfile.write('Package:      ' + self.variables["SHORT_NAME"] + '\n')
         controlfile.write('Source:       ' + self.variables["SHORT_NAME"] + '\n')
-        controlfile.write('Version:      ' + self.variables["VERSION"] + '.' + self.variables["RELEASE"] + '\n')
+        controlfile.write('Version:      ' + self.fullversion + '\n')
         controlfile.write('Architecture: ' + archType + '\n')
         controlfile.write('Maintainer:   ' + self.variables["MAINTAINER"] + '\n')
         controlfile.write('Installed-Size: %d\n' % self.GetSizeInformation())
@@ -137,15 +141,17 @@ class LinuxDebFile:
 
     def BuildPackage(self):
         pkgName = self.variables["SHORT_NAME"] + '-' + \
-            self.variables["VERSION"] + '-' + \
-            self.variables["RELEASE"] + '.universald.' + \
+            self.fullversion_dashed + '.universald.' + \
             str(self.variables["PFMAJOR"])  + '.' + self.variables["PFARCH"] + '.deb'
 
         if "SKIP_BUILDING_PACKAGE" in self.variables:
             return
 
         # Build the package - 'cd' to the directory where we want to store result
-        retval = os.system('cd ' + self.targetDir + '; dpkg -b ' + self.stagingDir + ' ' + pkgName)
+        dpkg_path = 'dpkg'
+        if "DPKG_LOCATION" in self.variables:
+            dpkg_path = self.variables["DPKG_LOCATION"]
+        retval = os.system('cd ' + self.targetDir + '; ' + dpkg_path  + ' -b ' + self.stagingDir + ' ' + pkgName)
         if retval != 0:
             print("Error: Failed building DPKG")
             exit(1)
