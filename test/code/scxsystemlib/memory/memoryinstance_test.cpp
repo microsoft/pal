@@ -196,7 +196,7 @@ public:
     class MockKstat : public SCXKstat
     {
     public:
-        MockKstat() : SCXKstat(), m_instance(0)
+        MockKstat() : SCXKstat(), m_instance(0), m_bCpuReturned(false)
         {
         }
 
@@ -214,7 +214,23 @@ public:
         }
         void Lookup(const char *module, const char *name, int instance = -1)
         {
-            SCXKstat::Lookup(module, name, instance);
+            // We need to return only one CPU instance
+            if ( strcasecmp(module, "cpu_stat") || false == m_bCpuReturned )
+            {
+                if ( 0 == strcasecmp(module, "cpu_stat") )
+                    m_bCpuReturned = true;
+
+                SCXKstat::Lookup(module, name, instance);
+            }
+            else
+            {
+                throw SCXKstatNotFoundException(L"kstat_lookup() could not find kstat",
+                                                ENOENT,
+                                                SCXCoreLib::StrFromUTF8(module),
+                                                instance,
+                                                ( name != NULL ? SCXCoreLib::StrFromUTF8(name) : L""),
+                                                SCXSRCLOCATION);
+            }
         }
 
         scxulong GetValue(const wstring& statistic) const
@@ -261,6 +277,7 @@ public:
 
     private:
         int m_instance;
+        bool m_bCpuReturned;
         cpu_stat_t mock_statistics;
     };
 

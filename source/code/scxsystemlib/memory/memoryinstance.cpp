@@ -1181,28 +1181,39 @@ namespace SCXSystemLib
 
 #elif defined(sun)
 
-        long number_of_cpus = deps->GetNumberOfCPUs();
-        long cpu_counter = 0;
         pageReads = 0;
         pageWrites = 0;
         SCXThreadLock lock(inst->GetKstatLockHandle());
  
-        inst->GetKstat()->Update();
-        for(int cpu_index = 0; cpu_counter < number_of_cpus; ++cpu_index) {
-            
-            /* Is this CPU installed? */
-            if (!deps->IsProcessorPresent(cpu_index)) {
-                continue;       // Processor with this index not existing, try next index
-            }
-            cpu_counter++;
+        SCXHandle<SCXSystemLib::SCXKstat> kstat = inst->GetKstat();
+        kstat->Update();
 
+        std::vector<int> cpuInstances;
+        for (kstat_t* cur = kstat->ResetInternalIterator(); cur; cur = kstat->AdvanceInternalIterator())
+        {
+            if (strcmp(cur->ks_module, "cpu_info") != 0 || cur->ks_type != KSTAT_TYPE_NAMED )
+                continue;
+
+            // Get the instance number of this CPU
+            int cpuInstance = cur->ks_instance;
+
+            // Is this CPU online and present?
+            if (!deps->IsProcessorPresent(cpuInstance)) {
+                continue;
+            }
+
+            cpuInstances.push_back(cpuInstance);
+        }
+
+        for (std::vector<int>::const_iterator it = cpuInstances.begin(); it != cpuInstances.end(); ++it)
+        {
             try {
                 std::wostringstream id;
-                id << "cpu_stat" << cpu_index;
-                inst->GetKstat()->Lookup(L"cpu_stat", id.str(), cpu_index);
-                
+                id << L"cpu_stat" << *it;
+                kstat->Lookup(L"cpu_stat", id.str(), *it);
+
                 const cpu_stat *cpu_stat_p = 0;
-                inst->GetKstat()->GetValueRaw(cpu_stat_p);
+                kstat->GetValueRaw(cpu_stat_p);
 
                 pageReads  += cpu_stat_p->cpu_vminfo.pgpgin;
                 pageWrites += cpu_stat_p->cpu_vminfo.pgpgout;
