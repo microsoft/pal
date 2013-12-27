@@ -713,18 +713,29 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-       Retrieves the cache sizes. On non-sun systems this is a no-op; 
-       on sun systems with zfs installed it returns cache size. 
+       Retrieves the cache size. On non-Solaris systems this is a no-op today; 
+       on Solaris systems with zfs installed it returns cache size. 
+
+       \Note Prior versions of this code took c_min into account. However,
+             due to WI631566 (Oracle Support SR #3-8264452461), this is not
+             correct behavior. In constrained memory situations, Solaris will
+             try to achieve a ZFS cache size of zero (0), to free memory for
+             programs, thus reducing the cache size well below c_min.
+
+             Note that this is often difficult for Solaris to achieve, as the
+             arccache is a write-thru cache (data written to ZFS first goes to
+             the arccache and is then written to disk from there), but Solaris
+             will do it's best to achieve that over time in constrained memory
+             situations.
 
        \param[out]  cacheSize The total amount of space used by the zfs cache
-       \param[out]  minCacheSize The amount of zfs reserved space in the cache, not 'free' memory.
        \returns     True/false, and populates parameters. 
 
     */
-    bool MemoryInstance::GetCacheSizes(scxulong& cacheSize, scxulong& minCacheSize)
+    bool MemoryInstance::GetCacheSize(scxulong& cacheSize)
     {
 #if defined(sun)
-        scxulong cache_size = 0, min_cache_size = 0;
+        scxulong cache_size = 0;
 
         SCXCoreLib::SCXThreadLock lock(m_kstat_lock_handle);
 
@@ -736,37 +747,29 @@ namespace SCXSystemLib
         }
         catch (SCXKstatNotFoundException)
         {
-            cacheSize = minCacheSize = 0;
+            cacheSize = 0;
             return false; 
         }
         
         try
         {
             // Get cache size and min cache size, return 0 if not able to find values
-            if(!m_kstat->TryGetValue(std::wstring(L"size"), cache_size)      ||
-               !m_kstat->TryGetValue(std::wstring(L"c_min"), min_cache_size))
+            if( !m_kstat->TryGetValue(std::wstring(L"size"), cache_size) )
             {
-                cacheSize = minCacheSize = 0;
+                cacheSize = 0;
                 return false; 
             }
         }
         catch (SCXKstatStatisticNotFoundException)
         {
-            cacheSize = minCacheSize = 0;
+            cacheSize = 0;
             return false; 
         }
         
-        // if the cache size is 0, then force the min cache size to be 0 as well
-        if(cache_size == 0)
-        {
-            min_cache_size = 0;
-        }
-
         cacheSize = cache_size; 
-        minCacheSize = min_cache_size;
         return true;
 #else
-        cacheSize = minCacheSize = 0;
+        cacheSize = 0;
         return false;
 #endif
     }
@@ -939,12 +942,14 @@ namespace SCXSystemLib
         scxulong pageSize = m_deps->GetPageSize();
         m_totalPhysicalMemory = m_deps->GetPhysicalPages() * pageSize;      // Resulting units: bytes
         m_availableMemory = m_deps->GetAvailablePhysicalPages() * pageSize; // Resulting units: bytes
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Memory Available (", m_availableMemory).append(L")"));
 
-        scxulong cacheSize = 0, minCacheSize = 0;
-        GetCacheSizes(cacheSize, minCacheSize);
+        scxulong cacheSize = 0;
+        GetCacheSize(cacheSize);
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - ZFS Cache Size (", cacheSize).append(L")"));
 
-        scxulong zfsCacheUsed = cacheSize - minCacheSize;
-        m_availableMemory += zfsCacheUsed;
+        m_availableMemory += cacheSize;
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - New Memory Available (", m_availableMemory).append(L")"));
         m_usedMemory = m_totalPhysicalMemory - m_availableMemory;           // Resulting units: bytes
 
         scxulong max_pages = 0;

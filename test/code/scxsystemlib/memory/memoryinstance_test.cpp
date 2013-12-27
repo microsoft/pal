@@ -50,15 +50,14 @@ const scxulong c_pageSize = 4096;
 
 #if defined(sun)
 
-// For test purposes, lets create a 64MB cache with a minimum of 32MB
+// For test purposes, lets create a 64MB cache;
 // This affects available memory, so adjust remaining figures
 const scxulong c_zfsCacheSize = 64 * 1024 * 1024;
-const scxulong c_zfsMinCacheSize = 32 * 1024 * 1024;
 
 // ZFS isn't supported on Sparc 9
 #if (PF_MAJOR == 5 && PF_MINOR >= 10) || (PF_MAJOR > 5)
 // Following is in MB
-const scxulong c_zfsMemoryAdj = (c_zfsCacheSize - c_zfsMinCacheSize) / 1024 / 1024;
+const scxulong c_zfsMemoryAdj = c_zfsCacheSize / 1024 / 1024;
 #else
 const scxulong c_zfsMemoryAdj = 0;
 #endif
@@ -262,11 +261,6 @@ public:
             if (statistic == L"size")
             {
                 value = c_zfsCacheSize;
-                return true;
-            }
-            if (statistic == L"c_min")
-            {
-                value = c_zfsMinCacheSize;
                 return true;
             }
 

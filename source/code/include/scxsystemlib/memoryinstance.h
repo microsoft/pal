@@ -114,7 +114,7 @@ namespace SCXSystemLib
         bool GetAvailableSwap(scxulong& availableSwap) const;
         bool GetUsedSwap(scxulong& usedSwap) const;
 
-        virtual bool GetCacheSizes(scxulong& cacheSize, scxulong& minCacheSize);
+        virtual bool GetCacheSize(scxulong& cacheSize);
         virtual void Update();
         virtual void CleanUp();
 
