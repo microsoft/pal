@@ -474,7 +474,11 @@ std::wstring GetFQHostName(std::wstring errMsg)
     std::ostringstream processErr;
     try 
     {
+#if defined(linux)
+        std::string command = std::string("sh -c \"nslookup -silent ") + hostName + " | grep \'Name:\' | awk \'{print $2}\'\"";
+#else
         std::string command = std::string("sh -c \"nslookup ") + hostName + " | grep \'Name:\' | awk \'{print $2}\'\"";
+#endif
         std::istringstream processInput;
         int status = SCXCoreLib::SCXProcess::Run(SCXCoreLib::StrFromUTF8(command),
             processInput, processOutput, processErr, 15000);
