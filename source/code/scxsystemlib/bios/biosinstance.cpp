@@ -26,6 +26,16 @@
 #include <unistd.h>
 #endif
 
+#define TARGET_OS_UNKNOWN 0
+#define TARGET_OS_OTHER 1
+#define TARGET_OS_HPUX 8
+#define TARGET_OS_AIX 9
+#define TARGET_OS_WINNT 18
+#define TARGET_OS_LINUX 36
+#define TARGET_OS_SOLARIS 29
+#define TARGET_OS_BSDUNIX 41
+#define TARGET_OS_FREEBSD 43
+
 using namespace SCXCoreLib;
 using namespace std;
 
@@ -456,16 +466,34 @@ namespace SCXSystemLib
 
       \param[out]   targetOperatingSystem- TargetOperatingSystem of BIOS.
       \returns      whether the implementation for this platform supports the value or not.
+
+      \notes        This is a key field in the Win32_BIOS class, so it must be present.
+                    In the cases where SMBIOS doesn't return this value, we return a
+                    value tied to the OS that the provider was built for. In reality,
+                    BIOS is mostly an MS_DOS concept, so we could also return
+                    TARGET_OS_WINNT, for most of these, since the BIOSs were probably
+                    originally made for Windows.
     */
     bool BIOSInstance::GetTargetOperatingSystem(unsigned short &targetOperatingSystem) const
     {
-        bool fRet = false;
-#if (defined(sun) && defined(sparc))
+        bool fRet;
+#if defined(linux)
+        targetOperatingSystem = TARGET_OS_LINUX;
+        fRet = true;
+#elif defined(sun) && defined(sparc)
         targetOperatingSystem = m_biosPro.targetOperatingSystem;
         fRet = true;
-#elif defined(linux) || (defined(sun) && !defined(sparc))
-        targetOperatingSystem = targetOperatingSystem; // Silence warning of unused arg.
-        fRet = false;
+#elif defined(sun)
+        targetOperatingSystem = TARGET_OS_SOLARIS;  // Solaris x86
+        fRet = true;
+#elif defined(aix)
+        targetOperatingSystem = TARGET_OS_AIX;
+        fRet = true;
+#elif defined(hpux)
+        targetOperatingSystem = TARGET_OS_HPUX;
+        fRet = true;
+#else
+# error "Unrecognized platform"
 #endif
         return fRet;
     }
