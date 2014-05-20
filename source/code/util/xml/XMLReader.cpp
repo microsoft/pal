@@ -1895,7 +1895,6 @@ void XMLReader::XML_PutError( void )
 */
 void XMLReader::XML_Raise(const char* format, ...)
 {
-    int n;
     va_list ap;
     memset(&ap, 0, sizeof(ap));
 
@@ -1903,10 +1902,9 @@ void XMLReader::XML_Raise(const char* format, ...)
     m_Message[0] = c_NullChar;
 
     va_start(ap, format);
-    n = vsnprintf(m_Message, sizeof(m_Message), format, ap);
+    vsnprintf(m_Message, sizeof(m_Message), format, ap);
     va_end(ap);
 
     SCX_LOGINFO(m_logHandle, ("XML_Raise called...") + std::string(m_Message));
     SCX_LOGINFO(m_logHandle, m_Message);
-    
 }

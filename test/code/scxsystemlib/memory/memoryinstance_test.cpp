@@ -647,15 +647,41 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
                 std::vector<std::string> topTokens;
                 Tokenize(topOutput, topTokens);
 
+                /*
+                ----------------------------------------------------------
+                ---------- Output from most Linux systems: ---------------
+                ----------------------------------------------------------
+                Mem:   2047248k total,  1164684k used,   882564k free,    11456k buffers
+                Swap:  4128760k total,        0k used,  4128760k free,   589628k cached
+                ----------------------------------------------------------
+                ---------- Output from Redhat 7 systems: -----------------
+                ----------------------------------------------------------
+                KiB Mem:   2043048 total,  1781884 used,   261164 free,      108 buffers
+                KiB Swap:  2113532 total,        8 used,  2113524 free.  1093844 cached Mem
+                ----------------------------------------------------------
+                */
+
+#if defined(PF_DISTRO_REDHAT) && PF_MAJOR == 7
+                if (topTokens.size() >= 21)
+                {
+                    keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2]);
+                    keyValues["AvailableMemory"] = ToSCXUlong(topTokens[6]);
+                    keyValues["UsedMemory"]      = ToSCXUlong(topTokens[4]);
+                    keyValues["TotalSwap"]       = ToSCXUlong(topTokens[12]);
+                    keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[16]);
+                    keyValues["UsedSwap"]        = ToSCXUlong(topTokens[14]);
+                }
+#else
                 if (topTokens.size() >= 18)
-                    {
-                        keyValues["TotalMemory"]     = ToSCXUlong(topTokens[1]);
-                        keyValues["AvailableMemory"] = ToSCXUlong(topTokens[5]);
-                        keyValues["UsedMemory"]      = ToSCXUlong(topTokens[3]);
-                        keyValues["TotalSwap"]       = ToSCXUlong(topTokens[10]);
-                        keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[14]);
-                        keyValues["UsedSwap"]        = ToSCXUlong(topTokens[12]);
-                    }
+                {
+                    keyValues["TotalMemory"]     = ToSCXUlong(topTokens[1]);
+                    keyValues["AvailableMemory"] = ToSCXUlong(topTokens[5]);
+                    keyValues["UsedMemory"]      = ToSCXUlong(topTokens[3]);
+                    keyValues["TotalSwap"]       = ToSCXUlong(topTokens[10]);
+                    keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[14]);
+                    keyValues["UsedSwap"]        = ToSCXUlong(topTokens[12]);
+                }
+#endif
             }
 
             // We did look up the value for UsedMemory/UsedSwap above

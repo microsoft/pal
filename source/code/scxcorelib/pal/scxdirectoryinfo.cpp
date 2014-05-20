@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-#if defined(aix)
+#if defined(aix) || defined(linux)
 #include <unistd.h>
 #endif
 

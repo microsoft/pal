@@ -304,7 +304,6 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
 
                 if (expectedResult)
                 {
-                    bool gotException = false;
                     try
                     {
                         Utf16String str(input);
@@ -312,7 +311,6 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
                     }
                     catch (InvalidCodeUnitException& e)
                     {
-                        gotException = true;
                         printf("\nEx = %s\n", SCXCoreLib::StrToUTF8(e.What()).c_str());
                         CPPUNIT_FAIL(SCXCoreLib::StrToUTF8(e.What()).c_str());
                     }

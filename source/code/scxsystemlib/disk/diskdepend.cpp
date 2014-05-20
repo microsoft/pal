@@ -645,7 +645,7 @@ namespace SCXSystemLib
           static std::wstring IGFS[] = {
                L"autofs",
                L"bdev", L"binfmt_misc",
-               L"cachefs", L"cdfs", L"cdrfs", L"cifs", L"cgroup", L"ctfs",
+               L"cachefs", L"cdfs", L"cdrfs", L"cifs", L"cgroup", L"configfs", L"ctfs",
                L"debugfs", L"devfs", L"devpts",
 #if defined(sun) && ((PF_MAJOR == 5 && PF_MINOR >= 11) || (PF_MAJOR > 5))
                // On Solaris 11, /dev is a pseudo file system.
@@ -665,9 +665,9 @@ namespace SCXSystemLib
                // WI 24875: Ignore file system type "none" (these are NFS-mounted on the local system)
                L"none",
                L"objfs",
-               L"pipefs", L"proc", L"procfs",
+               L"pipefs", L"proc", L"procfs", L"pstore",
                L"ramfs", L"rootfs", L"rpc_pipefs",
-               L"securityfs", L"sharefs", L"sockfs", L"specfs", L"subfs", L"sysfs",
+               L"securityfs", L"selinuxfs", L"sharefs", L"sockfs", L"specfs", L"subfs", L"sysfs",
                L"tmpfs",
                L"udfs", L"usbfs",
 #if defined(linux)

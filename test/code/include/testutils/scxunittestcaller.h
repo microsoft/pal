@@ -23,6 +23,7 @@
 #elif defined(SCX_UNIX)
 #include <pthread.h>
 #include <signal.h>
+#include <unistd.h>
 #else
 #error "Not implemented for this plattform"
 #endif

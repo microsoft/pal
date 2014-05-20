@@ -67,7 +67,7 @@ namespace {
     //! wchar_t must be able to accomodate the decoded character.
     //! Calculated by solving the following equation:
     //! 8 - (1 + 1 + extraBytesAllowed) + 6 * extraBytesAllowed == sizeof(wchar_t) * 8
-    const int cExtraBytesAllowed = (sizeof(wchar_t) * 8 - 6) / 5;
+    const int cExtraBytesAllowed = static_cast<int> ((sizeof(wchar_t) * 8 - 6) / 5);
 
 
     /*----------------------------------------------------------------------------*/

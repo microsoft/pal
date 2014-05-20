@@ -1255,7 +1255,7 @@ public:
         static std::wstring FS[] = {
             L"autofs",
             L"bdev", L"binfmt_misc",
-            L"cachefs", L"cdfs", L"cdrfs", L"cifs", L"cgroup", L"ctfs",
+            L"cachefs", L"cdfs", L"cdrfs", L"cifs", L"cgroup", L"configfs", L"ctfs",
             L"debugfs", L"devfs", L"devpts", 
 #if defined(sun) && ((PF_MAJOR == 5 && PF_MINOR >= 11) || (PF_MAJOR > 5))
             // On Solaris 11, /dev is a pseudo file system.
@@ -1275,9 +1275,9 @@ public:
             // WI 24875: Ignore file system type "none" (these are NFS-mounted on the local system)
             L"none",
             L"objfs",
-            L"pipefs", L"proc", L"procfs",
+            L"pipefs", L"proc", L"procfs", L"pstore",
             L"ramfs", L"rootfs", L"rpc_pipefs",
-            L"securityfs", L"sharefs", L"sockfs", L"specfs", L"subfs", L"sysfs",
+            L"securityfs", L"selinuxfs", L"sharefs", L"sockfs", L"specfs", L"subfs", L"sysfs",
             L"tmpfs",
             L"udfs", L"usbfs",
 #if defined(linux)
@@ -1925,19 +1925,20 @@ public:
 #endif
 
                 // Disk operations/second
-                double rTime, wTime, tTime, rTest, wTest, tTest;
+                double rTime, wTime, tTime;
+                CPPUNIT_ASSERT( ! disk->GetIOTimes(rTime, wTime));
+#if defined(linux)
+                CPPUNIT_ASSERT( ! disk->GetIOTimesTotal(tTime));
+#elif defined(sun) || defined(hpux)
                 scxulong rOps, wOps, rOpsT, wOpsT;
                 rOps = td_post->read.num - td_pre->read.num;
                 wOps = td_post->write.num - td_pre->write.num;
                 rOpsT = td_post->read.ms - td_pre->read.ms;
                 wOpsT = td_post->write.ms - td_pre->write.ms;
-                rTest = rOps?(static_cast<double>(rOpsT)/static_cast<double>(rOps)/1000.0):0;
-                wTest = wOps?(static_cast<double>(wOpsT)/static_cast<double>(wOps)/1000.0):0;
+
+                double tTest;
                 tTest = (rOps||wOps)?((static_cast<double>(rOpsT+wOpsT))/(static_cast<double>(rOps+wOps))/1000.0):0;
-                CPPUNIT_ASSERT( ! disk->GetIOTimes(rTime, wTime));
-#if defined(linux)
-                CPPUNIT_ASSERT( ! disk->GetIOTimesTotal(tTime));
-#elif defined(sun) || defined(hpux)
+
                 CPPUNIT_ASSERT(disk->GetIOTimesTotal(tTime));
                 CPPUNIT_ASSERT_EQUAL(tTest,tTime);
 #endif

@@ -36,6 +36,7 @@
 #include <sys/stropts.h>
 #elif defined(linux)
 #include <ifaddrs.h>
+#include <unistd.h>
 #endif
 
 #if (defined(sun) && defined(sparc) && PF_MINOR==10)
@@ -260,7 +261,7 @@ namespace SCXSystemLib {
             SPEED_10    = 10000,
             SPEED_100   = 100000,
             SPEED_1000  = 1000000,
-            SPEED_10000	= 10000000
+            SPEED_10000 = 10000000
         };
 
         NetworkInterfaceInfo(const std::wstring &name, unsigned knownAttributesMask, 

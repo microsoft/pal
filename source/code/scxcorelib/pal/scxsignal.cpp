@@ -128,7 +128,7 @@ namespace SCXCoreLib
     \throws      SCXInvalidArgumentException if called multiple times with same payload
 */
 
-    void SCXSignal::AssignHandler(u_short payload, void (*hndlrFunction)(siginfo_t *si))
+    void SCXSignal::AssignHandler(u_short payload, void (*hndlrInstance)(siginfo_t *si))
     {
         // Exists?
         if (m_hndlrFunctions.count(payload) > 0)
@@ -137,7 +137,7 @@ namespace SCXCoreLib
                 L"payload", L"Payload already defined with a signal handler", SCXSRCLOCATION);
         }
 
-        m_hndlrFunctions[payload] = hndlrFunction;
+        m_hndlrFunctions[payload] = hndlrInstance;
     }
 
 /*----------------------------------------------------------------------------*/

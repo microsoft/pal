@@ -34,7 +34,7 @@ namespace SCXCoreLib
         void AcceptSignals(hndlrFunction h);
         void BlockSignals();
 
-        void AssignHandler(u_short payload, void (*hndlrFunction)(siginfo_t *si));
+        void AssignHandler(u_short payload, void (*hndlrInstance)(siginfo_t *si));
         void SendSignal(pid_t pid, u_short payload);
 
         void Dispatcher(int sig, siginfo_t *si, void *ucontext);

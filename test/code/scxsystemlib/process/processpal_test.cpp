@@ -875,7 +875,7 @@ public:
         m_procEnum = new ProcessEnumeration();
         /* We don't start an update thread here: m_procEnum->Init(); */
 
-        SCXCoreLib::SCXCalendarTime pre_fork = SCXCoreLib::SCXCalendarTime::CurrentLocal();
+        // SCXCoreLib::SCXCalendarTime pre_fork = SCXCoreLib::SCXCalendarTime::CurrentLocal();
         pid_t pid = fork();
         CPPUNIT_ASSERT(-1 != pid);
         if (0 == pid)
@@ -886,9 +886,9 @@ public:
 
         m_procEnum->SampleData(); // Manual update of data
         m_procEnum->Update(true);
-        SCXCoreLib::SCXCalendarTime pre_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
+        // SCXCoreLib::SCXCalendarTime pre_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
         waitpid(pid, 0, 0);
-        SCXCoreLib::SCXCalendarTime post_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
+        // SCXCoreLib::SCXCalendarTime post_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
 
         m_procEnum->SampleData(); // Manual update of data
         m_procEnum->Update(true);
@@ -952,7 +952,7 @@ public:
 
         // Now reap it
         waitpid(pid, 0, 0);
-        SCXCoreLib::SCXCalendarTime post_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
+        // SCXCoreLib::SCXCalendarTime post_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
 
         m_procEnum->SampleData(); // Manual update of data
         m_procEnum->Update(true);
@@ -978,7 +978,7 @@ public:
         m_procEnum = new ProcessEnumeration();
         /* We don't start an update thread here: m_procEnum->Init(); */
 
-        SCXCoreLib::SCXCalendarTime pre_fork = SCXCoreLib::SCXCalendarTime::CurrentLocal();
+        // SCXCoreLib::SCXCalendarTime pre_fork = SCXCoreLib::SCXCalendarTime::CurrentLocal();
 
         pid_t pid = fork();
         CPPUNIT_ASSERT(-1 != pid);
@@ -993,7 +993,7 @@ public:
         SCXCoreLib::SCXThread::Sleep(500);
         m_procEnum->SampleData(); // Manual update of data
         m_procEnum->Update(true);
-        SCXCoreLib::SCXCalendarTime pre_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
+        // SCXCoreLib::SCXCalendarTime pre_wait = SCXCoreLib::SCXCalendarTime::CurrentLocal();
 
         // Get the process name of us ('testrunner' or whatever)
         SCXCoreLib::SCXHandle<ProcessInstance> inst = FindProcessInstanceFromPID(testapp_pid);

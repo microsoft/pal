@@ -473,7 +473,7 @@ public:
     CPPUNIT_TEST( TestGetDHCPEnabledFromProcessList );
     CPPUNIT_TEST( TestNetInterfaceConfEnumerationFindAll );
     CPPUNIT_TEST( TestDefaultGatewayIPAddress );
-    CPPUNIT_TEST( TestNetInterfaceIPAdress);
+    CPPUNIT_TEST( TestNetInterfaceIPAddress);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -659,7 +659,7 @@ public:
 #endif     
     }
 
-    void TestNetInterfaceIPAdress()
+    void TestNetInterfaceIPAddress()
     {
         NetworkInterfaceConfigurationEnumeration networkInterfaceConfigurationEnumeration;
 

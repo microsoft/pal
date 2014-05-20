@@ -155,7 +155,7 @@ public:
             bool resMediaLoaded, resPowerManagementSupported, resAvailability, resSCSILogicalUnit;
             bool resSCSITargetId, resPowerManagementCapabilities, resCapabilities, resCapabilityDescriptions;
             bool resFirmwareRevision = false;
-	    bool resMediaType, resSerialNumber, resPartitions, resSCSIBus, resSectorsPerTrack;
+            bool resMediaType, resSerialNumber, resPartitions, resSCSIBus, resSectorsPerTrack;
             bool resSignature, resTracksPerCylinder, resTotalTracks;
 
             bool valMediaLoaded, valPowermanagementSupported;
@@ -273,7 +273,7 @@ public:
 
             CPPUNIT_ASSERT_MESSAGE("Method GetPowerManagementSupported() failed", resPowerManagementSupported);
 
-                        if(diType == eDiskIfcSCSI)
+            if(diType == eDiskIfcSCSI)
             {
                 CPPUNIT_ASSERT_MESSAGE("Method GetSCSILogicalUnit() failed", resSCSILogicalUnit);
                 CPPUNIT_ASSERT_MESSAGE("Method GetSCSITargetId() failed", resSCSITargetId);
@@ -282,6 +282,13 @@ public:
 
             CPPUNIT_ASSERT_MESSAGE("Method GetPowerManagementCapabilities() failed", resPowerManagementCapabilities);
             CPPUNIT_ASSERT_MESSAGE("GetPowerManagementCapabilities() returned 0", valPowerManagementCapabilities.size() > 0);
+
+            CPPUNIT_ASSERT_MESSAGE("Method GetAvailability() failed", resAvailability);
+            CPPUNIT_ASSERT_MESSAGE("Method GetAvailability() returned unexpected value",
+                                   valAvailability == eDiskAvaPowerSave_Standby
+                                   || valAvailability == eDiskAvaPowerSave_LowPowerMode
+                                   || valAvailability == eDiskAvaRunningOrFullPower
+                                   || valAvailability == eDiskAvaUnknown );
 
             CPPUNIT_ASSERT_MESSAGE("Method GetCapabilities() failed", resCapabilities);
             CPPUNIT_ASSERT_MESSAGE("GetCapabilities() returned 0", valCapabilities.size() > 0);
@@ -306,6 +313,11 @@ public:
 
             /* valSignature may be 0 */
             CPPUNIT_ASSERT_MESSAGE("Method GetSignature() failed", resSignature);
+
+            CPPUNIT_ASSERT_MESSAGE("Method GetTracksPerCylinder() vailed", resTracksPerCylinder);
+            CPPUNIT_ASSERT_MESSAGE("Method GetTracksPerCylinder() vailed", resTracksPerCylinder);
+
+            CPPUNIT_ASSERT_MESSAGE("Method GetTotalTracks() failed", resTotalTracks);
             
             CPPUNIT_ASSERT_MESSAGE("Method GetMediaType() failed", resMediaType);
             CPPUNIT_ASSERT_MESSAGE("GetMediaType() returned 0", !valMediaType.empty());

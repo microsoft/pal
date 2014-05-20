@@ -380,12 +380,10 @@ size_t SCX::Util::Utf16StringOffsetOfIndex(
     bool allowLast)
 {
     CodePoint cp;
-    size_t codePointWords;
     size_t pos = 0;
     for ( ; index != 0; index--)
     {
         cp = (CodePoint)*(str + pos);
-        codePointWords = 1;
         if (cp >= c_CODE_POINT_SURROGATE_HIGH_MIN &&
             cp <= c_CODE_POINT_SURROGATE_HIGH_MAX)
         {

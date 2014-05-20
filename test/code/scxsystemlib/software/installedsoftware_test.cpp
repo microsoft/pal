@@ -297,7 +297,7 @@ public:
         std::string EvidenceSource = "M";
         unsigned int VersionMajor = 1;
         //unsigned int VersionMinor = 0;
-        SCXCalendarTime InstallDate = SCXCalendarTime::FromPosixTime(1000000000);
+        //SCXCalendarTime InstallDate = SCXCalendarTime::FromPosixTime(1000000000);
 
     #if defined(PF_DISTRO_REDHAT) || defined(PF_DISTRO_ULINUX)
         CPPUNIT_ASSERT(inst->GetDisplayName(tmpData));

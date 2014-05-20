@@ -15,37 +15,37 @@ using namespace std;
 void getIPAddrfromIfconfig(const wstring &ifName, set<wstring> &IPaddrSet)
 {
     std::istringstream streamInstr;
-	std::ostringstream streamOutstr;
-	std::ostringstream streamErrstr;
-	std::string stdoutStr;
-	SCXCoreLib::SCXStream::NLFs nlfs;
-	vector<wstring> outLines;
-	vector<wstring> tokens;
+        std::ostringstream streamOutstr;
+        std::ostringstream streamErrstr;
+        std::string stdoutStr;
+        SCXCoreLib::SCXStream::NLFs nlfs;
+        vector<wstring> outLines;
+        vector<wstring> tokens;
     wstring cmdIfconfig;
 
 #if defined(sun) || defined(aix)
-	cmdIfconfig = L"ifconfig -a";
+        cmdIfconfig = L"ifconfig -a";
 #elif defined(linux)
     cmdIfconfig = L"/sbin/ifconfig -a";
 #elif defined(hpux)
     cmdIfconfig = L"ifconfig " + ifName;
 #endif
 
-	int procRet = SCXCoreLib::SCXProcess::Run(cmdIfconfig, streamInstr, streamOutstr, streamErrstr, 150000);
+        int procRet = SCXCoreLib::SCXProcess::Run(cmdIfconfig, streamInstr, streamOutstr, streamErrstr, 150000);
 
-	if (procRet == 0 && streamErrstr.str().empty())
-	{
-		stdoutStr = streamOutstr.str();
-		std::istringstream stdInStr(stdoutStr);
-		SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(stdInStr, outLines, nlfs);
-	
+        if (procRet == 0 && streamErrstr.str().empty())
+        {
+            stdoutStr = streamOutstr.str();
+            std::istringstream stdInStr(stdoutStr);
+            SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(stdInStr, outLines, nlfs);
+        
 #if defined(linux) || defined(aix)
          bool enterIf = false;
 #endif
     
-		for(unsigned int i=0; i<outLines.size(); i++)
-		{
-			StrTokenize(outLines[i], tokens, L" ");
+         for(unsigned int i=0; i<outLines.size(); i++)
+         {
+             StrTokenize(outLines[i], tokens, L" ");
 #if defined(hpux)
             /*-------ifconfig lan0 output for hpux -----------
             lan0: flags=1843<UP,BROADCAST,RUNNING,MULTICAST,CKO>
@@ -71,40 +71,41 @@ void getIPAddrfromIfconfig(const wstring &ifName, set<wstring> &IPaddrSet)
                     inet6 2001:4898:e0:3206:214:4fff:fefb:89d3/64
             ---------------------------------------------------*/
 
-			if (tokens.size() > 0 && 0 != tokens[0].compare(0, 3, L"inet")) //The line contains interface name
-			{
-				vector<wstring> SecTokens;
-				wstring ipAddrs; 
+            if (tokens.size() > 0 && 0 != tokens[0].compare(0, 3, L"inet")) //The line contains interface name
+            {
+                vector<wstring> SecTokens;
+                wstring ipAddrs; 
 
                 //parsing interface name
-				StrTokenize(tokens[0], SecTokens, L":"); 
-				wstring interfaceName = SecTokens[0];
+                StrTokenize(tokens[0], SecTokens, L":"); 
+                wstring interfaceName = SecTokens[0];
 
-				if (interfaceName == ifName) //ip address in next line starting with inet word
-				{
-					i++;
-				    StrTokenize(outLines[i], tokens, L" ");
+                if (interfaceName == ifName) //ip address in next line starting with inet word
+                {
+                    i++;
+                    StrTokenize(outLines[i], tokens, L" ");
 
                     //parsing the ip address for interface being tested, ip addr is the one next after inet/inet6 word
-					if ((tokens.size() > 1) && (0 == tokens[0].compare(0, 4, L"inet"))) 
-					{
-						StrTokenize(tokens[1], SecTokens, L"/"); //trim off extra stuff
-						ipAddrs = SecTokens[0];
-						IPaddrSet.insert(ipAddrs);
+                    if ((tokens.size() > 1) && (0 == tokens[0].compare(0, 4, L"inet"))) 
+                    {
+                        StrTokenize(tokens[1], SecTokens, L"/"); //trim off extra stuff
+                        ipAddrs = SecTokens[0];
+                        IPaddrSet.insert(ipAddrs);
                         // (WI 525683: Exclude blank IP addresses from the expected values.
                         if (ipAddrs.compare(L"::") != 0)
                         {
                             IPaddrSet.insert(ipAddrs);
                         }
-					}
-					else //this should never happen unless ifconfig output changed format
-					{
-						i++;
-					}
-				}
-			}
+                    }
+                    else //this should never happen unless ifconfig output changed format
+                    {
+                        i++;
+                    }
+                }
+            }
 #elif defined(linux) 
-            /*--------- /sbin/ifconfig -a for linux machine ------
+            /*
+            --------- /sbin/ifconfig -a for linux machine ------
             eth0      Link encap:Ethernet  HWaddr 00:15:5D:03:1C:28
                         inet addr:10.217.2.89  Bcast:10.217.3.255  Mask:255.255.254.0
                         inet6 addr: 2001:4898:e0:3206:215:5dff:fe03:1c28/64 Scope:Global
@@ -124,52 +125,90 @@ void getIPAddrfromIfconfig(const wstring &ifName, set<wstring> &IPaddrSet)
                         TX packets:369305 errors:0 dropped:0 overruns:0 carrier:0
                         collisions:0 txqueuelen:0
                         RX bytes:2530938162 (2.3 GiB)  TX bytes:2530938162 (2.3 GiB)
-            ----------------------------------------------------------*/
+            ----------------------------------------------------------
+            ----------For RedHat 7, output is slightly different:-----
+            ----------------------------------------------------------
+            eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+                    inet 157.59.133.192  netmask 255.255.252.0  broadcast 157.59.135.255
+                    inet6 2001:4898:28:4:215:5dff:fea8:840e  prefixlen 64  scopeid 0x0<global>
+                    inet6 fe80::215:5dff:fea8:840e  prefixlen 64  scopeid 0x20<link>
+                    ether 00:15:5d:a8:84:0e  txqueuelen 1000  (Ethernet)
+                    RX packets 9560716  bytes 1411594372 (1.3 GiB)
+                    RX errors 0  dropped 5  overruns 0  frame 0
+                    TX packets 107591  bytes 22745425 (21.6 MiB)
+                    TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
-			if ( tokens.size()== 0 ) //finished one interface
-			{
-				if (enterIf == false) //interface being tested has not found yet
-				{
-					continue;
-				}
-				else //finished interface section being tested
-				{
-					break;
-				}
-			}
-		
-		    if (tokens.size() > 0 && tokens[0] == ifName) //entered the interface section being tested
-			{
-				if (enterIf == false)
+            lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+                    inet 127.0.0.1  netmask 255.0.0.0
+                    inet6 ::1  prefixlen 128  scopeid 0x10<host>
+                    loop  txqueuelen 0  (Local Loopback)
+                    RX packets 56598  bytes 324953152 (309.8 MiB)
+                    RX errors 0  dropped 0  overruns 0  frame 0
+                    TX packets 56598  bytes 324953152 (309.8 MiB)
+                    TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+            ----------------------------------------------------------
+            */
+
+            if ( tokens.size()== 0 ) //finished one interface
+            {
+                if (enterIf == false) //interface being tested has not found yet
                 {
-					enterIf = true;
-				}
-			}
-			else
-			{
-				if (enterIf == false) //not in the tested interface section, continue searching
-				{
-					continue;
-				}
-				else //inside tested interface section
-				{
-					vector<wstring> SecTokens;
-					wstring ipAddrs; 
-					StrTokenize(outLines[i], tokens, L" ");
-			        if ((tokens.size() > 1) && (0 == tokens[0].compare(0, 5, L"inet6")))
-					{
-						StrTokenize(tokens[2], SecTokens, L"/");
-						ipAddrs = SecTokens[0];
-						IPaddrSet.insert(ipAddrs);
-					}
-					else if ((tokens.size() > 1) && (0 == tokens[0].compare(0, 4, L"inet")))
-					{
-						StrTokenize(StrStripL(tokens[1], L"addr:"), SecTokens, L"/");
-						ipAddrs = SecTokens[0];
-						IPaddrSet.insert(ipAddrs);
-					}
-				}
-			}
+                    continue;
+                }
+                else //finished interface section being tested
+                {
+                    break;
+                }
+            }
+
+#if defined(PF_DISTRO_REDHAT) && PF_MAJOR == 7
+            wstring intSep = L":";
+#else
+            wstring intSep = L"";
+#endif
+
+            if (tokens.size() > 0 && tokens[0] == ifName + intSep) //entered the interface section being tested
+            {
+                if (enterIf == false)
+                {
+                    enterIf = true;
+                }
+            }
+            else
+            {
+                if (enterIf == false) //not in the tested interface section, continue searching
+                {
+                    continue;
+                }
+                else //inside tested interface section
+                {
+                    vector<wstring> SecTokens;
+                    wstring ipAddrs; 
+                    StrTokenize(outLines[i], tokens, L" ");
+                    if ((tokens.size() > 1) && (0 == tokens[0].compare(0, 5, L"inet6")))
+                    {
+#if defined(PF_DISTRO_REDHAT) && PF_MAJOR == 7
+                        ipAddrs = tokens[1];
+                        IPaddrSet.insert(ipAddrs);
+#else
+                        StrTokenize(tokens[2], SecTokens, L"/");
+                        ipAddrs = SecTokens[0];
+                        IPaddrSet.insert(ipAddrs);
+#endif
+                    }
+                    else if ((tokens.size() > 1) && (tokens[0] == L"inet"))
+                    {
+#if defined(PF_DISTRO_REDHAT) && PF_MAJOR == 7
+                        ipAddrs = tokens[1];
+                        IPaddrSet.insert(ipAddrs);
+#else
+                        StrTokenize(StrStripL(tokens[1], L"addr:"), SecTokens, L"/");
+                        ipAddrs = SecTokens[0];
+                        IPaddrSet.insert(ipAddrs);
+#endif
+                    }
+                }
+            }
 #elif defined(aix)
             /*-------------aix sample output for command: ifonfig -a -------------
             en0: flags=1e080863,480<UP,BROADCAST,NOTRAILERS,RUNNING,SIMPLEX,MULTICAST,GROUPRT,64BIT,CHECKSUM_OFFLOAD(ACTIVE),CHAIN>
@@ -225,11 +264,11 @@ void getIPAddrfromIfconfig(const wstring &ifName, set<wstring> &IPaddrSet)
                  }
              }
 #endif
-		}
-	}
-	else
-	{
-		cout << "Command Run failed. The return value is : " << procRet << endl;
-		cout << "The ErrorString is : " << streamErrstr.str() << endl;
-	}
+                }
+        }
+        else
+        {
+                cout << "Command Run failed. The return value is : " << procRet << endl;
+                cout << "The ErrorString is : " << streamErrstr.str() << endl;
+        }
 }
