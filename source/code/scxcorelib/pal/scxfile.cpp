@@ -28,7 +28,7 @@
 
 #ifndef MAP_FAILED  //!< returned error value described in API mmap.
 #define MAP_FAILED ((void *) -1)
-#endif 
+#endif
 
 namespace SCXCoreLib {
 /*--------------------------------------------------------------*/
@@ -37,11 +37,11 @@ namespace SCXCoreLib {
     Initializes a new instance of the FileInfo class, which acts as a wrapper for a file path.
 
     \param[in]  path    Path to the file, full as well as relative
-    \param[in]  pStat A stat struct to use when initializing. If zero (default) a new one will be used.
+    \param[in]  pStat   A stat struct to use when initializing. If zero (default) a new one will be used.
 
     There is no need to call Refresh before using the instance,
     all information is already fresh. If a relative path is given it is
-    resolved relative the currently active working directory to form
+    resolved relative to the currently active working directory to form
     a fully qualified path. In that way we make sure which file we actually
     refer to.
 */
@@ -126,7 +126,7 @@ namespace SCXCoreLib {
         \returns        true        iff the path refers to a file (not a directory) and the file exists
 
         The Exists method should not be used for path validation, this method merely checks
-        if the file specified in path exists. Passing an invalid path to Existsl returns false.
+        if the file specified in path exists. Passing an invalid path to Exists returns false.
 
         Be aware that another process can potentially do something with the file in between the
         time you call the Exists method and perform another operation on the file, such as Delete.
@@ -283,10 +283,12 @@ namespace SCXCoreLib {
 
         \param[in]  file    The file to open
         \param[in]  mode    How to open it, explicitly.
+
         \throws     SCXFilePathNotFoundException
         \throws     SCXUnauthorizedFileSystemAccessException
         \throws     SCXNotSupportedException
         \throws     InvalidArgumentException Arguments
+
         Unlike STL there is no implicit (default) mode, the requested mode has to explicitly stated.
         The content of the file is assumed to be encoded according to system default.
      */
@@ -334,6 +336,7 @@ namespace SCXCoreLib {
 
         \param[in]  file    The file to open
         \param[in]  mode    How to open it, explicitly.
+
         \throws     SCXFilePathNotFoundException
         \throws     SCXUnauthorizedFileSystemAccessException
         \throws     InvalidArgumentException Arguments
@@ -385,12 +388,12 @@ namespace SCXCoreLib {
         \param[out] nlfs        Newline symbols found used in the file
 
         \throws     SCXUnauthorizedFileSystemAccessException
-        \throws     SCXLineStreamPartialReadException       Line to long to be stored in a std::wstring
+        \throws     SCXLineStreamPartialReadException       Line too long to be stored in a std::wstring
 
         The content of the file is assumed to be encoded according to system default.
         Handles newline symbols in a platform independent way, that is, may
         be used to read a stream originating on one platform on another platform.
-        If the lines is to be written back to the originating system
+        If the lines are to be written back to the originating system
         the same nlf should in general be used, if we do not have other information.
 
         \note Will return no lines if file not found.
@@ -406,7 +409,7 @@ namespace SCXCoreLib {
 
     /*--------------------------------------------------------------*/
     /**
-        Reads as many lines of the UT8 encoded file at the specified position in the file system as possible
+        Reads as many lines of the UTF8 encoded file at the specified position in the file system as possible
 
         \param[in]  source  Position of the file in the filesystem
         \param[in]  lines   Lines that was read
@@ -440,7 +443,9 @@ namespace SCXCoreLib {
        \param buf Buffer to read data to.
        \param size Size of the given buffer.
        \param offset Offset in file where to start read. Default: 0 (start of file)
+
        \returns Number of bytes read and stored in given buffer.
+
        \throws SCXErrnoException if any system call fails with an unexpected error.
     */
 #if defined(DISABLE_WIN_UNSUPPORTED)
@@ -496,7 +501,7 @@ namespace SCXCoreLib {
       \param buf Buffer to read data to as unsigned char.
       \param size Size of the given buffer.
       \param offset Offset in file where to start read. Default: 0 (start of file)
-      \returns 0 if read was successfull, otherwise UNIX errno code of the error that caused failure. 
+      \returns 0 if read was successful, otherwise UNIX errno code of the error that caused failure.
 
       \date 11-01-26 15:45:00
       \author kesheng tao
@@ -517,22 +522,22 @@ namespace SCXCoreLib {
         remainder = offset% sysconf(_SC_PAGESIZE);
 #else
         remainder = offset% getpagesize();
-#endif 
+#endif
         //
-        //For API mmap, the sixth parameter mmapoffset must be a multiple of pagesize. 
+        //For API mmap, the sixth parameter mmapoffset must be a multiple of pagesize.
         //
         size_t mmapoffset = offset - remainder;
         pDevice = mmap(NULL, remainder + size, PROT_READ, MAP_SHARED, fd, mmapoffset);
         if (MAP_FAILED == pDevice) {
             int ret = errno;
-            close(fd); 
+            close(fd);
             return ret;
         }
 
         memcpy(buf, reinterpret_cast<unsigned char*>(pDevice) + remainder, size);
 
         munmap(reinterpret_cast<char*>(pDevice), remainder + size);
-        close(fd); 
+        close(fd);
 
         return 0;
 #endif
@@ -696,7 +701,7 @@ namespace SCXCoreLib {
 
     /*--------------------------------------------------------------*/
     /**
-     * Writes all lines to a utf8 encoded file using preferred kind of new line
+     * Writes all lines to a UTF8 encoded file using preferred kind of new line
      * \param[in]   target      Stream to be written to
      * \param[in]   lines       Lines to be written
      * \param[in]   mode        How to open the file
@@ -710,13 +715,13 @@ namespace SCXCoreLib {
 
     /*--------------------------------------------------------------*/
     /**
-     * Writes all lines to a utf8 encoded file using specified kind of new line
+     * Writes all lines to a UTF8 encoded file using specified kind of newline
      * \param[in]   target      Stream to be written to
      * \param[in]   lines       Lines to be written
      * \param[in]   mode        How to open the file
-     * \param[in]   nlf         Kind of new line to write
-     * No new line is appended after all lines.
-     * If mode is "append" an extra new line is prepended before the lines.
+     * \param[in]   nlf         Kind of newline to write
+     * No newline is appended after all lines.
+     * If mode is "append" an extra newline is prepended before the lines.
      */
     void SCXFile::WriteAllLinesAsUTF8(const SCXFilePath& target, const std::vector<std::wstring>& lines, std::ios_base::openmode mode,
             SCXStream::NLF nlf) {
@@ -736,4 +741,3 @@ namespace SCXCoreLib {
 }
 
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/
-
