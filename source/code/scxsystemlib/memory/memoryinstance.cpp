@@ -834,7 +834,7 @@ namespace SCXSystemLib
         bool foundAvailSwap = false;
         scxulong buffers = 0, cached = 0; // KB
 
-        for (size_t i=0; i<lines.size(); i++)
+        for (size_t i = 0; i < lines.size(); i++)
         {
             std::wstring line = lines[i];
 
@@ -928,9 +928,13 @@ namespace SCXSystemLib
         m_usedMemory = m_totalPhysicalMemory - m_availableMemory;
         m_usedSwap = m_totalSwap - m_availableSwap;
         
+        foundTotalPhysMem = foundTotalPhysMem;  // pacify compiler if SCXASSERT is defined to nothing
         SCXASSERT(foundTotalPhysMem && "MemTotal not found");
+        foundAvailMem = foundAvailMem;
         SCXASSERT(foundAvailMem && "MemFree not found");
+        foundTotalSwap = foundTotalSwap;
         SCXASSERT(foundTotalSwap && "SwapTotal not found");
+        foundAvailSwap = foundAvailSwap;
         SCXASSERT(foundAvailSwap && "SwapFree not found");
 
 #elif defined(sun)

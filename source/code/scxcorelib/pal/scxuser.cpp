@@ -96,7 +96,7 @@ namespace SCXCoreLib
     void SCXUser::SetName()
     {
         struct passwd pwd;
-        struct passwd *ppwd = NULL;
+        struct passwd *ppwd;
         long bufSize = sysconf(_SC_GETPW_R_SIZE_MAX);
 
         // Sanity check - all platforms have this, but never hurts to be certain
@@ -110,9 +110,11 @@ namespace SCXCoreLib
 
         // Use reentrant form of getpwuid (it's reentrant, and it pacifies purify)
 #if !defined(sun)
-        int rc = 0;
-        rc = getpwuid_r(m_uid, &pwd, &buf[0], buf.size(), &ppwd);
-        SCXASSERT( (0 == rc && NULL != ppwd) || (0 != rc && NULL == ppwd) );
+        int rc = getpwuid_r(m_uid, &pwd, &buf[0], buf.size(), &ppwd);
+        if (rc != 0)
+        {
+           ppwd = NULL;
+        }
 #else
         ppwd = getpwuid_r(m_uid, &pwd, &buf[0], buf.size());
 #endif
