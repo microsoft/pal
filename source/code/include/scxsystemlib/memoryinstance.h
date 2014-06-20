@@ -160,6 +160,14 @@ namespace SCXSystemLib
 #endif
 
         static void DataAquisitionThreadBody(SCXCoreLib::SCXThreadParamHandle& param);
+
+    protected:
+#if defined(linux)
+        bool m_foundTotalPhysMem;                       //< Was "MemTotal:" line found in /proc/meminfo
+        bool m_foundAvailMem;                           //< Was "MemFree:" line found in /proc/meminfo
+        bool m_foundTotalSwap;                          //< Was "SwapTotal:" line found in /proc/meminfo
+        bool m_foundAvailSwap;                          //< Was "SwapFree:" line found in /proc/meminfo
+#endif
     };
 
 }

@@ -358,6 +358,26 @@ public:
 };
 
 
+// Testable class to verify proper behavior when reading /proc/meminfo file on Linux
+class TestableMemoryInstance : public MemoryInstance
+{
+public:
+    TestableMemoryInstance(SCXCoreLib::SCXHandle<MemoryDependencies> deps = SCXCoreLib::SCXHandle<MemoryDependencies>(new MemoryDependencies()), bool startThread = true)
+        : MemoryInstance(deps, startThread)
+    {}
+
+    void VerifyMeminfoFileReadProperly()
+    {
+#if defined(linux)
+        CPPUNIT_ASSERT_EQUAL(static_cast<bool>(true), m_foundTotalPhysMem);
+        CPPUNIT_ASSERT_EQUAL(static_cast<bool>(true), m_foundAvailMem);
+        CPPUNIT_ASSERT_EQUAL(static_cast<bool>(true), m_foundTotalSwap);
+        CPPUNIT_ASSERT_EQUAL(static_cast<bool>(true), m_foundAvailSwap);
+#endif
+    }
+};
+
+
 #if defined(linux)
 class TestWI11691MemoryDependencies : public MemoryDependencies
 {
@@ -501,7 +521,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
 
     void testAllMembersDepInj()
     {
-        SCXCoreLib::SCXHandle<MemoryInstance> memInstance( new MemoryInstance(
+        SCXCoreLib::SCXHandle<TestableMemoryInstance> memInstance( new TestableMemoryInstance(
             SCXCoreLib::SCXHandle<MemoryDependencies>(new TestMemoryDependencies()), false ));
 
         memInstance->Update();
@@ -541,6 +561,8 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         CPPUNIT_ASSERT_EQUAL( c_totalPageReads, totalPageReads );
         CPPUNIT_ASSERT_EQUAL( c_totalPageWrites, totalPageWrites );
 
+        memInstance->VerifyMeminfoFileReadProperly();
+
         memInstance->CleanUp();
     }
 
@@ -552,7 +574,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
 
         GetPagingData(keyValuesBefore);
 
-        SCXCoreLib::SCXHandle<MemoryInstance> memInstance( new MemoryInstance(SCXCoreLib::SCXHandle<MemoryDependencies>(new MemoryDependencies()), false ));
+        SCXCoreLib::SCXHandle<TestableMemoryInstance> memInstance( new TestableMemoryInstance(SCXCoreLib::SCXHandle<MemoryDependencies>(new MemoryDependencies()), false ));
         memInstance->Update();
 
         // Values from MemoryInstance.
@@ -595,6 +617,8 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         CPPUNIT_ASSERT(keyValuesBefore["PageWrites"] <= totalPageWrites);
         CPPUNIT_ASSERT(totalPageWrites <= keyValuesAfter["PageWrites"]);
 
+        memInstance->VerifyMeminfoFileReadProperly();
+
         memInstance->CleanUp();
     }
 
@@ -609,7 +633,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         const scxulong c_cached = 189;
         
         
-        SCXCoreLib::SCXHandle<MemoryInstance> memInstance( new MemoryInstance(
+        SCXCoreLib::SCXHandle<TestableMemoryInstance> memInstance( new TestableMemoryInstance(
             SCXCoreLib::SCXHandle<MemoryDependencies>(new TestWI11691MemoryDependencies(
             c_totalMemory, c_free, c_buffer, c_cached )) ) );
 
@@ -623,10 +647,11 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         
         CPPUNIT_ASSERT( availableMemory/(1024*1024) == ( c_free + c_buffer + c_cached ));
         CPPUNIT_ASSERT( usedMemory/(1024*1024) == ( c_totalMemory - (c_free + c_buffer + c_cached) ));
-        
+
+        memInstance->VerifyMeminfoFileReadProperly();
 #endif        
     }
-    
+
     private:
 
     void GetLinuxTopData(std::map<std::string, scxulong>& keyValues)

@@ -528,6 +528,12 @@ namespace SCXSystemLib
         m_reservedMemoryIsSupported(false),
 #endif
         m_dataAquisitionThread(0)
+#if defined(linux)
+        , m_foundTotalPhysMem(false)
+        , m_foundAvailMem(false)
+        , m_foundTotalSwap(false)
+        , m_foundAvailSwap(false)
+#endif
     {
         m_log = SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.system.memory.memoryinstance");
         SCX_LOGTRACE(m_log, L"MemoryInstance default constructor");
@@ -828,10 +834,6 @@ namespace SCXSystemLib
     */
         std::vector<std::wstring> lines = m_deps->GetMemInfoLines();
 
-        bool foundTotalPhysMem = false;
-        bool foundAvailMem = false;
-        bool foundTotalSwap = false;
-        bool foundAvailSwap = false;
         scxulong buffers = 0, cached = 0; // KB
 
         for (size_t i = 0; i < lines.size(); i++)
@@ -849,7 +851,7 @@ namespace SCXSystemLib
                     try
                     {
                         m_totalPhysicalMemory = StrToULong(tokens[1]) * 1024;  // Resulting units: bytes
-                        foundTotalPhysMem = true;
+                        m_foundTotalPhysMem = true;
                         SCX_LOGHYSTERICAL(m_log, StrAppend(L"    totalPhysicalMemory = ", m_totalPhysicalMemory));
                     }
                     catch (const SCXNotSupportedException& e)
@@ -862,7 +864,7 @@ namespace SCXSystemLib
                     try
                     {
                         m_availableMemory = StrToULong(tokens[1]) * 1024;  // Resulting units: bytes
-                        foundAvailMem = true;
+                        m_foundAvailMem = true;
                         SCX_LOGHYSTERICAL(m_log, StrAppend(L"    availableMemory = ", m_availableMemory));
                     }
                     catch (const SCXNotSupportedException& e)
@@ -899,7 +901,7 @@ namespace SCXSystemLib
                     try
                     {
                         m_totalSwap = StrToULong(tokens[1]) * 1024; // Resulting units: bytes
-                        foundTotalSwap = true;
+                        m_foundTotalSwap = true;
                         SCX_LOGHYSTERICAL(m_log, StrAppend(L"    totalSwap = ", m_totalSwap));
                     }
                     catch (const SCXNotSupportedException& e)
@@ -912,7 +914,7 @@ namespace SCXSystemLib
                     try
                     {
                         m_availableSwap = StrToULong(tokens[1]) * 1024; // Resulting units: bytes
-                        foundAvailSwap = true;
+                        m_foundAvailSwap = true;
                         SCX_LOGHYSTERICAL(m_log, StrAppend(L"    availableSwap = ", m_availableSwap));
                     }
                     catch (const SCXNotSupportedException& e)
@@ -928,14 +930,11 @@ namespace SCXSystemLib
         m_usedMemory = m_totalPhysicalMemory - m_availableMemory;
         m_usedSwap = m_totalSwap - m_availableSwap;
         
-        foundTotalPhysMem = foundTotalPhysMem;  // pacify compiler if SCXASSERT is defined to nothing
-        SCXASSERT(foundTotalPhysMem && "MemTotal not found");
-        foundAvailMem = foundAvailMem;
-        SCXASSERT(foundAvailMem && "MemFree not found");
-        foundTotalSwap = foundTotalSwap;
-        SCXASSERT(foundTotalSwap && "SwapTotal not found");
-        foundAvailSwap = foundAvailSwap;
-        SCXASSERT(foundAvailSwap && "SwapFree not found");
+        // This is "weak" in that it can easily be missed; we verify this in unit tests too now
+        SCXASSERT(m_foundTotalPhysMem && "MemTotal not found");
+        SCXASSERT(m_foundAvailMem && "MemFree not found");
+        SCXASSERT(m_foundTotalSwap && "SwapTotal not found");
+        SCXASSERT(m_foundAvailSwap && "SwapFree not found");
 
 #elif defined(sun)
 
