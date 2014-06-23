@@ -13,6 +13,7 @@
 UTILLIB_ROOT=$(SCX_SRC_ROOT)/util
 
 STATIC_UTILLIB_SRCFILES = \
+	$(UTILLIB_ROOT)/base64/Base64Helper.cpp \
 	$(UTILLIB_ROOT)/unicode/Unicode.cpp \
 	$(UTILLIB_ROOT)/xml/HexBinaryHelper.cpp \
 	$(UTILLIB_ROOT)/xml/XDocument.cpp \
