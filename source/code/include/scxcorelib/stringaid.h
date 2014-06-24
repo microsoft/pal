@@ -17,8 +17,9 @@
 
 #include <string>
 #include <vector>
-#include <scxcorelib/scxexception.h>
 #include <map>
+
+#include <scxcorelib/scxexception.h>
 
 namespace SCXCoreLib
 {
@@ -85,6 +86,33 @@ namespace SCXCoreLib
     bool StrMergeTokens(std::vector<std::wstring>& tokens, const std::map<std::wstring,std::wstring>& mergePairs, const std::wstring& glue);
 
     bool StrIsPrefix(const std::wstring& str, const std::wstring& prefix, bool ci=false);
+
+    /*----------------------------------------------------------------------------*/
+    /**
+       Utility function to convert a String to a unsigned char vector
+
+       \param [in] input Input String
+       \return Corresponding unsigned char vector
+    */
+    static inline std::vector<unsigned char> ToUnsignedCharVector(const std::string& input)
+    {
+        std::basic_string<unsigned char> unsignedStr(reinterpret_cast<const unsigned char*>(input.c_str()));
+        std::vector<unsigned char> output(unsignedStr.begin(), unsignedStr.end());
+        return output;
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
+       Utility function to convert a unsigned char vector to string
+
+       \param [in] input The input vector
+       \return The corresponding string 
+    */
+    static inline std::string FromUnsignedCharVector(const std::vector<unsigned char>& input)
+    {
+        std::string output(reinterpret_cast<const char*>(&(input[0])), input.size());
+        return output;
+    }
 
     /** Exception for failed multibyte conversion*/
     class SCXStringConversionException : public SCXException {
