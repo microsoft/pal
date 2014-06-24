@@ -292,6 +292,7 @@ MI_Result MI_CALL TestableContext::PostResult(MI_Context* context, MI_Result res
     std::map<MI_Context*,TestableContext*>::iterator it = TestableContext::ms_map.find(context);
     CPPUNIT_ASSERT_MESSAGE("Unable to find TestableContext!", TestableContext::ms_map.end() != it);
     it->second->m_result = result;
+    it->second->m_wasResultPosted = true;
 
     return MI_RESULT_OK;
 }
@@ -338,6 +339,7 @@ MI_Result MI_CALL TestableContext::RefuseUnload(MI_Context* context)
 TestableContext::TestableContext()
     : m_pCppContext(NULL),
       m_result(MI_RESULT_SERVER_IS_SHUTTING_DOWN),
+      m_wasResultPosted(false),
       m_wasRefuseUnloadCalled(false)
 {
     memset(&m_miContext, 0, sizeof(m_miContext));
@@ -377,6 +379,16 @@ void TestableContext::Reset()
     m_result = MI_RESULT_SERVER_IS_SHUTTING_DOWN;
     m_wasRefuseUnloadCalled = false;
     m_inst.clear();
+}
+
+void TestableContext::WaitForResult()
+{
+    int count = 480;   // Two minutes worth of 0.25 second sleeps
+    while ( ! m_wasResultPosted && --count > 0 )
+    {
+        SCXCoreLib::SCXThread::Sleep( 250 );
+    }
+    CPPUNIT_ASSERT_EQUAL(true, m_wasResultPosted);
 }
 
 TestableContext::operator mi::Context&()

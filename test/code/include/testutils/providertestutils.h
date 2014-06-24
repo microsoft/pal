@@ -116,6 +116,7 @@ public:
     TestableContext();
     ~TestableContext();
     void Reset();
+    void WaitForResult();
 
     operator mi::Context&();
 
@@ -137,6 +138,7 @@ private:
 
     // Return values of interest
     MI_Result m_result;
+    volatile bool m_wasResultPosted;
     bool m_wasRefuseUnloadCalled;
 
     // Colllection of instances (should eventually be freed by calling MI_Instance_Delete())
