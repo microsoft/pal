@@ -215,7 +215,7 @@ namespace SCXCoreLib {
     {
         return m_serialNumber;
     }
-        
+
     /*--------------------------------------------------------------*/
     /**
            Check if path exists
@@ -250,7 +250,7 @@ namespace SCXCoreLib {
     {
 
         ReadFromDisk(pStat);
-        
+
     }
 
     /*-----------------------------------------------------------*/
@@ -263,7 +263,7 @@ namespace SCXCoreLib {
     /**
         Reads information about the file from disk and updates the state
 
-        \param[in] pStat Pointer to a pstat structure that should be used. 
+        \param[in] pStat Pointer to a pstat structure that should be used.
                          If zero (default) a new structure is fetched from disk.
 
         Helper method to retrive information from disk. If there is some problems with the path the
@@ -405,7 +405,7 @@ namespace SCXCoreLib {
                 resolvedFilePathTokens.push_back(*token);
             }
         }
-        
+
         // Now generate a FilePath out of the vector.
         SCXFilePath resolvedPath(L"/");
         for (std::vector<wstring>::const_iterator token = resolvedFilePathTokens.begin();
@@ -585,7 +585,7 @@ namespace SCXCoreLib {
             if (!firstItem) {
                 buf << L",";
             }
-            buf << *i;
+            buf << AsText(*i);
             firstItem = false;
         }
         return buf.str();

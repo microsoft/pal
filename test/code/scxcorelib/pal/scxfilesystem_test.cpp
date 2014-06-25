@@ -1,10 +1,10 @@
 /*--------------------------------------------------------------------------------
     Copyright (c) Microsoft Corporation.  All rights reserved.
-    
+
     Created date    2007-08-27 17:20:00
 
     File test class.
-    
+
 */
 /*----------------------------------------------------------------------------*/
 #include <testutils/scxunit.h>
@@ -21,22 +21,22 @@ using namespace std;
 
 class SCXFileSystemTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( SCXFileSystemTest );
-    
+
     CPPUNIT_TEST( callDumpStringForCoverage );
     CPPUNIT_TEST( createFileSystemExhaustedExceptionForCoverage );
     CPPUNIT_TEST( TestCreateFullPath );
     CPPUNIT_TEST( TestCreateFullPathForCoverage );
     CPPUNIT_TEST( TestEncodeDecodePath );
-    CPPUNIT_TEST( TestFileAttributeAsTextForCoverage );
+    CPPUNIT_TEST( TestFileAttributeAsTextConversion );
     CPPUNIT_TEST( TestStatFailsWithoutPermission );
 
     CPPUNIT_TEST_SUITE_END();
 
 private:
     SCXFilePath m_path1;
- 
+
 public:
-    void setUp() {   
+    void setUp() {
         m_path1 = SCXFilePath(L"SCXFileTestTemporary.txt");
         SCXFile::Delete(m_path1);
         ofstream file(SCXFileSystem::EncodePath(m_path1).c_str());
@@ -61,7 +61,7 @@ public:
 
     void TestCreateFullPath() {
         try {
-            SCXFileInfo info(m_path1);      
+            SCXFileInfo info(m_path1);
             CPPUNIT_ASSERT(SCXFileSystem::CreateFullPath(m_path1) ==  info.GetFullPath());
             CPPUNIT_ASSERT(SCXFileSystem::CreateFullPath(info.GetFullPath()) ==  info.GetFullPath());
         } catch (SCXException& e) {
@@ -90,11 +90,11 @@ public:
         CPPUNIT_ASSERT(fp4.Get() == L"/");
 #endif
     }
-   
+
     void TestCreateFullPathForCoverage() {
         try {
             m_path1.SetDirectory(L".");
-            SCXFileInfo info(m_path1);      
+            SCXFileInfo info(m_path1);
             CPPUNIT_ASSERT(SCXFileSystem::CreateFullPath(m_path1) ==  info.GetFullPath());
             CPPUNIT_ASSERT(SCXFileSystem::CreateFullPath(info.GetFullPath()) ==  info.GetFullPath());
         } catch (SCXException& e) {
@@ -102,27 +102,39 @@ public:
             CPPUNIT_ASSERT(!problem.c_str());
         }
     }
-   
+
     void TestEncodeDecodePath() {
         CPPUNIT_ASSERT(SCXFileSystem::DecodePath(SCXFileSystem::EncodePath(m_path1)) == m_path1);
     }
 
     // This test was added to increase code coverage
-    void TestFileAttributeAsTextForCoverage()
+    void TestFileAttributeAsTextConversion()
     {
         CPPUNIT_ASSERT_THROW(SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eUnknown), SCXCoreLib::SCXInvalidArgumentException);
         SCXUNIT_ASSERTIONS_FAILED_ANY();
         CPPUNIT_ASSERT(L"Readable" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eReadable));
         CPPUNIT_ASSERT(L"Writable" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eWritable));
         CPPUNIT_ASSERT(L"Directory" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eDirectory));
-        
+        CPPUNIT_ASSERT(L"UserRead" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eUserRead));
+        CPPUNIT_ASSERT(L"UserWrite" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eUserWrite));
+        CPPUNIT_ASSERT(L"UserExecute" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eUserExecute));
+        CPPUNIT_ASSERT(L"GroupRead" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eGroupRead));
+        CPPUNIT_ASSERT(L"GroupWrite" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eGroupWrite));
+        CPPUNIT_ASSERT(L"GroupExecute" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eGroupExecute));
+        CPPUNIT_ASSERT(L"OtherRead" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eOtherRead));
+        CPPUNIT_ASSERT(L"OtherWrite" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eOtherWrite));
+        CPPUNIT_ASSERT(L"OtherExecute" == SCXCoreLib::SCXFileSystem::AsText(SCXCoreLib::SCXFileSystem::eOtherExecute));
+
         SCXCoreLib::SCXFileSystem::Attributes a;
-        a.insert(SCXCoreLib::SCXFileSystem::eDirectory);
+        a.insert(SCXCoreLib::SCXFileSystem::eReadable);
         a.insert(SCXCoreLib::SCXFileSystem::eWritable);
-        CPPUNIT_ASSERT(L"1,3" == SCXCoreLib::SCXFileSystem::AsText(a));
+        a.insert(SCXCoreLib::SCXFileSystem::eDirectory);
+        a.insert(SCXCoreLib::SCXFileSystem::eUserRead);
+        a.insert(SCXCoreLib::SCXFileSystem::eUserWrite);
+        CPPUNIT_ASSERT(L"Directory,Readable,Writable,UserRead,UserWrite" == SCXCoreLib::SCXFileSystem::AsText(a));
     }
 
-    void TestStatFailsWithoutPermission() 
+    void TestStatFailsWithoutPermission()
     {
 #if defined(SCX_UNIX)
         SCXUser user;
@@ -139,7 +151,7 @@ public:
             tmp_file.SetFilename(L"test.tst");
 
             SCXDirectoryInfo dir = SCXDirectory::CreateDirectory(tmp_path);
-            
+
             SCXFileSystem::Attributes attr;
             attr.insert(SCXFileSystem::eDirectory);
             attr.insert(SCXFileSystem::eUserRead);
@@ -150,7 +162,7 @@ public:
 
             vector<wstring> lines;
             lines.push_back(L"test");
-            
+
             CPPUNIT_ASSERT_NO_THROW(SCXFile::WriteAllLines(tmp_file, lines, ios_base::out));
 
             SCXFileSystem::SCXStatStruct stats;
@@ -171,9 +183,8 @@ public:
             CPPUNIT_ASSERT_NO_THROW(SCXFileSystem::SetAttributes(tmp_path, attr));
             CPPUNIT_ASSERT_NO_THROW(dir.Delete(true));
         }
-#endif            
+#endif
     }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION( SCXFileSystemTest );
-
