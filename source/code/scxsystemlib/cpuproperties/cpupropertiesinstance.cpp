@@ -1411,8 +1411,6 @@ namespace SCXSystemLib
         {
             fRet = false;
         }
-
-        fRet = true;
 #elif defined(aix) 
         if (!m_processorAttr.stepping.empty())
         {
