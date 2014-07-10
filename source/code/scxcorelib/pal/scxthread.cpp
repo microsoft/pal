@@ -19,6 +19,7 @@
 #include <sstream>
 #if defined(WIN32)
 #elif defined(SCX_UNIX)
+#include <errno.h>
 #include <signal.h>
 #include <unistd.h>
 #else
@@ -249,9 +250,10 @@ namespace SCXCoreLib
             throw SCXThreadStartException(L"CreateThread failed", SCXSRCLOCATION);
         }
 #elif defined(SCX_UNIX)
-        if (0 != pthread_create(&m_threadID, *attr, ThreadStartRoutine, p))
+        int pth_errno;
+        if (0 != (pth_errno = pthread_create(&m_threadID, *attr, ThreadStartRoutine, p)))
         {
-            throw SCXThreadStartException(L"pthread_create failed", SCXSRCLOCATION);
+            throw SCXThreadStartException(SCXCoreLib::StrAppend(L"pthread_create failed, errno=", pth_errno), SCXSRCLOCATION);
         }
 #endif
     }
