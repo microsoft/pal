@@ -217,7 +217,7 @@ namespace SCXSystemLib
     /**
        BUG 462269, for some reason ODM can not be used before some system calls that themselves
        use ODM are called. For example, after perfstat_netinterface is called it is possible to use
-       ODM database. Hack to start the ODM database, code from networkinterface.cpp:
+       ODM database. Workaround to start the ODM database, code from networkinterface.cpp:
     */
     void SCXodm::perfInterface_init()
     {

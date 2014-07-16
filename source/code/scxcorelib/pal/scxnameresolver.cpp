@@ -284,12 +284,12 @@ namespace SCXCoreLib
        Normalize domain name, if defined, and if necessary.
 
        This means:
-           If host is:    foo.microsoft.com
+           If host is:    sub.microsoft.com
            and domain is: microsoft.com
-       then normalize the host to be "foo" and the domain to be "microsoft.com".
+       then normalize the host to be "sub" and the domain to be "microsoft.com".
 
        On the other hand:
-           If host is:    foo.microsoft.uk
+           If host is:    sub.microsoft.uk
            and domain is: microsoft.com
        then we'd make no change.
 
@@ -553,7 +553,7 @@ namespace SCXCoreLib
 
         // The name comes back as "hostname.domainname"
         //
-        // To protect against dotted hosts (i.e. "foo.bar"), check for prefix
+        // To protect against dotted hosts (i.e. "sub.bar"), check for prefix
         // rather than looking for a dot to isolate the host name.
         //
         // Note: On some systems (Redhat), if you have a default /etc/hosts

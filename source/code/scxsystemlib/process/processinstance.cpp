@@ -821,7 +821,7 @@ namespace SCXSystemLib
 
         /* If process has become a zombie, record time of death.
            On Sun, there is a better resoltion termination time of available in
-           puse.pr_term but when we read it, it's just junk.
+           puse.pr_term but when we read it, it is not valid data.
         */
         if (m_timeOfDeath.tv_sec == 0 && m_psinfo.pr_lwp.pr_sname == 'Z') 
         { 
@@ -1612,7 +1612,7 @@ namespace SCXSystemLib
     {
         /* This enum will convert to an integer that is consistent with the CIM model */
         enum { Unknown, Other, Ready, Running, Blocked, Suspended_Blocked, Suspended_Ready,
-               Terminated, Stopped, Growing, Relinquished, Hung } st;
+               Terminated, Stopped, Growing, Relinquished, NotResponding } st;
 
 #if defined(linux)
         switch (m.state) {
