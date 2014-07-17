@@ -295,6 +295,7 @@ namespace SCXCoreLib
 
         m_hThreads.clear();
         m_tasks.clear();
+        m_isTerminating = false;
     }
 
 } /* namespace SCXCoreLib */
