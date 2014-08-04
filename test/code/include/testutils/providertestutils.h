@@ -21,6 +21,7 @@
 #include "base/field.h"
 #include "module.h"
 #include <scxcorelib/scxexception.h>
+#include <scxcorelib/stringaid.h>
 #include <map>
 #include <vector>
 
@@ -28,6 +29,14 @@
 // Helper definitions used in the case of error to printout entire call stack.
 #define CALL_LOCATION(errMsg) (std::wstring(errMsg + (SCXSRCLOCATION).Where()))
 #define ERROR_MESSAGE (SCXCoreLib::StrToUTF8(errMsg))
+
+/* SetUp function returns a filter object that can be passed to EI and will
+ * return the string as the query/expression for GetExpression */
+namespace TestableFilter
+{
+    // Used to create a mock filter object with the input string as the query
+    MI_Filter SetUp(std::string expression, std::string language = "WQL");
+}
 
 class TestableInstance : public mi::Instance
 {
@@ -198,11 +207,11 @@ template<class T> void TearDownAgent(TestableContext &context, std::wstring errM
 //! \param[out]  context Object containing returned instances data and the return code.
 //! \param[in]  errMsg       String containing error messages.
 //! \param[in]  keysOnly True if only keys should be returned, otherwise all properties are returned.
-template<class T> void EnumInstances(TestableContext &context, std::wstring errMsg, bool keysOnly = false)
+template<class T> void EnumInstances(TestableContext &context, std::wstring errMsg, bool keysOnly = false, MI_Filter* filter = NULL)
 {
     mi::Module Module;
     T agent(&Module);
-    agent.EnumerateInstances(context, NULL, context.GetPropertySet(), keysOnly, NULL);
+    agent.EnumerateInstances(context, NULL, context.GetPropertySet(), keysOnly, filter);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, context.GetResult() );
 }
 
@@ -250,7 +259,7 @@ template<class T, class TN> MI_Result GetInstance(
     std::wstring errMsg)
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames.size(), keyValues.size());
-    
+
     TN instanceName;
 
     // Set all key values.
@@ -281,7 +290,98 @@ template<class T, class TN> MI_Result GetInstance(
             CALL_LOCATION(errMsg)));
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyValues[k], context[0].GetKeyValue(static_cast<MI_Uint32>(k),
             CALL_LOCATION(errMsg)));
-    }    
+    }
+    return MI_RESULT_OK;
+}
+
+/*----------------------------------------------------------------------------*/
+//! Creates new single instance data for the object.
+//! \param      T Type of object to be enumerated.
+//! \param      TN Type of instance name object to be used.
+//! \param[in]  context Object containing all retrieved instance. Only one instance is returned.
+//! \param[in]  errMsg String containing error messages.
+//! \returns    MI_RESULT_OK on success, otherwise error code.
+template<class T, class TN> MI_Result CreateInstance(TestableContext& context, std::wstring errMsg)
+{
+    TN newInstance;
+    mi::Module Module;
+    T agent(&Module);
+    agent.CreateInstance(context, NULL, newInstance);
+    if (context.GetResult() != MI_RESULT_OK)
+    {
+	return context.GetResult();
+    }
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 1u, context.Size());
+    return MI_RESULT_OK;
+}
+
+/*----------------------------------------------------------------------------*/
+//! Modifies single instance data for the object with given key values.
+//! \param      T Type of object to be enumerated.
+//! \param      TN Type of instance name object to be used.
+//! \param[in]  keyNames Vector of the keys describing the requested object instance.
+//! \param[in]  keyValues Vector of the key values describing the requested object instance.
+//! \param[in]  context Object containing all retrieved instance. Only one instance is returned.
+//! \param[in]  errMsg String containing error messages.
+//! \returns    MI_RESULT_OK on success, otherwise error code.
+template<class T, class TN> MI_Result ModifyInstance(
+    const std::vector<std::wstring>& keyNames, const std::vector<std::wstring>& keyValues, TestableContext &context,
+    std::wstring errMsg)
+{
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames.size(), keyValues.size());
+
+    TN modifiedInstance;
+
+    // Set all key values.
+    size_t k;
+    for (k = 0; k < keyNames.size(); k++)
+    {
+        std::string keyName = SCXCoreLib::StrToUTF8(keyNames[k]);
+        Field* field;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, FindFieldString(modifiedInstance, keyName.c_str(), field));
+        mi::Field<mi::String> *miField = reinterpret_cast<mi::Field<mi::String> *>(field);
+        mi::String keyValue(SCXCoreLib::StrToUTF8(keyValues[k]).c_str());
+        miField->Set(keyValue);
+    }
+
+    // Modify instance with these keys.
+    mi::Module Module;
+    T agent(&Module);
+    agent.ModifyInstance(context, NULL, modifiedInstance, context.GetPropertySet());
+    if (context.GetResult() != MI_RESULT_OK)
+    {
+        return context.GetResult();
+    }
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 1u, context.Size());
+    // Verify we got the proper instance back.
+    for (k = 0; k < keyNames.size(); k++)
+    {
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames[k], context[0].GetKeyName(static_cast<MI_Uint32>(k),
+            CALL_LOCATION(errMsg)));
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyValues[k], context[0].GetKeyValue(static_cast<MI_Uint32>(k),
+            CALL_LOCATION(errMsg)));
+    }
+    return MI_RESULT_OK;
+}
+
+/*----------------------------------------------------------------------------*/
+//! Deletes single instance data for the object with given key values.
+//! \param      T Type of object to be enumerated.
+//! \param      TN Type of instance name object to be used.
+//! \param[in]  context Object containing all retrieved instance. Only one instance is returned.
+//! \param[in]  errMsg String containing error messages.
+//! \returns    MI_RESULT_OK on success, otherwise error code.
+template<class T, class TN> MI_Result DeleteInstance(TestableContext &context, std::wstring errMsg)
+{
+    TN instanceName;
+    mi::Module Module;
+    T agent(&Module);
+    agent.DeleteInstance(context, NULL, instanceName);
+    if (context.GetResult() != MI_RESULT_OK)
+    {
+        return context.GetResult();
+    }
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 0u, context.Size());
     return MI_RESULT_OK;
 }
 
@@ -323,7 +423,7 @@ template<class T, class TN> MI_Result VerifyGetInstanceByCompleteKeySuccess(
     if (result != MI_RESULT_OK)
     {
         return result;
-    }   
+    }
     const TestableInstance &instance = context[0];
 
     // Number of keys must be same.
@@ -350,7 +450,7 @@ template<class T, class TN> MI_Result VerifyGetInstanceByCompleteKeySuccess(
             instance.FindProperty(originalProperty.name.c_str(), property));
 
         // Here we could also check if the property values of originalInstance and instance are the same. To do this we must
-        // first define the TestableInstance::PropertyInfo == or != operators for all of the possible MI_Value's, 
+        // first define the TestableInstance::PropertyInfo == or != operators for all of the possible MI_Value's,
         // which we don't have at the moment.
     }
 
@@ -442,7 +542,7 @@ template<class T> void StandardTestCheckKeyValues(const std::vector<std::wstring
     EnumInstances<T>(context, CALL_LOCATION(errMsg), true);// Second parameter is true to get keys only.
     const std::vector<TestableInstance> &instances = context.GetInstances();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());// We should always receive at least one instance.
-    
+
     // First check if keys in keyNames have expected keyValues.
     for (size_t i = 0; i < instances.size(); i++)
     {
@@ -454,7 +554,7 @@ template<class T> void StandardTestCheckKeyValues(const std::vector<std::wstring
                 CALL_LOCATION(errMsg)));
         }
     }
-    
+
     // Now check if keys in keysSame have same value in all the instances.
     for (size_t i = 1; i < instances.size(); i++)
     {
@@ -464,6 +564,21 @@ template<class T> void StandardTestCheckKeyValues(const std::vector<std::wstring
                 instances[i].GetKey(keysSame[k], CALL_LOCATION(errMsg)));
         }
     }
+}
+
+/*----------------------------------------------------------------------------*/
+//! Calls the provider's EnumerateInstances method and returns its result.
+//! \param      T Type of object to be enumerated.
+//! \param[out] context Object containing returned instances data and the return code.
+//! \param[in]  errMsg       String containing error messages.
+//! \param[in]  keysOnly True if only keys should be returned, otherwise all properties are returned.
+//! \returns    MI_Result error code.
+template<class T> MI_Result EnumerateInstancesResult(TestableContext &context, std::wstring errMsg, bool keysOnly = false, MI_Filter* filter = NULL)
+{
+    mi::Module Module;
+    T agent(&Module);
+    agent.EnumerateInstances(context, NULL, context.GetPropertySet(), keysOnly, filter);
+    return context.GetResult();
 }
 
 /*----------------------------------------------------------------------------*/

@@ -23,8 +23,48 @@
 #include <sys/utsname.h>
 #include <sys/wait.h>
 
-// Declare storage for static members of class
+// Mock of Filter (sent to EnumerateInstances)
+namespace TestableFilter
+{
+    // Mock of filter's function table's GetExpression from MI.h
+    MI_Result GetExpression(const MI_Filter* self, const MI_Char** lang, const MI_Char** expr);
 
+    // Because GetExpression must assign the address of a string, they must be defined here
+    std::string m_lang;
+    std::string m_expr;
+
+    // Because GetExpression must assign the address of a function table, it must be defined here
+    MI_FilterFT filterFT;
+
+    /* Use this function to get a filter object whose address you can pass
+     * to EI and will return the provided query for GetExpression */
+    MI_Filter
+    SetUp(std::string expression, std::string language)
+    {
+        // Sort of constructor that sets our test query
+        m_expr = expression;
+        m_lang = language;
+        // Create the mock filter object
+        MI_Filter filter;
+        // Assign the function table to filter's function table pointer
+        filter.ft = &filterFT;
+        // Assign the GetExpression function to the function table's GetExpression function pointer
+        filterFT.GetExpression = GetExpression;
+
+        return filter;
+    }
+
+    MI_Result
+    GetExpression(const MI_Filter* self, const MI_Char** lang, const MI_Char** expr)
+    {
+        // Assign the strings via C-style reference
+        *expr = TestableFilter::m_expr.c_str();
+        *lang = TestableFilter::m_lang.c_str();
+        return MI_RESULT_OK;
+    }
+}
+
+// Declare storage for static members of class
 std::map<MI_Context *, TestableContext *> TestableContext::ms_map;
 
 bool TestableInstance::PropertyInfo::GetValue_MIBoolean(std::wstring errMsg) const
@@ -139,7 +179,7 @@ MI_Uint32 TestableInstance::GetNumberOfKeys() const
     for (i = 0; i < cd->numProperties; i++)
     {
         const MI_PropertyDecl* pd = cd->properties[i];
-        const Field* field = (Field*)((char*)self + pd->offset);
+        const Field* field = (Field*)((const char*)self + pd->offset);
 
         if (Field_GetExists(field, static_cast<MI_Type> (pd->type)))
         {
@@ -160,7 +200,7 @@ MI_Uint32 TestableInstance::GetNumberOfProperties() const
     for (i = 0; i < cd->numProperties; i++)
     {
         const MI_PropertyDecl* pd = cd->properties[i];
-        const Field* field = (Field*)((char*)self + pd->offset);
+        const Field* field = (Field*)((const char*)self + pd->offset);
 
         if (Field_GetExists(field, static_cast<MI_Type> (pd->type)))
         {
@@ -179,7 +219,7 @@ MI_Result TestableInstance::FindProperty(const char* name, struct PropertyInfo& 
     for (MI_Uint32 i = 0; i < cd->numProperties; i++)
     {
         const MI_PropertyDecl* pd = cd->properties[i];
-        const Field* field = (Field*)((char*)self + pd->offset);
+        const Field* field = (Field*)((const char*)self + pd->offset);
 
         // Did we find the field being requested?
         if (0 == strcmp(name, pd->name))
@@ -205,7 +245,7 @@ MI_Result TestableInstance::FindProperty(MI_Uint32 index, struct PropertyInfo& i
     for (i = 0; i < cd->numProperties; i++)
     {
         const MI_PropertyDecl* pd = cd->properties[i];
-        const Field* field = (Field*)((char*)self + pd->offset);
+        const Field* field = (Field*)((const char*)self + pd->offset);
 
         // Did we find the field being requested?
         if (Field_GetExists(field, static_cast<MI_Type> (pd->type)) &&
@@ -408,7 +448,7 @@ MI_Result FindFieldString(mi::Instance &instance, const char* name, Field* &foun
     for (MI_Uint32 i = 0; i < cd->numProperties; i++)
     {
         const MI_PropertyDecl* pd = cd->properties[i];
-        Field* field = (Field*)((char*)self + pd->offset);
+        Field* field = (Field*)((const char*)self + pd->offset);
 
         // Did we find the field being requested?
         if (0 == strcmp(name, pd->name))
@@ -481,10 +521,10 @@ std::wstring GetFQHostName(std::wstring errMsg)
 #endif
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 0, gethostname(hostName, sizeof(hostName)));
     hostName[sizeof(hostName) - 1] = 0;
-    
+
     std::ostringstream processOutput;
     std::ostringstream processErr;
-    try 
+    try
     {
 #if defined(linux)
         std::string command = std::string("sh -c \"nslookup -silent ") + hostName + " | grep \'Name:\' | awk \'{print $2}\'\"";
@@ -607,4 +647,3 @@ void MakeZombie()
         zombieCreated = true;
     }
 }
-
