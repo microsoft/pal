@@ -428,7 +428,7 @@ void TestableContext::WaitForResult()
     {
         SCXCoreLib::SCXThread::Sleep( 250 );
     }
-    CPPUNIT_ASSERT_EQUAL(true, m_wasResultPosted);
+    CPPUNIT_ASSERT_EQUAL(true, (bool) m_wasResultPosted);
 }
 
 TestableContext::operator mi::Context&()
