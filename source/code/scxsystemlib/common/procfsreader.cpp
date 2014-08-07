@@ -304,7 +304,7 @@ bool
 ProcfsCpuInfo::AddressSizeVirtual(unsigned short& addresssizevirtual)
 {
     bool fRet = false;
-	PropertyTable::const_iterator cit = m_Properties.find(ADDRESS_SIZES);
+        PropertyTable::const_iterator cit = m_Properties.find(ADDRESS_SIZES);
     if (cit != m_Properties.end())
     {
         std::size_t len = cit->second.length();
@@ -1343,7 +1343,7 @@ ProcfsProcStatus::NonVoluntaryContextSwitches(scxulong &nonVolSwitches) const
 bool ProcfsProcStatusReader::Load(scxpid_t pid)
 {
     std::wstring procfsPath = L"/proc/" + SCXCoreLib::StrFrom(pid) + L"/status";
-    std::wfstream ifs(SCXCoreLib::StrToUTF8(procfsPath).c_str());
+    std::wfstream ifs(SCXCoreLib::StrToUTF8(procfsPath).c_str(), ios_base::in);
     return ProcfsTableReader<ProcfsProcStatus>::LoadFile(ifs);
 }
 

@@ -98,16 +98,6 @@ extern "C" int getkerninfo(int, char *, int *, int32long64_t);
 #include <scxcorelib/scxprocess.h>
 #endif
 
-// Header file <strops.h> is on its way out on some systems.  See:
-//
-//      http://bugzilla.redhat.com/show_bug.cgi?id=444676
-//
-// for more information.
-
-#if !(defined(PF_DISTRO_REDHAT) && PF_MAJOR >= 6)
-#include <stropts.h>
-#endif
-
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <errno.h>
