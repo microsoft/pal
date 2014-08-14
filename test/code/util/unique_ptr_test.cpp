@@ -16,6 +16,9 @@
 
 using namespace util;
 
+namespace
+{
+
 //
 // Test support code
 //
@@ -48,11 +51,13 @@ public:
     virtual /*dtor*/ ~TestObj () { --s_count; }
 };
 
+
 class DerivedTestObj : public TestObj
 {
 public:
     virtual /*dtor*/ ~DerivedTestObj () {}
 };
+
 
 class ValueObj
 {
@@ -61,6 +66,7 @@ public:
 
     int m_Val;
 };
+
 
 struct TestObjDeleter
 {
@@ -109,12 +115,6 @@ struct NoOpDeleter
     void operator () (T*&) {}
 };
 
-template<typename T, typename D>
-struct MoveObjCheat
-{
-    T* m_pT;
-    D m_deleter;
-};
 
 void testObjDeleteFn (TestObj*& pObj)
 {
@@ -158,12 +158,16 @@ result_type passMoveType (
     size_t const expectedCount,
     typename unique_ptr<T, D>::pointer const pExpected)
 {
-    typedef MoveObjCheat<T, D> CheatObj_t;
-    CheatObj_t* pCheat = reinterpret_cast<CheatObj_t*>(&moveObj);
-    return (expectedCount == TestObj::s_count && pExpected == pCheat->m_pT) ?
-    SUCCESS : MOVE_OBJ_FAILED;
+    unique_ptr<T, D> pObj1 (moveObj);
+    unique_ptr<T, D> pObj2 (moveObj);
+    return (expectedCount == TestObj::s_count &&
+            pExpected == pObj1.get () &&
+            0 == pObj2.get ()) ?
+                SUCCESS : MOVE_OBJ_FAILED;
 }
 
+
+}
 
 //
 // Unit tests follow
@@ -970,26 +974,24 @@ public:
         size_t const count = TestObj::s_count;
         {
             typedef unique_ptr<TestObj> TestObjPtr_t;
-            typedef MoveObjCheat<TestObjPtr_t::element_type,
-            TestObjPtr_t::deleter_type> TestObjMoveCheat_t;
             TestObjPtr_t ptrObj1;
             TestObjPtr_t::move_type moveObj1 (ptrObj1.move ());
-            TestObjMoveCheat_t const* const pCheat1 =
-            reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj1);
+            TestObjPtr_t ptrObj2 (moveObj1);
             if (0 != ptrObj1.get () ||
                 count != TestObj::s_count ||
-                0 != pCheat1->m_pT)
+                0 != ptrObj2.get ())
             {
                 result |= MOVE_FAILED;
             }
-            TestObjPtr_t ptrObj2 (new TestObj);
-            TestObj* pObj2 = ptrObj2.get ();
-            TestObjPtr_t::move_type moveObj2 (ptrObj2.move ());
-            TestObjMoveCheat_t const* const pCheat2 =
-            reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj2);
-            if (0 != ptrObj2.get () ||
+            TestObjPtr_t ptrObj3 (new TestObj);
+            TestObj const* const pObj3 = ptrObj3.get ();
+            TestObjPtr_t::move_type moveObj3 (ptrObj3.move ());
+            TestObjPtr_t ptrObj4 (moveObj3);
+            TestObjPtr_t ptrObj5 (moveObj3);
+            if (0 != ptrObj3.get () ||
                 (1 + count) != TestObj::s_count ||
-                pObj2 != pCheat2->m_pT)
+                pObj3 != ptrObj4.get () ||
+                0 != ptrObj5.get ())
             {
                 result |= MOVE_FAILED;
             }
@@ -1004,26 +1006,24 @@ public:
         size_t const count = TestObj::s_count;
         {
             typedef unique_ptr<TestObj[]> TestObjPtr_t;
-            typedef MoveObjCheat<TestObjPtr_t::element_type,
-            TestObjPtr_t::deleter_type> TestObjMoveCheat_t;
             TestObjPtr_t ptrObj1;
             TestObjPtr_t::move_type moveObj1 (ptrObj1.move ());
-            TestObjMoveCheat_t const* const pCheat1 =
-            reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj1);
+            TestObjPtr_t ptrObj2 (moveObj1);
             if (0 != ptrObj1.get () ||
                 count != TestObj::s_count ||
-                0 != pCheat1->m_pT)
+                0 != ptrObj2.get ())
             {
                 result |= MOVE_FAILED;
             }
-            TestObjPtr_t ptrObj2 (new TestObj[ARRAY_SIZE]);
-            TestObj* pObj2 = ptrObj2.get ();
-            TestObjPtr_t::move_type moveObj2 (ptrObj2.move ());
-            TestObjMoveCheat_t const* const pCheat2 =
-            reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj2);
-            if (0 != ptrObj2.get () ||
+            TestObjPtr_t ptrObj3 (new TestObj[ARRAY_SIZE]);
+            TestObj const* const pObj3 = ptrObj3.get ();
+            TestObjPtr_t::move_type moveObj3 (ptrObj3.move ());
+            TestObjPtr_t ptrObj4 (moveObj3);
+            TestObjPtr_t ptrObj5 (moveObj3);
+            if (0 != ptrObj3.get () ||
                 (1 * ARRAY_SIZE + count) != TestObj::s_count ||
-                pObj2 != pCheat2->m_pT)
+                pObj3 != ptrObj4.get () ||
+                0 != ptrObj5.get ())
             {
                 result |= MOVE_FAILED;
             }
@@ -1036,8 +1036,6 @@ public:
     {
         result_type result = SUCCESS;
         typedef unique_ptr<TestObj> TestObjPtr_t;
-        typedef MoveObjCheat<TestObjPtr_t::element_type,
-        TestObjPtr_t::deleter_type> TestObjMoveCheat_t;
         size_t const count = TestObj::s_count;
         {
             // test empty move object
@@ -1051,12 +1049,11 @@ public:
             }
             // test move object
             {
-                TestObjPtr_t ptrObj (new TestObj);
-                TestObjPtr_t::pointer pObj = ptrObj.get ();
-                TestObjPtr_t::move_type moveObj (ptrObj.move ());
-                TestObjMoveCheat_t const* const pCheat =
-                reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj);
-                if (pCheat->m_pT != pObj ||
+                TestObjPtr_t ptrObj1 (new TestObj);
+                TestObjPtr_t::pointer const pObj1 = ptrObj1.get ();
+                TestObjPtr_t::move_type moveObj1 (ptrObj1.move ());
+                TestObjPtr_t ptrObj2 (moveObj1);
+                if (pObj1 != ptrObj2.get () ||
                     (1 + count) != TestObj::s_count)
                 {
                     result |= MOVE_OBJ_FAILED;
@@ -1068,17 +1065,18 @@ public:
             }
             // test move object copy constructor
             {
-                TestObjPtr_t ptrObj (new TestObj);
-                TestObj* pObj = ptrObj.get ();
-                TestObjPtr_t::move_type moveObj1 (ptrObj.move ());
+                TestObjPtr_t ptrObj1 (new TestObj);
+                TestObj* pObj1 = ptrObj1.get ();
+                TestObjPtr_t::move_type moveObj1 (ptrObj1.move ());
                 TestObjPtr_t::move_type moveObj2 (moveObj1);
-                TestObjMoveCheat_t const* const pCheat1 =
-                reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj1);
-                TestObjMoveCheat_t const* const pCheat2 =
-                reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj2);
+                TestObjPtr_t ptrObj2 (moveObj1);
+                TestObjPtr_t ptrObj3 (moveObj2);
+                TestObjPtr_t ptrObj4 (moveObj2);
                 if ((1 + count) != TestObj::s_count ||
-                    0 != pCheat1->m_pT ||
-                    pObj != pCheat2->m_pT)
+                    0 != ptrObj1.get () ||
+                    0 != ptrObj2.get () ||
+                    pObj1 != ptrObj3.get () ||
+                    0 != ptrObj4.get ())
                 {
                     result |= MOVE_OBJ_FAILED;
                 }
@@ -1113,9 +1111,9 @@ public:
             // test pass empty move object to function
             {
                 TestObjPtr_t ptrObj;
-                result |= passMoveType<TestObjPtr_t::element_type,
-                TestObjPtr_t::deleter_type>(ptrObj.move (),
-                                            count, 0);
+                result |= passMoveType<
+                    TestObjPtr_t::element_type,
+                    TestObjPtr_t::deleter_type>(ptrObj.move (), count, 0);
             }
             if (count != TestObj::s_count)
             {
@@ -1142,8 +1140,6 @@ public:
     {
         result_type result = SUCCESS;
         typedef unique_ptr<TestObj[]> TestObjPtr_t;
-        typedef MoveObjCheat<TestObjPtr_t::element_type,
-        TestObjPtr_t::deleter_type> TestObjMoveCheat_t;
         size_t const count = TestObj::s_count;
         {
             // test empty move object
@@ -1157,12 +1153,14 @@ public:
             }
             // test move object
             {
-                TestObjPtr_t ptrObj (new TestObj[ARRAY_SIZE]);
-                TestObjPtr_t::pointer pObj = ptrObj.get ();
-                TestObjPtr_t::move_type moveObj (ptrObj.move ());
-                TestObjMoveCheat_t const* const pCheat =
-                reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj);
-                if (pCheat->m_pT != pObj ||
+                TestObjPtr_t ptrObj1 (new TestObj[ARRAY_SIZE]);
+                TestObjPtr_t::pointer const pObj1 = ptrObj1.get ();
+                TestObjPtr_t::move_type moveObj1 (ptrObj1.move ());
+                TestObjPtr_t ptrObj2 (moveObj1);
+                TestObjPtr_t ptrObj3 (moveObj1);
+                if (0 != ptrObj1.get () ||
+                    pObj1 != ptrObj2.get () ||
+                    0 != ptrObj3.get () ||
                     (1 * ARRAY_SIZE + count) != TestObj::s_count)
                 {
                     result |= MOVE_OBJ_FAILED;
@@ -1174,17 +1172,18 @@ public:
             }
             // test move object copy constructor
             {
-                TestObjPtr_t ptrObj (new TestObj[ARRAY_SIZE]);
-                TestObj* pObj = ptrObj.get ();
-                TestObjPtr_t::move_type moveObj1 (ptrObj.move ());
+                TestObjPtr_t ptrObj1 (new TestObj[ARRAY_SIZE]);
+                TestObj const* const pObj1 = ptrObj1.get ();
+                TestObjPtr_t::move_type moveObj1 (ptrObj1.move ());
                 TestObjPtr_t::move_type moveObj2 (moveObj1);
-                TestObjMoveCheat_t const* const pCheat1 =
-                reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj1);
-                TestObjMoveCheat_t const* const pCheat2 =
-                reinterpret_cast<TestObjMoveCheat_t const *>(&moveObj2);
-                if ((1 * ARRAY_SIZE + count) != TestObj::s_count ||
-                    0 != pCheat1->m_pT ||
-                    pObj != pCheat2->m_pT)
+                TestObjPtr_t ptrObj2 (moveObj1);
+                TestObjPtr_t ptrObj3 (moveObj2);
+                TestObjPtr_t ptrObj4 (moveObj2);
+                if (0 != ptrObj1.get () ||
+                    0 != ptrObj2.get () ||
+                    pObj1 != ptrObj3.get () ||
+                    0 != ptrObj4.get () ||
+                    (1 * ARRAY_SIZE + count) != TestObj::s_count)
                 {
                     result |= MOVE_OBJ_FAILED;
                 }
@@ -1250,8 +1249,6 @@ public:
     {
         result_type result = SUCCESS;
         typedef unique_ptr<TestObj> TestObjPtr_t;
-        typedef MoveObjCheat<TestObjPtr_t::element_type,
-        TestObjPtr_t::deleter_type> TestObjMoveCheat_t;
         size_t const count = TestObj::s_count;
         {
             // test empty move object
@@ -1259,20 +1256,18 @@ public:
                 TestObjPtr_t ptrObj1;
                 TestObjPtr_t::pointer const pObj = ptrObj1.get ();
                 TestObjPtr_t::move_type moveObj = ptrObj1.move ();
-                TestObjMoveCheat_t* pCheat =
-                reinterpret_cast<TestObjMoveCheat_t*>(&moveObj);
                 {
                     TestObjPtr_t ptrObj2 (moveObj);
-                    if (pObj != ptrObj2.get () ||
-                        0 != pCheat->m_pT ||
-                        0 != ptrObj1.get () ||
+                    TestObjPtr_t ptrObj3 (moveObj);
+                    if (0 != ptrObj1.get () ||
+                        pObj != ptrObj2.get () ||
+                        0 != ptrObj3.get () ||                        
                         count != TestObj::s_count)
                     {
                         result |= MOVE_CTOR_FAILED;
                     }
                 }
-                if (0 != pCheat->m_pT ||
-                    0 != ptrObj1.get () ||
+                if (0 != ptrObj1.get () ||
                     count != TestObj::s_count)
                 {
                     result |= MOVE_CTOR_FAILED;
@@ -1283,20 +1278,18 @@ public:
                 TestObjPtr_t ptrObj1 (new TestObj);
                 TestObjPtr_t::pointer const pObj = ptrObj1.get ();
                 TestObjPtr_t::move_type moveObj = ptrObj1.move ();
-                TestObjMoveCheat_t* pCheat =
-                reinterpret_cast<TestObjMoveCheat_t*>(&moveObj);
                 {
                     TestObjPtr_t ptrObj2 (moveObj);
-                    if (pObj != ptrObj2.get () ||
-                        0 != pCheat->m_pT ||
-                        0 != ptrObj1.get () ||
+                    TestObjPtr_t ptrObj3 (moveObj);
+                    if (0 != ptrObj1.get () ||
+                        pObj != ptrObj2.get () ||
+                        0 != ptrObj3.get () ||
                         (1 + count) != TestObj::s_count)
                     {
                         result |= MOVE_CTOR_FAILED;
                     }
                 }
-                if (0 != pCheat->m_pT ||
-                    0 != ptrObj1.get () ||
+                if (0 != ptrObj1.get () ||
                     count != TestObj::s_count)
                 {
                     result |= MOVE_CTOR_FAILED;
@@ -1328,8 +1321,6 @@ public:
     {
         result_type result = SUCCESS;
         typedef unique_ptr<TestObj[]> TestObjPtr_t;
-        typedef MoveObjCheat<TestObjPtr_t::element_type,
-        TestObjPtr_t::deleter_type> TestObjMoveCheat_t;
         size_t const count = TestObj::s_count;
         {
             // test empty move object
@@ -1337,20 +1328,18 @@ public:
                 TestObjPtr_t ptrObj1;
                 TestObjPtr_t::pointer const pObj = ptrObj1.get ();
                 TestObjPtr_t::move_type moveObj = ptrObj1.move ();
-                TestObjMoveCheat_t* pCheat =
-                reinterpret_cast<TestObjMoveCheat_t*>(&moveObj);
                 {
                     TestObjPtr_t ptrObj2 (moveObj);
-                    if (pObj != ptrObj2.get () ||
-                        0 != pCheat->m_pT ||
-                        0 != ptrObj1.get () ||
+                    TestObjPtr_t ptrObj3 (moveObj);
+                    if (0 != ptrObj1.get () ||
+                        pObj != ptrObj2.get () ||
+                        0 != ptrObj3.get () ||
                         count != TestObj::s_count)
                     {
                         result |= MOVE_CTOR_FAILED;
                     }
                 }
-                if (0 != pCheat->m_pT ||
-                    0 != ptrObj1.get () ||
+                if (0 != ptrObj1.get () ||
                     count != TestObj::s_count)
                 {
                     result |= MOVE_CTOR_FAILED;
@@ -1361,20 +1350,18 @@ public:
                 TestObjPtr_t ptrObj1 (new TestObj[ARRAY_SIZE]);
                 TestObjPtr_t::pointer const pObj = ptrObj1.get ();
                 TestObjPtr_t::move_type moveObj = ptrObj1.move ();
-                TestObjMoveCheat_t* pCheat =
-                reinterpret_cast<TestObjMoveCheat_t*>(&moveObj);
                 {
                     TestObjPtr_t ptrObj2 (moveObj);
-                    if (pObj != ptrObj2.get () ||
-                        0 != pCheat->m_pT ||
-                        0 != ptrObj1.get () ||
+                    TestObjPtr_t ptrObj3 (moveObj);
+                    if (0 != ptrObj1.get () ||
+                        pObj != ptrObj2.get () ||
+                        0 != ptrObj3.get () ||
                         (1 * ARRAY_SIZE + count) != TestObj::s_count)
                     {
                         result |= MOVE_CTOR_FAILED;
                     }
                 }
-                if (0 != pCheat->m_pT ||
-                    0 != ptrObj1.get () ||
+                if (0 != ptrObj1.get () ||
                     count != TestObj::s_count)
                 {
                     result |= MOVE_CTOR_FAILED;
@@ -1996,5 +1983,6 @@ public:
         CPPUNIT_ASSERT_EQUAL(static_cast<result_type>(SUCCESS), result);
     }
 };
+
 
 CPPUNIT_TEST_SUITE_REGISTRATION( Unique_Ptr_Test );
