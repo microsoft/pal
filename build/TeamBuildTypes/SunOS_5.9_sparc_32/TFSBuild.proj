@@ -107,7 +107,7 @@
     <!-- Text pointing to error/warnings file location on build failure -->
     <ErrorWarningLogText>The errors/warnings log file is at:</ErrorWarningLogText>
     <SkipPostBuild>true</SkipPostBuild>
-    <UnixBuildServer>scxsun13</UnixBuildServer>
+    <UnixBuildServer>scxrrsun13</UnixBuildServer>
     <WorkspaceFolder>$(MSBuildProjectDirectory)\..\sources</WorkspaceFolder>
     <UnixWorkSpaceName>TfsCoreWrkSpc_SunOS_5.9_sparc_32_2010</UnixWorkSpaceName>
 
