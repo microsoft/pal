@@ -321,7 +321,7 @@ namespace SCXSystemLib
     void CpuPropertiesInstance::Update()
     {
 #if defined(linux) 
-		SCX_LOGTRACE(m_log, wstring(L"CpuPropertiesInstance update with cpuinfo"));
+        SCX_LOGTRACE(m_log, wstring(L"CpuPropertiesInstance update with cpuinfo"));
 #elif (defined(sun)) 
         //
         //Go to first kstat
@@ -336,11 +336,12 @@ namespace SCXSystemLib
         //
         //Find the kstat by m_chipid
         //
-        scxulong chipId;
-        if (!m_deps->TryGetValue(cAttrName_ChipID, chipId))
+        scxulong uChipId;
+        if (!m_deps->TryGetValue(cAttrName_ChipID, uChipId))
         {
             throw SCXNotSupportedException(L"Chip Id not exist", SCXSRCLOCATION);
         }
+        scxlong chipId = static_cast<scxlong>( uChipId );
         //
         //Get clock_MHz and current_clock_Hz
         //
@@ -487,15 +488,16 @@ namespace SCXSystemLib
 
             if (!m_deps->Lookup(cModul_Name, cpuInfoName.str(), cInstancesNum)) break;
 
-            scxulong newChipId = 0;
+            scxulong uNewChipId = 0;
             //
             // Check ChipId. If chip_id not exist, give a default value 1.
             //
-            if (!m_deps->TryGetValue(cAttrName_ChipID, newChipId))
+            if (!m_deps->TryGetValue(cAttrName_ChipID, uNewChipId))
             {
                 logicalProcessorsCount++;
                 break;
             }
+            scxlong newChipId = static_cast<scxlong>( uNewChipId );
             //
             // Check ChipId. If equal, number Of Logical Processors add 1.
             //
@@ -534,28 +536,28 @@ namespace SCXSystemLib
         m_processorAttr.processorId = m_processorAttr.cpuKey;
         m_processorAttr.deviceID = m_processorAttr.cpuKey;
 
-		unsigned int numberOfCoresperCPU = 0;
-		struct pst_processor psp[PST_MAX_PROCS] = { { 0 } };
-		wstring  tmpPhysicalID;
+        unsigned int numberOfCoresperCPU = 0;
+        struct pst_processor psp[PST_MAX_PROCS] = { { 0 } };
+        wstring  tmpPhysicalID;
 
-		int cpuTotal = pstat_getprocessor(psp, sizeof(struct pst_processor), PST_MAX_PROCS, 0);
-		
-		if (-1 == cpuTotal)
-		{
-		    SCX_LOGTRACE(m_log, L"pstat_getprocessor failed. errno " + errno);
-		    throw SCXCoreLib::SCXInvalidStateException(L"pstat_getprocessor failed. errno " + errno, SCXSRCLOCATION);
-		}
-#if (PF_MINOR >= 31)		
-		for (unsigned int i= 0; i< cpuTotal; i++)
-		{
+        int cpuTotal = pstat_getprocessor(psp, sizeof(struct pst_processor), PST_MAX_PROCS, 0);
+
+        if (-1 == cpuTotal)
+        {
+            SCX_LOGTRACE(m_log, L"pstat_getprocessor failed. errno " + errno);
+            throw SCXCoreLib::SCXInvalidStateException(L"pstat_getprocessor failed. errno " + errno, SCXSRCLOCATION);
+        }
+#if (PF_MINOR >= 31)            
+        for (unsigned int i= 0; i< cpuTotal; i++)
+        {
             tmpPhysicalID = StrFrom(psp[i].psp_socket_id);    
             if (tmpPhysicalID == m_socketId)
-			{
-				numberOfCoresperCPU++;
-			}
-		}
+            {
+                numberOfCoresperCPU++;
+            }
+        }
         m_processorAttr.numberOfCores = numberOfCoresperCPU;
-		m_processorAttr.numberOfLogicalProcessors = numberOfCoresperCPU;
+        m_processorAttr.numberOfLogicalProcessors = numberOfCoresperCPU;
 #endif
         int64_t cpuChipType ;
         if ((cpuChipType = sysconf(_SC_CPU_CHIP_TYPE)) == -1)
@@ -983,7 +985,7 @@ namespace SCXSystemLib
 #if defined(linux) || defined(sun) || defined(aix) 
         // The frequency is unknown.
         // Returning false results in this property being posted as NULL.
-		externalClock = 0;
+        externalClock = 0;
         fRet = false;
 #elif defined(hpux) 
         if (m_processorAttr.extClock > 0)

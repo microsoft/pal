@@ -897,6 +897,29 @@ public:
         }
     }
 
+    bool MeetsPrerequisites(std::wstring testName)
+    {
+#if defined(hpux)
+        /* HP needs privileges because sudo doesn't work reliably when already sudo'ed */
+        if (0 == geteuid())
+        {
+            return true;
+        }
+
+        std::wstring warnText;
+
+        warnText = L"Platform needs privileges to run CPUEnumeration_Test::" + testName + L" test";
+
+        SCXUNIT_WARNING(warnText);
+        return false;
+#else
+        /* No privileges needed */
+        (void) testName;
+
+        return true;
+#endif
+    }
+
     void testMockedValues()
     {
         // Set up some values to use for testing
@@ -1240,6 +1263,9 @@ public:
         std::ostringstream streamOutstr;
         std::ostringstream streamErrstr;
 
+        if ( ! MeetsPrerequisites(L"testGetProcessorCountLogical"))
+            return;
+
         /*--------sample output on AIX------------------------*/
         /*--cmd: bindprocessor -q        
             output: The available processors are:  0 1 2 3 4 5 6 7
@@ -1271,7 +1297,7 @@ public:
         #if defined(aix)
             cmdStrNumOfLogProcessor = L"bindprocessor -q";
         #elif defined(hpux)
-            cmdStrNumOfLogProcessor = L"sudo ioscan -fnC processor";
+            cmdStrNumOfLogProcessor = L"ioscan -fnC processor";
         #elif defined(sun)
             cmdStrNumOfLogProcessor = L"psrinfo";
         #elif defined(linux)
