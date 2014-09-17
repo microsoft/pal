@@ -52,8 +52,14 @@
 // For stat()
 #include <sys/stat.h>
 
-// For getutxent
+// For getutxent and reading utmp file
 #include <utmpx.h>
+#include <fcntl.h>
+
+#if defined(aix) && !defined(UTMPX_FILE)
+#define UTMPX_FILE UTMP_FILE //compatibility hack
+#endif
+
 
 #if defined(linux) || defined(sun)
 // Regexp includes
@@ -675,7 +681,7 @@ namespace SCXSystemLib
             SCX_LOGERROR(m_log, StrAppend(L"Could not do uname(). errno = ", errno));
         }
 
-#if defined(linux)
+#if defined(linux) || defined(aix) || defined(sun)
 
         SetBootTime();
 
@@ -688,7 +694,7 @@ namespace SCXSystemLib
             m_pstd_isValid = false;
         }
 
-#elif defined (aix) || defined(macos) || defined(sun)
+#elif defined(macos)
         // Nothing extra for these platforms
 #else
         #error Platform not supported
@@ -750,35 +756,6 @@ namespace SCXSystemLib
 
 #if defined(linux)
     /**
-       Sets the time related member variables.
-
-       Information is read from the file /proc/uptime that contains the
-       number of seconds since the system was last rebooted.
-
-       This code is duplicated from processinstance.cpp.
-    */
-    void OSInstance::SetBootTime(void)
-    {
-        m_system_boot_isValid = false;
-        //m_system_boot.IsInitialized();
-        // First read seconds since boot
-        FILE *f = fopen("/proc/uptime", "r");
-        if (!f) {
-            SCX_LOGERROR(m_log, StrAppend(L"Could not open /proc/uptime. errno = ", errno));
-        }
-        int s = fscanf(f, "%lf", &m_upsec);
-        fclose(f);
-        if (s != 1) {
-            SCX_LOGERROR(m_log, StrAppend(L"Could not read /proc/uptime. errno = ", errno));
-        }
-
-        SCXAmountOfTime delta;
-        delta.SetSeconds(m_upsec);
-        m_system_boot = m_now - delta;
-        m_system_boot_isValid = true;
-    }
-
-    /**
        Computes the kernel-configured maximum number
        of processes.
 
@@ -825,6 +802,53 @@ namespace SCXSystemLib
         }
     }
 
+#endif
+    
+#if defined(aix) || defined(sun) || defined(linux)
+    /**
+     *  Sets the time related member variables.
+     *  Information is read from the utmp file
+     */
+    void OSInstance::SetBootTime(void)
+    {
+        m_system_boot_isValid = false;
+
+        int fd;
+        struct utmpx record;
+        int reclen = sizeof(struct utmpx);
+
+        fd = open(UTMPX_FILE, O_RDONLY);
+        if (fd == -1){
+            SCX_LOGERROR(m_log, StrAppend(L"Could not open UTMP file. errno = ", errno));
+            return;
+        }
+        
+        while (read(fd, &record, reclen) == reclen)
+        {
+            if (strcmp(record.ut_line, "system boot") == 0 || //aix
+                strcmp(record.ut_user, "reboot") == 0 ||      //linux
+                strcmp(record.ut_id, "si") == 0)              //suse
+            {
+                time_t boot_time = record.ut_tv.tv_sec;
+                SCX_LOGTRACE(m_log, StrAppend(L"Read utmp system boot time = ", boot_time));
+                try
+                {
+                    m_system_boot = SCXCalendarTime::FromPosixTime((scxulong)boot_time);
+                }
+                catch (const SCXNotSupportedException& e)
+                {
+                    SCX_LOGERROR(m_log, std::wstring(L"Error converting timestamp")
+                                 .append(L" - ").append(e.What()));
+                    break;
+                }
+                m_system_boot_isValid = true;
+                break;
+            }
+        }
+        
+        
+        close (fd);
+    }
 #endif
 
     /*----------------------------------------------------------------------------*/
@@ -1180,20 +1204,12 @@ namespace SCXSystemLib
     */
     bool OSInstance::GetLastBootUpTime(SCXCalendarTime& lbut) const
     {
-#if defined(linux)
+#if defined(linux) || defined(hpux) || defined(aix) || defined(sun)
         // Same basic solution as Pegasus, but we have a time PAL to use instead
         // The m_system_boot is set once by Update().
         if (!m_system_boot_isValid) { return false; }
         lbut = m_system_boot;
         return true;
-#elif defined(hpux)
-        if (!m_system_boot_isValid) { return false; }
-        lbut = m_system_boot;
-        return true;
-#elif defined(aix) || defined(sun)
-        // Not supported in the Pegasus implementation for AIX or Solaris
-        (void) lbut;
-        return false;
 #else
         #error Platform not supported
 #endif

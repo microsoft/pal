@@ -156,6 +156,10 @@ namespace SCXSystemLib
         struct utsname m_unameInfo;             //!< Saves the output from uname()
         bool m_unameIsValid;                    //!< Is m_unameInfo valid now?
 
+        SCXCalendarTime m_system_boot;          //!< Time of system boot
+        bool m_system_boot_isValid;             //!< Is m_system_boot valid now?
+        SCXCalendarTime m_now;                  //!< Current time on system
+
 #if defined(linux)
         void SetBootTime(void);
         void PrecomputeMaxProcesses(void);
@@ -165,10 +169,6 @@ namespace SCXSystemLib
         std::wstring m_platform;                //!< The current platform and version
 #endif
 
-        SCXCalendarTime m_system_boot;          //!< Time of system boot
-        bool m_system_boot_isValid;             //!< Is m_system_boot valid now?
-        SCXCalendarTime m_now;                  //!< Current time on system
-
 #if defined(hpux)
         void SetBootTime(void);
 
@@ -176,6 +176,10 @@ namespace SCXSystemLib
         struct pst_dynamic m_pstd;              //!< Holds output from pstat_getdynamic
         bool m_psts_isValid;                    //!< Is m_psts valid now?
         bool m_pstd_isValid;                    //!< Is m_pstd valid now?
+#endif
+
+#if defined(aix) || defined(sun)
+        void SetBootTime(void);
 #endif
 
         std::wstring m_LangSetting;               //!< System LANG environment variable setting

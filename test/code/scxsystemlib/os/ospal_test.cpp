@@ -111,6 +111,7 @@ class OSPAL_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( callDumpStringForCoverage );
     CPPUNIT_TEST( testTotalInstanceExists );
     CPPUNIT_TEST( testParseLangVariable );
+    CPPUNIT_TEST( testBootTime );
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -181,6 +182,68 @@ public:
         }
     }
 
+    std::wstring GetCommandLineBootTime()
+    {
+        std::istringstream input;
+        std::ostringstream output;
+        std::ostringstream error;
+        int procRet = SCXCoreLib::SCXProcess::Run(L"who -b", input, output, error);
+        CPPUNIT_ASSERT_EQUAL( std::string(""), error.str() );
+        CPPUNIT_ASSERT_EQUAL( 0, procRet );
+        return StrFromUTF8(output.str());
+    }
+
+    wstring GetExpectedNeedle(const SCXCalendarTime& boot_time)
+    {
+        char timeBuffer[128];
+        const time_t posixTime = static_cast<time_t>(boot_time.ToPosixTime());
+        struct tm* timeInfo = localtime(&posixTime);
+#if defined(linux)
+        const char timeFormat[] = "%F %R";
+#else
+        const char timeFormat[] = "%b %d %H:%M";
+#endif
+
+        if (strftime(timeBuffer, sizeof(timeBuffer), timeFormat, timeInfo) == 0) {
+            // error timeBuffer length not enough
+            timeBuffer[0] = '\0';
+        }
+
+        std::wostringstream buf;
+        buf << timeBuffer;
+        return buf.str();
+    }
+
+    void testBootTime()
+    {
+        m_osEnum = new OSEnumeration();
+        m_osEnum->Init();
+        m_osEnum->Update(true);
+
+        SCXCoreLib::SCXHandle<OSInstance> inst = m_osEnum->GetTotalInstance();
+        SCXCalendarTime currentTime = SCXCalendarTime::CurrentLocal();
+        SCXCalendarTime ASCXCalendarTime;
+
+        inst->GetLastBootUpTime(ASCXCalendarTime);
+        CPPUNIT_ASSERT((currentTime.GetYear()-ASCXCalendarTime.GetYear() ) <= 2);
+        CPPUNIT_ASSERT(currentTime > ASCXCalendarTime);
+
+        wstring cmdBootTime = GetCommandLineBootTime();
+        if (cmdBootTime.size() == 0)
+        {
+            SCXUNIT_WARNING(L"OSPAL_Test::testBootTime() Command 'who -b' returned empty string");
+        }
+        else
+        {
+            wstring expected_needle = GetExpectedNeedle(ASCXCalendarTime);
+            std::size_t found = cmdBootTime.find(expected_needle);
+            std::wostringstream buf;
+            buf << L"Could not find expected boot time: '" << expected_needle 
+                << L"' in 'who -b' output'" << cmdBootTime << L"'";
+            CPPUNIT_ASSERT_MESSAGE(StrToUTF8(buf.str()), found != std::string::npos);
+        }
+    }
+
     void SweepOSInstance(SCXCoreLib::SCXHandle<OSInstance> inst)
     {
         // Just access all methods so we can see that nothing fails fatal
@@ -194,39 +257,32 @@ public:
         short Ashort;
         unsigned int Auint;
         bool retVal;
-        SCXCalendarTime currentTime = SCXCalendarTime::CurrentLocal();
+        
         CPPUNIT_ASSERT(inst->GetOSType(Aunsignedshort));
         CPPUNIT_ASSERT(inst->GetOtherTypeDescription(Ascxstring));
-        #if !defined(PF_DISTRO_ULINUX)
-            CPPUNIT_ASSERT(inst->GetVersion(Ascxstring));
-            CPPUNIT_ASSERT(inst->GetManufacturer(Ascxstring));
-        #endif    
-		
-        retVal = inst->GetLastBootUpTime(ASCXCalendarTime);
-        #if defined (linux) || defined (hpux)
-            CPPUNIT_ASSERT(retVal);
-            CPPUNIT_ASSERT((currentTime.GetYear()-ASCXCalendarTime.GetYear() ) <= 2);
-            CPPUNIT_ASSERT(currentTime > ASCXCalendarTime);
-        #endif
-
+#if !defined(PF_DISTRO_ULINUX)
+        CPPUNIT_ASSERT(inst->GetVersion(Ascxstring));
+        CPPUNIT_ASSERT(inst->GetManufacturer(Ascxstring));
+#endif    
+        
+        CPPUNIT_ASSERT(inst->GetLastBootUpTime(ASCXCalendarTime));
         CPPUNIT_ASSERT(inst->GetLocalDateTime(ASCXCalendarTime));
         CPPUNIT_ASSERT(inst->GetCurrentTimeZone(Ashort));
         CPPUNIT_ASSERT(inst->GetNumberOfLicensedUsers(Auint));
         CPPUNIT_ASSERT(inst->GetNumberOfUsers(Auint));
 
         retVal = inst->GetMaxNumberOfProcesses(Auint);
-        #if defined (linux) || defined (hpux)
-            CPPUNIT_ASSERT(retVal);
+#if defined (linux) || defined (hpux)
+        CPPUNIT_ASSERT(retVal);
+#endif
 
-        #endif
-
-	    CPPUNIT_ASSERT(inst->GetMaxProcessMemorySize(Ascxulong));
-		inst->GetMaxProcessesPerUser(Auint);
+        CPPUNIT_ASSERT(inst->GetMaxProcessMemorySize(Ascxulong));
+        inst->GetMaxProcessesPerUser(Auint);
 
         retVal = inst->GetSystemUpTime(Ascxulong);
-		#if defined (linux) || defined (hpux)
-		    CPPUNIT_ASSERT(retVal);
-		#endif
+#if defined (linux) || defined (hpux)
+        CPPUNIT_ASSERT(retVal);
+#endif
     }
 };
 
