@@ -1,13 +1,13 @@
 /*--------------------------------------------------------------------------------
- Copyright (c) Microsoft Corporation.  All rights reserved.
+  Copyright (c) Microsoft Corporation.  All rights reserved.
 
- Created date    2011-04-02 09:51:06
+  Created date    2011-04-02 09:51:06
 
- cpuproperties colletion test class.
+  cpuproperties colletion test class.
 
-This class tests the Linux, Solaris(x86) implementations.
+  This class tests the Linux, Solaris(x86) implementations.
 
-It checks the result of cpuproperties detail information.
+  It checks the result of cpuproperties detail information.
 
 */
 /*----------------------------------------------------------------------------*/
@@ -32,115 +32,115 @@ using namespace std;
 
 #if defined(linux)
 /**
-    Class for injecting test behavior into the cpuproperties PAL.
- */
+   Class for injecting test behavior into the cpuproperties PAL.
+*/
 class CPUInfoTestDependencies: public CPUInfoDependencies
 {
 public:
     CPUInfoTestDependencies(): m_cpuInfoFileType(-1){}
     void SetCpuInfoFileType(int type) { m_cpuInfoFileType = type; }
-	SCXCoreLib::SCXHandle<std::wistream> OpenCpuinfoFile() const
+    SCXCoreLib::SCXHandle<std::wistream> OpenCpuinfoFile() const
     {
         SCXHandle<wstringstream> cpuInfoStream( new wstringstream );
         switch (m_cpuInfoFileType)
         {
             case 0: //no physcial id field
-               * cpuInfoStream 
-                    << L"processor       : 0" << endl
-                    << L"vendor_id       : GenuineIntel" << endl
-                    << L"cpu family      : 6" << endl
-                    << L"model           : 12" << endl
-                    << L"model name      : Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2104.008" << endl
-                    << L"cache size      : 0 KB" << endl
-                    << L"fpu             : yes" << endl
-                    << L"fpu_exception   : yes" << endl
-                    << L"cpuid level     : 11" << endl
-                    << L"wp              : yes" << endl
-                    << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx lm pni cx16 ts" << endl
-                    << L"bogomips        : 3145.72" << endl
-                    << L"clflush size    : 64" << endl
-                    << L"cache_alignment : 64" << endl
-                    << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
-                    << L"power management:" << endl
+                * cpuInfoStream 
+                << L"processor       : 0" << endl
+                << L"vendor_id       : GenuineIntel" << endl
+                << L"cpu family      : 6" << endl
+                << L"model           : 12" << endl
+                << L"model name      : Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2104.008" << endl
+                << L"cache size      : 0 KB" << endl
+                << L"fpu             : yes" << endl
+                << L"fpu_exception   : yes" << endl
+                << L"cpuid level     : 11" << endl
+                << L"wp              : yes" << endl
+                << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx lm pni cx16 ts" << endl
+                << L"bogomips        : 3145.72" << endl
+                << L"clflush size    : 64" << endl
+                << L"cache_alignment : 64" << endl
+                << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
+                << L"power management:" << endl
 
-                    << L"processor       : 1" << endl
-                    << L"vendor_id       : GenuineIntel" << endl
-                    << L"cpu family      : 6" << endl
-                    << L"model           : 12" << endl
-                    << L"model name      : Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2104.008" << endl
-                    << L"cache size      : 0 KB" << endl
-                    << L"fpu             : yes" << endl
-                    << L"fpu_exception   : yes" << endl
-                    << L"cpuid level     : 11" << endl
-                    << L"wp              : yes" << endl
-                    << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx lm pni cx16 ts" << endl
-                    << L"bogomips        : 2093.05" << endl
-                    << L"clflush size    : 64" << endl
-                    << L"cache_alignment : 64" << endl
-                    << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
-                    << L"power management:" << endl;
+                << L"processor       : 1" << endl
+                << L"vendor_id       : GenuineIntel" << endl
+                << L"cpu family      : 6" << endl
+                << L"model           : 12" << endl
+                << L"model name      : Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2104.008" << endl
+                << L"cache size      : 0 KB" << endl
+                << L"fpu             : yes" << endl
+                << L"fpu_exception   : yes" << endl
+                << L"cpuid level     : 11" << endl
+                << L"wp              : yes" << endl
+                << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx lm pni cx16 ts" << endl
+                << L"bogomips        : 2093.05" << endl
+                << L"clflush size    : 64" << endl
+                << L"cache_alignment : 64" << endl
+                << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
+                << L"power management:" << endl;
                 break;   
             case 1: //1 physical id exist with 2 cores on it
                 * cpuInfoStream 
-                    << L"processor       : 0" << endl
-                    << L"model           : 44" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2132.826" << endl
-                    << L"physical id     : 0" << endl
-                    << L"siblings        : 2" << endl
-                    << L"core id         : 0" << endl
-                    << L"cpu cores       : 2" << endl
+                << L"processor       : 0" << endl
+                << L"model           : 44" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2132.826" << endl
+                << L"physical id     : 0" << endl
+                << L"siblings        : 2" << endl
+                << L"core id         : 0" << endl
+                << L"cpu cores       : 2" << endl
 
-                    << L"processor       : 1" << endl
-                    << L"model           : 44" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2132.826" << endl
-                    << L"physical id     : 0" << endl
-                    << L"siblings        : 2" << endl
-                    << L"core id         : 1" << endl
-                    << L"cpu cores       : 2" << endl;
+                << L"processor       : 1" << endl
+                << L"model           : 44" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2132.826" << endl
+                << L"physical id     : 0" << endl
+                << L"siblings        : 2" << endl
+                << L"core id         : 1" << endl
+                << L"cpu cores       : 2" << endl;
                 break;
             case 2: // 2 physical id exist with 2 cores on each
                 * cpuInfoStream
-                    << L"processor       : 0" << endl
-                    << L"model           : 44" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2132.826" << endl
-                    << L"physical id     : 0" << endl
-                    << L"siblings        : 2" << endl
-                    << L"core id         : 0" << endl
-                    << L"cpu cores       : 2" << endl
+                << L"processor       : 0" << endl
+                << L"model           : 44" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2132.826" << endl
+                << L"physical id     : 0" << endl
+                << L"siblings        : 2" << endl
+                << L"core id         : 0" << endl
+                << L"cpu cores       : 2" << endl
 
-                    << L"processor       : 1" << endl
-                    << L"model           : 44" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2132.826" << endl
-                    << L"physical id     : 0" << endl
-                    << L"siblings        : 2" << endl
-                    << L"core id         : 1" << endl
-                    << L"cpu cores       : 2" << endl 
+                << L"processor       : 1" << endl
+                << L"model           : 44" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2132.826" << endl
+                << L"physical id     : 0" << endl
+                << L"siblings        : 2" << endl
+                << L"core id         : 1" << endl
+                << L"cpu cores       : 2" << endl 
 
-                    << L"processor       : 2" << endl
-                    << L"model           : 44" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2132.826" << endl
-                    << L"physical id     : 2" << endl
-                    << L"siblings        : 2" << endl
-                    << L"core id         : 0" << endl
-                    << L"cpu cores       : 2" << endl
+                << L"processor       : 2" << endl
+                << L"model           : 44" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2132.826" << endl
+                << L"physical id     : 2" << endl
+                << L"siblings        : 2" << endl
+                << L"core id         : 0" << endl
+                << L"cpu cores       : 2" << endl
 
-                    << L"processor       : 3" << endl
-                    << L"model           : 44" << endl
-                    << L"stepping        : 2" << endl
-                    << L"cpu MHz         : 2132.826" << endl
-                    << L"physical id     : 2" << endl
-                    << L"siblings        : 2" << endl
-                    << L"core id         : 1" << endl
-                    << L"cpu cores       : 2" << endl; 
+                << L"processor       : 3" << endl
+                << L"model           : 44" << endl
+                << L"stepping        : 2" << endl
+                << L"cpu MHz         : 2132.826" << endl
+                << L"physical id     : 2" << endl
+                << L"siblings        : 2" << endl
+                << L"core id         : 1" << endl
+                << L"cpu cores       : 2" << endl; 
                 break;
             default:
                 std::stringstream ss;
@@ -151,25 +151,25 @@ public:
         return cpuInfoStream; 
     }
 private:
-	int m_cpuInfoFileType;
+    int m_cpuInfoFileType;
 };
 
 /**
-    Class for injecting processor family behavior into the cpuproperties PAL.
- */
+   Class for injecting processor family behavior into the cpuproperties PAL.
+*/
 class CPUFamilyTestDependencies: public CPUInfoDependencies
 {
 public:
     string m_vendorString;
     string m_brandString;
-	SCXCoreLib::SCXHandle<std::wistream> OpenCpuinfoFile() const
+    SCXCoreLib::SCXHandle<std::wistream> OpenCpuinfoFile() const
     {
         SCXHandle<wstringstream> cpuInfoStream( new wstringstream );
         *cpuInfoStream 
-            << L"processor       : 0" << endl
-            << L"vendor_id       : " << StrFromMultibyte(m_vendorString) << endl
-            << L"cpu family      : 6" << endl
-            << L"model           : 12" << endl;
+        << L"processor       : 0" << endl
+        << L"vendor_id       : " << StrFromMultibyte(m_vendorString) << endl
+        << L"cpu family      : 6" << endl
+        << L"model           : 12" << endl;
         
         if (m_brandString.empty() != true)
         {
@@ -177,19 +177,19 @@ public:
         }
         
         *cpuInfoStream 
-            << L"stepping        : 2" << endl
-            << L"cpu MHz         : 2104.008" << endl
-            << L"cache size      : 0 KB" << endl
-            << L"fpu             : yes" << endl
-            << L"fpu_exception   : yes" << endl
-            << L"cpuid level     : 11" << endl
-            << L"wp              : yes" << endl
-            << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx lm pni cx16 ts" << endl
-            << L"bogomips        : 3145.72" << endl
-            << L"clflush size    : 64" << endl
-            << L"cache_alignment : 64" << endl
-            << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
-            << L"power management:" << endl;
+        << L"stepping        : 2" << endl
+        << L"cpu MHz         : 2104.008" << endl
+        << L"cache size      : 0 KB" << endl
+        << L"fpu             : yes" << endl
+        << L"fpu_exception   : yes" << endl
+        << L"cpuid level     : 11" << endl
+        << L"wp              : yes" << endl
+        << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx lm pni cx16 ts" << endl
+        << L"bogomips        : 3145.72" << endl
+        << L"clflush size    : 64" << endl
+        << L"cache_alignment : 64" << endl
+        << L"address sizes   : 40 bits physical, 48 bits virtual" << endl
+        << L"power management:" << endl;
 
         return cpuInfoStream; 
     }
@@ -217,11 +217,11 @@ public:
         std::ostringstream errMsg;
         errMsg << "Failed running test for vendor string \'" << vendorString << "\", brand string \"" << brandString <<"\"";
         
-		SCXHandle<CPUFamilyTestDependencies> deps(new CPUFamilyTestDependencies());
+        SCXHandle<CPUFamilyTestDependencies> deps(new CPUFamilyTestDependencies());
         deps->m_vendorString = vendorString;
         deps->m_brandString = brandString;
         SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> filehandle =
-            SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
+        SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
         SCXSystemLib::CpuPropertiesEnumeration cpuPropertiesEnum(filehandle);
         cpuPropertiesEnum.Init();
         CPPUNIT_ASSERT_EQUAL_MESSAGE(errMsg.str(), 1u, cpuPropertiesEnum.Size());
@@ -233,7 +233,7 @@ public:
     }
 #endif
 
-	void testGetCpuFamilyAttr()
+    void testGetCpuFamilyAttr()
     {
 #if defined(linux)
         OneFamilyTest("GenuineIntel", "", 2); // Unknown family.
@@ -264,11 +264,11 @@ public:
     }
 
 #if defined(linux)
-	void testGetCpuInfoWithoutPhysicalid()
+    void testGetCpuInfoWithoutPhysicalid()
     {
         //----------- test scenario, no physical id exist in cpuinfo table----------
-		SCXHandle<CPUInfoTestDependencies> deps(new CPUInfoTestDependencies());
-		deps->SetCpuInfoFileType(0);
+        SCXHandle<CPUInfoTestDependencies> deps(new CPUInfoTestDependencies());
+        deps->SetCpuInfoFileType(0);
         SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> filehandle = SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
         SCXSystemLib::CpuPropertiesEnumeration cpuPropertiesEnum(filehandle);
         cpuPropertiesEnum.Init();
@@ -306,7 +306,10 @@ public:
 
         CPPUNIT_ASSERT(inst->GetName(strtmp));
         CPPUNIT_ASSERT_EQUAL(L"Intel(R) Xeon(R) CPU           L5630  @ 2.13GHz", strtmp);
-
+        
+        CPPUNIT_ASSERT(inst->GetDescription(strtmp));
+        CPPUNIT_ASSERT_EQUAL(L"GenuineIntel Family 179 Model 12 Stepping 2", strtmp);
+        
         bool btmp = false;
         CPPUNIT_ASSERT(inst->GetIs64Bit(btmp));
         CPPUNIT_ASSERT_EQUAL(true, btmp);
@@ -318,17 +321,17 @@ public:
         //true if vme || svm || vmx
         CPPUNIT_ASSERT(inst->GetIsVirtualizationCapable(btmp)); 
         CPPUNIT_ASSERT_EQUAL(true, btmp);
-   }
+    }
 
-   void testGetCpuInfoWithPhysicalIDOnechip()
-   {
+    void testGetCpuInfoWithPhysicalIDOnechip()
+    {
         //----------- test scenario, physical id exist in cpuinfo table----------
-		SCXHandle<CPUInfoTestDependencies> deps(new CPUInfoTestDependencies());
-		deps->SetCpuInfoFileType(1);
-		SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> filehandle = SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
+        SCXHandle<CPUInfoTestDependencies> deps(new CPUInfoTestDependencies());
+        deps->SetCpuInfoFileType(1);
+        SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> filehandle = SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
         SCXSystemLib::CpuPropertiesEnumeration cpuPropertiesEnum(filehandle);
         cpuPropertiesEnum.Init();
-		SCXCoreLib::SCXHandle<CpuPropertiesInstance> inst = cpuPropertiesEnum.GetInstance(0);
+        SCXCoreLib::SCXHandle<CpuPropertiesInstance> inst = cpuPropertiesEnum.GetInstance(0);
 
         wstring strtmp = L"";
         CPPUNIT_ASSERT(inst->GetRole(strtmp));
@@ -354,16 +357,16 @@ public:
         CPPUNIT_ASSERT(inst->GetNumberOfCores(itmp));
         CPPUNIT_ASSERT_EQUAL((unsigned int)2, itmp);
     }
-	
-	void testGetCpuInfoWithPhysicalIDTwochip()
-	{
+        
+    void testGetCpuInfoWithPhysicalIDTwochip()
+    {
         //----------- test scenario, physical id exist in cpuinfo table, 2 chips and each with 2 cores on it----------
-		SCXHandle<CPUInfoTestDependencies> deps(new CPUInfoTestDependencies());
-		deps->SetCpuInfoFileType(2);
-		SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> filehandle = SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
+        SCXHandle<CPUInfoTestDependencies> deps(new CPUInfoTestDependencies());
+        deps->SetCpuInfoFileType(2);
+        SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> filehandle = SCXHandle<SCXSystemLib::ProcfsCpuInfoReader> (new ProcfsCpuInfoReader(deps));
         SCXSystemLib::CpuPropertiesEnumeration cpuPropertiesEnum(filehandle);
         cpuPropertiesEnum.Init();
-		SCXCoreLib::SCXHandle<CpuPropertiesInstance> inst = cpuPropertiesEnum.GetInstance(0);
+        SCXCoreLib::SCXHandle<CpuPropertiesInstance> inst = cpuPropertiesEnum.GetInstance(0);
 
         wstring strtmp = L"";
         CPPUNIT_ASSERT(inst->GetRole(strtmp));
@@ -397,15 +400,15 @@ public:
     void testGetCpuPropertiesAttr()
     {
 #if defined(linux)
-    testGetCpuInfoWithoutPhysicalid();
-	testGetCpuInfoWithPhysicalIDOnechip();
-	testGetCpuInfoWithPhysicalIDTwochip();
+        testGetCpuInfoWithoutPhysicalid();
+        testGetCpuInfoWithPhysicalIDOnechip();
+        testGetCpuInfoWithPhysicalIDTwochip();
 #elif defined(sun)
-    testGetCpuPropertiesAttrSun();
+        testGetCpuPropertiesAttrSun();
 #elif defined(hpux)
-    testGetCpuPropertiesAttrbyCmd();
-    testGetCpuPropertiesAttrCPUChipInfo();
-    testGetCpuPropertiesAttrDevID();
+        testGetCpuPropertiesAttrbyCmd();
+        testGetCpuPropertiesAttrCPUChipInfo();
+        testGetCpuPropertiesAttrDevID();
 #endif
     }
 
@@ -421,7 +424,7 @@ public:
         std::string deviceId = "CPU ";
         unsigned short family;
         unsigned int normSpeed, currentSpeed;
-		std::string stepping;
+        std::string stepping;
         unsigned int numberOfCores, numLogicalProcs=0;
         string manufacturer, name, chipId, model;
         bool firstModule=false;
@@ -535,6 +538,13 @@ public:
         CPPUNIT_ASSERT_EQUAL(deviceId, StrToUTF8(strtmp));
 
         CPPUNIT_ASSERT(!inst->GetRole(strtmp));
+
+#if !defined(sparc)
+        std::stringstream ss;
+        ss << manufacturer << " Family " << family << " Model " << model << " Stepping " << stepping;
+        CPPUNIT_ASSERT(inst->GetDescription(strtmp));
+        CPPUNIT_ASSERT_EQUAL(ss.str(), StrToUTF8(strtmp));
+#endif
         
         unsigned int itmp = 0;
 #if defined(ia32)
@@ -547,7 +557,7 @@ public:
         unsigned short tmp; 
         CPPUNIT_ASSERT(inst->GetFamily(tmp));
         CPPUNIT_ASSERT_EQUAL(family, tmp);
-
+     
         std::stringstream version(std::stringstream::out);
         version << "Model " << model << " Stepping " << stepping;      
         CPPUNIT_ASSERT(inst->GetVersion(strtmp));
@@ -569,7 +579,7 @@ public:
 #if defined(ia32) || (defined(sparc) && PF_MINOR >= 10)
         CPPUNIT_ASSERT_EQUAL(coreid.size(), itmp);
 #else
-         CPPUNIT_ASSERT_EQUAL(numLogicalProcs, itmp);
+        CPPUNIT_ASSERT_EQUAL(numLogicalProcs, itmp);
 #endif
 
         CPPUNIT_ASSERT(inst->GetNumberOfLogicalProcessors(itmp));
@@ -734,7 +744,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(numberOfLogicalProcessors/numPhysicalCPU, itmp);
 #endif //version checking
     }
-void testGetCpuPropertiesAttrDevID()
+    void testGetCpuPropertiesAttrDevID()
     {
 #if defined(hpux) && ((PF_MAJOR > 11) || (PF_MINOR >= 31))
 
@@ -768,7 +778,7 @@ void testGetCpuPropertiesAttrDevID()
 #endif
     }
 
-void testGetCpuPropertiesAttrCPUChipInfo()
+    void testGetCpuPropertiesAttrCPUChipInfo()
     {
 #if defined(hpux)
         std::istringstream streamInstr;

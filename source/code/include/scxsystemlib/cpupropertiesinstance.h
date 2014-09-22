@@ -369,15 +369,15 @@ namespace SCXSystemLib
           ThrowException: SCXNotSupportException - For not implemented platform.
          */
         bool GetRole(std::wstring& role) const;
-		/*----------------------------------------------------------------------------*/
-		/**
-	      Device ID.
-		
-	      Parameters:  deviceId-  Device ID.
-		  Returns:     whether the implementation for this platform supports the value.
-		  ThrowException: SCXNotSupportException - For not implemented platform.
-		 */
-	    bool GetDeviceID(std::wstring& deviceId) const;
+        /*----------------------------------------------------------------------------*/
+        /**
+           Device ID.
+                
+           Parameters:  deviceId-  Device ID.
+           Returns:     whether the implementation for this platform supports the value.
+           ThrowException: SCXNotSupportException - For not implemented platform.
+        */
+        bool GetDeviceID(std::wstring& deviceId) const;
         /*----------------------------------------------------------------------------*/
         /**
           CPU Key.
@@ -387,21 +387,29 @@ namespace SCXSystemLib
           ThrowException: SCXNotSupportException - For not implemented platform.
          */
         bool GetCPUKey(std::wstring& cpuKey) const;
+        /**
+          CPU Description
+
+          Parameters:  description -  CPU description.
+          Returns:     whether the implementation for this platform supports the value.
+          ThrowException: SCXNotSupportException - For not implemented platform.
+         */
+        bool GetDescription(std::wstring& description) const;
 
         private:
 
 #if defined(linux)
         ProcfsCpuInfo m_cpuinfo;
-		ProcfsCpuInfoReader m_cpuinfoTable;
-		unsigned short m_family;
-		unsigned short GetFamily();
+        ProcfsCpuInfoReader m_cpuinfoTable;
+        unsigned short m_family;
+        unsigned short GetFamily();
 #elif defined(hpux)
-		std::wstring m_socketId;
+        std::wstring m_socketId;
 #elif defined(sun) 
         SCXCoreLib::SCXHandle<CpuPropertiesPALDependencies> m_deps; //!< Collects external dependencies of this class.
         std::wstring m_cpuInfoIndex;
 #elif defined(aix) 
-	    bool FillAttributes(void);
+        bool FillAttributes(void);
 
 // _system_configuration.implementation
 #if !defined(POWER_7)

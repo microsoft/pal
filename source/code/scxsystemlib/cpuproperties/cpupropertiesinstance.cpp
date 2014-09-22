@@ -1156,7 +1156,7 @@ namespace SCXSystemLib
     {
         bool fRet = false;
 #if defined(linux) 
-        cpuKey = GetId();;
+        cpuKey = GetId();
         fRet = true;
 #elif defined(sun) 
         cpuKey = m_processorAttr.deviceID;
@@ -1171,6 +1171,36 @@ namespace SCXSystemLib
         // Not implemented platform
         throw SCXNotSupportedException(L"CPUKey", SCXSRCLOCATION);
 #endif
+        return fRet;
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
+      Get cpu Description.
+
+      Parameters:  description- Description string : manufacturer Family # Model # Stepping #
+      Returns:     whether the implementation for this platform supports the value.
+      ThrowException: SCXNotSupportException - For not implemented platform.
+    */
+    bool CpuPropertiesInstance::GetDescription(wstring& description) const
+    {
+        wstring manufacturer, version;
+        unsigned short ufamily;
+        bool gotManufacturer, gotFamily, gotVersion;
+        bool fRet = false;
+
+        gotManufacturer = GetManufacturer(manufacturer);
+        gotFamily = GetFamily(ufamily);
+        gotVersion = GetVersion(version);
+
+        if (gotManufacturer && gotFamily && gotVersion)
+        {
+            std::wstringstream ss;
+            ss << manufacturer << L" Family " << ufamily << L" " << version;
+            description = ss.str();
+            fRet = true;
+        } 
+
         return fRet;
     }
 
