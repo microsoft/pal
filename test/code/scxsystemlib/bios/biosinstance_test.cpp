@@ -13,6 +13,7 @@
 /*----------------------------------------------------------------------------*/
 #include <scxcorelib/scxcmn.h>
 #include <scxsystemlib/biosinstance.h>
+#include <scxcorelib/scxprocess.h>
 #include <scxcorelib/scxtime.h>
 #include <fstream>
 
@@ -163,9 +164,45 @@ public:
 
         SCXCalendarTime tmpDate;
         CPPUNIT_ASSERT(biosInstance->GetInstallDate(tmpDate));
+#elif defined(aix)
+        SCXCoreLib::SCXHandle<BIOSInstance> biosInstance(new BIOSInstance());
+        biosInstance->Update();
+        wstring tmp;
+        
+        CPPUNIT_ASSERT(biosInstance->GetSystemSerialNumber(tmp));
+        CPPUNIT_ASSERT(tmp.size() > 0);
+        CPPUNIT_ASSERT_EQUAL(getCuAtValue(L"attribute=systemid"), tmp);
 
+        CPPUNIT_ASSERT(biosInstance->GetVersion(tmp));
+        CPPUNIT_ASSERT(tmp.size() > 0);
+        CPPUNIT_ASSERT_EQUAL(getCuAtValue(L"attribute=fwversion"), tmp);
 #endif
     }
+
+#if defined(aix)
+    wstring getCuAtValue(wstring query)
+    {
+        std::istringstream in;
+        std::ostringstream out, err;
+        
+        wstring command = L"odmget -q\"" + query + L"\" CuAt";
+        int retValue = SCXCoreLib::SCXProcess::Run(command, in, out, err);
+        
+        CPPUNIT_ASSERT_EQUAL("", err.str());
+        CPPUNIT_ASSERT_EQUAL(0, retValue);
+        wstring output = StrFromUTF8(out.str());
+
+        wstring leftbound = L"value = \"";
+        string::size_type start = output.find(leftbound);
+        CPPUNIT_ASSERT(start != string::npos);
+        start += leftbound.size();
+
+        wstring rightbound = L"\"";
+        string::size_type end = output.find(rightbound, start + 1);
+        CPPUNIT_ASSERT(end != string::npos);
+        return output.substr(start, end - start);
+    }
+#endif
 
 #if defined(linux) || (defined(sun) && defined(ia32))
     void TestBiosCharacteristics_wi478597()

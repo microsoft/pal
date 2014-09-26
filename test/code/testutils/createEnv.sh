@@ -9,7 +9,9 @@ echo >> $ENV_FILE
 echo "LANG=\"$LANG\"; export LANG" >> $ENV_FILE
 
 if [ "`uname`" = "SunOS" ]; then
-	echo "LD_LIBRARY_PATH=/usr/local/ssl/lib; export LD_LIBRARY_PATH" >> $ENV_FILE
+    echo "LD_LIBRARY_PATH=/usr/local/ssl/lib; export LD_LIBRARY_PATH" >> $ENV_FILE
+elif [ "`uname`" = "AIX" ]; then
+    echo "ODMDIR=/etc/objrepos; export ODMDIR" >> $ENV_FILE
 fi
 
 # Export a variable solely so that we can see we're running under test

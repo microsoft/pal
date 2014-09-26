@@ -258,6 +258,29 @@ namespace SCXSystemLib
         {
             SCX_LOG(m_log, infoSuppressor.GetSeverity(L"odm exception"), StrAppend(L"When looking up odm entry for CuAt where attribute=systemid, an exception was thrown: ", e.What()));
         }
+
+        try 
+        {
+            SCXodm odm;
+            struct CuAt atData;
+            memset(&atData, '\0', sizeof(atData));
+            void * pResult = odm.Get(CuAt_CLASS, L"attribute=fwversion", &atData);
+            if (pResult != NULL)
+            {
+                if (atData.value[0] != '\0')
+                {
+                    m_biosPro.version = StrFromUTF8(atData.value);
+                }
+            }
+            else
+            {
+                SCX_LOG(m_log, warningSuppressor.GetSeverity(L"no odm entry"), L"Unable to find odm entry for CuAt where attribute=fwversion.");
+            }
+        }
+        catch (SCXodmException &e)
+        {
+            SCX_LOG(m_log, infoSuppressor.GetSeverity(L"odm exception"), StrAppend(L"When looking up odm entry for CuAt where attribute=fwversion, an exception was thrown: ", e.What()));
+        }
 #else
 #error No implementation for platform.
 #endif
@@ -453,7 +476,7 @@ namespace SCXSystemLib
     bool BIOSInstance::GetVersion(wstring &version) const
     {
         bool fRet = false;
-#if defined(linux) || defined(sun)
+#if defined(linux) || defined(sun) || defined(aix)
         version = m_biosPro.version;
         fRet = true;
 #endif
