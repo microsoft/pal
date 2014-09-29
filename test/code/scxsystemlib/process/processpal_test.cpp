@@ -1990,7 +1990,7 @@ public:
         }
 
         std::stringstream errMsg;
-        std::map<scxulong,int> priritiesFromPS;
+        std::map<scxulong,int> prioritiesFromPS;
         char buf[256];
         // Get rid of first line, then iterate over rest of lines until no more.
         CPPUNIT_ASSERT(fgets(buf, sizeof(buf), psEFile));
@@ -2014,20 +2014,35 @@ public:
             // 4 S     0     1     0  0  80   0 -   252 -      ?        00:00:49 init           
             scan >> skip >> skip >> skip >> pid >> skip >> skip >> pri;
             CPPUNIT_ASSERT(scan.good());
-#else
+#elif defined(sun)
             istringstream scan(buf);
-            // OnSOlaris and AIX the output from 'ps' is in the format:
-            //  PID PRI                                                                        
-            //    0  96                                                                        
+            // On Solaris and AIX the output from 'ps' is in the format:
+            //  PID PRI
+            //    0  96
             scan >> pid;
             CPPUNIT_ASSERT(scan.good());
             scan >>  pri;
             CPPUNIT_ASSERT(scan.eof() || scan.good());
+#elif defined(aix)
+            istringstream scan(buf);
+            string aixPriority;
+            // On Solaris and AIX the output from 'ps' is in the format:
+            //  PID PRI
+            //    0  96
+            //
+            // However, on AIX, PRI may be "-". If we read into an integer, the stream is considered "bad".
+            scan >> pid;
+            CPPUNIT_ASSERT(scan.good());
+            scan >>  aixPriority;
+            CPPUNIT_ASSERT(scan.eof() || scan.good());
+            pri = atoi(aixPriority.c_str());
+#else
+#error Uncrecognized platform
 #endif
             errMsg << pid << '\t' << pri << std::endl;
 
             std::pair<std::map<scxulong,int>::iterator, bool> ret;
-            ret = priritiesFromPS.insert(std::pair<scxulong, int>(pid, pri));
+            ret = prioritiesFromPS.insert(std::pair<scxulong, int>(pid, pri));
             ostringstream msg;
             msg << "process id repeats, pid = " << pid;
             CPPUNIT_ASSERT_MESSAGE(msg.str(), ret.second);
@@ -2059,7 +2074,7 @@ public:
         {
             scxulong pid = palPid[i];
             int pri = palPri[i];
-            if(priritiesFromPS.count(pid) == 0)
+            if(prioritiesFromPS.count(pid) == 0)
             {
                 // This process did not exist when PS command was called. We allow only few occurances.
                 noPSProcessCount++;
@@ -2067,7 +2082,7 @@ public:
                     noPSProcessCount <= 5);
                 continue;
             }
-            int pspri = priritiesFromPS[pid];
+            int pspri = prioritiesFromPS[pid];
 
             unsigned int priDelta = abs(pri - pspri);
             // OS can modify the process priority. Only if priority is off by more than 2 we count it as a mismatch.
