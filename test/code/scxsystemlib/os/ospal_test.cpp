@@ -198,10 +198,10 @@ public:
         char timeBuffer[128];
         const time_t posixTime = static_cast<time_t>(boot_time.ToPosixTime());
         struct tm* timeInfo = localtime(&posixTime);
-#if defined(linux)
-        const char timeFormat[] = "%F %R";
+#if ( defined(PF_DISTRO_REDHAT) && PF_MAJOR <= 4 ) || ( defined(PF_DISTRO_SUSE) && PF_MAJOR <= 9 ) ||  !defined(linux)
+        const char timeFormat[] = "%b %e %H:%M";
 #else
-        const char timeFormat[] = "%b %d %H:%M";
+        const char timeFormat[] = "%F %R";
 #endif
 
         if (strftime(timeBuffer, sizeof(timeBuffer), timeFormat, timeInfo) == 0) {
@@ -235,8 +235,18 @@ public:
         }
         else
         {
-            wstring expected_needle = GetExpectedNeedle(ASCXCalendarTime);
-            std::size_t found = cmdBootTime.find(expected_needle);
+            std::size_t found;
+            wstring expected_needle(L"");
+            // We allow a little fudge factor to prevent rounding errors of the minutes
+            for (scxseconds fudge_seconds = -60.0; fudge_seconds <= 61.0; fudge_seconds += 60.0 )
+            {
+                SCXCalendarTime fudgeTime = ASCXCalendarTime + SCXRelativeTime().SetSeconds(fudge_seconds);
+                expected_needle = GetExpectedNeedle(fudgeTime);
+                found = cmdBootTime.find(expected_needle);
+                if (found != std::string::npos)
+                    break;
+            }
+            
             std::wostringstream buf;
             buf << L"Could not find expected boot time: '" << expected_needle 
                 << L"' in 'who -b' output'" << cmdBootTime << L"'";
