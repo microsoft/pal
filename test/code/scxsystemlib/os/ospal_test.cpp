@@ -182,37 +182,67 @@ public:
         }
     }
 
-    std::wstring GetCommandLineBootTime()
+    std::string GetCommandLineBootTime()
     {
         std::istringstream input;
         std::ostringstream output;
         std::ostringstream error;
+#if defined(PF_DISTRO_SUSE) && PF_MAJOR <= 10
+        int procRet = SCXCoreLib::SCXProcess::Run(L"bash -c \"who -a | head -1\"", input, output, error);
+#else
         int procRet = SCXCoreLib::SCXProcess::Run(L"who -b", input, output, error);
+#endif
         CPPUNIT_ASSERT_EQUAL( std::string(""), error.str() );
         CPPUNIT_ASSERT_EQUAL( 0, procRet );
-        return StrFromUTF8(output.str());
+        return output.str();
     }
 
-    wstring GetExpectedNeedle(const SCXCalendarTime& boot_time)
+    // Return the POSIX time parsed from the 'who -b' output
+    scxlong parseBootTime(string bootTime, int yearHint)
     {
-        char timeBuffer[128];
-        const time_t posixTime = static_cast<time_t>(boot_time.ToPosixTime());
-        struct tm* timeInfo = localtime(&posixTime);
-#if ( defined(PF_DISTRO_REDHAT) && PF_MAJOR <= 4 ) || ( defined(PF_DISTRO_SUSE) && PF_MAJOR <= 9 ) ||  !defined(linux)
-        const char timeFormat[] = "%b %e %H:%M";
+
+#if defined(PF_DISTRO_SUSE) && PF_MAJOR <= 10
+        string timeStr(bootTime);
 #else
-        const char timeFormat[] = "%F %R";
+        // Remove the part before the date from any of the below formats
+        //    .        system boot Sep 28 10:55
+        //          system boot  2014-01-23 21:18
+        string user("system boot");
+        size_t start_user = bootTime.find(user);
+        CPPUNIT_ASSERT_MESSAGE("Could not find 'system boot' in : " + bootTime, start_user != string::npos);
+        string timeStr = bootTime.substr(start_user + user.size(), bootTime.size());
 #endif
+        // Parse the date
+#if defined(aix) || defined(sun) || defined(hpux)
+        const char timeFormat[] = " %b %d %H:%M";
+#else
+        const char timeFormat[] = " %Y-%m-%d %H:%M";
+#endif
+        struct tm timeStruct;
+        char *ret = strptime(timeStr.c_str(), timeFormat, &timeStruct);
+        ostringstream parse_err_msg;
+        parse_err_msg << "Date parsing error. Date='" << timeStr << "' Format='" << timeFormat << "'";
+        CPPUNIT_ASSERT_MESSAGE(parse_err_msg.str(), ret != NULL);
 
-        if (strftime(timeBuffer, sizeof(timeBuffer), timeFormat, timeInfo) == 0) {
-            // error timeBuffer length not enough
-            timeBuffer[0] = '\0';
-        }
+        // Fixup tm fields
+#if defined(aix) || defined(sun) || defined(hpux)
+        timeStruct.tm_year = yearHint - 1900;
+#else
+        (void) yearHint;
+#endif        
+        timeStruct.tm_sec = 0;
+        timeStruct.tm_isdst = -1; // Unknown Daylight Saving Time
 
-        std::wostringstream buf;
-        buf << timeBuffer;
-        return buf.str();
-    }
+        // Convert to POSIX time
+        time_t time = mktime(&timeStruct);
+        ostringstream invalid_date_err_msg;
+        invalid_date_err_msg << "Invalid date in timeStruct: '" << timeStruct.tm_year + 1900 << "-"
+                             << timeStruct.tm_mon + 1 << "-" << timeStruct.tm_mday << " "
+                             << timeStruct.tm_hour << ":" << timeStruct.tm_min << ":" << timeStruct.tm_sec
+                             << " errno reason : " << strerror(errno);
+        CPPUNIT_ASSERT_MESSAGE(invalid_date_err_msg.str(), time != -1);
+        return (scxlong)time;
+    } 
 
     void testBootTime()
     {
@@ -222,36 +252,17 @@ public:
 
         SCXCoreLib::SCXHandle<OSInstance> inst = m_osEnum->GetTotalInstance();
         SCXCalendarTime currentTime = SCXCalendarTime::CurrentLocal();
-        SCXCalendarTime ASCXCalendarTime;
+        SCXCalendarTime SCXBootTime;
 
-        inst->GetLastBootUpTime(ASCXCalendarTime);
-        CPPUNIT_ASSERT((currentTime.GetYear()-ASCXCalendarTime.GetYear() ) <= 2);
-        CPPUNIT_ASSERT(currentTime > ASCXCalendarTime);
+        inst->GetLastBootUpTime(SCXBootTime);
+        CPPUNIT_ASSERT((currentTime.GetYear()-SCXBootTime.GetYear() ) <= 2);
+        CPPUNIT_ASSERT(currentTime > SCXBootTime);
 
-        wstring cmdBootTime = GetCommandLineBootTime();
-        if (cmdBootTime.size() == 0)
-        {
-            SCXUNIT_WARNING(L"OSPAL_Test::testBootTime() Command 'who -b' returned empty string");
-        }
-        else
-        {
-            std::size_t found;
-            wstring expected_needle(L"");
-            // We allow a little fudge factor to prevent rounding errors of the minutes
-            for (scxseconds fudge_seconds = -60.0; fudge_seconds <= 61.0; fudge_seconds += 60.0 )
-            {
-                SCXCalendarTime fudgeTime = ASCXCalendarTime + SCXRelativeTime().SetSeconds(fudge_seconds);
-                expected_needle = GetExpectedNeedle(fudgeTime);
-                found = cmdBootTime.find(expected_needle);
-                if (found != std::string::npos)
-                    break;
-            }
-            
-            std::wostringstream buf;
-            buf << L"Could not find expected boot time: '" << expected_needle 
-                << L"' in 'who -b' output'" << cmdBootTime << L"'";
-            CPPUNIT_ASSERT_MESSAGE(StrToUTF8(buf.str()), found != std::string::npos);
-        }
+        string whoBoutput = GetCommandLineBootTime();
+        CPPUNIT_ASSERT_MESSAGE("No output was found to compare boot time", whoBoutput.size() > 0);
+        scxlong CMDBootTime = parseBootTime(whoBoutput, (int)SCXBootTime.GetYear());
+        scxlong acceptable_fudge_seconds = 61;
+        SCXUNIT_ASSERT_BETWEEN(SCXBootTime.ToPosixTime(), CMDBootTime - acceptable_fudge_seconds, CMDBootTime + acceptable_fudge_seconds);
     }
 
     void SweepOSInstance(SCXCoreLib::SCXHandle<OSInstance> inst)
