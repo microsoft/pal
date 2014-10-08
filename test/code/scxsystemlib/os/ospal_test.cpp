@@ -185,33 +185,36 @@ public:
     std::string GetCommandLineBootTime()
     {
         std::istringstream input;
-        std::ostringstream output;
-        std::ostringstream error;
-#if defined(PF_DISTRO_SUSE) && PF_MAJOR <= 10
-        int procRet = SCXCoreLib::SCXProcess::Run(L"bash -c \"who -a | head -1\"", input, output, error);
-#else
+        std::ostringstream output, error;
+
         int procRet = SCXCoreLib::SCXProcess::Run(L"who -b", input, output, error);
-#endif
         CPPUNIT_ASSERT_EQUAL( std::string(""), error.str() );
         CPPUNIT_ASSERT_EQUAL( 0, procRet );
+        
+        // On SUSE the output of "who -b" is sometimes empty.
+        // We use a fallback instead of an #ifdef block because PF_DISTRO_SUSE is undefined in Universal builds
+        if (output.str().size() == 0)
+        {
+            procRet = SCXCoreLib::SCXProcess::Run(L"bash -c \"who -a | head -1\"", input, output, error);
+            CPPUNIT_ASSERT_EQUAL( std::string(""), error.str() );
+            CPPUNIT_ASSERT_EQUAL( 0, procRet );
+        }
         return output.str();
     }
 
     // Return the POSIX time parsed from the 'who -b' output
     scxlong parseBootTime(string bootTime, int yearHint)
     {
-
-#if defined(PF_DISTRO_SUSE) && PF_MAJOR <= 10
-        string timeStr(bootTime);
-#else
         // Remove the part before the date from any of the below formats
         //    .        system boot Sep 28 10:55
         //          system boot  2014-01-23 21:18
         string user("system boot");
         size_t start_user = bootTime.find(user);
-        CPPUNIT_ASSERT_MESSAGE("Could not find 'system boot' in : " + bootTime, start_user != string::npos);
-        string timeStr = bootTime.substr(start_user + user.size(), bootTime.size());
-#endif
+        if (start_user != string::npos)
+        {
+            bootTime = bootTime.substr(start_user + user.size(), bootTime.size());
+        }
+
         // Parse the date
 #if defined(aix) || defined(sun) || defined(hpux) || defined(PF_DISTRO_REDHAT) && PF_MAJOR <= 4 || defined(PF_DISTRO_SUSE) && PF_MAJOR <= 9
         const char timeFormat[] = " %b %d %H:%M";
@@ -219,9 +222,9 @@ public:
         const char timeFormat[] = " %Y-%m-%d %H:%M";
 #endif
         struct tm timeStruct;
-        char *ret = strptime(timeStr.c_str(), timeFormat, &timeStruct);
+        char *ret = strptime(bootTime.c_str(), timeFormat, &timeStruct);
         ostringstream parse_err_msg;
-        parse_err_msg << "Date parsing error. Date='" << timeStr << "' Format='" << timeFormat << "'";
+        parse_err_msg << "Date parsing error. Date='" << bootTime << "' Format='" << timeFormat << "'";
         CPPUNIT_ASSERT_MESSAGE(parse_err_msg.str(), ret != NULL);
 
         // Fixup tm fields
@@ -236,13 +239,13 @@ public:
         // Convert to POSIX time
         time_t time = mktime(&timeStruct);
         ostringstream invalid_date_err_msg;
-        invalid_date_err_msg << "Invalid date in timeStruct:\n'" << "Date='" << timeStr 
+        invalid_date_err_msg << "Invalid date in timeStruct:\n'" << "Date='" << bootTime 
                              << "' Format='" << timeFormat << "'\n " << timeStruct.tm_year + 1900 << "-"
                              << timeStruct.tm_mon + 1 << "-" << timeStruct.tm_mday << " "
                              << timeStruct.tm_hour << ":" << timeStruct.tm_min << ":" << timeStruct.tm_sec;
         CPPUNIT_ASSERT_MESSAGE(invalid_date_err_msg.str(), time != -1);
         return (scxlong)time;
-    } 
+    }
 
     void testBootTime()
     {
