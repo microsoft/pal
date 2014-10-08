@@ -213,7 +213,7 @@ public:
         string timeStr = bootTime.substr(start_user + user.size(), bootTime.size());
 #endif
         // Parse the date
-#if defined(aix) || defined(sun) || defined(hpux)
+#if defined(aix) || defined(sun) || defined(hpux) || defined(PF_DISTRO_REDHAT) && PF_MAJOR <= 4 || defined(PF_DISTRO_SUSE) && PF_MAJOR <= 9
         const char timeFormat[] = " %b %d %H:%M";
 #else
         const char timeFormat[] = " %Y-%m-%d %H:%M";
@@ -225,7 +225,7 @@ public:
         CPPUNIT_ASSERT_MESSAGE(parse_err_msg.str(), ret != NULL);
 
         // Fixup tm fields
-#if defined(aix) || defined(sun) || defined(hpux)
+#if defined(aix) || defined(sun) || defined(hpux) || defined(PF_DISTRO_REDHAT) && PF_MAJOR <= 4 || defined(PF_DISTRO_SUSE) && PF_MAJOR <= 9
         timeStruct.tm_year = yearHint - 1900;
 #else
         (void) yearHint;
@@ -236,10 +236,10 @@ public:
         // Convert to POSIX time
         time_t time = mktime(&timeStruct);
         ostringstream invalid_date_err_msg;
-        invalid_date_err_msg << "Invalid date in timeStruct: '" << timeStruct.tm_year + 1900 << "-"
+        invalid_date_err_msg << "Invalid date in timeStruct:\n'" << "Date='" << timeStr 
+                             << "' Format='" << timeFormat << "'\n " << timeStruct.tm_year + 1900 << "-"
                              << timeStruct.tm_mon + 1 << "-" << timeStruct.tm_mday << " "
-                             << timeStruct.tm_hour << ":" << timeStruct.tm_min << ":" << timeStruct.tm_sec
-                             << " errno reason : " << strerror(errno);
+                             << timeStruct.tm_hour << ":" << timeStruct.tm_min << ":" << timeStruct.tm_sec;
         CPPUNIT_ASSERT_MESSAGE(invalid_date_err_msg.str(), time != -1);
         return (scxlong)time;
     } 
