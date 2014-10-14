@@ -150,36 +150,32 @@ namespace SCXSystemLib
 
     private:
         SCXOSTypeInfo m_osInfo;                 //!< Static OS Information
-                struct OSInfo m_osDetailInfo;                   //!< Detail OS Information
+        struct OSInfo m_osDetailInfo;           //!< Detail OS Information
         SCXCoreLib::SCXLogHandle m_log;         //!< Log handle.
 
         struct utsname m_unameInfo;             //!< Saves the output from uname()
         bool m_unameIsValid;                    //!< Is m_unameInfo valid now?
 
+        void SetBootTime(void);                 //!< Sets the system_boot variables
         SCXCalendarTime m_system_boot;          //!< Time of system boot
         bool m_system_boot_isValid;             //!< Is m_system_boot valid now?
         SCXCalendarTime m_now;                  //!< Current time on system
 
 #if defined(linux)
-        void SetBootTime(void);
         void PrecomputeMaxProcesses(void);
-
         unsigned int m_MaxProcesses;            //!< Maximum number of process contexts.
-        double m_upsec;                         //!< Uptime in seconds
         std::wstring m_platform;                //!< The current platform and version
 #endif
 
 #if defined(hpux)
-        void SetBootTime(void);
-
         struct pst_static m_psts;               //!< Holds output from pstat_getstatic
         struct pst_dynamic m_pstd;              //!< Holds output from pstat_getdynamic
         bool m_psts_isValid;                    //!< Is m_psts valid now?
         bool m_pstd_isValid;                    //!< Is m_pstd valid now?
-#endif
-
-#if defined(aix) || defined(sun)
-        void SetBootTime(void);
+#else
+        void SetUptime(void);                   //!< Sets the upsec variables
+        scxulong m_upsec;                       //!< Uptime in seconds
+        bool m_upsec_isValid;                   //!< Is m_upsec valid now?
 #endif
 
         std::wstring m_LangSetting;               //!< System LANG environment variable setting

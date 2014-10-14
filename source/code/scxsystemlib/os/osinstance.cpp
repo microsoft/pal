@@ -682,18 +682,15 @@ namespace SCXSystemLib
         }
 
 #if defined(linux) || defined(aix) || defined(sun)
-
         SetBootTime();
-
+        SetUptime();
 #elif defined(hpux)
-
         /* Get information about the system dynamic variables */
         m_pstd_isValid = true;
         if (pstat_getdynamic(&m_pstd, sizeof(m_pstd), 1, 0) != 1) {
             SCX_LOGERROR(m_log, StrAppend(L"Could not do pstat_getdynamic(). errno = ",errno));
             m_pstd_isValid = false;
         }
-
 #elif defined(macos)
         // Nothing extra for these platforms
 #else
@@ -802,9 +799,7 @@ namespace SCXSystemLib
         }
     }
 
-#endif
-    
-#if defined(aix) || defined(sun) || defined(linux)
+#elif defined(aix) || defined(sun) || defined(linux)
     /**
      *  Sets the time related member variables.
      *  Information is read from the utmp file
@@ -834,6 +829,7 @@ namespace SCXSystemLib
                 try
                 {
                     m_system_boot = SCXCalendarTime::FromPosixTime((scxulong)boot_time);
+                    m_system_boot_isValid = true;
                 }
                 catch (const SCXNotSupportedException& e)
                 {
@@ -841,14 +837,50 @@ namespace SCXSystemLib
                                  .append(L" - ").append(e.What()));
                     break;
                 }
-                m_system_boot_isValid = true;
                 break;
             }
         }
-        
-        
         close (fd);
     }
+
+    void OSInstance::SetUptime()
+    {
+        m_upsec_isValid = false;
+#if defined(linux)
+        // Read seconds since boot
+        FILE *uptimeFile = fopen("/proc/uptime", "r");
+        if (uptimeFile)
+        {
+            long unsigned int tmp_upsec;
+            int success = fscanf(uptimeFile, "%lu", &tmp_upsec);
+            if (success == 1)
+            {
+                m_upsec = static_cast<scxulong>(tmp_upsec);
+                m_upsec_isValid = true;
+            }
+            else
+            {
+                SCX_LOGERROR(m_log, StrAppend(L"Could not read /proc/uptime. errno = ", errno));
+            }
+        }
+        else
+        {
+            SCX_LOGERROR(m_log, StrAppend(L"Could not open /proc/uptime. errno = ", errno));        
+        }
+        fclose(uptimeFile);
+#else
+        if (m_system_boot_isValid)
+        {
+            time_t nowTime = time(0);   // get time now
+            time_t bootTime = m_system_boot.ToPosixTime();
+            
+            m_upsec = nowTime - bootTime;
+            m_upsec_isValid = true;
+        }
+#endif
+    }
+#else
+    #error "Not implemented for this platform."
 #endif
 
     /*----------------------------------------------------------------------------*/
@@ -1471,24 +1503,14 @@ namespace SCXSystemLib
     */
     bool OSInstance::GetSystemUpTime(scxulong& sut) const
     {
-#if defined(linux)
-        sut = static_cast<scxulong>(m_upsec);
-        return true;
-#elif defined(sun)
-        // Not supported by the Pegasus Solaris implementation
-        // The uptime command reads this info from /var/adm/utmpx
-        // See the utmpx man page
-        (void) sut;
-        return false;
+#if defined(linux) || defined(sun) || defined(aix)
+        sut = m_upsec;
+        return m_upsec_isValid;
 #elif defined(hpux)
         // It's simpler to reuse the Pegasus implementation here, than to use our time PAL
         time_t timeval = time(0);
         sut = timeval - m_psts.boot_time;
         return (timeval > 0) && m_psts_isValid;
-#elif defined(aix)
-        // Not supported in the Pegasus implementation for AIX.
-        (void) sut;
-        return false;
 #else
         #error Platform not supported
 #endif

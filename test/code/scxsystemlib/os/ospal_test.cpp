@@ -112,6 +112,7 @@ class OSPAL_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testTotalInstanceExists );
     CPPUNIT_TEST( testParseLangVariable );
     CPPUNIT_TEST( testBootTime );
+    CPPUNIT_TEST( testUpTime );
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -182,24 +183,29 @@ public:
         }
     }
 
-    std::string GetCommandLineBootTime()
+    // Return the stdout of a shell command. Will fail on any error (return code or stderr)
+    string CheckOutput(wstring command)
     {
-        std::istringstream input;
-        std::ostringstream output, error;
+        istringstream input;
+        ostringstream output, error;
 
-        int procRet = SCXCoreLib::SCXProcess::Run(L"who -b", input, output, error);
-        CPPUNIT_ASSERT_EQUAL( std::string(""), error.str() );
+        int procRet = SCXCoreLib::SCXProcess::Run(command, input, output, error);
+        CPPUNIT_ASSERT_EQUAL( string(""), error.str() );
         CPPUNIT_ASSERT_EQUAL( 0, procRet );
+        return output.str();
+    }
+
+    string GetCommandLineBootTime()
+    {
+        string bootString = CheckOutput(L"who -b");
         
         // On SUSE the output of "who -b" is sometimes empty.
         // We use a fallback instead of an #ifdef block because PF_DISTRO_SUSE is undefined in Universal builds
-        if (output.str().size() == 0)
+        if (bootString.size() == 0)
         {
-            procRet = SCXCoreLib::SCXProcess::Run(L"bash -c \"who -a | head -1\"", input, output, error);
-            CPPUNIT_ASSERT_EQUAL( std::string(""), error.str() );
-            CPPUNIT_ASSERT_EQUAL( 0, procRet );
+            bootString = CheckOutput(L"bash -c \"who -a | head -1\"");
         }
-        return output.str();
+        return bootString;
     }
 
     // Return the POSIX time parsed from the 'who -b' output
@@ -268,6 +274,33 @@ public:
         SCXUNIT_ASSERT_BETWEEN(SCXBootTime.ToPosixTime(), CMDBootTime - acceptable_fudge_seconds, CMDBootTime + acceptable_fudge_seconds);
     }
 
+    void testUpTime()
+    {
+        m_osEnum = new OSEnumeration();
+        m_osEnum->Init();
+        m_osEnum->Update(true);
+        SCXCoreLib::SCXHandle<OSInstance> inst = m_osEnum->GetTotalInstance();
+        scxulong uptime;
+        
+        CPPUNIT_ASSERT(inst->GetSystemUpTime(uptime));
+        CPPUNIT_ASSERT(uptime > 0);
+        string uptimeStr = CheckOutput(L"uptime");
+        
+        // Remove the part before the number of days from any of the below formats
+        //  12:47:05 up 261 days,  2:37,  0 users,  load average: 1.27, 1.61, 1.59
+        //    3:39pm  up 159 days 23:18,  0 users,  load average: 0.18, 0.45, 0.40
+        string toRemove("up ");
+        size_t start = uptimeStr.find(toRemove);
+        if (start != string::npos)
+        {
+            uptimeStr = uptimeStr.substr(start + toRemove.size(), uptimeStr.size());
+        }
+        istringstream uptimeStream(uptimeStr);
+        scxulong daysUp;
+        uptimeStream >> daysUp;
+        CPPUNIT_ASSERT_EQUAL(daysUp, uptime/60/60/24);
+    }
+
     void SweepOSInstance(SCXCoreLib::SCXHandle<OSInstance> inst)
     {
         // Just access all methods so we can see that nothing fails fatal
@@ -303,10 +336,7 @@ public:
         CPPUNIT_ASSERT(inst->GetMaxProcessMemorySize(Ascxulong));
         inst->GetMaxProcessesPerUser(Auint);
 
-        retVal = inst->GetSystemUpTime(Ascxulong);
-#if defined (linux) || defined (hpux)
-        CPPUNIT_ASSERT(retVal);
-#endif
+        CPPUNIT_ASSERT(inst->GetSystemUpTime(Ascxulong));
     }
 };
 
