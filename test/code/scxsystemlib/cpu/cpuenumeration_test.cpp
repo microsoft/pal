@@ -269,6 +269,7 @@ public:
                 break;
 
             case 1:
+                // One physical processor, one logical processor
                 *cpufilecontent << L"processor       : 0" << endl
                                 << L"vendor_id       : GenuineIntel" << endl
                                 << L"physical id     : 0" << endl
@@ -278,6 +279,7 @@ public:
                 break;
 
             case 2:
+                // One physical processor, two logical processors
                 *cpufilecontent << L"processor       : 0" << endl
                                 << L"vendor_id       : GenuineIntel" << endl
                                 << L"physical id     : 0" << endl
@@ -294,6 +296,7 @@ public:
                 break;
 
             case 3:
+                // Two physical processors, four logical processors
                 *cpufilecontent << L"processor       : 0" << endl
                                 << L"vendor_id       : GenuineIntel" << endl
                                 << L"physical id     : 0" << endl
@@ -321,6 +324,29 @@ public:
                                 << L"siblings        : 3" << endl
                                 << L"core id         : 3" << endl
                                 << L"cpu cores       : 4" << endl;
+                break;
+
+            case 4:
+                // CPU info file from the PM's test system. No "physical id" line.
+                // This appears to happen on VMware, but can happen on Hyper-V as well.
+                *cpufilecontent << L"processor       : 0" << endl
+                                << L"vendor_id       : GenuineIntel" << endl
+                                << L"cpu family      : 6" << endl
+                                << L"model           : 26" << endl
+                                << L"model name      : Intel(R) Xeon(R) CPU           W3530  @ 2.80GHz" << endl
+                                << L"stepping        : 5" << endl
+                                << L"cpu MHz         : 2799.948" << endl
+                                << L"cache size      : 8192 KB" << endl
+                                << L"fpu             : yes" << endl
+                                << L"fpu_exception   : yes" << endl
+                                << L"cpuid level     : 11" << endl
+                                << L"wp              : yes" << endl
+                                << L"flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss syscall nx lm constant_tsc up rep_good nopl pni ssse3 cx16 sse4_1 sse4_2 popcnt hypervisor lahf_lm" << endl
+                                << L"bogomips        : 5599.89" << endl
+                                << L"clflush size    : 64" << endl
+                                << L"cache_alignment : 64" << endl
+                                << L"address sizes   : 36 bits physical, 48 bits virtual" << endl
+                                << L"power management:" << endl;
                 break;
 
             case 44326:
@@ -867,6 +893,7 @@ class CPUEnumeration_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testPhysicalProcCountWithOneCoreProcessor );
     CPPUNIT_TEST( testPhysicalProcCountWithOneCoreProcessorTwoProcs );
     CPPUNIT_TEST( testPhysicalProcCountWithTwoCoreProcessors );
+    CPPUNIT_TEST( testPhysicalProcCountWithNoPhysicalID );
     CPPUNIT_TEST( testPhysicalProcCountWithGapInPhysicalIDs );
     CPPUNIT_TEST( testPhysicalProcCountWithMassiveProcessors );
     CPPUNIT_TEST( testPhysicalLogicalProcCountsWithDynamicCPUs );
@@ -1383,8 +1410,9 @@ public:
 
 #if defined(linux) || defined(aix) || defined(sun)
         // Verify that the physical count of processors matches
+        // (Note that we must always have at least one processor)
         SCXCoreLib::SCXLogHandle logH = SCXLogHandleFactory::GetLogHandle(s_LogModuleName);
-        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), CPUEnumeration::ProcessorCountPhysical(deps, logH, true));
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), CPUEnumeration::ProcessorCountPhysical(deps, logH, true));
 #endif
     }
 
@@ -1491,6 +1519,19 @@ public:
         // Verify that the physical count of processors matches
         SCXCoreLib::SCXLogHandle logH = SCXLogHandleFactory::GetLogHandle(s_LogModuleName);
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), CPUEnumeration::ProcessorCountPhysical(deps, logH, true));
+#endif
+    }
+
+    void testPhysicalProcCountWithNoPhysicalID()
+    {
+#if defined(linux)
+        // Mock dependencies object
+        SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
+        deps->SetCpuInfoFileType(4);
+
+        // Verify that the physical count of processors matches
+        SCXCoreLib::SCXLogHandle logH = SCXLogHandleFactory::GetLogHandle(s_LogModuleName);
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), CPUEnumeration::ProcessorCountPhysical(deps, logH, true));
 #endif
     }
 

@@ -184,7 +184,6 @@ public:
         model = "HVM domU";
         unsigned short powerSupplyState = 3;
         unsigned short thermalState = 3;
-        unsigned int numberOfLogicalProcessors = 3;
 
         unsigned short tmp = 0;
         CPPUNIT_ASSERT(inst->GetChassisBootupState(tmp));
@@ -198,10 +197,6 @@ public:
 
         CPPUNIT_ASSERT(inst->GetThermalState(tmp));
         CPPUNIT_ASSERT_EQUAL(tmp,thermalState);
-
-        unsigned int logicalProcessor = 0;
-        CPPUNIT_ASSERT(inst->GetNumberOfLogicalProcessors(logicalProcessor));
-        CPPUNIT_ASSERT_EQUAL(logicalProcessor,numberOfLogicalProcessors);
 #elif defined(sun) || defined(aix) || defined(hpux) 
 
         //

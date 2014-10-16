@@ -56,7 +56,6 @@ namespace SCXSystemLib
         std::wstring manufacturer;                              //!< Name of a computer manufacturer.
         std::wstring model;                                     //!< Product name that a manufacturer gives to a computer. This property must have a value.
         bool networkServerModeEnabled;                       //!< If True, the network Server Mode is enabled.
-        unsigned int numberOfLogicalProcessors;              //!< Number of logical processors available on the computer.
         unsigned short powerSupplyState;                     //!< State of the power supply or supplies when last booted. The following list identifies the values for this property.
         vector<unsigned int> powerManagementCapabilities;    //!< Array of the specific power-related capabilities of a logical device.
         bool powerManagementSupported;                       //!< If True, device can be power-managed.
@@ -212,17 +211,6 @@ namespace SCXSystemLib
 
         /*----------------------------------------------------------------------------*/
         /**
-        Get NumberOfLogicalProcessors.
-
-        Parameters:  numberOfLogicalProcessors - RETURN: NumberOfLogicalProcessors of ComputerSystem instance
-
-        Retval:      true if a value is supported by this implementation
-        ThrowException: SCXNotSupportException - For not implemented platform.
-        */
-        bool GetNumberOfLogicalProcessors(unsigned int& numberOfLogicalProcessors) const;
-
-        /*----------------------------------------------------------------------------*/
-        /**
         Get PowerSupplyState.
 
         Parameters:  powerSupplyState - RETURN: PowerSupplyState of ComputerSystem instance
@@ -308,13 +296,6 @@ namespace SCXSystemLib
           Returns:     whether it's successful to parse it. 
          */
         bool ParseSmbiosTable(const struct SmbiosEntry &curSmbiosEntry);
-        /*----------------------------------------------------------------------------*/
-        /**
-          Get the number of all logical processors via parsing the system file.
-
-          Returns:   whether it's successful to parse it.
-         */
-        bool ParseCPUInfo();
         /**
           Read the attributes of System Reset structure Information . 
 

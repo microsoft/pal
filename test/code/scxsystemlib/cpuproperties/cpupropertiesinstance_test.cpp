@@ -352,10 +352,6 @@ public:
         unsigned int itmp = 0;
         CPPUNIT_ASSERT(inst->GetCurrentClockSpeed(itmp));
         CPPUNIT_ASSERT_EQUAL((unsigned int)2132, itmp);
-
-        itmp = 0;
-        CPPUNIT_ASSERT(inst->GetNumberOfCores(itmp));
-        CPPUNIT_ASSERT_EQUAL((unsigned int)2, itmp);
     }
         
     void testGetCpuInfoWithPhysicalIDTwochip()
@@ -390,10 +386,6 @@ public:
         unsigned int itmp = 0;
         CPPUNIT_ASSERT(inst->GetCurrentClockSpeed(itmp));
         CPPUNIT_ASSERT_EQUAL((unsigned int)2132, itmp);
-
-        itmp = 0;
-        CPPUNIT_ASSERT(inst->GetNumberOfCores(itmp));
-        CPPUNIT_ASSERT_EQUAL((unsigned int)2, itmp);
     }
 #endif
 
@@ -425,10 +417,9 @@ public:
         unsigned short family;
         unsigned int normSpeed, currentSpeed;
         std::string stepping;
-        unsigned int numberOfCores, numLogicalProcs=0;
+
         string manufacturer, name, chipId, model;
         bool firstModule=false;
-        std::set<wstring> coreid;
 
         std::istringstream streamInstr;
         std::ostringstream streamOutstr;
@@ -501,31 +492,6 @@ public:
                     }
                 }
             }
-
-            bool theSamechipId = false;
-            for(unsigned int i=0; i<outLines.size(); i++)
-            {
-                StrTokenize(outLines[i], tokens, L" ");
-                if (tokens.size() > 1)
-                {
-                    if (0 == tokens[0].compare(L"chip_id"))
-                    {
-                        if (chipId == StrToUTF8(tokens[1]))
-                        {
-                            numLogicalProcs++;
-                            theSamechipId = true;
-                        }
-                        else
-                        {
-                            theSamechipId = false;
-                        }
-                    }
-                    if ((0 == tokens[0].compare(L"core_id")) && theSamechipId == true)
-                    {
-                        coreid.insert(tokens[1]);
-                    }
-                }
-            }
         } 
         else
         {
@@ -574,17 +540,6 @@ public:
         
         CPPUNIT_ASSERT(inst->GetName(strtmp));
         CPPUNIT_ASSERT(!strtmp.empty());
-
-        CPPUNIT_ASSERT(inst->GetNumberOfCores(itmp));
-#if defined(ia32) || (defined(sparc) && PF_MINOR >= 10)
-        CPPUNIT_ASSERT_EQUAL(coreid.size(), itmp);
-#else
-        CPPUNIT_ASSERT_EQUAL(numLogicalProcs, itmp);
-#endif
-
-        CPPUNIT_ASSERT(inst->GetNumberOfLogicalProcessors(itmp));
-        CPPUNIT_ASSERT_EQUAL(numLogicalProcs, itmp);    
-        
 #endif
     }
 
@@ -687,40 +642,7 @@ public:
             cout << "The ErrorString is : " << streamErrstr.str() << endl;
         }
 
-        wstring cmdStrLogicalCpus = L"sudo ioscan -fnC processor";
-        unsigned int numberOfLogicalProcessors = 0;
-        streamInstr.str(std::string());
-        streamOutstr.str(std::string());
-        streamErrstr.str(std::string());
-        stdoutStr.clear();
-        outLines.clear();
-
-        procRet = SCXCoreLib::SCXProcess::Run(cmdStrLogicalCpus, streamInstr, streamOutstr, streamErrstr, 150000);
-
-        if (procRet == 0)
-        {
-            stdoutStr = streamOutstr.str();
-            std::istringstream stdInStr(stdoutStr);
-            SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(stdInStr, outLines, nlfs);
-            for(unsigned int i=0; i<outLines.size(); i++)
-            {
-                StrTokenize(outLines[i], tokens, L" ");
-                if (tokens.size() > 1)
-                {
-                    if (0 == tokens[0].compare(L"processor"))
-                    {
-                        numberOfLogicalProcessors++;
-                    }
-                }
-            }
-        }
-        else
-        {
-            cout << "Ioscan command Run failed. The return value is : " << procRet << endl;
-            cout << "The ErrorString is : " << streamErrstr.str() << endl;
-        } 
-     
-        //number of physical cpus
+        // Validate that the number of instances is the same as what machinfo utility indicated
         CPPUNIT_ASSERT_EQUAL(numPhysicalCPU, cpuPropertiesEnum.Size());
 
         wstring strtmp = L"";
@@ -734,14 +656,6 @@ public:
         itmp = 0;
         CPPUNIT_ASSERT(inst->GetMaxClockSpeed(itmp));
         CPPUNIT_ASSERT_EQUAL(clockspeed, (floor((itmp + 5)/10.0)*10));
-
-        itmp = 0;
-        CPPUNIT_ASSERT(inst->GetNumberOfLogicalProcessors(itmp));
-        CPPUNIT_ASSERT_EQUAL(numberOfLogicalProcessors/numPhysicalCPU, itmp);
-
-        itmp = 0;
-        CPPUNIT_ASSERT(inst->GetNumberOfCores(itmp));
-        CPPUNIT_ASSERT_EQUAL(numberOfLogicalProcessors/numPhysicalCPU, itmp);
 #endif //version checking
     }
     void testGetCpuPropertiesAttrDevID()

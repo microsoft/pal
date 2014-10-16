@@ -491,7 +491,8 @@ namespace SCXSystemLib
             }
         }
 
-        return uniquePhysicalIDs.size();
+        // No "physical id"s found in /proc/cpuinfo? Assume one ...
+        return ( uniquePhysicalIDs.size() ? uniquePhysicalIDs.size() : 1 );
 
 #elif defined(sun)
 
@@ -518,7 +519,9 @@ namespace SCXSystemLib
 
             numPhysicalProcs = uniquePhysicalIDs.size();
         }
-        return numPhysicalProcs;
+
+        // Be sure that at least one physical processor is returned
+        return ( numPhysicalProcs ? numPhysicalProcs : 1);
 
 #elif defined(hpux) && ((PF_MAJOR > 11) || (PF_MINOR >= 31))
 
@@ -587,7 +590,8 @@ namespace SCXSystemLib
             count++;
         }
 
-        return count;
+        // Be sure we return at least one physical processor
+        return ( count ? count : 1 );
 
 #else
 #error "Not implemented for this platform"
@@ -636,6 +640,12 @@ namespace SCXSystemLib
                 continue;
 
             count++;
+        }
+
+        // If, due to timing with dynamic processors, we came up with zero, assume one
+        if (count == 0)
+        {
+            count = 1;
         }
 
         return count;

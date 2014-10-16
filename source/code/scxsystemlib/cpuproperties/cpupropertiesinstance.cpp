@@ -240,11 +240,6 @@ namespace SCXSystemLib
         m_processorAttr.currentClockSpeed =
             m_processorAttr.maxClockSpeed =
                 m_processorAttr.normSpeed = (unsigned int)(cpuTotal.processorHZ / 1000000);
-        if (partTotal.online_cpus >= 1)
-        {
-            m_processorAttr.numberOfCores = cpuTotal.ncpus / partTotal.online_cpus;
-            m_processorAttr.numberOfLogicalProcessors = cpuTotal.ncpus / partTotal.online_cpus;
-        }
         m_processorAttr.processorType = CENTRAL_PROCESSOR;
         m_processorAttr.role = L"Central Processor";
         m_processorAttr.upgradeMethod = 2; //Unknown
@@ -298,10 +293,6 @@ namespace SCXSystemLib
         m_processorAttr.role = L"Central Processor";
         m_processorAttr.upgradeMethod = 2; //Unknown
         m_processorAttr.cpuStatus = 0;   // Unknown. System metrics are gathered on a per logical cpu basis rather than physical.
-#if (PF_MINOR < 31)
-        m_processorAttr.numberOfCores = psd.psd_proc_cnt;
-        m_processorAttr.numberOfLogicalProcessors = psd.psd_proc_cnt;
-#endif
     }
 #endif
 
@@ -474,58 +465,6 @@ namespace SCXSystemLib
         os << "CPU " << chipId;
         m_processorAttr.deviceID = os.str();
 
-       
-        std::set<scxulong> coreid;
-        //
-        //get number Of Logical Processors count the chip_id
-        //
-        unsigned int cpuIndex =0;
-        for ( ; ; )
-        {
-            wstringstream cpuInfoName;
-            cpuInfoName << cModul_Name.c_str() << cpuIndex;
-
-
-            if (!m_deps->Lookup(cModul_Name, cpuInfoName.str(), cInstancesNum)) break;
-
-            scxulong uNewChipId = 0;
-            //
-            // Check ChipId. If chip_id not exist, give a default value 1.
-            //
-            if (!m_deps->TryGetValue(cAttrName_ChipID, uNewChipId))
-            {
-                logicalProcessorsCount++;
-                break;
-            }
-            scxlong newChipId = static_cast<scxlong>( uNewChipId );
-            //
-            // Check ChipId. If equal, number Of Logical Processors add 1.
-            //
-            if (newChipId == chipId)
-            {
-                logicalProcessorsCount++;
-
-                // Get Core Id
-                scxulong coreID;
-                if (m_deps->TryGetValue(cAttrName_CoreID, coreID))
-                {
-                    coreid.insert(coreID); 
-                }
-
-            }
-           
-            cpuIndex++;
-        }
-        m_processorAttr.numberOfLogicalProcessors = logicalProcessorsCount;
-        if (coreid.size() > 0)
-        {
-            m_processorAttr.numberOfCores = coreid.size();
-        }
-        else
-        {
-            m_processorAttr.numberOfCores = m_processorAttr.numberOfLogicalProcessors;
-        }
-
 #elif defined(aix)
         if (!FillAttributes())
         {
@@ -536,7 +475,6 @@ namespace SCXSystemLib
         m_processorAttr.processorId = m_processorAttr.cpuKey;
         m_processorAttr.deviceID = m_processorAttr.cpuKey;
 
-        unsigned int numberOfCoresperCPU = 0;
         struct pst_processor psp[PST_MAX_PROCS] = { { 0 } };
         wstring  tmpPhysicalID;
 
@@ -547,18 +485,6 @@ namespace SCXSystemLib
             SCX_LOGTRACE(m_log, L"pstat_getprocessor failed. errno " + errno);
             throw SCXCoreLib::SCXInvalidStateException(L"pstat_getprocessor failed. errno " + errno, SCXSRCLOCATION);
         }
-#if (PF_MINOR >= 31)            
-        for (unsigned int i= 0; i< cpuTotal; i++)
-        {
-            tmpPhysicalID = StrFrom(psp[i].psp_socket_id);    
-            if (tmpPhysicalID == m_socketId)
-            {
-                numberOfCoresperCPU++;
-            }
-        }
-        m_processorAttr.numberOfCores = numberOfCoresperCPU;
-        m_processorAttr.numberOfLogicalProcessors = numberOfCoresperCPU;
-#endif
         int64_t cpuChipType ;
         if ((cpuChipType = sysconf(_SC_CPU_CHIP_TYPE)) == -1)
         {
@@ -999,31 +925,6 @@ namespace SCXSystemLib
 #endif
         return fRet;
     }
-    /*----------------------------------------------------------------------------*/
-    /**
-      Core Count.
-
-      Parameters:  numberOfCores- core count.
-      Returns:     whether the implementation for this platform supports the value.
-      ThrowException: SCXNotSupportException - For not implemented platform.
-     */
-    bool CpuPropertiesInstance::GetNumberOfCores(unsigned int& numberOfCores) const
-    {
-        bool fRet = false;
-#if defined(linux) 
-        fRet = m_cpuinfo.CpuCores(numberOfCores);
-#elif defined(aix) || defined(hpux) || defined(sun)
-        if (0 < m_processorAttr.numberOfCores)
-        {
-            numberOfCores = m_processorAttr.numberOfCores; 
-            fRet = true;
-        }
-#else
-        // Not implemented platform
-        throw SCXNotSupportedException(L"NumberOfCores", SCXSRCLOCATION);
-#endif
-        return fRet;
-    }
 
     /*----------------------------------------------------------------------------*/
     /**
@@ -1321,35 +1222,6 @@ namespace SCXSystemLib
 #else
         // Not implemented platform
         throw SCXNotSupportedException(L"NormSpeed", SCXSRCLOCATION);
-#endif
-        return fRet;
-    }
-
-    /*----------------------------------------------------------------------------*/
-    /**
-      Get processor numberOfLogicalProcessors.
-
-      Parameters:  numberOfLogicalProcessors- numbers of kstat_t structure.
-      Returns:     whether the implementation for this platform supports the value.
-      ThrowException: SCXNotSupportException - For not implemented platform.
-     */
-    bool CpuPropertiesInstance::GetNumberOfLogicalProcessors(unsigned int& numberOfLogicalProcessors) const
-    {
-        bool fRet = false;
-#if defined(linux) 
-        fRet = m_cpuinfo.CpuCores(numberOfLogicalProcessors);
-#elif defined(sun) 
-        numberOfLogicalProcessors = m_processorAttr.numberOfLogicalProcessors;
-        fRet = true;
-#elif defined(aix) || defined(hpux)
-        if (0 < m_processorAttr.numberOfLogicalProcessors)
-        {
-            numberOfLogicalProcessors = m_processorAttr.numberOfLogicalProcessors;
-            fRet = true;
-        }
-#else
-        // Not implemented platform
-        throw SCXNotSupportedException(L"NumberOfLogicalProcessors", SCXSRCLOCATION);
 #endif
         return fRet;
     }

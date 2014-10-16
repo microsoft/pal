@@ -123,7 +123,6 @@ namespace SCXSystemLib
         m_computersystemAttr.manufacturer = L"";
         m_computersystemAttr.model = L"";
         m_computersystemAttr.networkServerModeEnabled = false;
-        m_computersystemAttr.numberOfLogicalProcessors = 0;
         m_computersystemAttr.powerSupplyState = 0;
         m_computersystemAttr.powerManagementCapabilities.clear();
         m_computersystemAttr.powerManagementSupported = false;
@@ -151,7 +150,6 @@ namespace SCXSystemLib
     void ComputerSystemInstance::Update()
     {
 #if FILTERLINUX
-                ParseCPUInfo();
         struct SmbiosEntry smbiosEntry;
         smbiosEntry.tableAddress = 0;
         smbiosEntry.tableLength = 0;
@@ -165,34 +163,6 @@ namespace SCXSystemLib
         if(m_deps->GetSystemRunLevel(tmpRes))
         {
             m_runLevel = tmpRes;
-        }
-
-        //
-        // Prepare Processor Enumeration
-        //
-        SCXSystemLib::CpuPropertiesEnumeration processorEnum;
-        processorEnum.Init();
-        size_t processorSize = processorEnum.Size();
-        SCX_LOGINFO(m_log, StrAppend(std::wstring(L"Retrive the value of NumberOfProcessors : "), processorSize));
-        unsigned int numOfLogicalProcessors = 0;
-        for(size_t index = 0; index < processorSize; ++index)
-        {
-            //
-            //Get processor Instance
-            //
-            SCXHandle<SCXSystemLib::CpuPropertiesInstance> processorInst = processorEnum.GetInstance(index);
-            processorInst->Update();
-            unsigned int logicalCount = 0;
-            if(processorInst->GetNumberOfLogicalProcessors(logicalCount))
-            {
-                numOfLogicalProcessors += logicalCount;
-            }
-            processorInst->CleanUp();
-        }
-        processorEnum.CleanUp();
-        if (numOfLogicalProcessors >0)
-        {
-            m_computersystemAttr.numberOfLogicalProcessors = numOfLogicalProcessors;
         }
 #endif
 #if defined(sun)
@@ -552,34 +522,6 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-      Get NumberOfLogicalProcessors.
-
-      Parameters:  numberOfLogicalProcessors
-      Returns:     whether the implementation for this platform supports the value or not.
-      ThrowException: SCXNotSupportException - For not implemented platform.
-     */
-    bool ComputerSystemInstance::GetNumberOfLogicalProcessors(unsigned int &numberOfLogicalProcessors) const
-    {
-        numberOfLogicalProcessors = m_computersystemAttr.numberOfLogicalProcessors;
-        // m_computersystemAttr.numberOfLogicalProcessors is set by ComputerSystemInstance::ParseCPUInfo,
-        // which really should make these decisions
-#if FILTERLINUX || defined(sun) || defined(hpux) || defined(aix)
-        if(0 == numberOfLogicalProcessors)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-#else
-        // Not supported platform
-        throw SCXNotSupportedException(L"NumberOfLogicalProcessors", SCXSRCLOCATION);
-#endif
-    }
-
-    /*----------------------------------------------------------------------------*/
-    /**
       Get PowerSupplyState.
 
       Parameters:  powerSupplyState
@@ -863,55 +805,6 @@ namespace SCXSystemLib
         }
 
        return true;
-    }
-
-    /*----------------------------------------------------------------------------*/
-    /**
-      Get the number of all logical processors via parsing the system file.
-
-      Returns:  whether it's successful to parse it.
-     */
-    bool ComputerSystemInstance::ParseCPUInfo()
-    {
-       SCX_LOGTRACE(m_log, std::wstring(L"ComputerSystemInstance ParseCPUInfo(): "));
-
-       try
-       {
-           unsigned int logicalCount = 0;
-
-           vector<std::wstring> cpuInfo = m_deps->GetCpuInfo();
-           for(size_t index=0;index<cpuInfo.size();++index)
-           {
-               std::wstring line = cpuInfo[index];
-               if (0 == line.length())
-               {
-                   continue;
-               }
-               std::vector<std::wstring> parts;
-               parts.clear();
-               SCXCoreLib::StrTokenize(line, parts, L":");
-               if (parts.size() < 2)
-               {
-                   continue;
-               }
-               //
-               //Anchor string "processor" indicate this is a logical processor.
-               //
-               if(cAnchorLogicalProcessor == parts[0])
-               {
-                   logicalCount++;
-               }
-           }
-
-           m_computersystemAttr.numberOfLogicalProcessors = logicalCount;
-           SCX_LOGTRACE(m_log, StrAppend(L"ComputerSystemInstance::ParseCPUInfo() - logicalCount: ", logicalCount));
-       }
-       catch(const SCXException& e)
-       {
-           throw SCXCoreLib::SCXInternalErrorException(L"failed to parse cpuinfo.", SCXSRCLOCATION);
-       }
-
-       return  true;
     }
 
     /**
