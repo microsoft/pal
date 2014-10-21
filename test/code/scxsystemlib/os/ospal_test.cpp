@@ -267,6 +267,9 @@ public:
         CPPUNIT_ASSERT((currentTime.GetYear()-SCXBootTime.GetYear() ) <= 2);
         CPPUNIT_ASSERT(currentTime > SCXBootTime);
 
+        // The boot time should be in the same time zone as the current local
+        CPPUNIT_ASSERT_EQUAL(SCXCalendarTime::CurrentOffsetFromUTC().GetMinutes(), SCXBootTime.GetOffsetFromUTC().GetMinutes());
+
         string whoBoutput = GetCommandLineBootTime();
         CPPUNIT_ASSERT_MESSAGE("No output was found to compare boot time", whoBoutput.size() > 0);
         scxlong CMDBootTime = parseBootTime(whoBoutput, (int)SCXBootTime.GetYear());

@@ -820,15 +820,16 @@ namespace SCXSystemLib
         
         while (read(fd, &record, reclen) == reclen)
         {
-            if (strcmp(record.ut_line, "system boot") == 0 || //aix
-                strcmp(record.ut_user, "reboot") == 0 ||      //linux
-                strcmp(record.ut_id, "si") == 0)              //suse
+            if (strcmp(record.ut_line, "system boot") == 0 || // Aix
+                strcmp(record.ut_user, "reboot") == 0 ||      // Linux
+                strcmp(record.ut_id, "si") == 0)              // Suse
             {
                 time_t boot_time = record.ut_tv.tv_sec;
                 SCX_LOGTRACE(m_log, StrAppend(L"Read utmp system boot time = ", boot_time));
                 try
                 {
                     m_system_boot = SCXCalendarTime::FromPosixTime((scxulong)boot_time);
+                    m_system_boot.MakeLocal(SCXCalendarTime::CurrentOffsetFromUTC());
                     m_system_boot_isValid = true;
                 }
                 catch (const SCXNotSupportedException& e)
