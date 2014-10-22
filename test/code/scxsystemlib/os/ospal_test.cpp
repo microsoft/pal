@@ -292,15 +292,23 @@ public:
         // Remove the part before the number of days from any of the below formats
         //  12:47:05 up 261 days,  2:37,  0 users,  load average: 1.27, 1.61, 1.59
         //    3:39pm  up 159 days 23:18,  0 users,  load average: 0.18, 0.45, 0.40
+        //   4:19pm  up 63 day(s),  6:54,  1 user,  load average: 0.03, 0.37, 0.29
         string toRemove("up ");
         size_t start = uptimeStr.find(toRemove);
         if (start != string::npos)
         {
             uptimeStr = uptimeStr.substr(start + toRemove.size(), uptimeStr.size());
         }
+
+        // If the uptime is less than 24h, the output of "uptime" does not contain days
+        // 7:56pm  up  21:07,  4 users,  load average: 0.04, 0.17, 0.26
         istringstream uptimeStream(uptimeStr);
-        scxulong daysUp;
-        uptimeStream >> daysUp;
+        scxulong daysUp = 0;
+        if (uptimeStr.find("day") != string::npos)
+        {
+            uptimeStream >> daysUp;
+        }
+
         CPPUNIT_ASSERT_EQUAL(daysUp, uptime/60/60/24);
     }
 
