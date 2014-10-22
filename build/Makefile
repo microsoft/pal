@@ -20,15 +20,12 @@ all : scxcore-status scxcorelib scxsystemlib util scxassertabort scxassertcppuni
 scxcore-status:
 	$(ECHO) "========================= Performing make SCXCore"
 
+distclean: clean
+	-$(RMDIR) $(SCX_BRD)/intermediate $(SCX_BRD)/target $(SCX_BRD)/build/config.mak
+
 clean: clean-status doxygen_clean
-	-$(RMDIR) $(INTERMEDIATE_DIR)/include
-	-$(RMDIR) $(INTERMEDIATE_DIR)/source
-	-$(RMDIR) $(INTERMEDIATE_DIR)/test
 	-$(RMDIR) $(SCX_BRD)/installer/intermediate
-	-$(RMDIR) $(INTERMEDIATE_DIR)/lib*.a
-	-$(RMDIR) $(INTERMEDIATE_DIR)/*.exp
-	-$(RMDIR) $(INTERMEDIATE_DIR)/*.map
-	-$(RMDIR) $(INTERMEDIATE_DIR)/*.cov
+	-$(RMDIR) $(INTERMEDIATE_DIR)
 	-$(RMDIR) $(TARGET_DIR)
 
 clean-status:
