@@ -43,6 +43,7 @@ STATIC_CORELIB_SRCFILES = \
 	$(CORELIB_ROOT)/pal/scxthreadpool.cpp \
 	$(CORELIB_ROOT)/pal/scxuser.cpp \
 	$(CORELIB_ROOT)/pal/scxstrencodingconv.cpp \
+	$(CORELIB_ROOT)/util/scxconfigfile.cpp \
 	$(CORELIB_ROOT)/util/scxexception.cpp \
 	$(CORELIB_ROOT)/util/scxmath.cpp \
 	$(CORELIB_ROOT)/util/utftoupper.cpp \

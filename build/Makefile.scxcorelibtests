@@ -38,6 +38,7 @@ POSIX_UNITTESTS_CORE_SRCFILES = \
 	$(CORELIB_UNITTEST_ROOT)/pal/scxuser_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxexception_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxhandle_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/util/scxconfigfile_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxmath_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxsingleton_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxstringaid_test.cpp \
