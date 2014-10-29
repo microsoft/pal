@@ -72,7 +72,13 @@ namespace SCXCoreLib
 
     protected:
         /** Only instantiated by subclassing. */
-        SCXSingleton() {}
+        SCXSingleton(int recursiveLock = 1) 
+        {
+            if (recursiveLock == 0)
+            {
+                s_lockHandle = new SCXThreadLockHandle(ThreadLockHandleGet(recursiveLock));
+            }
+        }
         /** Only instantiated by subclassing. */
         SCXSingleton(const SCXSingleton&) {}
         /** Only copied by subclassing. */
@@ -84,7 +90,7 @@ namespace SCXCoreLib
     };
 
     template<class T> SCXCoreLib::SCXHandle<T> SCXSingleton<T>::s_instance(0);
-    template<class T> SCXCoreLib::SCXHandle<SCXThreadLockHandle> SCXSingleton<T>::s_lockHandle( new SCXThreadLockHandle(ThreadLockHandleGet()));
+    template<class T> SCXCoreLib::SCXHandle<SCXThreadLockHandle> SCXSingleton<T>::s_lockHandle( new SCXThreadLockHandle(ThreadLockHandleGet(1)));
 }
 
 #endif /* SCXSINGLETON_H */
