@@ -273,7 +273,11 @@ public:
         string whoBoutput = GetCommandLineBootTime();
         CPPUNIT_ASSERT_MESSAGE("No output was found to compare boot time", whoBoutput.size() > 0);
         scxlong CMDBootTime = parseBootTime(whoBoutput, (int)SCXBootTime.GetYear());
+#if defined(hpux)
+        scxlong acceptable_fudge_seconds = 60 * 61;
+#else
         scxlong acceptable_fudge_seconds = 61;
+#endif
         SCXUNIT_ASSERT_BETWEEN(SCXBootTime.ToPosixTime(), CMDBootTime - acceptable_fudge_seconds, CMDBootTime + acceptable_fudge_seconds);
     }
 
