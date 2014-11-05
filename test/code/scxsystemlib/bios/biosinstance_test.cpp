@@ -90,6 +90,7 @@ class BIOS_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE(BIOS_test);
 
     CPPUNIT_TEST(testGetBiosAttr);
+    CPPUNIT_TEST(testGetTargetOS);
     SCXUNIT_TEST_ATTRIBUTE(testGetBiosAttr,SLOW);
 #if defined(linux) || (defined(sun) && defined(ia32))
     CPPUNIT_TEST(TestBiosCharacteristics_wi478597);
@@ -177,6 +178,21 @@ public:
         CPPUNIT_ASSERT(tmp.size() > 0);
         CPPUNIT_ASSERT_EQUAL(getCuAtValue(L"attribute=fwversion"), tmp);
 #endif
+    }
+
+    void testGetTargetOS()
+    {
+#if defined(sun) && defined(sparc)
+        SCXHandle<BiosDependencies> deps(new BiosDependencies());
+        SCXCoreLib::SCXHandle<BIOSInstance> biosInstance(new BIOSInstance(deps));
+#else
+        SCXCoreLib::SCXHandle<BIOSInstance> biosInstance(new BIOSInstance());
+#endif
+        biosInstance->Update();
+        
+        unsigned short targetOS;
+        CPPUNIT_ASSERT(biosInstance->GetTargetOperatingSystem(targetOS));
+        CPPUNIT_ASSERT_MESSAGE("Unknown target operating system", targetOS != 0);
     }
 
 #if defined(aix)
