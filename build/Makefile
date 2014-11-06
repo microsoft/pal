@@ -27,6 +27,7 @@ clean: clean-status doxygen_clean
 	-$(RMDIR) $(SCX_BRD)/installer/intermediate
 	-$(RMDIR) $(INTERMEDIATE_DIR)
 	-$(RMDIR) $(TARGET_DIR)
+	-find $(SCX_BRD) -name \*~ -exec rm {} \;
 
 clean-status:
 	$(ECHO) "========================= Performing make clean"
