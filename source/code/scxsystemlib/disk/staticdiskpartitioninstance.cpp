@@ -85,16 +85,14 @@ StaticDiskPartitionInstance::StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<S
         ,c_RedHDetailPattern(L"(^/dev/[^ ]*) [ ]*([0-9]+) [ ]*([0-9]+) [ ]*([0-9]+)")
 #endif
 #if defined(sun) && defined(sparc)
-        ,c_SolPrtconfPattern(L"bootpath:[ ]+[^ ]*(scsi|ide){1}[^:]*:([a-z]?)")
-        ,c_SolLsPatternBeg(L"[ ]*[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+(c[0-9]t[0-9]d[0-9]s[0-9])[ ]*->[ ]*[^ ]*")
+        ,c_SolPrtconfPattern(L"bootpath:[ ]+'([^ ]*)'")
 #elif defined(sun) && !defined(sparc)
-        ,c_SolPrtconfPattern(L"setprop bootpath[ ]+[^ ]*(scsi@0|ide@0){1}[^:]*:([a-z]?)")
-        ,c_SolLsPatternBeg(L"[ ]*[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+[^ ]+[ ]+(c[0-9]d[0-9]s[0-9])[ ]*->[ ]*[^ ]*")
+        ,c_SolPrtconfPattern(L"bootpath[ ]+([^ ]*)")
 #endif
 #if defined(sun)  //Both SPARC and x86
+        ,c_SolLsPatternBeg(L"(c[0-9]t?[0-9]?d[0-9]s[0-9]+).*")
         ,m_isZfsPartition(false)
         ,c_SolDfPattern(L"([^ ]*)[^(]*\\((/dev/dsk/[^ )]*)[ ]*):[ ]*([0-9]*)")
-        ,c_SolLsPatternEnd(L"[^:]*:")
         ,c_SolPrtvtocBpSPattern(L"^\\*[ ]*([0-9]+) bytes/sector")
         ,c_SolprtvtocDetailPattern(L"^[^\\*]{1}[ ]*([0-9])[ ]*[0-9][ ]*[0-9]+[ ]*([0-9]+)[ ]*([0-9]+)[ ]+[0-9]+[ ]*(/[^ ]*)")
 #endif
@@ -498,9 +496,8 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         bootpathStr.clear();
 
         // buffer to store lines read from process output
-        wstring driveLetter;     //e.g. "a"
-        wstring bootInterface;   // e.g. "scsi"
         wstring curLine;
+        wstring bootInterfacePath;
 
         // Determine Solaris boot disk using 'prtconf' and 'ls /dev/dsk'
         // cmdString stores the current process we are running via SCXProcess::Run()
@@ -526,6 +523,7 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         {
             m_deps->Run(cmdPrtString, processInputPrt, processOutputPrt, processErrPrt, 15000);
             prtconfResult = processOutputPrt.str();
+            SCX_LOGTRACE(m_log, L"  Got this output from " + cmdPrtString + L" : " + StrFromUTF8(prtconfResult) );
             size_t lengthCaptured = prtconfResult.length();
 
             // Truncate trailing newline if there in captured output                  
@@ -551,6 +549,7 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         // Let's build our RegEx:
         try
         {
+            SCX_LOGTRACE(m_log, L"  Using this regex on PrtConf output: " + c_SolPrtconfPattern );
             solPrtconfPatternPtr = new SCXCoreLib::SCXRegex(c_SolPrtconfPattern);
         }
         catch(SCXCoreLib::SCXInvalidRegexException &e)
@@ -564,9 +563,8 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         allLines.clear();
         SCXStream::NLFs nlfs;
         SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(stringStrmPrtconf, allLines, nlfs);
-        bool foundBootPath = false;
 
-        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end() && !foundBootPath; it++)
+        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end(); it++)
         {
             curLine.assign(*it);
             matchingVector.clear();
@@ -574,14 +572,13 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
             // Let's get the Boot partition interface and drive letter from prtconf
             if (solPrtconfPatternPtr->ReturnMatch(curLine, matchingVector, 0))
             {
-                bootInterface = matchingVector[1];
-                driveLetter = matchingVector[2];
-                foundBootPath = true;
+                bootInterfacePath = matchingVector[1];
+                SCX_LOGTRACE(m_log, L"Found match of PrtConfPattern : " + bootInterfacePath);
+                break;
             }
-
         }
 
-        if (!foundBootPath || bootInterface.size() == 0)
+        if (bootInterfacePath.size() == 0)
         {
             std::wstringstream warningMsg;
             if (matchingVector.size() > 0)
@@ -597,18 +594,26 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         }     
 
 
-        ///Now we need to build up our pattern to find the bootdisk, using our results from above:
+        // Now we need to build up our pattern to find the bootdisk, using our results from above:
         SCXRegexPtr solLsPatternPtr(NULL);
 
         wstring solLsPattern(c_SolLsPatternBeg);
-        solLsPattern += bootInterface;
-        solLsPattern += c_SolLsPatternEnd;
-        solLsPattern += driveLetter;
+#if defined(sparc) &&  PF_MAJOR == 5 && PF_MINOR  == 9
+        // Replace "disk" by "sd"
+        wstring from(L"disk");
+        size_t start_pos = bootInterfacePath.find(from);
+        if(start_pos != std::string::npos)
+        {
+            bootInterfacePath.replace(start_pos, from.length(), L"sd");
+        }
+#endif
+        solLsPattern += bootInterfacePath;
         matchingVector.clear();  //clear the decks!
 
         //Let's build our RegEx:
         try
         {
+            SCX_LOGTRACE(m_log, L"  Using this regex on ls -l /dev/dsk output: " + solLsPattern );
             solLsPatternPtr = new SCXCoreLib::SCXRegex(solLsPattern);
         }
         catch(SCXCoreLib::SCXInvalidRegexException &e)
@@ -621,9 +626,6 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         // Retrieve the bootdrive using the bootInterface and driveLetter
         wstring cmdStringLs = L"/usr/bin/ls -l /dev/dsk";
         std::string devDskResult;
-        bool foundIt = false;
-        wstring bootDisk;
-        wstring bootFullPath(L"/dev/dsk/");
 
         std::istringstream processInputLs;
         std::ostringstream processOutputLs;
@@ -634,9 +636,11 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         {
             SCXCoreLib::SCXProcess::Run(cmdStringLs, processInputLs, processOutputLs, processErrLs, 15000);
             devDskResult = processOutputLs.str();
+            SCX_LOGTRACE(m_log, L"  Got this output from " + cmdStringLs + L" : " + StrFromUTF8(devDskResult) );
+
             size_t lengthCaptured = devDskResult.length();
 
-            // Truncate trailing newline if there in captured output                  
+            // Truncate trailing newline if there in captured output
             if (lengthCaptured > 0)
             {
               if (devDskResult[lengthCaptured - 1] == '\n')
@@ -656,7 +660,8 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         allLines.clear();
         SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(stringStrmDevDsk, allLines, nlfs);
 
-        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end() && !foundIt; it++)
+        wstring bootDisk(L"");
+        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end(); it++)
         {
             curLine.assign(*it);
             curLine.push_back('\n');
@@ -666,12 +671,12 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
             if (solLsPatternPtr->ReturnMatch(curLine, matchingVector, 0))
             {
                 bootDisk = matchingVector[1];  //e.g. "c1t0d0s0"
-                foundIt = true;
+                break;
             }
         }
 
         //Check the results
-        if (!foundIt || bootDisk.size() == 0)
+        if (bootDisk.size() == 0)
         {
             std::wstringstream warningMsg;
             if (matchingVector.size() > 0)
@@ -686,9 +691,7 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
             return false;
         }     
 
-        //Now we have the full path of the bootdrive to return it:
-        bootFullPath += bootDisk;    //e.g. "/dev/dsk/c1t0d0s0"
-        bootpathStr = bootFullPath;
+        bootpathStr = L"/dev/dsk/" + bootDisk; //e.g. "/dev/dsk/c1t0d0s0"
 
         return true;
 }

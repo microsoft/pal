@@ -48,6 +48,7 @@ class SCXStaticDiskPartitionPalTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestDumpString );
     CPPUNIT_TEST( TestGetMethods );
     CPPUNIT_TEST( TestSimulatedDiskPartitions );
+    CPPUNIT_TEST( TestHasBootPartition );
 #if defined(sun)
     CPPUNIT_TEST( TestReturnMatch_wi501457 );
 #endif
@@ -96,6 +97,7 @@ public:
             SCXCoreLib::SCXHandle<SCXSystemLib::StaticDiskPartitionInstance> dp = *iter;
 
             CPPUNIT_ASSERT(0 != dp);
+            dp->Update();
             std::wcout << std::endl << dp->DumpString();
         }
 
@@ -339,6 +341,28 @@ public:
         bootRootShareLV = true;
         OneDiskPartitionSystemTest();
 #endif
+    }
+
+    void TestHasBootPartition()
+    {
+        SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps( new SCXSystemLib::DiskDependDefault() );
+        CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum = new SCXSystemLib::StaticDiskPartitionEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum->Init());
+
+        SCXSystemLib::EntityEnumeration<SCXSystemLib::StaticDiskPartitionInstance>::EntityIterator iter;
+        bool hasBootPartition = false;
+        bool resBool = false;
+
+        for (iter = m_diskPartEnum->Begin(); iter != m_diskPartEnum->End(); iter++)
+        {
+            SCXCoreLib::SCXHandle<SCXSystemLib::StaticDiskPartitionInstance> dp = *iter;
+            CPPUNIT_ASSERT(0 != dp);
+            CPPUNIT_ASSERT_NO_THROW(dp->Update());
+            CPPUNIT_ASSERT(dp->GetBootPartition(resBool));
+            hasBootPartition |= resBool;
+        }
+
+        CPPUNIT_ASSERT_MESSAGE("Could not find a boot partition.", hasBootPartition);
     }
 
 #if defined(sun)
