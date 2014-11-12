@@ -1,13 +1,13 @@
 /*--------------------------------------------------------------------------------
-    Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+  Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 
 */
 /**
-    \file        staticdiskpartitioninstance.h
+   \file        staticdiskpartitioninstance.h
 
-    \brief       Implements the disk partition instance pal for static information.
+   \brief       Implements the disk partition instance pal for static information.
 
-    \date        2011-08-31 11:42:00
+   \date        2011-08-31 11:42:00
 
 */
 /*----------------------------------------------------------------------------*/
@@ -29,41 +29,9 @@ using namespace SCXCoreLib;
 
 namespace SCXSystemLib
 {
-    /*----------------------------------------------------------------------------*/
-    //! Encapsulates all external dependencies for unit-testing.
-    class StaticDiskPartitionInstanceDeps 
-    {
-    public:
-        //! Constructor
-        StaticDiskPartitionInstanceDeps () { }
-
-        /**
-          Wrapper for SCXProcess::Run()
-          \param[in]  command     Corresponding to what would be entered by a user in a command shell
-          \param[in]  mystdin     stdin for the process
-          \param[out] mystdout    stdout for the process
-          \param[in]  mystderr    stderr for the process
-          \param[in]  timeout     Accepted number of millieconds to wait for return
-          \param[in]  cwd         Directory to be set as current working directory for process.
-          \param[in]  chrootPath  Directory to be used for chrooting process.
-          \returns exit code of run process.
-          \throws     SCXInternalErrorException           Failure that could not be prevented
-          */
-        virtual int Run(const std::wstring &command, std::istream &mystdin,
-                   std::ostream &mystdout, std::ostream &mystderr, unsigned timeout)
-        {
-            return SCXCoreLib::SCXProcess::Run(command, mystdin, mystdout, mystderr, timeout); 
-        }
-
-        //! Destructor
-        virtual ~StaticDiskPartitionInstanceDeps () { }
-    protected:
-        //! Prevent copying to avoid slicing
-        StaticDiskPartitionInstanceDeps (const StaticDiskPartitionInstanceDeps  &);
-    };
 /*----------------------------------------------------------------------------*/
 /**
-    Represents a single disk partition instance with static data.
+   Represents a single disk partition instance with static data.
 */
     class StaticDiskPartitionInstance : public EntityInstance
     {
@@ -75,7 +43,7 @@ namespace SCXSystemLib
         /**
            Default constructor
         */
-        StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<StaticDiskPartitionInstanceDeps> deps = SCXCoreLib::SCXHandle<StaticDiskPartitionInstanceDeps>(new StaticDiskPartitionInstanceDeps()));
+        StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<DiskDepend> deps = SCXCoreLib::SCXHandle<DiskDependDefault>(new DiskDependDefault()));
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -91,7 +59,7 @@ namespace SCXSystemLib
            \returns     true if value is supported on platform, false otherwise.
         */
         bool GetPartitionBlockSize(scxulong& value) const {value = m_blockSize;
-             return true;}
+            return true;}
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -101,7 +69,7 @@ namespace SCXSystemLib
            \returns     true if value was set, otherwise false.
         */
         bool GetBootPartition(bool& bootp) const { bootp = m_bootPartition;
-             return true; }
+            return true; }
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -111,7 +79,7 @@ namespace SCXSystemLib
            \returns     true if value is supported on platform, false otherwise.
         */
         bool GetDeviceId(std::wstring& value) const { value = m_deviceID;
-             return true; }
+            return true; }
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -121,18 +89,18 @@ namespace SCXSystemLib
            \returns     true if value is supported on platform, false otherwise.
         */
         bool GetIndex(scxulong& value) const { value = m_index;
-             return true; }
+            return true; }
 
         /*----------------------------------------------------------------------------*/
         /**
            Retrieve the Total number of consecutive blocks, each block the size of the value 
-               contained in the BlockSize property, which form this storage extent.
+           contained in the BlockSize property, which form this storage extent.
 
            \param       value - output parameter which is the total number of blocks.
            \returns     true if value is supported on platform, false otherwise.
         */
         bool GetNumberOfBlocks(scxulong& value) const { value = m_numberOfBlocks;
-             return true; }
+            return true; }
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -142,7 +110,7 @@ namespace SCXSystemLib
            \returns     true if value is supported on platform, false otherwise.
         */
         bool GetPartitionSizeInBytes(scxulong& value) const { value = m_partitionSize;
-             return true; }
+            return true; }
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -152,7 +120,7 @@ namespace SCXSystemLib
            \returns     true if value is supported on platform, false otherwise.
         */
         bool GetStartingOffset(scxulong& value) const { value = m_startingOffset;
-             return true; }
+            return true; }
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -180,22 +148,6 @@ namespace SCXSystemLib
         */
         void Update_Linux();
 
-        /**
-           The check to make sure this DeviceName is also listed with fdisk
-
-           \param       None.
-           \returns     bool, True if found in fdisk, False otherwise
-        */
-        bool CheckFdiskLinux();
-
-        /**
-           Execute the 'fdisk -ul' command and save the results to m_fdiskResult
-
-           \param       None.
-           \returns     bool, True if successful, false otherwise
-        */
-        bool GetFdiskResult();
-
 #elif defined(sun)
 
         /**
@@ -216,7 +168,7 @@ namespace SCXSystemLib
   
         scxulong             m_blockSize;               //!< Size of a block on this partition
         bool                 m_bootPartition;           //!< If true, this struct is referring to the active boot partition 
-        std::wstring            m_deviceID;                //!< What the name of the device is (perhaps a disk drive identifier)
+        std::wstring         m_deviceID;                //!< What the name of the device is (perhaps a disk drive identifier)
         unsigned int         m_index;                   //!< Index number of the partition
         scxulong             m_numberOfBlocks;          //!< Total number of consecutive blocks
         scxulong             m_partitionSize;           //!< Total size of the partition (bytes)
@@ -225,16 +177,6 @@ namespace SCXSystemLib
         //Let's use a safe handle to our Regex objects
         typedef SCXCoreLib::SCXHandle<SCXRegex> SCXRegexPtr;
 
-        // Let's define our Regular Expressions as String constants:
-#if defined(linux)
-        std::string m_fdiskResult;
-        const std::wstring c_cmdFdiskStr;
-        const std::wstring c_cmdBlockDevSizeStr;
-        const std::wstring c_cmdBlockDevBszStr;
-        const std::wstring c_RedHSectorSizePattern;
-        const std::wstring c_RedHBootPDetailPattern;
-        const std::wstring c_RedHDetailPattern;
-#endif
 #if defined(sun)
 
         bool m_isZfsPartition;                                       //!< Sun Microsystems ZFS partition
@@ -248,7 +190,7 @@ namespace SCXSystemLib
 #endif
         const size_t MATCHCOUNT;
 
-        SCXCoreLib::SCXHandle<StaticDiskPartitionInstanceDeps> m_deps; //!< Dependencies to rely on. Used for unit-testing.
+        SCXCoreLib::SCXHandle<DiskDepend> m_deps; //!< Dependencies to rely on. Used for unit-testing.
 
     };
 } /* namespace SCXSystemLib */

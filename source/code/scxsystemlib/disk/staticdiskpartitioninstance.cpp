@@ -1,13 +1,13 @@
 /*--------------------------------------------------------------------------------
-    Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+  Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
     
 */
 /**
-    \file        staticdiskpartitioninstance.cpp
+   \file        staticdiskpartitioninstance.cpp
 
-    \brief       Implements the disk partition instance pal for static information.
+   \brief       Implements the disk partition instance pal for static information.
 
-    \date        2011-08-31 11:42:00
+   \date        2011-08-31 11:42:00
 
 */
 /*----------------------------------------------------------------------------*/
@@ -66,7 +66,7 @@ namespace SCXSystemLib
    \param       None.
 
 */
-StaticDiskPartitionInstance::StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<StaticDiskPartitionInstanceDeps> deps)
+    StaticDiskPartitionInstance::StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<DiskDepend> deps)
         :  m_log(SCXCoreLib::SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.system.disk.staticdiskpartitioninstance"))
         ,m_blockSize(0)
         ,m_bootPartition(false)
@@ -75,15 +75,6 @@ StaticDiskPartitionInstance::StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<S
         ,m_numberOfBlocks(0)
         ,m_partitionSize(0)
         ,m_startingOffset(0)
-#if defined(linux)
-        ,m_fdiskResult("")
-        ,c_cmdFdiskStr(L"/bin/sh -c \"/sbin/fdisk -u -l\" ")
-        ,c_cmdBlockDevSizeStr(L"/sbin/blockdev --getsize ")
-        ,c_cmdBlockDevBszStr(L"/sbin/blockdev --getbsz ")
-        ,c_RedHSectorSizePattern(L"^Units =[^=]*=[ ]*([0-9]+)")
-        ,c_RedHBootPDetailPattern(L"(^/dev/[^ ]*) [ ]*(\\*) [ ]*([0-9]+) [ ]*([0-9]+) [ ]*([0-9]+)")
-        ,c_RedHDetailPattern(L"(^/dev/[^ ]*) [ ]*([0-9]+) [ ]*([0-9]+) [ ]*([0-9]+)")
-#endif
 #if defined(sun) && defined(sparc)
         ,c_SolPrtconfPattern(L"bootpath:[ ]+'([^ ]*)'")
 #elif defined(sun) && !defined(sparc)
@@ -98,16 +89,16 @@ StaticDiskPartitionInstance::StaticDiskPartitionInstance(SCXCoreLib::SCXHandle<S
 #endif
         ,MATCHCOUNT(0x20)
         ,m_deps(deps)
-{
-}
+    {
+    }
 
 /*----------------------------------------------------------------------------*/
 /**
    Virtual destructor.
 */
-StaticDiskPartitionInstance::~StaticDiskPartitionInstance()
-{
-}
+    StaticDiskPartitionInstance::~StaticDiskPartitionInstance()
+    {
+    }
 
 
 /*----------------------------------------------------------------------------*/
@@ -116,143 +107,25 @@ StaticDiskPartitionInstance::~StaticDiskPartitionInstance()
     
    \returns     String representation of object, suitable for logging.
 */
-const wstring StaticDiskPartitionInstance::DumpString() const
-{
+    const wstring StaticDiskPartitionInstance::DumpString() const
+    {
         return SCXDumpStringBuilder("StaticDiskPartitionInstance")
-            .Text("Name", GetId())
-            .Scalar("Blocksize", m_blockSize)
-            .Text("BootPartition", (m_bootPartition? L"TRUE" : L"FALSE") )
-            .Text("DeviceID", m_deviceID)
-            .Scalar("DiskIndex", m_index)
-            .Scalar("NumberOfBlocks",m_numberOfBlocks)
-            .Scalar("Size", m_partitionSize)
-            .Scalar("StartingOffset", m_startingOffset);
-}
-
-
-#if defined(linux)
-/*----------------------------------------------------------------------------*/
-/**
-   Check that this is a valid instance by seeing whether it's found by fdisk
-
-   \returns    True if this instance is found in the fdisk output, False otherwise
-*/
-bool StaticDiskPartitionInstance::CheckFdiskLinux()
-{
-  SCX_LOGTRACE(m_log, L"DiskPartition::CheckFdiskLinux() Entering, DeviceID is:" + m_deviceID);
-
-
-  bool foundIt = false;
-
-  if (GetFdiskResult())
-  {
-    //We have the valid output from fdisk to use:
-        SCXRegexPtr bootDetRegExPtr(NULL);
-        SCXRegexPtr detailRegExPtr(NULL);
-
-        std::vector<wstring> matchingVector;
-
-        //Let's build our RegEx:
-        try
-        {
-            bootDetRegExPtr = new SCXCoreLib::SCXRegex(c_RedHBootPDetailPattern);
-            detailRegExPtr = new SCXCoreLib::SCXRegex(c_RedHDetailPattern);
-        }
-        catch(SCXCoreLib::SCXInvalidRegexException &e)
-        {
-            SCX_LOGERROR(m_log, L"Exception caught in compiling regex: " + e.What());
-            return false;
-        }
-
-        std::istringstream fdskStringStrm(m_fdiskResult);
-
-        vector<wstring>  allLines;                       // all lines read from fdisk output
-        allLines.clear();
-
-        SCXStream::NLFs nlfs;
-        SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(fdskStringStrm, allLines, nlfs);
- 
-        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end() && !foundIt; it++)
-        {
-             wstring curLine(*it);
-             SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"DiskPartition::CheckFdiskLinux() Top of FOR: We have a line= ", (*it)));
-             matchingVector.clear();
-
-             // Look for the detail line for this partition
-             if (((detailRegExPtr->ReturnMatch(curLine, matchingVector, 0)) ||
-                  (bootDetRegExPtr->ReturnMatch(curLine, matchingVector, 0))) &&
-                 (m_deviceID == matchingVector[1]))
-             {
-                 //This is our record in the fdisk output
-                 foundIt = true;
-             }
-             else if (matchingVector.size() > 0)
-             {
-                 //Have an error message
-                 SCX_LOGINFO(m_log, L"No match found! Message: " + matchingVector[0]);
-             }
-
-        } //EndFor
-
-  }
-  else
-  {
-     SCX_LOGERROR(m_log, StrAppend(wstring(L"Error from fdisk for Device: "),m_deviceID));
-  }
-
-  return foundIt;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-   Get the results of the fdisk command for later parsing
-
-   \returns    True if fdisk is successfully executed, False otherwise
-*/
-bool StaticDiskPartitionInstance::GetFdiskResult()
-{
-    SCX_LOGTRACE(m_log, StrAppend(L"DiskPartition::GetFdiskResult() Entering, DeviceID is:", m_deviceID));
-
-   std::istringstream processInput;
-   std::ostringstream processOutput;
-   std::ostringstream processErr;
-
-   try
-   {
-        SCXCoreLib::SCXProcess::Run(c_cmdFdiskStr, processInput, processOutput, processErr, 15000);
-        m_fdiskResult = processOutput.str();
-        SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(m_fdiskResult)));
-
-        std::string errOut = processErr.str();
-        if (errOut.size() > 0)
-        {
-            SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from fdisk command: ", StrFromUTF8(errOut)));
-        }
-   }
-   catch (SCXCoreLib::SCXException &e) 
-   {
-        SCX_LOGERROR(m_log, L"attempt to execute fdisk command for the purpose of retrieving partition information failed.");
-        m_fdiskResult.clear();
-        return false;
-   }
-
-   if (m_fdiskResult.size() == 0)
-   {
-       SCX_LOGERROR(m_log, L"Unable to retrieve partition information from OS...");
-       return false;
-   }
-
-   return true;
-}
-#endif
-
+        .Text("Name", GetId())
+        .Scalar("Blocksize", m_blockSize)
+        .Text("BootPartition", (m_bootPartition? L"TRUE" : L"FALSE") )
+        .Text("DeviceID", m_deviceID)
+        .Scalar("DiskIndex", m_index)
+        .Scalar("NumberOfBlocks",m_numberOfBlocks)
+        .Scalar("Size", m_partitionSize)
+        .Scalar("StartingOffset", m_startingOffset);
+    }
 
 /*----------------------------------------------------------------------------*/
 /**
    Update the instance.
 */
-void StaticDiskPartitionInstance::Update()
-{
+    void StaticDiskPartitionInstance::Update()
+    {
 
         SCX_LOGTRACE(m_log, L"DiskPartition::Update():: Entering, DeviceID is:" + m_deviceID);
 
@@ -272,7 +145,7 @@ void StaticDiskPartitionInstance::Update()
         return;
 
 #endif
-}
+    }
 
 
 
@@ -282,8 +155,8 @@ void StaticDiskPartitionInstance::Update()
 /**
    Update the Solaris Sparc instance.
 */
-void StaticDiskPartitionInstance::Update_Solaris()
-{
+    void StaticDiskPartitionInstance::Update_Solaris()
+    {
 
         SCX_LOGTRACE(m_log, L"DiskPartition::Update_Solaris():: Entering, DeviceID is:" + m_deviceID);
 
@@ -319,9 +192,9 @@ void StaticDiskPartitionInstance::Update_Solaris()
         // Let's build our RegEx:
         try
         {
-           solDfPatternPtr = new SCXCoreLib::SCXRegex(c_SolDfPattern);
-           solPrtvtocBpSPatternPtr = new SCXCoreLib::SCXRegex(c_SolPrtvtocBpSPattern);
-           solPrtvtocDetailPatternPtr = new SCXCoreLib::SCXRegex(c_SolprtvtocDetailPattern);
+            solDfPatternPtr = new SCXCoreLib::SCXRegex(c_SolDfPattern);
+            solPrtvtocBpSPatternPtr = new SCXCoreLib::SCXRegex(c_SolPrtvtocBpSPattern);
+            solPrtvtocDetailPatternPtr = new SCXCoreLib::SCXRegex(c_SolprtvtocDetailPattern);
         }
         catch(SCXCoreLib::SCXInvalidRegexException &e)
         {
@@ -359,7 +232,7 @@ void StaticDiskPartitionInstance::Update_Solaris()
             matchingVector.clear();
 
             if ((solDfPatternPtr->ReturnMatch(curLine, matchingVector, 0)) && (matchingVector.size() >= 4) && 
-                      (m_deviceID == matchingVector[2]))
+                (m_deviceID == matchingVector[2]))
             {
                 mountedStr = matchingVector[1];
                 blockSizeStr = matchingVector[3];
@@ -367,8 +240,8 @@ void StaticDiskPartitionInstance::Update_Solaris()
             }
             else if (matchingVector.size() > 0)
             {
-                 //Have an error message
-                 SCX_LOGINFO(m_log, L"No match found! Error: " + matchingVector[0]);
+                //Have an error message
+                SCX_LOGINFO(m_log, L"No match found! Error: " + matchingVector[0]);
             }
 
         }
@@ -376,9 +249,8 @@ void StaticDiskPartitionInstance::Update_Solaris()
         //Check the results
         if (!foundIt || mountedStr .size() == 0)
         {
-           SCX_LOGERROR(m_log, L"Failed to find this partition info with df -g: " + m_deviceID +
-                         L"  And Regex Error Msg: " + matchingVector[0]);
-           return;
+            SCX_LOGERROR(m_log, L"Failed to find this partition info with df -g: " + m_deviceID );
+            return;
         }     
 
 
@@ -409,10 +281,10 @@ void StaticDiskPartitionInstance::Update_Solaris()
             // Truncate trailing newline if there in captured output                  
             if (lengthCaptured > 0)
             {
-              if (prtResult[lengthCaptured - 1] == '\n')
-              {
-                prtResult[lengthCaptured - 1] = '\0';
-              }
+                if (prtResult[lengthCaptured - 1] == '\n')
+                {
+                    prtResult[lengthCaptured - 1] = '\0';
+                }
             }
 
         }
@@ -451,9 +323,9 @@ void StaticDiskPartitionInstance::Update_Solaris()
         //Check the results
         if (!foundIt || bytesPerSectorStr.size() == 0)
         {
-           SCX_LOGERROR(m_log, L"Failed to find this partition info with prtvtoc: " + m_deviceID +
+            SCX_LOGERROR(m_log, L"Failed to find this partition info with prtvtoc: " + m_deviceID +
                          L"  And Regex Error Msg: " + matchingVector[0]);
-           return;
+            return;
         }     
 
         // If we reached here we have everything we need
@@ -471,7 +343,7 @@ void StaticDiskPartitionInstance::Update_Solaris()
                                               static_cast<double>(m_blockSize));
 
         return;
-}
+    }
 #endif
 
 
@@ -484,13 +356,13 @@ void StaticDiskPartitionInstance::Update_Solaris()
    so Enumerate can call this for the first Instance, and just reuse the results for the 
    other instances.
 
-       input parameter: String that will be set to the boot drive path (e.g. /dev/dsk/c1t0d0s0)
-       returns T when set, F when it fails.
+   input parameter: String that will be set to the boot drive path (e.g. /dev/dsk/c1t0d0s0)
+   returns T when set, F when it fails.
    
 */
 
-bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
-{
+    bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
+    {
         SCX_LOGTRACE(m_log, L"DiskPartition::GetBootDrivePath():: Entering . . .");
 
         bootpathStr.clear();
@@ -529,10 +401,10 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
             // Truncate trailing newline if there in captured output                  
             if (lengthCaptured > 0)
             {
-              if (prtconfResult[lengthCaptured - 1] == '\n')
-              {
-                  prtconfResult[lengthCaptured - 1] = '\0';
-              }
+                if (prtconfResult[lengthCaptured - 1] == '\n')
+                {
+                    prtconfResult[lengthCaptured - 1] = '\0';
+                }
             }
 
         }
@@ -643,10 +515,10 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
             // Truncate trailing newline if there in captured output
             if (lengthCaptured > 0)
             {
-              if (devDskResult[lengthCaptured - 1] == '\n')
-              {
-                devDskResult[lengthCaptured - 1] = '\0';
-              }
+                if (devDskResult[lengthCaptured - 1] == '\n')
+                {
+                    devDskResult[lengthCaptured - 1] = '\0';
+                }
             }
 
         }
@@ -694,7 +566,7 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
         bootpathStr = L"/dev/dsk/" + bootDisk; //e.g. "/dev/dsk/c1t0d0s0"
 
         return true;
-}
+    }
 #endif
 
 #if defined(linux)
@@ -703,223 +575,61 @@ bool StaticDiskPartitionInstance::GetBootDrivePath(wstring& bootpathStr)
 /**
    Update the Linux instance.
 */
-void StaticDiskPartitionInstance::Update_Linux()
-{
-    SCX_LOGTRACE(m_log, L"DiskPartition::Update_Linux():: Entering, DeviceID is:" + m_deviceID);
-
-
-    // ****************************** start linux ****************************** 
-
-    if (m_fdiskResult.size() > 0)
+    void StaticDiskPartitionInstance::Update_Linux()
     {
-      //Good, we've already retrieved the fdisk info we need
-
-        std::istringstream fdskStringStrm(m_fdiskResult);
-
-        SCXRegexPtr sectSzRegExPtr(NULL);
-        SCXRegexPtr bootDetRegExPtr(NULL);
-        SCXRegexPtr detailRegExPtr(NULL);
-
-        std::vector<wstring> matchingVector;
-
-        //Let's build our RegEx:
-        try
+        SCX_LOGTRACE(m_log, L"DiskPartition::Update_Linux():: Entering, DeviceID is:" + m_deviceID);
+        
+        bool opened = m_deps->open(StrToUTF8(m_deviceID).c_str(), O_RDONLY | O_NONBLOCK);
+        if (!opened)
         {
-            sectSzRegExPtr = new SCXCoreLib::SCXRegex(c_RedHSectorSizePattern);
-            bootDetRegExPtr = new SCXCoreLib::SCXRegex(c_RedHBootPDetailPattern);
-            detailRegExPtr = new SCXCoreLib::SCXRegex(c_RedHDetailPattern);
+            return; // Failure should already be logged by the open call
         }
-        catch(SCXCoreLib::SCXInvalidRegexException &e)
+
+        int ret;
+
+        struct hd_geometry geo;
+        memset(&geo,0,sizeof(geo));
+        ret = m_deps->ioctl(HDIO_GETGEO, &geo);
+        if (ret || errno)
         {
-            SCX_LOGERROR(m_log, L"Exception caught in compiling regex: " + e.What());
+            SCX_LOGERROR(m_log, L"Could not read disk geometry : ret=" + StrFrom(ret) + L" errno=" + StrFrom(errno));
+            return; //No use going on . . .
+        }
+        
+        u_int64_t sectorSz=0;
+        ret = m_deps->ioctl( BLKSSZGET, &sectorSz);
+        if (ret || errno)
+        {
+            SCX_LOGERROR(m_log, L"ioctl BLKSSZGET failed : ret=" + StrFrom(ret) + L" errno=" + StrFrom(errno));
+            return;
+        }
+        
+        u_int64_t blockDevBsz=0;
+        ret = m_deps->ioctl( BLKBSZGET, &blockDevBsz);
+        if (ret || errno)
+        {
+            SCX_LOGERROR(m_log, L"ioctl BLKBSZGET failed : ret=" + StrFrom(ret) + L" errno=" + StrFrom(errno));
             return;
         }
 
-        vector<wstring>  allLines;                       // all lines read from fdisk output
-        allLines.clear();
-
-        unsigned int sectorSz = 0;
-        unsigned int savedSectorSz = 0;
-        wstring endOffsetStr;
-        wstring numBlocksStr;
-        bool bootpart = false;
-        bool foundIt = false;
-        scxulong startBlk = 0;
-
-        SCXStream::NLFs nlfs;
-        SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(fdskStringStrm, allLines, nlfs);
- 
-        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end() && !foundIt; it++)
+        unsigned long partitionSize=0;
+        ret = m_deps->ioctl( BLKGETSIZE, &partitionSize);
+        if (ret || errno)
         {
-             wstring curLine(*it);
-             SCX_LOGTRACE(m_log, L"DiskPartition::Update():: Top of FOR: We have a line= " + (*it));
-             matchingVector.clear();
-
-             // First let's get the value for Sector Size
-             if (sectSzRegExPtr->ReturnMatch(curLine, matchingVector, 0))
-             {
-                 //First field [0] repeats the whole matching string
-                 if (matchingVector.size() >= 1)
-                 {
-                     //Want to overwrite any existing values to keep with the latest
-                     sectorSz = SCXCoreLib::StrToUInt(matchingVector[1]);
-                 }
-             }
-             else if ((bootDetRegExPtr->ReturnMatch(curLine, matchingVector, 0)) &&
-                      (m_deviceID == matchingVector[1]))
-             {
-                 //This is our record in the fdisk output
-                 //First field repeats the whole matching string
-                 if ((matchingVector.size() >= 5) && (sectorSz != 0))
-                 {
-                     savedSectorSz = sectorSz;  //Save off the last Sector size read in.
-                     bootpart = true;  //matchingVector[2]
-                     startBlk = SCXCoreLib::StrToULong(matchingVector[3]);
-                     foundIt = true;
-
-                 }
-                 else
-                 {
-                     SCX_LOGERROR(m_log, L"Matched Boot Detail line, but not enough fields available. Matching Size= " 
-                     + StrFrom(matchingVector.size()));
-                 }
-
-             }
-             else if ((detailRegExPtr->ReturnMatch(curLine, matchingVector, 0)) &&
-                      (m_deviceID == matchingVector[1]))
-             {
-                 //This is our record in the fdisk output
-                 //First field repeats the whole matching string
-                 if ((matchingVector.size() >= 4) && (sectorSz != 0))
-                 {
-                     savedSectorSz = sectorSz;  //Save off the last Sector size read in.
-                     bootpart = false;
-                     startBlk = SCXCoreLib::StrToULong(matchingVector[2]);
-                     foundIt = true;
-                 }
-                 else
-                 {
-                     SCX_LOGERROR(m_log, L"Matched Boot Detail line, but not enough fields available. Matching Size= " 
-                     + StrFrom(matchingVector.size()));
-                 }
-             }
-             else if (matchingVector.size() > 0)
-             {
-                 //Have an error message
-                 SCX_LOGINFO(m_log, L"No match found! Error: " + matchingVector[0]);
-             }
-
-        } //EndFor
-
-          
-        // Now let's use the 'blockdev' command to get the partition size, and the correct block size:
-        std::istringstream processBdevSizeInput;
-        std::ostringstream processBdevSizeOutput;
-        std::ostringstream processBdevSizeErr;
-
-        scxulong partitionSize = 0;
-        scxulong blockDevBsz = 0;
-        wstring bDevSizeCmd(c_cmdBlockDevSizeStr);
-        bDevSizeCmd += m_deviceID;
-        std::string blockDevResult;
-
-        try
-        {
-            SCXCoreLib::SCXProcess::Run(bDevSizeCmd.c_str(), processBdevSizeInput, processBdevSizeOutput, processBdevSizeErr, 15000);
-            blockDevResult = processBdevSizeOutput.str();
-            SCX_LOGTRACE(m_log, StrAppend(wstring(L"  Got this output from BlockDev: "), StrFromUTF8(blockDevResult)));
-
-            std::string errOutPSz = processBdevSizeErr.str();
-            if (errOutPSz.size() > 0)
-            {
-                SCX_LOGERROR(m_log, StrAppend(L"Got this error string from blockdev GetSize command: ", StrFromUTF8(errOutPSz)));
-            }
-        }
-        catch (SCXCoreLib::SCXException &e) 
-        {
-            SCX_LOGERROR(m_log, L"attempt to execute blockdev command for the purpose of retrieving partition information failed.");
-            return;  //No use going on . . .
-        }
-
-        if (blockDevResult.size() == 0)
-        {
-            SCX_LOGERROR(m_log, L"Unable to retrieve partition Size information from OS...");
+            SCX_LOGERROR(m_log, L"ioctl BLKGETSIZE failed : ret=" + StrFrom(ret) + L" errno=" + StrFrom(errno));
             return;
         }
-
-        //So, everything checks out, lets save off the result:
-        partitionSize = SCXCoreLib::StrToULong(SCXCoreLib::StrFromUTF8(blockDevResult));
-
-
-        //Now we'll use blockdev to retrieve the blocksize for the file system (as opposed to the kernel buffer block size).
-        std::istringstream processBlkSizeInput;
-        std::ostringstream processBlkSizeOutput;
-        std::ostringstream processBlkSizeErr;
-        wstring bDevBlkSizeCmd(c_cmdBlockDevBszStr);
-        bDevBlkSizeCmd += m_deviceID;
-        blockDevResult.clear();
-
-        try
-        {
-            SCXCoreLib::SCXProcess::Run(bDevBlkSizeCmd.c_str(), processBlkSizeInput, processBlkSizeOutput, processBlkSizeErr, 15000);
-            blockDevResult = processBlkSizeOutput.str();
-            SCX_LOGTRACE(m_log, StrAppend(L"  Got this output from BlockDev: ", StrFromUTF8(blockDevResult)));
-
-            std::string errOutBsz = processBlkSizeErr.str();
-            if (errOutBsz.size() > 0)
-            {
-                SCX_LOGERROR(m_log, StrAppend(L"Got this error string from blockdev GetSize command: ", StrFromUTF8(errOutBsz)));
-            }
-        }
-        catch (SCXCoreLib::SCXException &e) 
-        {
-            SCX_LOGERROR(m_log, L"attempt to execute blockdev command for the purpose of retrieving partition information failed.");
-            return;  //No use going on . . .
-        }
-
-        if (blockDevResult.size() == 0)
-        {
-            SCX_LOGERROR(m_log, L"Unable to retrieve partition Size information from OS...");
-            return;
-        }
-
-        //So, everything checks out, lets save off the result:
-        blockDevBsz = SCXCoreLib::StrToULong(SCXCoreLib::StrFromUTF8(blockDevResult));
-
-        // Now, let's fill in our fields  
-        if (foundIt && startBlk > 0)
-        {      
-           // fill in all the fields in the instance of PartitionInformation
-           m_bootPartition = bootpart; 
-           m_partitionSize = partitionSize * savedSectorSz;
-           m_blockSize = blockDevBsz;
-           m_startingOffset = startBlk;
-           m_numberOfBlocks = RoundToUnsignedInt(
-                                 static_cast<double>(m_partitionSize) / 
-                                            static_cast<double>(m_blockSize)); ;
-        }
-        else
-        {
-           SCX_LOGERROR(m_log, L"Partition Record Not Found! Starting Block= " + StrFrom(startBlk) +
-                        L"  And Regex Error Msg: " + matchingVector[0]);
-
-        }
-
-    }
-    else
-    {
-      //The fdisk command failed earlier
-      SCX_LOGERROR(m_log, L"No fdisk information available for this instance.");
+         
+        // fill in the fields in the instance of PartitionInformation
+        m_partitionSize = partitionSize * sectorSz;
+        m_blockSize = blockDevBsz;
+        m_startingOffset = geo.start;
+        m_numberOfBlocks = RoundToUnsignedInt(
+            static_cast<double>(m_partitionSize) / 
+            static_cast<double>(m_blockSize));
     }
 
-    return;
-
-    // ****************************** end linux ******************************
-}
-
-#endif
-
-
+#endif /* linux */
     
 } /* namespace SCXSystemLib */
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/

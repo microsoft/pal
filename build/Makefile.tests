@@ -134,6 +134,7 @@ testrun_copy : $(TARGET_DIR)/closefiledescriptors
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/bios/*.dat $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/computersystem/*.dat $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/disk/*.md.cf $(TARGET_DIR)/testfiles/
+	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/disk/orapdb01* $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/disk/bug*.lvmtab $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/disk/bug*_mnttab $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/networkinterface/procnetdev*.txt $(TARGET_DIR)/testfiles/

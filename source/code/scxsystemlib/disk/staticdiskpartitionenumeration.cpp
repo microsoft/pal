@@ -42,7 +42,7 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-        Standard Constructor
+       Standard Constructor
     */
     StaticDiskPartitionEnumeration::StaticDiskPartitionEnumeration(SCXCoreLib::SCXHandle<DiskDepend> deps) :
         m_deps(deps), m_log(SCXLogHandleFactory::GetLogHandle(moduleIdentifier))
@@ -61,7 +61,7 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-        Creates the total DiskPartition instances.
+       Creates the total DiskPartition instances.
     */
     void StaticDiskPartitionEnumeration::Init()
     {
@@ -86,7 +86,7 @@ namespace SCXSystemLib
        Update the enumeration.
 
        \param updateInstances If true (default) all instances will be updated.
-                              Otherwise only the content of the enumeration will be updated.
+       Otherwise only the content of the enumeration will be updated.
 
     */
     void StaticDiskPartitionEnumeration::Update(bool updateInstances /*=true*/)
@@ -98,18 +98,25 @@ namespace SCXSystemLib
         }
 
 #if defined(linux)
+
         /************* Start Linux ************************************/
-        const wchar_t * const proc_part = L"/proc/partitions"; // partitions file path
         int                major     = 0;                  // major number of a partition
         int                minor     = 0;                  // minor number of a partition
-        int                blocks    = 0;                  // blocks of a partition
+        scxulong           blocks    = 0;                  // blocks of a partition
         vector<std::wstring>  allLines;                       // all lines read from partitions table
         std::wstring          partname;                       // name of the partition
         const std::wstring    dev_dir = L"/dev/";              // device directory
+        std::map<std::wstring, std::wstring> partitions;
+        std::string partedOutput;
 
+        if (!GetPartedOutput(partedOutput) || !ParsePartedOutput(partedOutput, partitions))
+        {
+            // An error happened and was logged
+            return;
+        }
 
         SCXStream::NLFs nlfs;
-        SCXFile::ReadAllLines(SCXFilePath(proc_part), allLines, nlfs);
+        SCXFile::ReadAllLines(m_deps->LocateProcPartitions(), allLines, nlfs);
 
         // Let's read through line-by-line the /proc/partitions pseudo-file.
         for (vector<std::wstring>::iterator it = allLines.begin(); it != allLines.end(); it++)
@@ -132,6 +139,7 @@ namespace SCXSystemLib
             //Partition names end in the partitionIndex, skip the 'dm-*' because those are device-mapped
             if (m_deps->FileExists(devPath) && isdigit(partname[partname.size()-1]) && (std::wstring::npos == partname.find(L"-"))) 
             {
+                // Check existence first to prevent duplicate instances
                 SCXCoreLib::SCXHandle<StaticDiskPartitionInstance> partit = GetInstance(partname);
                 if (NULL == partit)
                 {
@@ -140,19 +148,21 @@ namespace SCXSystemLib
                 partit->SetId(partname);
                 partit->m_deviceID = devPath;
                 //Last chars of partition name is the index. Need to handle 1, 2 or 3 digits
-                partit->m_index = 
-                    SCXCoreLib::StrToUInt(partname.substr(partname.find_first_of(L"0123456789"))); 
+                partit->m_index = SCXCoreLib::StrToUInt(partname.substr(partname.find_first_of(L"0123456789"))); 
 
-                if (partit->CheckFdiskLinux())
+                // Double check to make sure this DevicePath is also listed with parted
+                if (partitions.find(devPath) != partitions.end())
                 {
-                   AddInstance(partit);
+                    AddInstance(partit);
+                    std::wstring detail = partitions.find(devPath)->second;
+                    // Set whether this is a boot partition
+                    partit->m_bootPartition = (detail.find(L"boot") != std::string::npos);
                 }
                 else
                 {
-                   SCX_LOGINFO(m_log, L"This partition is listed in /proc/partitions, but not in fdisk: Name: " + partname);
-                   //delete partit;  Handle destructed when exiting this block
+                    SCX_LOGINFO(m_log, L"This partition is listed in /proc/partitions, but not in parted: Name: " + partname);
+                    //delete partit;  Handle destructed when exiting this block
                 }
-
             }
 
         } //EndFor
@@ -176,7 +186,7 @@ namespace SCXSystemLib
             SCX_LOGTRACE(m_log, L"DPEnum::Update():: Inside FOR loop, Device=" + it->device + L"  And file=" + it->fileSystem + L"  MountPt=" + it->mountPoint);
 
             if (! m_deps->FileSystemIgnored(it->fileSystem) && ! m_deps->DeviceIgnored(it->device) &&
-                 (std::wstring::npos != (it->device).find(dev_dsk_dir)))
+                (std::wstring::npos != (it->device).find(dev_dsk_dir)))
             {
 
                 SCXCoreLib::SCXHandle<StaticDiskPartitionInstance> partit = GetInstance(it->device);
@@ -190,7 +200,7 @@ namespace SCXSystemLib
                     partit->m_deviceID = devPath;
                     //Last char of partition name is the index.
                     partit->m_index = 
-                         SCXCoreLib::StrToUInt(partname.substr(partname.find_last_of(L"0123456789")));
+                    SCXCoreLib::StrToUInt(partname.substr(partname.find_last_of(L"0123456789")));
                     if ((partit->m_index + 1) > zfsFirstIndex)
                     {
                         // ZFS partition indices start after last regular partition index.
@@ -200,19 +210,19 @@ namespace SCXSystemLib
                     //Getting the bootdrive is expensive, let's just do it once. 
                     if (firstInstance)
                     {
-                       if (partit->GetBootDrivePath(bootp))
-                       {
-                          firstInstance = false;
-                       }
+                        if (partit->GetBootDrivePath(bootp))
+                        {
+                            firstInstance = false;
+                        }
                     }
 
                     if (devPath == bootp)
                     {
-                       partit->m_bootPartition = true;
+                        partit->m_bootPartition = true;
                     }
                     else
                     {
-                       partit->m_bootPartition = false;
+                        partit->m_bootPartition = false;
                     }                   
 
                     AddInstance(partit);
@@ -243,7 +253,7 @@ namespace SCXSystemLib
                     {
                         // Just log in case we can not get file system data.
                         std::wstring noStatvfs = L"Statvfs failed for mountpoint \"" +
-                            it->mountPoint + L"\", errno = " + StrFrom(errno);
+                        it->mountPoint + L"\", errno = " + StrFrom(errno);
                         SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(noStatvfs));
                         SCX_LOG(m_log, severity, noStatvfs);
                     }
@@ -312,7 +322,7 @@ namespace SCXSystemLib
         if (ret_lvmvgs != 0)
         {
             throw SCXInternalErrorException(L"lvm_queryvgs failed with error code: " + StrFrom(ret_lvmvgs) +
-                L".", SCXSRCLOCATION);
+                                            L".", SCXSRCLOCATION);
         }
         // Iterate through volume groups.
         for (long ivg = 0; ivg < vgs->num_vgs; ivg++)
@@ -323,7 +333,7 @@ namespace SCXSystemLib
             if (ret_lvmvg != 0)
             {
                 throw SCXInternalErrorException(L"lvm_queryvg failed with error code: " + StrFrom(ret_lvmvg) +
-                    L".", SCXSRCLOCATION);
+                                                L".", SCXSRCLOCATION);
             }
             // Iterate through logical volumes.
             for (long ilv = 0; ilv < vg->num_lvs; ilv++)
@@ -337,11 +347,11 @@ namespace SCXSystemLib
                     if (ret_lvmlv != 0)
                     {
                         throw SCXInternalErrorException(L"lvm_querylv for logical volume \"" +
-                            StrFromUTF8(vg->lvs[ilv].lvname) + L"\" failed with error code: " +
-                            StrFrom(ret_lvmlv) + L".", SCXSRCLOCATION);
+                                                        StrFromUTF8(vg->lvs[ilv].lvname) + L"\" failed with error code: " +
+                                                        StrFrom(ret_lvmlv) + L".", SCXSRCLOCATION);
                     }
                     ProcessOneDiskPartition(vm, mount_point_cnt, lv->lvname, 
-                        static_cast<scxlong>(lv->currentsize) << lv->ppsize, partition_index);
+                                            static_cast<scxlong>(lv->currentsize) << lv->ppsize, partition_index);
                 }
                 catch(SCXCoreLib::SCXException& e)
                 {
@@ -378,7 +388,7 @@ namespace SCXSystemLib
                     }
                     // Now we have all file system data. Update the disk partition instance.
                     scxulong partition_size =
-                        static_cast<scxulong>(stat.f_frsize) * static_cast<scxulong>(stat.f_blocks);
+                    static_cast<scxulong>(stat.f_frsize) * static_cast<scxulong>(stat.f_blocks);
 
                     partition_instance->m_blockSize = stat.f_frsize;
                     partition_instance->m_numberOfBlocks = stat.f_blocks;
@@ -399,7 +409,7 @@ namespace SCXSystemLib
                             if (!matches[0].empty())
                             {
                                 wstring msg = L"Error encountered when trying to verify device name \"" + logVol[i].name +
-                                    L"\". " + matches[0];
+                                L"\". " + matches[0];
                                 throw SCXInternalErrorException(msg, SCXSRCLOCATION);
                             }
                             else
@@ -457,16 +467,16 @@ namespace SCXSystemLib
 #if defined(aix)
     /*----------------------------------------------------------------------------*/
     /**
-        Processes one disk partition during enumeration.
+       Processes one disk partition during enumeration.
 
-        \param mountPoints Buffer containing mount points.
-        \param mountPointCnt Number of mountpoints in the buffer.
-        \param partitionName Partition name.
-        \param partitionSize Partition size.
-        \param partitionIndex Partition index.
+       \param mountPoints Buffer containing mount points.
+       \param mountPointCnt Number of mountpoints in the buffer.
+       \param partitionName Partition name.
+       \param partitionSize Partition size.
+       \param partitionIndex Partition index.
     */
     void StaticDiskPartitionEnumeration::ProcessOneDiskPartition(const std::vector<char> &mountPoints, int mountPointCnt,
-        const char* partitionName, scxlong partitionSize, unsigned int &partitionIndex)
+                                                                 const char* partitionName, scxlong partitionSize, unsigned int &partitionIndex)
     {
         SCXCoreLib::SCXHandle<SCXodm> odm_deps = m_deps->CreateOdm();
         std::string partition_name = partitionName;
@@ -477,7 +487,7 @@ namespace SCXSystemLib
         criteria_at += partition_name;
         // Find disk partition instance or create one.
         SCXCoreLib::SCXHandle<StaticDiskPartitionInstance> partition_instance =
-            GetInstance(StrFromUTF8(partition_name));
+        GetInstance(StrFromUTF8(partition_name));
         if (NULL == partition_instance)
         {
             partition_instance = new StaticDiskPartitionInstance();
@@ -515,7 +525,7 @@ namespace SCXSystemLib
                         struct statvfs64 stat;
                         memset(&stat, 0, sizeof(stat));
                         int r = m_deps->statvfs64(reinterpret_cast<const char*>(vmp) + vmp->vmt_data[VMT_STUB].vmt_off,
-                            &stat);
+                                                  &stat);
                         if(r != 0)
                         {
                             throw SCXErrnoException(L"statvfs failed", errno, SCXSRCLOCATION);
@@ -523,7 +533,7 @@ namespace SCXSystemLib
 
                         // Now we have all file system data. Update the disk partition instance.
                         scxulong partition_size =
-                            static_cast<scxulong>(stat.f_frsize) * static_cast<scxulong>(stat.f_blocks);
+                        static_cast<scxulong>(stat.f_frsize) * static_cast<scxulong>(stat.f_blocks);
 
                         partition_instance->m_blockSize = stat.f_frsize;
                         partition_instance->m_numberOfBlocks = stat.f_blocks;
@@ -556,10 +566,10 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-        Dump object as string (for logging).
+       Dump object as string (for logging).
     
-        Parameters:  None
-        Retval:      The object represented as a string suitable for logging.
+       Parameters:  None
+       Retval:      The object represented as a string suitable for logging.
     
     */
     const std::wstring StaticDiskPartitionEnumeration::DumpString() const
@@ -642,7 +652,7 @@ namespace SCXSystemLib
             {
                 // PV name from "lvlnboot -v" not found in "vgdisplay -v".
                 std::wstring invalidPvName = L"PV Name '" + bootPvName +
-                    L"' from 'lvlnboot -v' output not found in 'vgdisplay -v' output.";
+                L"' from 'lvlnboot -v' output not found in 'vgdisplay -v' output.";
                 throw SCXCoreLib::SCXInternalErrorException(invalidPvName, SCXSRCLOCATION);
             }
             // Get the index of the matched PV.
@@ -666,14 +676,14 @@ namespace SCXSystemLib
             {
                 // LV name from "lvlnboot -v" not found in "vgdisplay -v".
                 std::wstring invalidLvName = L"Boot LV Name '" + bootLvName +
-                    L"' from 'lvlnboot -v' output not found in 'vgdisplay -v' output.";
+                L"' from 'lvlnboot -v' output not found in 'vgdisplay -v' output.";
                 throw SCXCoreLib::SCXInternalErrorException(invalidLvName, SCXSRCLOCATION);
             }
             if(lvFoundCount > 1)
             {
                 std::wstring invalidLvName = L"Boot LV Name '" + bootLvName +
-                    L"' from 'lvlnboot -v' output found multiple times in 'vgdisplay -v' output. Names differ "
-                    L"only in leading and trailing spaces. impossible to determine actual boot logical volume.";
+                L"' from 'lvlnboot -v' output found multiple times in 'vgdisplay -v' output. Names differ "
+                L"only in leading and trailing spaces. impossible to determine actual boot logical volume.";
                 throw SCXCoreLib::SCXInternalErrorException(invalidLvName, SCXSRCLOCATION);
             }
 
@@ -681,21 +691,21 @@ namespace SCXSystemLib
         else
         {
             std::wstring procExcMsg = L"Execution of '" + procCmd + L"' failed with return code " +
-                StrFrom(procRet) + L".\nOutput:\n" + StrFromUTF8(lvlnbootStr) + L"\nError output:\n" +
-                StrFromUTF8(errStr) + L"\n";
+            StrFrom(procRet) + L".\nOutput:\n" + StrFromUTF8(lvlnbootStr) + L"\nError output:\n" +
+            StrFromUTF8(errStr) + L"\n";
             throw SCXCoreLib::SCXInternalErrorException(procExcMsg, SCXSRCLOCATION);
         }
     }
 
     /**
-        Retrieves vector of mount points. This helper function is necessary to put HP-s fix that ensures data integrity
-        around setmntent(), getmntent(), endmntent() sequence. Fix description and sample code is from
-        HP-UX reference on getmntent(3X). To achieve data integrity we compare MNT_MNTTAB file size and modification time
-        before and after data reads and use data only if there was no modification.
+       Retrieves vector of mount points. This helper function is necessary to put HP-s fix that ensures data integrity
+       around setmntent(), getmntent(), endmntent() sequence. Fix description and sample code is from
+       HP-UX reference on getmntent(3X). To achieve data integrity we compare MNT_MNTTAB file size and modification time
+       before and after data reads and use data only if there was no modification.
 
-        \param log Handle to a log file.
-        \param deps External dependencies.
-        \param mountPoints Return vector to be filled with mount points.
+       \param log Handle to a log file.
+       \param deps External dependencies.
+       \param mountPoints Return vector to be filled with mount points.
     */
     void GetMountPoints(SCXCoreLib::SCXLogHandle &log, SCXCoreLib::SCXHandle<DiskDepend> &deps,
                         vector<SCXLogicalVolumes> &mountPoints)
@@ -779,23 +789,23 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-        Executes "vgdisplay -v" command and returns lists of volume groups, logical and physical volumes found on
-        the system.
+       Executes "vgdisplay -v" command and returns lists of volume groups, logical and physical volumes found on
+       the system.
 
-        \param log Logging handle.
-        \param deps Dependencies handle.
-        \param volGroup Returned list of volume groups found on the system.
-        \param logVol Returned list of logical volumes found on the system.
-        \param logVolShort Returned list of logical volume names in the short form, without path and with leading
-                           and trailing spaces removed.
-        \param logVolVGIndex Index of a volume group to which particular logical volume belongs to.
-        \param physVol Returned list of physical volumes found on the system.
-        \param physVolVGIndex Index of a volume group to which particular physical volume belongs to.
+       \param log Logging handle.
+       \param deps Dependencies handle.
+       \param volGroup Returned list of volume groups found on the system.
+       \param logVol Returned list of logical volumes found on the system.
+       \param logVolShort Returned list of logical volume names in the short form, without path and with leading
+       and trailing spaces removed.
+       \param logVolVGIndex Index of a volume group to which particular logical volume belongs to.
+       \param physVol Returned list of physical volumes found on the system.
+       \param physVolVGIndex Index of a volume group to which particular physical volume belongs to.
     */
     void GetVgLvPv(SCXCoreLib::SCXLogHandle &log, 
-            SCXCoreLib::SCXHandle<DiskDepend> &deps, vector<std::wstring> &volGroup,
-            vector<SCXLogicalVolumes> &logVol, vector<std::wstring> &logVolShort, vector<size_t> &logVolVGIndex,
-            vector<std::wstring> &physVol, vector<size_t> &physVolVGIndex)
+                   SCXCoreLib::SCXHandle<DiskDepend> &deps, vector<std::wstring> &volGroup,
+                   vector<SCXLogicalVolumes> &logVol, vector<std::wstring> &logVolShort, vector<size_t> &logVolVGIndex,
+                   vector<std::wstring> &physVol, vector<size_t> &physVolVGIndex)
     {
         volGroup.clear();
         logVol.clear();
@@ -859,8 +869,8 @@ namespace SCXSystemLib
                         {
                             throw SCXCoreLib::SCXInternalErrorException(
                                 std::wstring(L"vgdisplay -v returned corrupt data."
-                                          L"LV or PV name encountered before it's VG name."),
-                                          SCXSRCLOCATION);
+                                             L"LV or PV name encountered before it's VG name."),
+                                SCXSRCLOCATION);
                         }
 
                         std::wstring nameType = regExMatches[2].matchString;
@@ -899,14 +909,14 @@ namespace SCXSystemLib
         else
         {
             std::wstring procExcMsg = L"Execution of '" + procCmd + L"' failed with return code " +
-                StrFrom(procRet) + L".\nOutput:\n" + StrFromUTF8(vgStr) + L"\nError output:\n" +
-                StrFromUTF8(errStr) + L"\n";
+            StrFrom(procRet) + L".\nOutput:\n" + StrFromUTF8(vgStr) + L"\nError output:\n" +
+            StrFromUTF8(errStr) + L"\n";
             throw SCXCoreLib::SCXInternalErrorException(procExcMsg, SCXSRCLOCATION);
         }
     }
 
     void GetLogicalVolumes(SCXCoreLib::SCXLogHandle &log, 
-            SCXCoreLib::SCXHandle<DiskDepend> &deps, vector<SCXLogicalVolumes> &logVol)
+                           SCXCoreLib::SCXHandle<DiskDepend> &deps, vector<SCXLogicalVolumes> &logVol)
     {
         vector<std::wstring> volGroup;
         vector<std::wstring> logVolShort;
@@ -917,7 +927,7 @@ namespace SCXSystemLib
     }
 
     void StaticDiskPartitionEnumeration::GetLogicalVolumesBoot(vector<SCXLogicalVolumes> &logVol,
-            bool &bootLvFound, size_t &fullBootLvIndex)
+                                                               bool &bootLvFound, size_t &fullBootLvIndex)
     {
         bootLvFound = false;
         fullBootLvIndex = 0;
@@ -945,6 +955,128 @@ namespace SCXSystemLib
         }
     }
 #endif// hpux
+
+#if defined(linux)
+    bool StaticDiskPartitionEnumeration::GetPartedOutput(std::string &partedOutput)
+    {
+        SCX_LOGTRACE(m_log, L"DiskPartitionEnum::GetPartedOutput() Entering");
+
+        std::istringstream processInput;
+        std::ostringstream processOutput, processErr;
+        
+        try
+        {
+            SCX_LOGTRACE(m_log, L"Invoking command : \"parted -l\"");
+            int ret = m_deps->Run(L"parted -l", processInput, processOutput, processErr, 15000);
+            partedOutput = processOutput.str();
+            SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(partedOutput)));
+            std::string errOut = processErr.str();
+
+            if (ret != 0 || errOut.size() > 0)
+            {
+                SCX_LOGTRACE(m_log, L"Using fallback interactive parted command : \"parted -i\"");
+                processErr.str(""); // Reset the error stream
+                // We use ignore in case parted shows an interactive warning
+                std::istringstream input("ignore\nprint\nquit\n");
+                // We need the -i flag for stdin to be used correctly
+                m_deps->Run(L"parted -i", input, processOutput, processErr, 15000);
+                partedOutput = processOutput.str();
+                SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(partedOutput)));
+                errOut = processErr.str();
+            }
+
+            if (errOut.size() > 0)
+            {
+                SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from parted command: ", StrFromUTF8(errOut)));
+            }
+        }
+        catch (SCXCoreLib::SCXException &e) 
+        {
+            SCX_LOGERROR(m_log, L"Attempt to execute parted command for the purpose of retrieving partition information failed : " + e.What());
+            partedOutput.clear();
+            return false;
+        }
+
+        if (partedOutput.size() == 0)
+        {
+            SCX_LOGERROR(m_log, L"Unable to retrieve partition information from OS...");
+            return false;
+        }
+
+        return true;
+    }
+
+    bool StaticDiskPartitionEnumeration::ParsePartedOutput(const std::string &partedOutput, std::map<std::wstring, std::wstring> &partitions)
+    {
+        SCX_LOGTRACE(m_log, L"DiskPartitionEnum::ParsePartedOutput() Entering");
+
+        typedef SCXCoreLib::SCXHandle<SCXRegex> SCXRegexPtr;
+
+        SCXRegexPtr diskRegExPtr(NULL);
+        SCXRegexPtr detailRegExPtr(NULL);
+        
+        // Gets the path of the disk. For example:
+        // "/dev/sda" in "Disk /dev/sda: 112GB"
+        wstring partedDiskPattern(L"Disk[^/]+(/dev/[^ ]*):");
+
+        // Get the partition number on detail lines. For example:
+        // "1" in " 1      1049kB  525MB  524MB  primary  ext4         boot"
+        // "2" in "2        101.975 102398.686  primary               lvm"
+        wstring partedDetailPattern(L"^[ ]?([0-9]+)");
+
+        std::vector<wstring> matchingVector;
+
+        //Let's build our RegEx:
+        try
+        {
+            diskRegExPtr = new SCXCoreLib::SCXRegex(partedDiskPattern);
+            detailRegExPtr = new SCXCoreLib::SCXRegex(partedDetailPattern);
+        }
+        catch(SCXCoreLib::SCXInvalidRegexException &e)
+        {
+            SCX_LOGERROR(m_log, L"Exception caught in compiling regex: " + e.What());
+            return false;
+        }
+
+        // All lines read from parted output
+        vector<wstring>  allLines;
+        allLines.clear();
+
+        std::istringstream partedStringStrm(partedOutput);
+        SCXStream::NLFs nlfs;
+        SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(partedStringStrm, allLines, nlfs);
+        wstring currentDisk(L"");
+
+        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end(); it++)
+        {
+            wstring curLine(*it);
+            SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"DiskPartitionEnum::ParseParted() Top of FOR: We have a line= ", (*it)));
+            matchingVector.clear();
+
+            if (diskRegExPtr->ReturnMatch(curLine, matchingVector, 0))
+            {
+                currentDisk = matchingVector[1];
+            }
+            else if (detailRegExPtr->ReturnMatch(curLine, matchingVector, 0))
+            {
+                // We found a partition, save it.
+                wstring deviceID = currentDisk + matchingVector[1]; 
+                partitions[deviceID] = curLine;
+            }
+        }
+
+        if (m_log.GetSeverityThreshold() <= SCXCoreLib::eHysterical )
+        {
+            SCX_LOGHYSTERICAL(m_log, L"Parted output parsing result");
+            for (std::map<std::wstring, std::wstring>::const_iterator it = partitions.begin(); it != partitions.end(); ++it)
+            {
+                SCX_LOGHYSTERICAL(m_log, it->first + L" : " + it->second);
+            }
+        }
+
+        return true;
+    }
+#endif
 }
 
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/

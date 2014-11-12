@@ -144,6 +144,28 @@ namespace SCXSystemLib
         */
         void GetLogicalVolumesBoot(vector<SCXLogicalVolumes> &logVol, bool &bootLvFound, size_t &fullBootLvIndex);
 #endif// hpux
+#if defined (linux)
+        /*----------------------------------------------------------------------------*/
+        /**
+            Gets the output of the parted command.
+
+            \param (out) The string to store the output of parted.
+            \returns    True if parted is successfully executed, False otherwise
+        */
+        bool GetPartedOutput(std::string &partedOutput);
+
+        /*----------------------------------------------------------------------------*/
+        /**
+            Extracts the deviceIDs of the partitions mapped to their description line
+            in the output of parted.
+
+            \param partedOutput The output of parted
+            \param (out) partitions The map to store the said mapping.
+            \returns    True if parsing was successfully executed, False otherwise
+        */
+
+        bool ParsePartedOutput(const std::string &partedOutput, std::map<std::wstring, std::wstring> &partitions);
+#endif
     };
 }
 

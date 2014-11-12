@@ -22,24 +22,61 @@
 #include <testutils/scxtestutils.h>
 #include "diskdepend_mock.h"
 
-class TestStaticDiskParDeps : public SCXSystemLib::StaticDiskPartitionInstanceDeps
+class TestStaticDiskPartInstanceDeps : public SCXSystemLib::DiskDependDefault
 {
 public:
-        TestStaticDiskParDeps() { }
-        using SCXSystemLib::StaticDiskPartitionInstanceDeps::Run;
-        int Run(const std::wstring &command, std::istream &mystdin,
-                std::ostream &mystdout, std::ostream &mystderr, unsigned timeout)
+    TestStaticDiskPartInstanceDeps() { }
+    using SCXSystemLib::DiskDependDefault::Run;
+    virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
+                        unsigned timeout, const SCXCoreLib::SCXFilePath& cwd, const SCXCoreLib::SCXFilePath& chrootPath )
         {
             (void)command;
             (void)mystdin;
             (void)mystderr;
             (void)timeout;
+        (void)cwd;
+        (void)chrootPath;
             mystdout << "Not a match, yet not an error" << endl;
             return 0;
         }
+
         //! Destructor
-        ~TestStaticDiskParDeps() { }
+    ~TestStaticDiskPartInstanceDeps() { }
 };
+
+#if defined(linux)
+class TestStaticDiskPartEnumerationDeps : public SCXSystemLib::DiskDependDefault
+{
+public:
+    virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
+                        unsigned timeout, const SCXCoreLib::SCXFilePath& cwd, const SCXCoreLib::SCXFilePath& chrootPath )
+    {
+        (void)command;
+        (void)mystdin;
+        (void)mystderr;
+        (void)timeout;
+        (void)cwd;
+        (void)chrootPath;
+        if (command == L"parted -l")
+        {
+            ifstream parted_file("testfiles/orapdb01_parted_output.txt");
+            mystdout << parted_file.rdbuf();
+        }
+        return 0;
+    }
+    
+    virtual bool FileExists(const std::wstring& path)
+    {
+        (void)path;
+        return true;
+    }
+
+    void SetProcPartitionsPath(wstring path)
+    {
+        m_ProcPartitionsPath.Set(path);
+    }
+};
+#endif
 
 class SCXStaticDiskPartitionPalTest : public CPPUNIT_NS::TestFixture
 {
@@ -51,6 +88,8 @@ class SCXStaticDiskPartitionPalTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestHasBootPartition );
 #if defined(sun)
     CPPUNIT_TEST( TestReturnMatch_wi501457 );
+#elif defined(linux)
+    CPPUNIT_TEST( TestAllPartedPartitionsEnumerated );
 #endif
     CPPUNIT_TEST_SUITE_END();
 
@@ -100,7 +139,6 @@ public:
             dp->Update();
             std::wcout << std::endl << dp->DumpString();
         }
-
     }
 
     /* Tests each of the Get() methods and verifies that the results are reasonable */
@@ -369,11 +407,22 @@ public:
     void TestReturnMatch_wi501457 ()
     {
         bool rtn(true);
-        SCXCoreLib::SCXHandle<TestStaticDiskParDeps> deps = SCXCoreLib::SCXHandle<TestStaticDiskParDeps>(new TestStaticDiskParDeps());
+        SCXCoreLib::SCXHandle<TestStaticDiskPartInstanceDeps> deps = SCXCoreLib::SCXHandle<TestStaticDiskPartInstanceDeps>(new TestStaticDiskPartInstanceDeps());
         SCXSystemLib::StaticDiskPartitionInstance sdpInst(deps);
         wstring bootpathStr(L"");
         rtn = sdpInst.GetBootDrivePath(bootpathStr);
         CPPUNIT_ASSERT(!rtn);
+    }
+#endif
+
+#if defined(linux)
+    void TestAllPartedPartitionsEnumerated()
+    {
+        SCXCoreLib::SCXHandle<TestStaticDiskPartEnumerationDeps> deps( new TestStaticDiskPartEnumerationDeps() );
+        deps->SetProcPartitionsPath(L"testfiles/orapdb01_proc_partitions.txt");
+        CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum = new SCXSystemLib::StaticDiskPartitionEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum->Init());
+        CPPUNIT_ASSERT_EQUAL((size_t)272, m_diskPartEnum->Size());
     }
 #endif
 };

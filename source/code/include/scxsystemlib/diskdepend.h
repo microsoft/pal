@@ -1,13 +1,13 @@
 /*--------------------------------------------------------------------------------
-    Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+  Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
     
 */
 /**
-    \file        
+   \file        
 
-    \brief       Defines the dependency interface for disk data retrieval
+   \brief       Defines the dependency interface for disk data retrieval
     
-    \date        2008-03-19 11:42:00
+   \date        2008-03-19 11:42:00
     
 */
 /*----------------------------------------------------------------------------*/
@@ -21,10 +21,10 @@
 #elif defined(hpux)
 #include <sys/pstat.h>
 #include <mntent.h>
-#include <scxcorelib/scxprocess.h>
 #elif defined(sun)
 #include <scxsystemlib/scxkstat.h>
 #endif
+#include <scxcorelib/scxprocess.h>
 #include <scxcorelib/scxfilepath.h>
 #include <scxcorelib/scxlog.h>
 #include <scxcorelib/stringaid.h>
@@ -49,7 +49,7 @@ namespace SCXSystemLib
 {
     /**
        Common data type for 64-bit statvfs() system call
-     */
+    */
     typedef struct statvfs64  SCXStatVfs;
 
     /**
@@ -171,9 +171,9 @@ namespace SCXSystemLib
         virtual ~DiskDepend() { } //!< Virtual destructor
 
         /**
-            Get the path to mount tab file.
+           Get the path to mount tab file.
 
-            \returns path to mount tab file.
+           \returns path to mount tab file.
         */
         virtual const SCXCoreLib::SCXFilePath& LocateMountTab() = 0;
 
@@ -188,6 +188,13 @@ namespace SCXSystemLib
            Refresh the disk stats file cache.
         */
         virtual void RefreshProcDiskStats() = 0;
+
+        /**
+           Get the path to the partitions file.
+
+           \returns the path to the partitions file.
+        */
+        virtual const SCXCoreLib::SCXFilePath& LocateProcPartitions() = 0;
 
         /**
            Get a proc disk stats row.
@@ -209,99 +216,99 @@ namespace SCXSystemLib
         virtual void GetFilesInDirectory(const std::wstring& path, std::vector<SCXCoreLib::SCXFilePath>& files) = 0;
 
         /**
-            Get a parsed version of lvmtab.
+           Get a parsed version of lvmtab.
 
-            \returns a SCXLvmTab object.        
+           \returns a SCXLvmTab object.        
         */
         virtual const SCXLvmTab& GetLVMTab() = 0;
 
         /**
-            Get a parsed version of mount tab.
+           Get a parsed version of mount tab.
 
-            \returns a vector of MntTabEntry objects.
+           \returns a vector of MntTabEntry objects.
         */ 
         virtual const std::vector<MntTabEntry>& GetMNTTab() = 0;
 
         /**
-            Refresh the mount tab state.
+           Refresh the mount tab state.
         */ 
         virtual void RefreshMNTTab() = 0;
 
 #if defined(sun)
         /**
-            Set the path to dev tab file.
+           Set the path to dev tab file.
 
-            \returns Nothing, but sets path to file.
+           \returns Nothing, but sets path to file.
         */
         virtual void SetDevTabPath(const std::wstring& newValue) = 0;
         /**
-            Return the path to dev tab file.
+           Return the path to dev tab file.
 
-            \returns Path to file.
+           \returns Path to file.
         */
         virtual const SCXCoreLib::SCXFilePath&  LocateDevTab() = 0;
         /**
-            Return vector of system files from /dev/dsk.
+           Return vector of system files from /dev/dsk.
 
-            \returns vector of system files from /dev/dsk.
+           \returns vector of system files from /dev/dsk.
         */
         virtual std::vector<SCXCoreLib::SCXHandle<SCXCoreLib::SCXFileInfo> > GetDevDskInfo() = 0;
 #endif
 
         /**
-            Check if a given file system should be ignored or not.
+           Check if a given file system should be ignored or not.
 
-            \param       fs Name of file system.
-            \returns     true if the file system should be ignored, otherwise false.
+           \param       fs Name of file system.
+           \returns     true if the file system should be ignored, otherwise false.
 
-            Ignored file systems are file systems we know we will not want to monitor.
-            For example CD/DVD devices, system devices etc.
+           Ignored file systems are file systems we know we will not want to monitor.
+           For example CD/DVD devices, system devices etc.
         */
         virtual bool FileSystemIgnored(const std::wstring& fs) = 0;
 
         /**
-            Checks if the given device should be given in the given enumeration.
+           Checks if the given device should be given in the given enumeration.
 
-            \param[in] device  the device to check.
+           \param[in] device  the device to check.
 
-            \return This method will return true if the given device should be
-                    ignored; false otherwise.
+           \return This method will return true if the given device should be
+           ignored; false otherwise.
 
-            Devices may be ignored because they are know to cause problems.  For
-            example CD/DVD devices on Solaris, and LVM on old Linux distributions.
+           Devices may be ignored because they are know to cause problems.  For
+           example CD/DVD devices on Solaris, and LVM on old Linux distributions.
         */
         virtual bool DeviceIgnored(const std::wstring& device) = 0;
 
         /**
-            Check if a given file system is represented by 'known' physical device.
-            in mnttab file. Currently, we do not know how to get list of
-            physical device(s) for ZFS filesystem, there is also the issue that
-            on for example a solaris zone there is no physical disk so the info
-            in mnttab is the same for device and mountpoint.
+           Check if a given file system is represented by 'known' physical device.
+           in mnttab file. Currently, we do not know how to get list of
+           physical device(s) for ZFS filesystem, there is also the issue that
+           on for example a solaris zone there is no physical disk so the info
+           in mnttab is the same for device and mountpoint.
 
-            \param       fs Name of file system.
-            \param       dev_path Device path fount in mount table.
-            \param       mountpoint Mount point found in mount table.
-            \returns     true if the file system has 'real' device in mnt-tab.
+           \param       fs Name of file system.
+           \param       dev_path Device path fount in mount table.
+           \param       mountpoint Mount point found in mount table.
+           \returns     true if the file system has 'real' device in mnt-tab.
         */
         virtual bool LinkToPhysicalExists(const std::wstring& fs, const std::wstring& dev_path, const std::wstring& mountpoint) = 0;
 
         /**
-            Decide interface type from the device name.
+           Decide interface type from the device name.
 
-            \param dev device name.
-            \returns a disk interface type.
+           \param dev device name.
+           \returns a disk interface type.
         */
         virtual DiskInterfaceType DeviceToInterfaceType(const std::wstring& dev) const = 0;
 
         /**
-            Given a device path from mount tab file, return related physical devices.
+           Given a device path from mount tab file, return related physical devices.
 
-            \param device A device path as found in mount tab file.
-            \returns A string map (name -> device path) with all physical devices 
-            related to given device.
+           \param device A device path as found in mount tab file.
+           \returns A string map (name -> device path) with all physical devices 
+           related to given device.
 
-            Several devices may be returned if the device for example is a logical volume.
+           Several devices may be returned if the device for example is a logical volume.
         */
         virtual std::map<std::wstring, std::wstring> GetPhysicalDevices(const std::wstring& device) = 0;
 
@@ -408,9 +415,9 @@ namespace SCXSystemLib
 
         /*----------------------------------------------------------------------------*/
         /**
-            Get monut table options value list content.
+           Get monut table options value list content.
     
-            \param       value list.
+           \param       value list.
         */
         virtual void readMNTTab(std::vector<std::wstring>& mntOptions) = 0;
 
@@ -496,21 +503,6 @@ namespace SCXSystemLib
            \returns 0 on success, otherwise -1 and sets errno.
         */
         virtual int stat(const char *path, struct stat *buf) = 0;
-        /**
-           Wrapper for SCXProcess::Run()
-            \param[in]  command     Corresponding to what would be entered by a user in a command shell
-            \param[in]  mystdin     stdin for the process
-            \param[in]  mystdout    stdout for the process
-            \param[in]  mystderr    stderr for the process
-            \param[in]  timeout     Accepted number of millieconds to wait for return
-            \param[in]  cwd         Directory to be set as current working directory for process.
-            \param[in]  chrootPath  Directory to be used for chrooting process.
-            \returns exit code of run process.
-            \throws     SCXInternalErrorException           Failure that could not be prevented
-        */
-        virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
-                unsigned timeout, const SCXCoreLib::SCXFilePath& cwd = SCXCoreLib::SCXFilePath(),
-                const SCXCoreLib::SCXFilePath& chrootPath  = SCXCoreLib::SCXFilePath() ) = 0;
 #endif /* hpux */
 #if defined(aix)
         /**
@@ -547,7 +539,7 @@ namespace SCXSystemLib
            \param queryVGS Pointer to the queryvgs structure.
            \param kmid Entry point of the logical volume device driver. For backward compatibility. Can be set to 0.
            \returns On success returns 0, otherwise one of the error codes: LVM_ALLOCERR, LVM_INVALID_PARAM or
-                    LVM_INVCONFIG.
+           LVM_INVCONFIG.
         */
         virtual int lvm_queryvgs(struct queryvgs **queryVGS, mid_t kmid) = 0;
 
@@ -557,9 +549,9 @@ namespace SCXSystemLib
            \param vgId Id of the volume group to be queried.
            \param queryVG Pointer to the queryvg structure.
            \param pvName Name of the physical drive containing the descriptor area. If NULL, then function returns in
-                         memory data for varied on devices.
+           memory data for varied on devices.
            \returns On success returns 0, otherwise one of the error codes: LVM_ALLOCERR, LVM_INVALID_PARAM,
-                    LVM_FORCEOFF or LVM_OFFLINE.
+           LVM_FORCEOFF or LVM_OFFLINE.
         */
         virtual int lvm_queryvg(struct unique_id *vgId, struct queryvg **queryVG, char *pvName) = 0;
 
@@ -569,7 +561,7 @@ namespace SCXSystemLib
            \param lvId Id of the logical volume to be queried.
            \param queryLV Pointer to the querylv structure.
            \param pvName Name of the physical drive containing the descriptor area. If NULL, then function returns in
-                         memory data for varied on devices.
+           memory data for varied on devices.
            \returns On success returns 0. For list of all error codes see AIX documentation at http://www.ibm.com/us/en/.
         */
         virtual int lvm_querylv(struct lv_id *lvId, struct querylv **queryLV, char *pvName) = 0;
@@ -586,6 +578,23 @@ namespace SCXSystemLib
         virtual int statvfs64(const char* path, struct statvfs64* buf) = 0;
 
 #endif
+
+        /**
+           Wrapper for SCXProcess::Run()
+           \param[in]  command     Corresponding to what would be entered by a user in a command shell
+           \param[in]  mystdin     stdin for the process
+           \param[in]  mystdout    stdout for the process
+           \param[in]  mystderr    stderr for the process
+           \param[in]  timeout     Accepted number of millieconds to wait for return
+           \param[in]  cwd         Directory to be set as current working directory for process.
+           \param[in]  chrootPath  Directory to be used for chrooting process.
+           \returns exit code of run process.
+           \throws     SCXInternalErrorException           Failure that could not be prevented
+        */
+        virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
+                        unsigned timeout, const SCXCoreLib::SCXFilePath& cwd = SCXCoreLib::SCXFilePath(),
+                        const SCXCoreLib::SCXFilePath& chrootPath  = SCXCoreLib::SCXFilePath() ) = 0;
+
 #if defined(linux)
         /**
            Returns an input stream.
@@ -614,6 +623,7 @@ namespace SCXSystemLib
 
         virtual const SCXCoreLib::SCXFilePath& LocateMountTab();
         virtual const SCXCoreLib::SCXFilePath& LocateProcDiskStats();
+        virtual const SCXCoreLib::SCXFilePath& LocateProcPartitions();
         virtual void RefreshProcDiskStats();
         virtual const std::vector<std::wstring>& GetProcDiskStats(const std::wstring& device);
         virtual void GetFilesInDirectory(const std::wstring& path, std::vector<SCXCoreLib::SCXFilePath>& files);
@@ -638,9 +648,9 @@ namespace SCXSystemLib
 
         /*----------------------------------------------------------------------------*/
         /**
-            Get monut table options value list content.
+           Get monut table options value list content.
     
-            \param       value list.
+           \param       value list.
         */
         virtual void readMNTTab(std::vector<std::wstring>& mntOptions);
 #if defined(sun)
@@ -763,15 +773,6 @@ namespace SCXSystemLib
         {
             return ::stat(path, buf);
         }
-        /**
-           \copydoc SCXSystemLib::DiskDepend::Run
-        */
-        virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
-                unsigned timeout, const SCXCoreLib::SCXFilePath& cwd = SCXCoreLib::SCXFilePath(),
-                const SCXCoreLib::SCXFilePath& chrootPath  = SCXCoreLib::SCXFilePath() )
-        {
-            return SCXCoreLib::SCXProcess::Run(command, mystdin, mystdout, mystderr, timeout, cwd, chrootPath);
-        }
 #endif /* hpux */
 #if defined(aix)
         /**
@@ -791,7 +792,7 @@ namespace SCXSystemLib
         }
 
         /** 
-           \copydoc SCXSystemLib::DiskDepend::CreateOdm
+            \copydoc SCXSystemLib::DiskDepend::CreateOdm
         */
         virtual const SCXCoreLib::SCXHandle<SCXodm> CreateOdm(void) const
         {
@@ -799,7 +800,7 @@ namespace SCXSystemLib
         }
 
         /** 
-           \copydoc SCXSystemLib::DiskDepend::lvm_queryvgs
+            \copydoc SCXSystemLib::DiskDepend::lvm_queryvgs
         */
         virtual int lvm_queryvgs(struct queryvgs **queryVGS, mid_t kmid)
         {
@@ -807,7 +808,7 @@ namespace SCXSystemLib
         }
 
         /** 
-           \copydoc SCXSystemLib::DiskDepend::lvm_queryvg
+            \copydoc SCXSystemLib::DiskDepend::lvm_queryvg
         */
         virtual int lvm_queryvg(struct unique_id *vgId, struct queryvg **queryVG, char *pvName)
         {
@@ -815,7 +816,7 @@ namespace SCXSystemLib
         }
 
         /** 
-           \copydoc SCXSystemLib::DiskDepend::lvm_querylv
+            \copydoc SCXSystemLib::DiskDepend::lvm_querylv
         */
         virtual int lvm_querylv(struct lv_id *lvId, struct querylv **queryLV, char *pvName)
         {
@@ -834,6 +835,17 @@ namespace SCXSystemLib
         }
 
 #endif
+
+        /**
+           \copydoc SCXSystemLib::DiskDepend::Run
+        */
+        virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
+                        unsigned timeout, const SCXCoreLib::SCXFilePath& cwd = SCXCoreLib::SCXFilePath(),
+                        const SCXCoreLib::SCXFilePath& chrootPath  = SCXCoreLib::SCXFilePath() )
+        {
+            return SCXCoreLib::SCXProcess::Run(command, mystdin, mystdout, mystderr, timeout, cwd, chrootPath);
+        }
+
 #if defined(linux)
         /**
            \copydoc SCXSystemLib::DiskDepend::GetWIStream
@@ -852,6 +864,7 @@ namespace SCXSystemLib
         SCXCoreLib::SCXFilePath m_DevTabPath; //!< path to device tab file
 #endif
         SCXCoreLib::SCXFilePath m_ProcDiskStatsPath; //!< path to proc diskstats file.
+        SCXCoreLib::SCXFilePath m_ProcPartitionsPath; //!< path to the partitions file
         SCXCoreLib::SCXHandle<SCXLvmTab> m_pLvmTab; //!< A parsed lvmtab file object.
         SCXCoreLib::SCXHandle<SCXRaid> m_pRaid; //!< A parsed RAID configuration.
         std::vector<MntTabEntry> m_MntTab; //!< A parsed mnttab object.

@@ -1,0 +1,2684 @@
+#From client SAIC
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sda: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdb: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdc: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdd: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sde: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdf: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjm: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjl: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjk: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjj: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdji: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjh: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjg: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjf: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdje: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjd: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjc: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdjb: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdja: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdiz: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdiy: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdix: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  805GB  805GB  primary                    
+
+
+                                                                          
+Error: Unable to open /dev/md0 - unrecognised disk label.
+
+
+Model: hp v125w (scsi)
+Disk /dev/sdiw: 4041MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start  End  Size  Type  File system  Flags
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdiv: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: Unknown (unknown)
+Disk /dev/sdit: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdis: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdir: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdiq: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdip: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdio: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdin: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdim: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdil: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdik: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdij: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdii: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdig: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdih: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdif: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdie: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdid: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdic: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdib: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdia: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhy: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhx: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhw: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhv: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhu: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdht: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhs: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhr: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhq: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhp: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdho: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhn: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhm: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhh: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhl: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhk: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhj: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhi: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhg: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhf: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhe: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhd: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: Unknown (unknown)
+Disk /dev/sdhb: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdha: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgz: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgy: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgx: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgv: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgu: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgt: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgr: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgs: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgq: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgp: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgo: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgn: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgm: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgk: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgj: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgi: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgh: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgg: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgf: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdge: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgd: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgc: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdgb: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdga: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfz: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfy: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfx: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfw: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfv: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfu: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdft: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfs: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfr: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfq: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfp: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfo: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfn: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfm: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfl: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfk: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfj: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfi: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfh: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfg: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfc: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdff: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfe: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfd: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfb: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdfa: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdeu: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdez: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdey: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdex: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdew: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdev: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdet: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdes: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sder: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdeq: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdep: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdeo: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sden: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdem: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdel: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdek: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdej: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdei: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdeh: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdeg: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdef: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdee: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdec: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sded: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdeb: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sdea: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sddz: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: Unknown (unknown)
+Disk /dev/sddy: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddw: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddx: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdds: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddv: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddt: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddu: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddr: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddq: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddp: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddo: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddn: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddm: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddl: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddk: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddj: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddi: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddh: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddg: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdde: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddd: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddc: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sddb: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdda: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcz: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcy: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcx: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcw: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcv: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcu: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdct: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcs: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcr: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcp: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdco: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcn: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcm: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcl: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdck: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcj: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdci: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdch: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcg: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcf: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdce: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcd: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcc: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdcb: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdby: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdca: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbz: 2147GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      32.3kB  2147GB  2147GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbx: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbw: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbv: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbu: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbt: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbs: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbr: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbq: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbp: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbo: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbn: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbm: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbl: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbk: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbj: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbi: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbh: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+                                                                          
+Error: msdos labels do not support devices that have more than 4294967295 sectors.
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbf: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbe: 1611GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1611GB  1611GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbd: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbc: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdbb: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdaz: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdba: 805GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  805GB  805GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sday: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdax: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdaw: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdav: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdau: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdat: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdas: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdar: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdaq: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdap: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdao: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdan: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdam: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdal: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdak: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdaj: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdai: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdah: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdad: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdag: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdae: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdaf: 53.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  53.7GB  53.7GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdac: 21.5GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  21.5GB  21.5GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdab: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdaa: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdz: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdy: 206GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  526MB  526MB  primary  ext3         boot 
+ 2      526MB   206GB  206GB  primary               lvm  
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdx: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdw: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdv: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdu: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdt: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sds: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdr: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdq: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdp: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdo: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdn: 107GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      1049kB  107GB  107GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdm: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdl: 71.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  71.4GB  71.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdk: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdj: 752GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End    Size   Type     File system  Flags
+ 1      32.3kB  752GB  752GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdi: 1077MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1069MB  1068MB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdh: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
+
+Model: EMC SYMMETRIX (scsi)
+Disk /dev/sdg: 64.4GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  64.4GB  64.4GB  primary                    
+
+
