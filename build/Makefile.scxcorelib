@@ -24,6 +24,7 @@ STATIC_CORELIB_SRCFILES = \
 	$(CORELIB_ROOT)/pal/scxatomic.cpp \
 	$(CORELIB_ROOT)/pal/scxcompat.cpp \
 	$(CORELIB_ROOT)/pal/scxcondition.cpp \
+	$(CORELIB_ROOT)/pal/scxconfigfile.cpp \
 	$(CORELIB_ROOT)/pal/scxfilepath.cpp \
 	$(CORELIB_ROOT)/pal/scxfile.cpp \
 	$(CORELIB_ROOT)/pal/scxfilesystem.cpp \
@@ -43,7 +44,6 @@ STATIC_CORELIB_SRCFILES = \
 	$(CORELIB_ROOT)/pal/scxthreadpool.cpp \
 	$(CORELIB_ROOT)/pal/scxuser.cpp \
 	$(CORELIB_ROOT)/pal/scxstrencodingconv.cpp \
-	$(CORELIB_ROOT)/util/scxconfigfile.cpp \
 	$(CORELIB_ROOT)/util/scxexception.cpp \
 	$(CORELIB_ROOT)/util/scxmath.cpp \
 	$(CORELIB_ROOT)/util/utftoupper.cpp \
