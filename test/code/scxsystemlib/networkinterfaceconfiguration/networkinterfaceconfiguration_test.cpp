@@ -656,7 +656,24 @@ public:
             // Verify that there's no default gateway IP.
             CPPUNIT_ASSERT(!networkInterfaceConfigurationInst.GetDefaultIPGateway(defaultIPGateway));
         }
-#endif     
+#elif defined(aix)
+        NetworkInterfaceConfigurationEnumeration networkInterfaceConfigurationEnumeration;
+        std::vector<NetworkInterfaceConfigurationInstance> instances = networkInterfaceConfigurationEnumeration.FindAll();
+        size_t instance_cnt = instances.size();
+        CPPUNIT_ASSERT_MESSAGE("Could not find a network interface configuration instance", instance_cnt > (size_t) 0 );
+        for(size_t i = 0; i < instances.size(); i++) 
+        {
+            NetworkInterfaceConfigurationInstance networkInterfaceConfigurationInst = instances[i];
+
+            std::vector<std::wstring> defaultIPGateway;
+            // Verify the return value.
+            CPPUNIT_ASSERT(networkInterfaceConfigurationInst.GetDefaultIPGateway(defaultIPGateway));
+            // Verify the defaultIPGateway is not empty.
+            CPPUNIT_ASSERT(!defaultIPGateway.empty());
+            // Verify we have the right address (may need minor edit if DEV network undergoes reconfiguration)
+            CPPUNIT_ASSERT_EQUAL("10.200.8.129", StrToUTF8(defaultIPGateway[0]));
+        }
+#endif
     }
 
     void TestNetInterfaceIPAddress()

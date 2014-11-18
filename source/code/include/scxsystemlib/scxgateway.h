@@ -58,6 +58,25 @@ namespace SCXSystemLib
             \returns 1 if successful, 0 otherwise.
         */
         static int get_gatewayip(std::wstring & gatewayIP, SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps);
+        
+        /*----------------------------------------------------------------------------*/
+        /**
+            Extracts the default gateway IP address from the command "route -n get gateway"
+            In this example output, the function would return 10.200.8.129
+               route to: 10.172.8.38
+            destination: default
+                   mask: default
+                gateway: 10.200.8.129
+              interface: en0
+            interf addr: 10.200.8.173
+                  flags: <UP,GATEWAY,DONE>
+            
+            \param[out] gatewayIP - Gateway Ip address.
+            \param cmdStringRoute - The exact command to execute
+            
+            \returns true if successful, false otherwise.
+        */
+        static bool extract_gatewayip(std::wstring & gatewayIP, std::wstring cmdStringRoute);
     };
 }
 

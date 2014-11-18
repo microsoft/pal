@@ -242,7 +242,7 @@ std::vector<NetworkInterfaceConfigurationInstance> NetworkInterfaceConfiguration
         // Determine m_DefaultIPGateway
         // Array of IP addresses of default gateways that the computer system uses.
         // Example: 192.168.12.1 192.168.46.1
-#if defined(linux) || defined(sun)
+#if defined(linux) || defined(sun) || defined(aix)
         wstring gwip;
         if (GatewayInfo::get_gatewayip(gwip, m_deps))
         {

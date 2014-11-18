@@ -303,8 +303,6 @@ namespace SCXSystemLib
 
         if (found_gatewayip == 0)
         {
-            std::stringstream strIn; 
-            std::stringstream strOut, strErr;
 #if PF_MAJOR == 5 && PF_MINOR  == 9
             std::wstring cmdStringRoute = L"/usr/sbin/route -n get gateway";
 #elif PF_MAJOR == 5 && (PF_MINOR == 10 || PF_MINOR  == 11)
@@ -312,36 +310,46 @@ namespace SCXSystemLib
 #else
 #error "Platform not supported"
 #endif
-            if (SCXCoreLib::SCXProcess::Run(cmdStringRoute, strIn, strOut, strErr) == 0)
-            {
-                std::string line; 
-                while (strOut.good())
-                {
-                    getline(strOut, line); 
-                    size_t pos = line.find("gateway"); 
-                    if(pos == std::string::npos)
-                        continue; 
-
-                    // Line with "gateway" might have space before colon ... 
-                    pos = line.find(':', pos); 
-                    if(pos == std::string::npos)
-                        continue; 
-                    
-                    // Ensure pos + 1 is valid char
-                    if(line.length() <= pos)
-                        continue; 
-
-                    gatewayIP = std::wstring(SCXCoreLib::StrFromUTF8(line.substr(pos + 1)));
-                    gatewayIP = StrTrim(gatewayIP);
-                    found_gatewayip = 1;
-
-                    break;
-                }
-            } 
+            found_gatewayip = GatewayInfo::extract_gatewayip(gatewayIP, cmdStringRoute) ? 1 : 0;
         }
         return found_gatewayip;
+#elif defined(aix)
+        std::wstring cmdStringRoute = L"/etc/route -n get gateway";
+        return GatewayInfo::extract_gatewayip(gatewayIP, cmdStringRoute) ? 1 : 0;
 #else
         return 0;
 #endif
     }
+
+    bool GatewayInfo::extract_gatewayip(std::wstring & gatewayIP, std::wstring cmdStringRoute)
+    {
+        std::stringstream strIn; 
+        std::stringstream strOut, strErr;
+        if (SCXCoreLib::SCXProcess::Run(cmdStringRoute, strIn, strOut, strErr) == 0)
+        {
+            std::string line; 
+            while (strOut.good())
+            {
+                getline(strOut, line); 
+                size_t pos = line.find("gateway"); 
+                if(pos == std::string::npos)
+                    continue; 
+
+                // Line with "gateway" might have space before colon ... 
+                pos = line.find(':', pos); 
+                if(pos == std::string::npos)
+                    continue; 
+                
+                // Ensure pos + 1 is valid char
+                if(line.length() <= pos)
+                    continue; 
+
+                gatewayIP = std::wstring(SCXCoreLib::StrFromUTF8(line.substr(pos + 1)));
+                gatewayIP = StrTrim(gatewayIP);
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
