@@ -2,7 +2,7 @@
 
 using util::Base64Helper;
 
-void Base64Helper::Encode(std::vector<unsigned char>& input, std::string& encodedString)
+void Base64Helper::Encode(const std::vector<unsigned char>& input, std::string& encodedString)
 {
     static char base64Table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     static unsigned int maskArray[4] = {0x00FC0000, 0x0003F000, 0x00000FC0, 0x0000003F};

@@ -47,6 +47,8 @@ namespace SCXCoreLib
     */  
     void SCXConfigFile::LoadConfig()
     {
+        m_configLoaded = true;
+
         if (!SCXFile::Exists(m_configFilePath))
         {
             throw SCXFilePathNotFoundException(m_configFilePath, SCXSRCLOCATION);
@@ -58,11 +60,10 @@ namespace SCXCoreLib
         std::wostringstream error_reasons;
 
         bool internalError = false;
-        m_configLoaded = true;
 
         for (std::vector<wstring>::const_iterator line=lines.begin(); line!=lines.end(); ++line)
         {
-            string::size_type pos = line->find(L":");
+            string::size_type pos = line->find(L"=");
             if (pos != string::npos)
             {
                 wstring key = StrTrim( line->substr(0, pos) );
@@ -104,7 +105,7 @@ namespace SCXCoreLib
 
         for (std::map<wstring, wstring>::const_iterator it=m_config.begin(); it!=m_config.end(); ++it)
         {
-            lines[i++] = it->first +  L":" + it->second;
+            lines[i++] = it->first +  L"=" + it->second;
         }
         SCXFile::WriteAllLinesAsUTF8(m_configFilePath, lines, std::ios_base::out);
     }

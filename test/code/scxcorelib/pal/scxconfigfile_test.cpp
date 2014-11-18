@@ -57,6 +57,7 @@ class SCXConfigFileTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestSurroundingSpacesRemoved );
     CPPUNIT_TEST( TestDeleteEntry );
     CPPUNIT_TEST( TestDeleteNonexistentEntry );
+    CPPUNIT_TEST( TestIteration );
 
     CPPUNIT_TEST_SUITE_END();
 private:
@@ -76,21 +77,21 @@ public:
         std::vector<wstring> lines1;
         SCXFile::WriteAllLinesAsUTF8(pathTestEmptyFile, lines1, std::ios_base::out);
         
-        lines1.push_back(L":value");
-        lines1.push_back(L"normal key:after empty key");
+        lines1.push_back(L"=value");
+        lines1.push_back(L"normal key=after empty key");
         SCXFile::WriteAllLinesAsUTF8(pathTestEmptyKey, lines1, std::ios_base::out);
 
         std::vector<wstring> lines2;
-        lines2.push_back(L"key:value");
-        lines2.push_back(L"colon:a:value");
-        lines2.push_back(L" keystrip    :       valuestrip   ");
-        lines2.push_back(L"key space:value space");
-        lines2.push_back(L"empty:");
+        lines2.push_back(L"key=value");
+        lines2.push_back(L"equal=a=value");
+        lines2.push_back(L" keystrip    =       valuestrip   ");
+        lines2.push_back(L"key space=value space");
+        lines2.push_back(L"empty=");
         lines2.push_back(L"");
-        lines2.push_back(L"skip:line");
+        lines2.push_back(L"skip=line");
         SCXFile::WriteAllLinesAsUTF8(pathTestUsual, lines2, std::ios_base::out);
         
-        lines2.push_back(L"key:value");
+        lines2.push_back(L"key=value");
         SCXFile::WriteAllLinesAsUTF8(pathTestDupKey, lines2, std::ios_base::out);
     }
 
@@ -143,7 +144,7 @@ public:
     {
         TestableSCXConfigFile config(SCXFilePath(L"imaginaryDirectory/config"));
         SCXUNIT_ASSERT_THROWN_EXCEPTION(config.LoadConfig(), SCXFilePathNotFoundException, L"No item found");
-        CPPUNIT_ASSERT_EQUAL(false, config.GetLoadedFlag());
+        CPPUNIT_ASSERT_EQUAL(true, config.GetLoadedFlag());
         CPPUNIT_ASSERT_EQUAL((size_t) 0, config.GetNumberOfEntries());
     }
 
@@ -180,14 +181,14 @@ public:
         config.SaveConfig();
         
         std::vector<wstring> lines_expected;
-        lines_expected.push_back(L"colon:a:value");
-        lines_expected.push_back(L"empty:");
-        lines_expected.push_back(L"key:new value");
-        lines_expected.push_back(L"key space:value space");
-        lines_expected.push_back(L"keystrip:valuestrip");
-        lines_expected.push_back(L"new key:other value");
-        lines_expected.push_back(L"skip:line");
-        
+        lines_expected.push_back(L"empty=");
+        lines_expected.push_back(L"equal=a=value");
+        lines_expected.push_back(L"key=new value");
+        lines_expected.push_back(L"key space=value space");
+        lines_expected.push_back(L"keystrip=valuestrip");
+        lines_expected.push_back(L"new key=other value");
+        lines_expected.push_back(L"skip=line");
+
         std::vector<wstring> lines_actual;
         SCXStream::NLFs nlfs;
         SCXFile::ReadAllLinesAsUTF8(pathTestUsual, lines_actual, nlfs);
@@ -198,7 +199,7 @@ public:
     {
         SCXConfigFile config(pathTestUsual);
         config.LoadConfig();
-        
+
         CPPUNIT_ASSERT_EQUAL(true, config.KeyExists(L"key"));
         config.DeleteEntry(L"key");
         CPPUNIT_ASSERT_EQUAL(false, config.KeyExists(L"key"));
@@ -222,8 +223,8 @@ public:
         CPPUNIT_ASSERT_EQUAL(true, config.GetValue(L"empty", tmp));
         CPPUNIT_ASSERT_EQUAL(L"", tmp);
 
-        CPPUNIT_ASSERT_EQUAL(true, config.GetValue(L"colon", tmp));
-        CPPUNIT_ASSERT_EQUAL(L"a:value", tmp);
+        CPPUNIT_ASSERT_EQUAL(true, config.GetValue(L"equal", tmp));
+        CPPUNIT_ASSERT_EQUAL(L"a=value", tmp);
 
         CPPUNIT_ASSERT_EQUAL(true, config.GetValue(L"skip", tmp));
         CPPUNIT_ASSERT_EQUAL(L"line", tmp);
@@ -287,6 +288,30 @@ public:
         config.LoadConfig();
         SCXUNIT_ASSERT_THROWN_EXCEPTION(config.DeleteEntry(L"not a key"), SCXInvalidArgumentException, L"not found");
         SCXUNIT_ASSERTIONS_FAILED_ANY();
+    }
+
+    void TestIteration()
+    {
+        TestableSCXConfigFile config(pathTestUsual);
+        CPPUNIT_ASSERT_NO_THROW(config.LoadConfig());
+        CPPUNIT_ASSERT_EQUAL(true, config.GetLoadedFlag());
+        CPPUNIT_ASSERT_EQUAL((size_t) 6, config.GetNumberOfEntries());
+
+        std::vector<wstring> expectedKeys;
+        expectedKeys.push_back(L"empty");
+        expectedKeys.push_back(L"equal");
+        expectedKeys.push_back(L"key");
+        expectedKeys.push_back(L"key space");
+        expectedKeys.push_back(L"keystrip");
+        expectedKeys.push_back(L"skip");
+
+        int counter = 0;
+        for (std::map<wstring,wstring>::const_iterator it = config.begin(); it != config.end(); ++it)
+        {
+            CPPUNIT_ASSERT_EQUAL_MESSAGE( "Differing key for element " + StrToUTF8(StrFrom(counter)),
+                                          expectedKeys[counter], it->first );
+            counter++;
+        }
     }
 
 };

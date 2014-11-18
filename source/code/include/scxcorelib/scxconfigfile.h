@@ -59,7 +59,18 @@ namespace SCXCoreLib
         void SetValue(const wstring& key, const wstring& value);
         void DeleteEntry(const wstring& key);
         bool KeyExists(const wstring& key) const;
-        
+
+        // Iterators
+        std::map<wstring, wstring>::const_iterator begin() const
+        {
+            return m_config.begin();
+        }
+
+        std::map<wstring, wstring>::const_iterator end() const
+        {
+            return m_config.end();
+        }
+
     protected:
         bool m_configLoaded;
         SCXFilePath m_configFilePath; 

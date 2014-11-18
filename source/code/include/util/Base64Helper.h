@@ -41,7 +41,7 @@ namespace util
            \param [in] input Input stream to encode
            \param [out] encodedString The base64 encoded string
         */
-        static void Encode(std::vector<unsigned char>& input, std::string& encodedString);
+        static void Encode(const std::vector<unsigned char>& input, std::string& encodedString);
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -49,7 +49,7 @@ namespace util
            \param [in] input Input stream to encode
            \param [out] encodedString The base64 encoded string
         */
-        static inline void Encode(std::string& input, std::string& encodedString)
+        static inline void Encode(const std::string& input, std::string& encodedString)
         {
             std::vector<unsigned char> inputVec = SCXCoreLib::ToUnsignedCharVector(input);
             Encode(inputVec, encodedString);
