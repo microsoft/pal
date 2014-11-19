@@ -14,11 +14,7 @@
 #define PROCESSORENUMERATION_H
 
 #include <scxsystemlib/entityenumeration.h>
-#include <scxsystemlib/processorinstance.h>
 #include <scxcorelib/scxlog.h>
-
-
-
 
 namespace SCXSystemLib
 {

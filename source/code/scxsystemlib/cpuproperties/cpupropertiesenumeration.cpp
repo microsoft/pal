@@ -14,7 +14,6 @@
 #include <scxsystemlib/cpupropertiesenumeration.h>
 #include <scxcorelib/stringaid.h>
 #include <sstream>
-#include <scxsystemlib/cpupropertiesinstance.h>
 
 #if defined(sun)
 #include <sys/sysinfo.h>

@@ -274,6 +274,8 @@ public:
         CPPUNIT_ASSERT_MESSAGE("No output was found to compare boot time", whoBoutput.size() > 0);
         scxlong CMDBootTime = parseBootTime(whoBoutput, (int)SCXBootTime.GetYear());
 #if defined(hpux)
+        // Accept one hour of fudge for HP because there is sometimes a larger difference
+        // between the boot time returned by who -b and the one returned by the pstat_getstatic system call
         scxlong acceptable_fudge_seconds = 60 * 61;
 #else
         scxlong acceptable_fudge_seconds = 61;
