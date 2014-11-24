@@ -107,6 +107,13 @@ namespace SCXCoreLib
         {
             lines[i++] = it->first +  L"=" + it->second;
         }
+
+        // By default, SCX code won't write a newline at the very end; we want that in a .INI-style file
+        if ( m_config.size() )
+        {
+            lines[m_config.size() - 1] += L"\n";
+        }
+
         SCXFile::WriteAllLinesAsUTF8(m_configFilePath, lines, std::ios_base::out);
     }
 
