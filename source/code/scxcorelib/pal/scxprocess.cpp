@@ -41,15 +41,37 @@
 #include <sys/socket.h>
 #endif
 
-#if defined(macos) || defined(sun)
-#include <signal.h>
-#endif
-
 #include <errno.h>
 
 namespace SCXCoreLib
 {
  
+    SignalBlock::SignalBlock(int sigmask) : m_sigmask(sigmask)
+    {
+        sigemptyset(&m_set);
+        sigaddset(&m_set, m_sigmask);
+        int ret = pthread_sigmask(SIG_BLOCK, &m_set, &m_oldset);
+        if (ret != 0)
+        {
+            std::cerr << "pthread_sigmask failed with error: " << ret << std::endl;
+        }
+    }
+
+    SignalBlock::~SignalBlock()
+    {
+        // Consume any pending signal but do not wait
+        struct timespec timeout;
+        timeout.tv_sec = timeout.tv_nsec = 0;
+        sigtimedwait(&m_set, NULL, &timeout);
+
+        // Restore signal mask
+        int ret = pthread_sigmask(SIG_SETMASK, &m_oldset, NULL);
+        if (ret != 0)
+        {
+            std::cerr << "pthread_sigmask failed with error : " << ret << std::endl;
+        }
+    }
+
     /*----------------------------------------------------------------------------*/
     /**
         Retrieve the calling process', process id.
@@ -331,6 +353,8 @@ namespace SCXCoreLib
                         std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr, unsigned timeout /*= 0*/)
     {
         int returnCode = -1;
+        SignalBlock ignoreSigPipe = SignalBlock(SIGPIPE);
+
         if (timeout <= 0)
         {
             returnCode = process.WaitForReturn(mystdin, mystdout, mystderr);
@@ -644,14 +668,14 @@ namespace SCXCoreLib
         if (pollStatus > 0)             /* No timeout */
         {
             // Check if we can write to the child's stdin channel
-            if (fds[0].revents & POLLOUT)
+            if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))
+            {
+                m_stdinActive = false;
+            }
+            else if (fds[0].revents & POLLOUT)
             {
                 m_stdinActive = SendInput(mystdin);
             }
-            if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))
-        {
-                m_stdinActive = false;
-        }
        
             // Check if we have data to read from streams
             // (If no data to read, check if stream has closed)
@@ -660,7 +684,7 @@ namespace SCXCoreLib
                 ReadToStream(m_outForChild[R], mystdout);
             }
             if (fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))
-        {
+            {
                 m_stdoutActive = false;
             }
 
@@ -824,11 +848,11 @@ namespace SCXCoreLib
         if (bytesRead == 0) {
             return false;
         } else if (bytesRead < 0) {
-                // If no data is available for reading, just return
-                if (EAGAIN == errno)
-                {
-                    return true;
-                }
+            // If no data is available for reading, just return
+            if (EAGAIN == errno)
+            {
+                return true;
+            }
 
             throw SCXInternalErrorException(UnexpectedErrno(L"Process communication failed", errno), SCXSRCLOCATION);
         }

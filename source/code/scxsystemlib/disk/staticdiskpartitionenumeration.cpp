@@ -963,38 +963,51 @@ namespace SCXSystemLib
 
         std::istringstream processInput;
         std::ostringstream processOutput, processErr;
+        bool success = false;
         
         try
         {
             SCX_LOGTRACE(m_log, L"Invoking command : \"parted -l\"");
             int ret = m_deps->Run(L"parted -l", processInput, processOutput, processErr, 15000);
+
+            std::string errOut = processErr.str();
             partedOutput = processOutput.str();
             SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(partedOutput)));
-            std::string errOut = processErr.str();
+            
+            success = (ret == 0 && errOut.size() == 0);
+        }
+        catch (SCXCoreLib::SCXInternalErrorException &e) 
+        {
+            SCX_LOGERROR(m_log, L"Attempt to execute parted command for the purpose of retrieving partition information failed : " + e.What());
+        }
 
-            if (ret != 0 || errOut.size() > 0)
+        if (!success)
+        {
+            try
             {
                 SCX_LOGTRACE(m_log, L"Using fallback interactive parted command : \"parted -i\"");
                 processErr.str(""); // Reset the error stream
+
                 // We use ignore in case parted shows an interactive warning
                 std::istringstream input("ignore\nprint\nquit\n");
+
                 // We need the -i flag for stdin to be used correctly
-                m_deps->Run(L"parted -i", input, processOutput, processErr, 15000);
+                int ret = m_deps->Run(L"parted -i", input, processOutput, processErr, 15000);
+
+                std::string errOut = processErr.str();
                 partedOutput = processOutput.str();
                 SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(partedOutput)));
-                errOut = processErr.str();
-            }
 
-            if (errOut.size() > 0)
-            {
-                SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from parted command: ", StrFromUTF8(errOut)));
+                if (errOut.size() > 0)
+                {
+                    SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from parted command: ", StrFromUTF8(errOut)));
+                }
+                success = (ret == 0 && errOut.size() == 0);
             }
-        }
-        catch (SCXCoreLib::SCXException &e) 
-        {
-            SCX_LOGERROR(m_log, L"Attempt to execute parted command for the purpose of retrieving partition information failed : " + e.What());
-            partedOutput.clear();
-            return false;
+            catch (SCXCoreLib::SCXInternalErrorException &e) 
+            {
+                SCX_LOGERROR(m_log, L"Attempt to execute parted command for the purpose of retrieving partition information failed : " + e.What());
+            }
         }
 
         if (partedOutput.size() == 0)
@@ -1003,7 +1016,7 @@ namespace SCXSystemLib
             return false;
         }
 
-        return true;
+        return success;
     }
 
     bool StaticDiskPartitionEnumeration::ParsePartedOutput(const std::string &partedOutput, std::map<std::wstring, std::wstring> &partitions)

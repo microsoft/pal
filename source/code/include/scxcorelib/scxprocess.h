@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 #include <sys/types.h>
+#include <signal.h>
 
 #if defined(sun) || defined(hpux)
 #include <sys/wait.h>
@@ -60,6 +61,22 @@ namespace SCXCoreLib
                                                          
         virtual std::wstring What() const { return L"Process interrupted"; }
     
+    };
+
+    /*----------------------------------------------------------------------------*/
+    // RAII encapsulation to block certain signals ( Like SIGPIPE )
+    class SignalBlock
+    {
+    public:
+        //! Constructor
+        //! \param[in]   Bitfield mask of signals to ignore
+        SignalBlock(int sigmask);
+
+        //! Destructor
+        ~SignalBlock();
+    private:
+        sigset_t m_set, m_oldset;
+        int m_sigmask;
     };
 
     /*----------------------------------------------------------------------------*/

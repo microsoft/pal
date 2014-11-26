@@ -87,6 +87,8 @@ class SCXProcessTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( WritingToProcessWithClosedStdinShouldNotFail );
     CPPUNIT_TEST( VerifyParsing_WI_421069 );
     CPPUNIT_TEST( TestCompareVector );
+    CPPUNIT_TEST( TestFakeCommand );
+    CPPUNIT_TEST( TestWriteRaceCondition );
     CPPUNIT_TEST( TestSplitCommand_Empty );
     CPPUNIT_TEST( TestSplitCommand_NoSpaces );
     CPPUNIT_TEST( TestSplitCommand_SpacesNoQuotes );
@@ -453,6 +455,35 @@ public:
         vec.push_back( L"Four" );
         vec.push_back( L"Five" );
         CompareVector( vec, expectedFive );
+    }
+
+    void TestFakeCommand()
+    {
+        std::istringstream input;
+        std::ostringstream output;
+        std::ostringstream error;
+        int ret = SCXCoreLib::SCXProcess::Run(L"fakeCommand123 -i", input, output, error);
+        CPPUNIT_ASSERT_MESSAGE("Return code indicates success although it shouldn't", ret != 0);
+        // Do we fail for the good reason
+        CPPUNIT_ASSERT_MESSAGE("Could not find the expected failure reason on stderr: " + error.str(),
+            error.str().find("Failed to start child process") != std::string::npos);
+        CPPUNIT_ASSERT_MESSAGE("Unexpected output on stdout: " + output.str(), output.str().size() == 0);
+    }
+
+    void TestWriteRaceCondition()
+    {
+        // On some slower systems, the child process can die between the time we poll the stdin pipe
+        // to validate it and the time we write to it creating a race condition.
+        // We will execute the SIGPIPE test multiple times to increase our chances of catching it.
+        for (int i = 0; i <= 10; i++)
+        {
+            std::istringstream input2("anything");
+            std::ostringstream output2, error2;
+            // This next line used to cause a sigpipe. If not then the test passes!
+            int ret = SCXCoreLib::SCXProcess::Run(L"fakeCommand123", input2, output2, error2);
+
+            CPPUNIT_ASSERT_MESSAGE("Return code indicates success although it shouldn't", ret != 0);
+        }
     }
 
     //
