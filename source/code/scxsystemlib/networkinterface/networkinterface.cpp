@@ -215,7 +215,7 @@ using namespace SCXCoreLib;
 //! \param[out]   attrId   Identifier of attribute
 //! \param[out]   knownAttributesMask  Will contain id of attribute if value is present
 //! \returns      Value of attribute if present, undefined otherwise
-scxulong ValueOf(bool hasAttr, const scxulong attr, NetworkInterfaceInfo::OptionalAttribute attrId, unsigned &knownAttributesMask) {
+scxulong ValueOf(bool hasAttr, const scxulong attr, NetworkInterfaceInfo::OptionalAttribute attrId, unsigned long &knownAttributesMask) {
     scxulong value = 0;
     if (hasAttr) {
         value = attr;
@@ -237,7 +237,7 @@ scxulong BestValueOf(bool hasAttr64,
                      const scxulong attr64,
                      bool hasAttr, const scxulong attr,
                      NetworkInterfaceInfo::OptionalAttribute attrId,
-                     unsigned &knownAttributesMask) {
+                     unsigned long &knownAttributesMask) {
     scxulong value = 0;
     if (hasAttr64) {
         value = attr64;
@@ -544,6 +544,27 @@ static const char* KSTAT_CAP_AUTONEG = "cap_autoneg"; //<!//kstat data field nam
         }
 #else
         throw SCXNotSupportedException(L"Speed", SCXSRCLOCATION);
+#endif
+        return fRet;
+    }
+    /*----------------------------------------------------------------------------*/
+    /**
+       Retrieve the maximum transmission unit (MTU).
+
+       \param       value - output parameter where the MTU of the device is stored.
+       \returns     true if value is supported on platform, false otherwise.
+    */
+    bool NetworkInterfaceInfo::GetMTU(scxulong& value) const
+    {
+        bool fRet = false;
+#if defined(linux) || defined(sun) || defined(aix) || defined(hpux)
+        if (IsValueKnown(eMTU))
+        {
+            value = m_mtu;
+            fRet = true;
+        }
+#else
+        throw SCXNotSupportedException(L"MTU", SCXSRCLOCATION);
 #endif
         return fRet;
     }
@@ -1985,6 +2006,16 @@ std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<Networ
             instance.m_broadcastAddress = ToString(ifr.ifr_addr);
             instance.m_knownAttributesMask |= eBroadcastAddress;
         }
+        if (deps->ioctl(fd, SIOCGIFMTU, &ifr) >=0)
+        {
+#if defined(hpux) && PF_MAJOR == 11 && PF_MINOR <= 23 || defined(sun) && PF_MAJOR == 5 && PF_MINOR <= 10
+            // Old versions of HPUX and Sun do not have ifr_mtu
+            instance.m_mtu = ifr.ifr_ifru.ifru_metric;
+#else
+            instance.m_mtu = ifr.ifr_mtu;
+#endif
+            instance.m_knownAttributesMask |= eMTU;
+        }
         if (deps->ioctl(fd, SIOCGIFFLAGS, &ifr) >= 0) {
             instance.m_up = (ifr.ifr_flags & IFF_UP) != 0;
             instance.m_running = (ifr.ifr_flags & IFF_RUNNING) != 0;
@@ -2123,7 +2154,7 @@ void NetworkInterfaceInfo::init()
     m_netConnectionStatus = eNetConnectionStatusInvalid;
     m_physicalAdapter     = true;
     m_speed               = 0;
-
+    m_mtu                 = 0;
 }
 }
 

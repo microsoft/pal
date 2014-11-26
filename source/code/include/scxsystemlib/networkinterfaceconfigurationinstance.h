@@ -123,7 +123,7 @@ namespace SCXSystemLib
         ~NetworkInterfaceConfigurationInstance();
         //! Check if the value of an attribute is known
         //! \param[in] attr  Attribbute of interest
-        //! \return true iff the value of the optional attribute is present
+        //! \return true if the value of the optional attribute is present
         bool IsValueKnown(OptionalAttribute attr) const { return m_knownAttributesBitset[attr]; }
         void SetKnown(OptionalAttribute attr) { m_knownAttributesBitset[attr] = true; }
         
@@ -135,265 +135,265 @@ namespace SCXSystemLib
         /*----------------------------------------------------------------------------*/
         //! ArpAlwaysSourceRoute assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetArpAlwaysSourceRoute(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! ArpUseEtherSNAP assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetArpUseEtherSNAP(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! Caption assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetCaption(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DatabasePath assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDatabasePath(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DeadGWDetectEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDeadGWDetectEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DefaultIPGateway assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDefaultIPGateway(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DefaultTOS assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDefaultTOS(Uint8 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DefaultTTL assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDefaultTTL(Uint8 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! Description assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDescription(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DHCPEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDHCPEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DHCPLeaseExpires assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDHCPLeaseExpires(SCXCalendarTime &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DHCPLeaseObtained assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDHCPLeaseObtained(SCXCalendarTime &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DHCPServer assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDHCPServer(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DNSDomain assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDNSDomain(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DNSDomainSuffixSearchOrder assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDNSDomainSuffixSearchOrder(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DNSEnabledForWINSResolution assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDNSEnabledForWINSResolution(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DNSHostName assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDNSHostName(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DNSServerSearchOrder assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDNSServerSearchOrder(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! DomainDNSRegistrationEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetDomainDNSRegistrationEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! ForwardBufferMemory assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetForwardBufferMemory(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! FullDNSRegistrationEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetFullDNSRegistrationEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! GatewayCostMetric assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetGatewayCostMetric(vector<Uint16> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IGMPLevel assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIGMPLevel(Uint8 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! Index assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIndex(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! InterfaceIndex assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetInterfaceIndex(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPAddress assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPAddress(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPConnectionMetric assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPConnectionMetric(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPFilterSecurityEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPFilterSecurityEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPPortSecurityEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPPortSecurityEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPSecPermitIPProtocols assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPSecPermitIPProtocols(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPSecPermitTCPPorts assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPSecPermitTCPPorts(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPSecPermitUDPPorts assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPSecPermitUDPPorts(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPSubnet assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPSubnet(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPUseZeroBroadcast assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPUseZeroBroadcast(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPXAddress assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPXAddress(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPXEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPXEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPXFrameType assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPXFrameType(vector<Uint32> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPXMediaType assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPXMediaType(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPXNetworkNumber assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPXNetworkNumber(vector<wstring> &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! IPXVirtualNetNumber assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetIPXVirtualNetNumber(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! KeepAliveInterval assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetKeepAliveInterval(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! KeepAliveTime assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetKeepAliveTime(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! MACAddress assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetMACAddress(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
@@ -405,97 +405,97 @@ namespace SCXSystemLib
         /*----------------------------------------------------------------------------*/
         //! NumForwardPackets assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetNumForwardPackets(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! PMTUBHDetectEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetPMTUBHDetectEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! PMTUDiscoveryEnabled assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetPMTUDiscoveryEnabled(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! ServiceName assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetServiceName(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! SettingID assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetSettingID(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! TcpipNetbiosOptions assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetTcpipNetbiosOptions(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! TcpMaxConnectRetransmissions assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetTcpMaxConnectRetransmissions(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! TcpMaxDataRetransmissions assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetTcpMaxDataRetransmissions(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! TcpNumConnections assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetTcpNumConnections(Uint32 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! TcpUseRFC1122UrgentPointer assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetTcpUseRFC1122UrgentPointer(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! TcpWindowSize assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetTcpWindowSize(Uint16 &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! WINSEnableLMHostsLookup assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetWINSEnableLMHostsLookup(bool &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! WINSHostLookupFile assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetWINSHostLookupFile(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! WINSPrimaryServer assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetWINSPrimaryServer(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! WINSScopeID assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetWINSScopeID(wstring &value) const;
 
         /*----------------------------------------------------------------------------*/
         //! WINSSecondaryServer assigned to interface
         //! param[out] value Reference to value of property to be initialized
-        //! \return true iff property is supported
+        //! \return true if property is supported
         bool GetWINSSecondaryServer(wstring &value) const;
 
     private:

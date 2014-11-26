@@ -878,6 +878,7 @@ class SCXNetworkInterfaceTest : public CPPUNIT_NS::TestFixture /* CUSTOMIZE: use
     CPPUNIT_TEST( TestEnumerationBehavior );
     CPPUNIT_TEST( TestEnumerationSoundness );
     CPPUNIT_TEST( TestBug5175_IgnoreNetDevicesNotInterfaces );
+    CPPUNIT_TEST( TestMTU );
 #if defined(hpux)
     CPPUNIT_TEST( TestHP_FindAllInDLPI_AtLeastOneInterface );
     CPPUNIT_TEST( TestHP_FindAllInDLPI_ComparedToLanscan );
@@ -1879,6 +1880,25 @@ public:
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), interfaces.size());
 #endif
     }
+
+    void TestMTU()
+    {
+        SCXHandle<NetworkInterfaceDependencies> deps(new NetworkInterfaceDependencies());
+        std::vector<NetworkInterfaceInfo> interfaces = NetworkInterfaceInfo::FindAll(deps);
+        CPPUNIT_ASSERT_MESSAGE("No interface information found", interfaces.size() > 0);
+
+        scxulong mtu;
+        for (size_t nr = 0; nr < interfaces.size(); nr++)
+        {
+            CPPUNIT_ASSERT(interfaces[nr].GetMTU(mtu));
+            std::cout << " " << mtu;
+            // RFC 791 "Every internet module must be able to forward a datagram of 68 octets without further fragmentation."
+            CPPUNIT_ASSERT_MESSAGE("MTU too small : " + StrToUTF8(StrFrom(mtu)), mtu >= 68);
+            // Default maximum for the ip4 mtu in the tracepath utility
+            CPPUNIT_ASSERT_MESSAGE("MTU too large : " + StrToUTF8(StrFrom(mtu)), mtu <= 65536);
+        }
+    }
+
 #if defined(hpux)
     // This is a system test designed to test if there is at least one network interface active 
     void TestHP_FindAllInDLPI_AtLeastOneInterface()

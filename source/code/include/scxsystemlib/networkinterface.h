@@ -249,7 +249,8 @@ namespace SCXSystemLib {
             ePhysicalAdapter  = (1 << 12), //!< Represents the attribute "PhysicalAdapter"
             eAutoSense        = (1 << 13), //!< Represents the attribute "AutoSense"
             eInterfaceIndex   = (1 << 14), //!< represents the attribute "InterfaceIndex"
-            eSpeed            = (1 << 15)  //!< represents the attribute "Speed"
+            eSpeed            = (1 << 15), //!< represents the attribute "Speed"
+            eMTU              = (1 << 16)  //!< represents the attribute "MTU"
          };
 
         static std::vector<NetworkInterfaceInfo> FindAll(SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps,
@@ -487,8 +488,16 @@ namespace SCXSystemLib {
            \returns     true if value is supported on platform, false otherwise.
         */
         bool GetSpeed(scxulong& value) const;
-        
 
+        /*----------------------------------------------------------------------------*/
+        /**
+           Retrieve the maximum transmission unit (MTU).
+
+           \param       value - output parameter where the MTU of the device is stored.
+           \returns     true if value is supported on platform, false otherwise.
+        */
+        bool GetMTU(scxulong& value) const;
+        
         const std::wstring DumpString() const;        
 
 
@@ -649,7 +658,7 @@ namespace SCXSystemLib {
         }
 
         std::wstring m_name;         //!< Name of interface
-        unsigned m_knownAttributesMask;   //!< Bitmask holding which attributes that have known values 
+        unsigned long m_knownAttributesMask;   //!< Bitmask holding which attributes that have known values 
         std::wstring m_ipAddress;         //!< IPv4 Address (empty if none is available)
         std::vector <std::wstring> m_ipv6Address; //!< IPv6 Address (empty if none is available)
         std::wstring m_netmask;          //!< Netmask (empty if none is available)
@@ -664,16 +673,17 @@ namespace SCXSystemLib {
         bool m_up;                   //!< Is the interface up
         bool m_running;              //!< Is the interface running
 
-        unsigned short m_availability;      //!< Availability and status of the device, must be value in enum DiskAvailabilityType
-        std::wstring m_adapterType;          //!< Network medium in use
-        unsigned short m_adapterTypeID;          //!< Network medium ID in use
-        bool m_autoSense;          //!< if the network adapter can automatically determine the speed of the attached or network media
-        unsigned int  m_interfaceIndex;          //!< Index value that uniquely identifies the local network interface
-        std::wstring m_macAddress;          //!< Media access control address for this network adapter
-        scxulong m_maxSpeed;       //!< Maximum speed, in bits per second, for the network adapter
-        unsigned short m_netConnectionStatus;          //!< State of the network adapter connection to the network
-        bool m_physicalAdapter;          //!< Indicates whether the adapter is a physical or a logical adapter
-        scxulong m_speed;       //!< Estimate of the current bandwidth in bits per second
+        unsigned short m_availability;  //!< Availability and status of the device, must be value in enum DiskAvailabilityType
+        std::wstring m_adapterType;     //!< Network medium in use
+        unsigned short m_adapterTypeID; //!< Network medium ID in use
+        bool m_autoSense;               //!< if the network adapter can automatically determine the speed of the attached or network media
+        unsigned int  m_interfaceIndex; //!< Index value that uniquely identifies the local network interface
+        std::wstring m_macAddress;      //!< Media access control address for this network adapter
+        scxulong m_maxSpeed;            //!< Maximum speed, in bits per second, for the network adapter
+        unsigned short m_netConnectionStatus; //!< State of the network adapter connection to the network
+        bool m_physicalAdapter;         //!< Indicates whether the adapter is a physical or a logical adapter
+        scxulong m_speed;               //!< Estimate of the current bandwidth in bits per second
+        scxulong m_mtu;                 //!< Maximum transmission unit
 
 #if defined(sun) 
         std::wstring m_ks_module;   //!< save the ks_module of this instance in kstat

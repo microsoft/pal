@@ -69,6 +69,13 @@ std::vector<NetworkInterfaceConfigurationInstance> NetworkInterfaceConfiguration
         interfaces[nr].GetMACAddress(instance.m_MACAddress);
         instance.SetKnown(NetworkInterfaceConfigurationInstance::eMACAddress);
 
+        scxulong mtu;
+        if (interfaces[nr].GetMTU(mtu))
+        {
+            instance.m_MTU = static_cast<Uint32>(mtu);
+            instance.SetKnown(NetworkInterfaceConfigurationInstance::eMTU);
+        }
+
         instance.m_IPAddress.clear();
         if (interfaces[nr].IsIPAddressKnown())
         {
