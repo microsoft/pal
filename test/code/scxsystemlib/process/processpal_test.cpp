@@ -1426,9 +1426,9 @@ public:
         /* No Init(), we do manual updates. */
 
         string cmd = "ln -s /bin/sleep ./" + procname;
-        CPPUNIT_ASSERT(system(cmd.c_str()) == 0);
+        CPPUNIT_ASSERT_EQUAL(0, system(cmd.c_str()) & 0xFF);
         cmd = "./" + procname + " 5 &";
-        CPPUNIT_ASSERT(system(cmd.c_str()) == 0);
+        CPPUNIT_ASSERT_EQUAL(0, system(cmd.c_str()) & 0xFF);
         
         // Sleep for a short time to make sure the process has time to get started
         SCXCoreLib::SCXThread::Sleep(500);

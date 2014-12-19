@@ -156,7 +156,16 @@ namespace SCXSystemLib
      */
     bool LinuxProcStat::ReadStatFile(FILE *filePointer, const char* filename)
     {
-        int nscanned = fscanf(filePointer, "%d", &processId);
+        // We used to parse by reading bytes, but this can be problematic if
+        // process names contain "(" or ")" (which was found on SuSE 12).
+        //
+        // Read the entire thing into a buffer and use sscanf to parse it.
+        // This allows us to search for "(" (start of process name), and
+        // reverse search for ")" (end of process name), and not care what
+        // is in the middle.
+
+        char buffer[1024];
+        int nscanned = (int) fread(&buffer[0], 1, sizeof(buffer), filePointer);
 
         // Test if the file was deleted before we had a chance to read it.
         // This can happen on RedHat, but not on Suse10.
@@ -167,8 +176,22 @@ namespace SCXSystemLib
               return false;
             }
             int eno = errno;
-            throw SCXErrnoException(L"fscanf", eno, SCXSRCLOCATION);
+            throw SCXErrnoException(L"fread", eno, SCXSRCLOCATION);
         }
+
+        // Less than 32 bytes read; that's not possible unless something is really wrong
+        if (nscanned < 32) {
+            int eno = errno;
+
+            wostringstream errtxt;
+            errtxt << L"Getting very short contents reading " << StrFromUTF8(filename) << L" file. "
+                   << L"Expecting minimum of 32 bytes but got " << nscanned << L" bytes (errno="
+                   << eno << L").";
+            throw SCXInternalErrorException(errtxt.str(), SCXSRCLOCATION);
+        }
+        buffer[nscanned] = '\0';
+
+        nscanned = sscanf(buffer, "%d", &processId);
 
         if (nscanned != 1) {
             wostringstream errtxt;
@@ -177,25 +200,23 @@ namespace SCXSystemLib
             throw SCXInternalErrorException(errtxt.str(), SCXSRCLOCATION);
         }
 
-        int ch = 0;
-        int pos = 0;
-        bool start = false;
-        // get process name to comm member variable
-        while (ch != ')' && !feof(filePointer) && pos < 29)
+        // Now go for the process name "(processname)", but search for starting
+        // "(" and last ")" to handle processes that contain "(" or ")" bytes.
+        const char* procStart = strchr(buffer, '(');
+        const char* procEnd = strrchr(buffer, ')');
+        if (NULL == procStart || NULL == procEnd || procStart > procEnd || (procEnd - procStart) > 28)
         {
-            ch = getc(filePointer);
-            if (start && ch != ')')
-            {
-                command[pos++] = static_cast<char>(ch);
-            } 
-            else if (ch == '(')
-            {
-                start = true;
-            }
+            wostringstream errtxt;
+            errtxt << L"Unexpected error parsing " << StrFromUTF8(filename) << L", file contents: " << StrFromUTF8(buffer);
+            throw SCXInternalErrorException(errtxt.str(), SCXSRCLOCATION);
         }
-        command[pos] = 0;
 
-        nscanned = fscanf(filePointer, scanstring,
+        size_t endByte = procEnd - procStart - 1;
+        const char* remainingPtr = procEnd + 1;
+        memcpy(command, procStart + 1, endByte);
+        command[endByte] = '\0';
+
+        nscanned = sscanf(remainingPtr, scanstring,
                           &state, &parentProcessId, &processGroupId,
                           &sessionId, &controllingTty, &terminalProcessId, &flags, &minorFaults,
                           &childMinorFaults, &majorFaults, &childMajorFaults, &userTime, &systemTime,
@@ -205,18 +226,6 @@ namespace SCXSystemLib
                           &kernelInstructionPointer, &signal, &blocked, &sigignore, &sigcatch, 
                           &waitChannel, &numPagesSwapped, &cumNumPagesSwapped, &exitSignal, 
                           &processorNum, &realTimePriority, &schedulingPolicy);
-
-        // Test if the file was deleted before we had a chance to read it.
-        // This can happen on RedHat, but not on Suse10.
-        // On Suse10 the fscanf will return normally, but all values are 0.
-        if (ferror(filePointer)) {
-            if (errno == ESRCH) {
-              // Race condition. This is ok.
-              return false;
-            }
-            int eno = errno;
-            throw SCXErrnoException(L"fscanf", eno, SCXSRCLOCATION);
-        }
 
         // -2 since we read pid and name separatly
         if (nscanned != procstat_len-2) {

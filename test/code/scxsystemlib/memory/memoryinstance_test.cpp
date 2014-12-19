@@ -686,7 +686,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
                 ----------------------------------------------------------
                 */
 
-#if defined(PF_DISTRO_REDHAT) && PF_MAJOR == 7
+#if (defined(PF_DISTRO_REDHAT) && PF_MAJOR >= 7) || (defined(PF_DISTRO_SUSE) && PF_MAJOR >= 12)
                 if (topTokens.size() >= 21)
                 {
                     keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2]);

@@ -422,7 +422,11 @@ public:
                 hasBootPartition |= resBool;
             }
 
+#if defined(PF_DISTRO_SUSE) && PF_MAJOR == 12
+            CPPUNIT_ASSERT_MESSAGE("Could not find a boot partition. On SuSE 12, this happens if parted fails, which can occur if CD-ROM is mounted. Dismount CD-ROM drive via 'umount' and then 'eject'.", hasBootPartition);
+#else
             CPPUNIT_ASSERT_MESSAGE("Could not find a boot partition.", hasBootPartition);
+#endif
         }
     }
 

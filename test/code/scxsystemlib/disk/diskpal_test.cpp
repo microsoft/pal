@@ -533,7 +533,8 @@ loop1      0      0       0       0      0      0       0       0      0      0
                 if (line.find(L"loop=") == std::wstring::npos && line.find(L"/dev/loop") == std::wstring::npos && line.find(L".iso") == std::wstring::npos && parts.size() > 6)
                 {
                     // Might need to add more file system types
-                    if (parts[1] == L"ext2" ||
+                    if (parts[1] == L"btrfs" ||
+                        parts[1] == L"ext2" ||
                         parts[1] == L"ext3" ||
                         parts[1] == L"ext4" ||
                         parts[1] == L"reiserfs" ||
@@ -541,10 +542,10 @@ loop1      0      0       0       0      0      0       0       0      0      0
                         parts[1] == L"xfs" ||
                         parts[1] == L"ufs")
                     {
-                    // on RHEL4/SLES9 anything that IsDMDevice gets ignored
-                    // because it is not possible to detect what level of
-                    // LVM support is/isn't available from the unit test
-                    bool skipOnRhel4Sles9 = false;
+                        // on RHEL4/SLES9 anything that IsDMDevice gets ignored
+                        // because it is not possible to detect what level of
+                        // LVM support is/isn't available from the unit test
+                        bool skipOnRhel4Sles9 = false;
 
 #if ( ( defined(PF_DISTRO_SUSE)   && (PF_MAJOR<=9) ) || \
       ( defined(PF_DISTRO_REDHAT) && (PF_MAJOR<=4) ) )
@@ -559,9 +560,9 @@ loop1      0      0       0       0      0      0       0       0      0      0
 
                         if (!skipOnRhel4Sles9)
                         {
-                        CPPUNIT_ASSERT( IsInMnttab(parts[0]) );
-                        disk = new TestDisk();
-                    }
+                            CPPUNIT_ASSERT( IsInMnttab(parts[0]) );
+                            disk = new TestDisk();
+                        }
                     }
                     if (0 != disk)
                     {
@@ -652,7 +653,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
             FILE* fp = popen(command.str().c_str(), "r");
             if (0 != fp)
             {
-                while (  ! feof(fp))
+                while ( ! feof(fp) )
                 {
                     memset(buf, 0, sizeof(buf));
                     fgets(buf, sizeof(buf), fp);

@@ -124,7 +124,7 @@ public:
 
     void TestGetMethods()
     {
-        std::wstring strKnownFS = L"|ext2|ext3|ext4|hfs|jfs|jfs2|reiserfs|ufs|vfat|vxfs|xfs|zfs|";
+        std::wstring strKnownFS = L"|btrfs|ext2|ext3|ext4|hfs|jfs|jfs2|reiserfs|ufs|vfat|vxfs|xfs|zfs|";
 
         // Solaris 11 has a new file system type for the /dev file system
 #if defined(sun) && ((PF_MAJOR == 5 && PF_MINOR >= 11) || (PF_MAJOR > 5))
@@ -300,7 +300,7 @@ public:
         CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
         CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
 
-	    // Insure number of devices is correct (less /dev/cdrom, which is ignored)
+            // Insure number of devices is correct (less /dev/cdrom, which is ignored)
         CPPUNIT_ASSERT_MESSAGE("Wrong number of (fake) logical drives", m_diskEnum->Size() == (sizeof LogicalDeviceTable / sizeof (LogicalDeviceAttr)) - 1);
 
         size_t i = 0;
@@ -314,12 +314,12 @@ public:
             unsigned int uintVal;
             std::wstring strVal, strFSType;
 
-	        // If we're pointing to the CD-ROM, skip it (ignored by PAL tests)
-	        while (0 == SCXCoreLib::StrCompare(LogicalDeviceTable[i].FSType,
-					       L"iso9660", true))
-	        {
-	            i++;
-	        }
+                // If we're pointing to the CD-ROM, skip it (ignored by PAL tests)
+                while (0 == SCXCoreLib::StrCompare(LogicalDeviceTable[i].FSType,
+                                               L"iso9660", true))
+                {
+                    i++;
+                }
 
             res = di->GetDeviceID(strVal);
             CPPUNIT_ASSERT_MESSAGE("Method GetDeviceID() failed", res);
@@ -562,57 +562,57 @@ public:
 
 #if defined(linux) 
         SCXCoreLib::SCXHandle<DiskDependTest> deps( new DiskDependTest() );
-	SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
+        SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
 
-	FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
-	CPPUNIT_ASSERT(fp != NULL);
-	fputs("proc /proc proc rw 0 0\n"
-	      "sysfs /sys sysfs rw 0 0\n"
-	      "tmpfs /dev/shm tmpfs rw,rootcontext=\"system_u:object_r:tmpfs_t:s0\" 0 0\n"
-	      "/dev/sda1 /boot ext4 rw 0 0\n"
-	      "/dev/hdc5 / ext4 rw 0 0\n"
-	      "/dev/ram /mnt/ramdisk vfat rw 0 0\n"
-	      "/dev/unknown /mnt/unknown ext4 rw 0 0\n"
-	      "/dev/xvdb3 /mnt/host ext4 rw 0 0\n"
-	      "/dev/cdrom /mnt/cdrom iso9660 rw 0 0\n"
-	      "/dev/dvdrom /mnt/dvdrom ufs rw 0 0\n"
-	      "none /proc/fs binfmt_misc rw 0 0\n",
-	      fp);
-	fclose(fp);
+        FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
+        CPPUNIT_ASSERT(fp != NULL);
+        fputs("proc /proc proc rw 0 0\n"
+              "sysfs /sys sysfs rw 0 0\n"
+              "tmpfs /dev/shm tmpfs rw,rootcontext=\"system_u:object_r:tmpfs_t:s0\" 0 0\n"
+              "/dev/sda1 /boot ext4 rw 0 0\n"
+              "/dev/hdc5 / ext4 rw 0 0\n"
+              "/dev/ram /mnt/ramdisk vfat rw 0 0\n"
+              "/dev/unknown /mnt/unknown ext4 rw 0 0\n"
+              "/dev/xvdb3 /mnt/host ext4 rw 0 0\n"
+              "/dev/cdrom /mnt/cdrom iso9660 rw 0 0\n"
+              "/dev/dvdrom /mnt/dvdrom ufs rw 0 0\n"
+              "none /proc/fs binfmt_misc rw 0 0\n",
+              fp);
+        fclose(fp);
 
-	deps->SetMountTabPath(fauxMntTab);
-	CPPUNIT_ASSERT_NO_THROW(m_diskEnum = new SCXSystemLib::StaticLogicalDiskEnumeration(deps));
-	CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
-	CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
+        deps->SetMountTabPath(fauxMntTab);
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum = new SCXSystemLib::StaticLogicalDiskEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
 
-	// Insure number of devices is correct (less /dev/cdrom, which is ignored)
-	CPPUNIT_ASSERT_MESSAGE("Wrong number of (fake) logical drives", m_diskEnum->Size() == (sizeof LogicalDeviceTable / sizeof (LogicalDeviceAttr)) - 1);
+        // Insure number of devices is correct (less /dev/cdrom, which is ignored)
+        CPPUNIT_ASSERT_MESSAGE("Wrong number of (fake) logical drives", m_diskEnum->Size() == (sizeof LogicalDeviceTable / sizeof (LogicalDeviceAttr)) - 1);
 
-	for (SCXSystemLib::EntityEnumeration<SCXSystemLib::StaticLogicalDiskInstance>::EntityIterator it = m_diskEnum->Begin(); it != m_diskEnum->End(); ++it)
-	  {
-	    SCXCoreLib::SCXHandle<SCXSystemLib::StaticLogicalDiskInstance> di(*it);
-	    CPPUNIT_ASSERT(di != NULL);
+        for (SCXSystemLib::EntityEnumeration<SCXSystemLib::StaticLogicalDiskInstance>::EntityIterator it = m_diskEnum->Begin(); it != m_diskEnum->End(); ++it)
+          {
+            SCXCoreLib::SCXHandle<SCXSystemLib::StaticLogicalDiskInstance> di(*it);
+            CPPUNIT_ASSERT(di != NULL);
 
-	    scxulong blockSizeExpected = 2048;
-	    scxulong blockSize = 0;
-	    bool resBool = di->GetBlockSize(blockSize);
-	    CPPUNIT_ASSERT_MESSAGE("Method GetBlockSize() failed", resBool);
-	    CPPUNIT_ASSERT_EQUAL(blockSizeExpected, blockSize);
-	  }
+            scxulong blockSizeExpected = 2048;
+            scxulong blockSize = 0;
+            bool resBool = di->GetBlockSize(blockSize);
+            CPPUNIT_ASSERT_MESSAGE("Method GetBlockSize() failed", resBool);
+            CPPUNIT_ASSERT_EQUAL(blockSizeExpected, blockSize);
+          }
 
 #elif defined(aix) || defined(hpux) || defined(sun)
-	SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps( new DiskPartLogVolDiskDependTest() );
-	CPPUNIT_ASSERT_NO_THROW(m_diskEnum = new SCXSystemLib::StaticLogicalDiskFullEnumeration(deps));
-	CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
-	CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update());
-	CPPUNIT_ASSERT_EQUAL(m_diskEnum->Size(), static_cast<size_t>(logicalDisk_cnt));
+        SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps( new DiskPartLogVolDiskDependTest() );
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum = new SCXSystemLib::StaticLogicalDiskFullEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update());
+        CPPUNIT_ASSERT_EQUAL(m_diskEnum->Size(), static_cast<size_t>(logicalDisk_cnt));
 
-	// First logical disk, hd0.
-	OneLogicalDiskTest(0, mountPoint0_frsize, mountPoint0_frsize*mountPoint0_blocks, mountPoint0_frsize*mountPoint0_bfree,
-			   mountPoint0_namemax, mountPoint0_devName, mountPoint0_name, mountPoint0_name, mountPoint0_basetype);
-	// Second logical disk, hd1.
-	OneLogicalDiskTest(1, mountPoint1_frsize, mountPoint1_frsize*mountPoint1_blocks, mountPoint1_frsize*mountPoint1_bfree,
-			   mountPoint1_namemax, mountPoint1_devName, mountPoint1_name, mountPoint1_name, mountPoint1_basetype);
+        // First logical disk, hd0.
+        OneLogicalDiskTest(0, mountPoint0_frsize, mountPoint0_frsize*mountPoint0_blocks, mountPoint0_frsize*mountPoint0_bfree,
+                           mountPoint0_namemax, mountPoint0_devName, mountPoint0_name, mountPoint0_name, mountPoint0_basetype);
+        // Second logical disk, hd1.
+        OneLogicalDiskTest(1, mountPoint1_frsize, mountPoint1_frsize*mountPoint1_blocks, mountPoint1_frsize*mountPoint1_bfree,
+                           mountPoint1_namemax, mountPoint1_devName, mountPoint1_name, mountPoint1_name, mountPoint1_basetype);
 #endif// defined(aix) || defined(hpux)
     } 
 };

@@ -426,6 +426,7 @@ namespace SCXSystemLib
 #if defined(sun) && ((PF_MAJOR == 5 && PF_MINOR >= 11) || (PF_MAJOR > 5))
               { L"dev",        L"Not Compressed",   L"Not Encrypted",   2,   true,   true,   0  },
 #endif
+              { L"btrfs",      L"Not Compressed",   L"Not Encrypted",   2,   true,   true,   0  },
               { L"ext2",       L"Not Compressed",   L"Not Encrypted",   2,   true,   true,   0  },
               { L"ext3",       L"Not Compressed",   L"Not Encrypted",   2,   true,   true,   0  },
               { L"ext4",       L"Not Compressed",   L"Not Encrypted",   2,   true,   true,   0  },

@@ -641,7 +641,8 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
         CPPUNIT_ASSERT_EQUAL(sizeof(buf), SCXFile::ReadAvailableBytes(L"/dev/urandom", buf, sizeof(buf)));
 
         // Solaris and Mac (and sometimes HPUX) gives much more random data than other platforms.
-#if !defined(sun) && !defined(macos) && !defined(hpux)
+        // Looks like newer Linuxes return much more random data as well ...
+#if !defined(sun) && !defined(macos) && !defined(hpux) && !(defined(PF_DISTRO_SUSE) && PF_MAJOR >= 12)
         std::stringstream ss;
         ss << "sizeof(buf): " << sizeof(buf);
         size_t bytesRead = SCXFile::ReadAvailableBytes(L"/dev/random", buf, sizeof(buf));

@@ -541,7 +541,7 @@ Homepage: http://nfs.sourceforge.net/
         //in redhat 6 and SuSE 11 ia64, the RPM version is 4.8,
         //  prototype: int rpmcliQuery(rpmts ts, QVA_t qva, ARGV_const_t argv)
         const char ** poptArgs = poptGetArgs(context);
-#if (defined(PF_DISTRO_REDHAT) && PF_MAJOR < 6) || defined(PF_DISTRO_SUSE)
+#if (defined(PF_DISTRO_REDHAT) && PF_MAJOR < 6) || (defined(PF_DISTRO_SUSE) && PF_MAJOR < 12)
         errorCode = rpmcliQuery(ts, qva, poptArgs);
 #else
         errorCode = rpmcliQuery(ts, qva, const_cast<ARGV_const_t>(poptArgs));
