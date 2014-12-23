@@ -98,6 +98,8 @@ namespace SCXSystemLib
         unsigned short cpuStatus;
         unsigned short processorType;
         unsigned int extClock;
+        unsigned int numberOfCores;
+        unsigned int numberOfLogicalProcessors;
         unsigned int currentClockSpeed;
         unsigned short family;
         unsigned int maxClockSpeed;
@@ -122,6 +124,8 @@ namespace SCXSystemLib
             cpuStatus(0),
             processorType(0),
             extClock(0),
+            numberOfCores(0),
+            numberOfLogicalProcessors(0),
             currentClockSpeed(0),
             family(0),
             maxClockSpeed(0),
@@ -240,6 +244,16 @@ namespace SCXSystemLib
 
         /*----------------------------------------------------------------------------*/
         /**
+        Get numberOfLogicalProcessors.
+
+        Parameters:  numberOfLogicalProcessors - RETURN: numberOfLogicalProcessors of CpuProperties instance
+
+        Retval:      true if a value is supported by this implementation
+        */
+        bool GetNumberOfLogicalProcessors(unsigned int& numberOfLogicalProcessors) const;
+
+        /*----------------------------------------------------------------------------*/
+        /**
         Get currentClockSpeed.
 
         Parameters:  currentClockSpeed - RETURN: currentClockSpeed of CpuProperties instance
@@ -319,6 +333,15 @@ namespace SCXSystemLib
           ThrowException: SCXNotSupportException - For not implemented platform.
          */
         bool GetExternalClock(unsigned int& externalClock) const;
+        /*----------------------------------------------------------------------------*/
+        /**
+          Core Count.
+
+          Parameters:  numberOfCores- core count.
+          Returns:     whether the implementation for this platform supports the value.
+          ThrowException: SCXNotSupportException - For not implemented platform.
+         */
+        bool GetNumberOfCores(unsigned int& numberOfCores) const;
         /*----------------------------------------------------------------------------*/
         /**
           Max Clock Speed.

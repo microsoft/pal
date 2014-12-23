@@ -19,10 +19,6 @@
 
 #include <scxsystemlib/cpuenumeration.h>
 
-#if defined(aix)
-#include <scxsystemlib/scxodm.h>
-#endif // defined(aix)
-
 #if defined(sun)
 #include <sys/sysinfo.h>
 #include <scxsystemlib/scxkstat.h>
@@ -69,28 +65,6 @@ static const wstring s_LogModuleName = L"scx.core.common.pal.system.cpu.cpuenume
 #endif
 
 class CPUPALTestDependencies;
-
-/**
-    Mock SCXodm
-*/
-#if defined(aix)
-
-class MockOdm : public SCXodm
-{
-public:
-    MockOdm(const CPUPALTestDependencies* pDeps) :
-        SCXodm(),
-        m_pTestdeps(NULL)
-    {
-        m_pTestdeps = const_cast<CPUPALTestDependencies*>(pDeps);
-    }
-    void* Get(CLASS_SYMBOL cs, const wstring &wCriteria, void* returnData, eGetMode mode);
-
-private:
-    CPUPALTestDependencies* m_pTestdeps;
-};
-
-#endif // defined(aix)
 
 #if defined(sun)
 
@@ -180,9 +154,6 @@ public:
         m_numProcs(1),
         m_disabledProcs(0),
         m_cpuInfoFileType(-1)
-#if defined(aix)
-        , m_aixDeviceIndex(0)
-#endif // defined(aix)
     {}
 
     virtual SCXHandle<std::wistream> OpenStatFile() const
@@ -570,12 +541,6 @@ public:
     }
 
 #elif defined(aix)
-    virtual const SCXHandle<SCXodm> CreateOdm() const
-    {
-        SCXHandle<MockOdm> odm( new MockOdm(this) );
-        return odm;
-    }
-
     virtual int perfstat_cpu_total(perfstat_id_t* name,
                                    perfstat_cpu_total_t* buf,
                                    int bufsz,
@@ -669,23 +634,12 @@ public:
     }
 
     void SetCpuInfoFileType(int type) { m_cpuInfoFileType = type; }
-#if defined(aix)
-    void SetAixDeviceVector(vector<struct CuDv>& devices)
-    {
-        m_aixDevices = devices;
-        m_aixDeviceIndex = 0;
-    }
-#endif // defined(aix)
 
 public:
     scxulong m_user;
     scxulong m_system;
     scxulong m_idle;
     scxulong m_iowait;
-#if defined(aix)
-    vector<struct CuDv> m_aixDevices;
-    int m_aixDeviceIndex;
-#endif // defined(aix)
 
 #if defined(sun)
     vector<kstat_t> m_vKstat;           //!< Vector of kstat_t data structures
@@ -704,32 +658,6 @@ private:
     int m_disabledProcs;
     int m_cpuInfoFileType;
 };
-
-#if defined(aix)
-// Need to be here due to mutual dependencies
-// This is used for physical processor count dependency injection
-
-void* MockOdm::Get(CLASS_SYMBOL cs, const wstring &wCriteria, void* returnData, eGetMode mode)
-{
-    // Validate that the caller is really what we expect
-    CPPUNIT_ASSERT( L"name like 'proc*'" == wCriteria );
-    // Only mode expected is eGetDefault
-    CPPUNIT_ASSERT_EQUAL(eGetDefault, mode);
-
-    // If we're to return an element of our vector, do so
-    if ( m_pTestdeps->m_aixDevices.size() > 0
-         && m_pTestdeps->m_aixDevices.size() > m_pTestdeps->m_aixDeviceIndex)
-    {
-        memcpy(returnData,
-               &m_pTestdeps->m_aixDevices[m_pTestdeps->m_aixDeviceIndex++],
-               sizeof(m_pTestdeps->m_aixDevices[0]));
-        return returnData;
-    }
-
-    // Otherwise just say: No element found
-    return NULL;
-}
-#endif // defined(aix)
 
 #if defined(sun)
 // Need to be here due to mutal dependencies
@@ -881,6 +809,8 @@ private:
 
 class CPUEnumeration_Test : public CPPUNIT_NS::TestFixture
 {
+    friend class SCXSystemLib::CPUEnumeration;
+
     CPPUNIT_TEST_SUITE( CPUEnumeration_Test  );
 
     CPPUNIT_TEST( testMockedValues );
@@ -1399,11 +1329,8 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetCpuInfoFileType(0);
 #elif defined(aix)
-        vector<struct CuDv> devices;
-
-        // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetAixDeviceVector(devices);
+        deps->SetNumProcs(0);
 #elif defined(sun)
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
 #endif
@@ -1423,18 +1350,9 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetCpuInfoFileType(1);
 #elif defined(aix)
-        vector<struct CuDv> devices;
-        struct CuDv device;
-        memset( &device, 0, sizeof(device) );
-
-        // 'lsdev -c processor' shows:
-        //    proc0 Available 00-00 Processor
-        strncpy(device.name, "proc0", sizeof(device.name));
-        devices.push_back(device);
-
         // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetAixDeviceVector(devices);
+        deps->SetNumProcs(1);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->Reset();
@@ -1455,19 +1373,9 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetCpuInfoFileType(2);
 #elif defined(aix)
-        vector<struct CuDv> devices;
-        struct CuDv device;
-        memset( &device, 0, sizeof(device) );
-
-        // 'lsdev -c processor' shows:
-        //    proc0 Available 00-00 Processor
-        // (No difference for multiple cores)
-        strncpy(device.name, "proc0", sizeof(device.name));
-        devices.push_back(device);
-
         // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetAixDeviceVector(devices);
+        deps->SetNumProcs(1);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->Reset();
@@ -1489,21 +1397,9 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetCpuInfoFileType(3);
 #elif defined(aix)
-        vector<struct CuDv> devices;
-        struct CuDv device;
-        memset( &device, 0, sizeof(device) );
-
-        // 'lsdev -c processor' shows:
-        //    proc0 Available 00-00 Processor
-        //    proc4 Available 00-04 Processor
-        strncpy(device.name, "proc0", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc4", sizeof(device.name));
-        devices.push_back(device);
-
         // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetAixDeviceVector(devices);
+        deps->SetNumProcs(2);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->Reset();
@@ -1544,21 +1440,9 @@ public:
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->SetCpuInfoFileType(44326);
 #elif defined(aix)
-        vector<struct CuDv> devices;
-        struct CuDv device;
-        memset( &device, 0, sizeof(device) );
-
-        // 'lsdev -c processor' (hypothetically) shows:
-        //    proc0 Available 00-00 Processor
-        //    proc8 Available 00-08 Processor
-        strncpy(device.name, "proc0", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc8", sizeof(device.name));
-        devices.push_back(device);
-
         // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetAixDeviceVector(devices);
+        deps->SetNumProcs(2);
 #elif defined(sun) || defined(HPUX_PHYSICAL_PROC_COUNT_SUPPORTED)
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
         deps->Reset();
@@ -1580,11 +1464,7 @@ public:
         // AIX-specific test
 
 #if defined(aix)
-        vector<struct CuDv> devices;
-        struct CuDv device;
-        memset( &device, 0, sizeof(device) );
-
-        // 'lsdev -c processor' (from a friend's system) shows:
+        // 'lsdev -c processor' shows:
         //    proc0  Available 00-00 Processor
         //    proc4  Available 00-04 Processor
         //    proc8  Available 00-08 Processor
@@ -1597,34 +1477,14 @@ public:
         //    proc36 Available 00-36 Processor
         //    proc40 Available 00-40 Processor
         //    proc44 Available 00-44 Processor
-        strncpy(device.name, "proc0", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc4", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc8", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc12", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc16", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc20", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc24", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc28", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc32", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc36", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc40", sizeof(device.name));
-        devices.push_back(device);
-        strncpy(device.name, "proc44", sizeof(device.name));
-        devices.push_back(device);
+        //
+        // With this implemention, the sort of bug we had is no longer possible.
+        // But at least set a large number of disabled processors and validate.
 
         // Mock dependencies object
         SCXHandle<CPUPALTestDependencies> deps(new CPUPALTestDependencies());
-        deps->SetAixDeviceVector(devices);
+        deps->SetNumProcs(44);
+        deps->SetDisabledProcs(32);
 
         // Verify that the physical count of processors matches
         SCXCoreLib::SCXLogHandle logH = SCXLogHandleFactory::GetLogHandle(s_LogModuleName);

@@ -38,7 +38,6 @@
 #elif defined(aix)
 
 #include <sys/systemcfg.h>
-#include <scxsystemlib/scxodm.h>
 
 #endif
 
@@ -70,7 +69,6 @@ namespace SCXSystemLib
                                      size_t elemcount,
                                      int index) const;
 #elif defined(aix)
-        virtual const SCXCoreLib::SCXHandle<SCXodm> CreateOdm() const;
         virtual int perfstat_cpu_total(perfstat_id_t *name,
                                        perfstat_cpu_total_t* buf,
                                        int bufsz,
@@ -213,6 +211,7 @@ namespace SCXSystemLib
         bool m_threadStarted;                   //!< true if the subsidiary thread has run Update() at least one time
         perfstat_cpu_total_t m_dataarea_total;  //!< Holds output from perfstat_cpu_total()
         perfstat_id_t m_cpuid;                  //!< First CPU ID in perfstat_cpu() queries
+
 #endif
     };
 

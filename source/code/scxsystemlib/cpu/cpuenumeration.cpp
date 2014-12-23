@@ -38,11 +38,7 @@
 
 // System-specific includes
 
-#if defined(aix)
-
-#include <scxsystemlib/scxodm.h>
-
-#elif defined(hpux)
+#if defined(hpux)
 
 #include <sys/pstat.h>
 #include <sys/mp.h>
@@ -187,16 +183,6 @@ namespace SCXSystemLib
 #endif /* hpux */
 
 #if defined(aix)
-
-    /**
-       Creates a new SCXodm object. Provided for dependency injection purposes.
-
-       \returns     Handle to newly created SCXodm class.
-    */
-    const SCXHandle<SCXodm> CPUPALDependencies::CreateOdm(void) const
-    {
-        return SCXHandle<SCXodm>(new SCXodm());
-    }
 
     /** Gets global CPU usage
 
@@ -571,27 +557,15 @@ namespace SCXSystemLib
 
 #elif defined(aix)
 
-        // On AIX, we really just count the number of processors, similar to
-        // 'lsdev -c processor | wc -l'.  However, just as a sanity check,
-        // verify we are actually getting processors back ...
-
-        SCXHandle<SCXSystemLib::SCXodm> odm = deps->CreateOdm();
-        struct CuDv dvData;
-        size_t count = 0;
-
-        for ( ; ; )
+        perfstat_partition_total_t partTotal;
+        int rc = deps->perfstat_partition_total(NULL, &partTotal, sizeof(perfstat_partition_total_t), 1);
+        if (rc == 0)
         {
-            void *pResult = odm->Get(CuDv_CLASS, L"name like 'proc*'", &dvData);
-            if (NULL == pResult)
-            {
-                break;
-            }
-            SCXASSERT(0 == strncmp("proc", dvData.name, 4));
-            count++;
+            throw SCXCoreLib::SCXInvalidStateException(L"perfstat partition is unavailable.", SCXSRCLOCATION);
         }
 
         // Be sure we return at least one physical processor
-        return ( count ? count : 1 );
+        return ( partTotal.online_cpus ? partTotal.online_cpus : 1 );
 
 #else
 #error "Not implemented for this platform"
