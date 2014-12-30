@@ -165,9 +165,12 @@ RestoreConfigurationFile() {
         else:
             arch = self.variables["PFARCH"]
 
-        depotbasefilename = self.variables["SHORT_NAME"] + '-' + \
-                                     self.fullversion_dashed + \
-                                     '.hpux.' + osversion + '.' + arch + '.depot'
+        if 'OUTPUTFILE' in self.variables:
+            depotbasefilename = self.variables['OUTPUTFILE'] + '.depot'
+        else:
+            depotbasefilename = self.variables["SHORT_NAME"] + '-' + \
+                self.fullversion_dashed + \
+                '.hpux.' + osversion + '.' + arch + '.depot'
         depotfilename = os.path.join(self.targetDir, depotbasefilename)
 
         if "SKIP_BUILDING_PACKAGE" in self.variables:

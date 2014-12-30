@@ -174,10 +174,14 @@ class AIXLPPFile:
 
 
     def BuildPackage(self):
-        lppbasefilename = self.variables["SHORT_NAME"] + '-' + \
-                          self.fullversion_dashed + \
-                          '.aix.' + str(self.variables["PFMAJOR"]) + '.' + \
-                          self.variables['PFARCH'] + '.lpp'
+        if 'OUTPUTFILE' in self.variables:
+            lppbasefilename = self.variables['OUTPUTFILE'] + '.lpp'
+        else:
+            lppbasefilename = self.variables["SHORT_NAME"] + '-' + \
+                self.fullversion_dashed + \
+                '.aix.' + str(self.variables["PFMAJOR"]) + '.' + \
+                self.variables['PFARCH'] + '.lpp'
+
         lppfilename = os.path.join(self.targetDir, lppbasefilename)
 
         if "SKIP_BUILDING_PACKAGE" in self.variables:

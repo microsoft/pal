@@ -140,9 +140,12 @@ class LinuxDebFile:
                 conffile.write(f.stagedLocation + '\n')
 
     def BuildPackage(self):
-        pkgName = self.variables["SHORT_NAME"] + '-' + \
-            self.fullversion_dashed + '.universald.' + \
-            str(self.variables["PFMAJOR"])  + '.' + self.variables["PFARCH"] + '.deb'
+        if 'OUTPUTFILE' in self.variables:
+            pkgName = self.variables['OUTPUTFILE'] + '.deb'
+        else:
+            pkgName = self.variables["SHORT_NAME"] + '-' + \
+                self.fullversion_dashed + '.universald.' + \
+                str(self.variables["PFMAJOR"])  + '.' + self.variables["PFARCH"] + '.deb'
 
         if "SKIP_BUILDING_PACKAGE" in self.variables:
             return

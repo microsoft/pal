@@ -135,7 +135,9 @@ class LinuxRPMFile:
 
 
     def StageAndProperlyNameRPM(self):
-        if self.variables['PFDISTRO'] == 'SUSE':
+        if 'OUTPUTFILE' in self.variables:
+            rpmNewFileName = self.variables['OUTPUTFILE'] + '.rpm'
+        elif self.variables['PFDISTRO'] == 'SUSE':
             rpmNewFileName = self.variables['SHORT_NAME'] + '-' + \
                 self.fullversion_dashed + '.sles.' + \
                 str(self.variables['PFMAJOR']) + '.' + self.variables['PFARCH'] + '.rpm'

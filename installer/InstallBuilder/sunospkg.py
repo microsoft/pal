@@ -114,10 +114,13 @@ class SunOSPKGFile:
             print("Error: pkgmk failed")
             exit(1)
 
-        basepkgfilename = self.variables['SHORT_NAME'] + '-' + \
-            self.fullversion_dashed + \
-            '.solaris.' + str(self.variables['PFMINOR']) + '.' + \
-            self.variables['PFARCH'] + '.pkg'
+        if 'OUTPUTFILE' in self.variables:
+            basepkgfilename = self.variables['OUTPUTFILE'] + '.pkg'
+        else:
+            basepkgfilename = self.variables['SHORT_NAME'] + '-' + \
+                self.fullversion_dashed + \
+                '.solaris.' + str(self.variables['PFMINOR']) + '.' + \
+                self.variables['PFARCH'] + '.pkg'
 
         pkgfilename = os.path.join(self.targetDir, basepkgfilename)
 
