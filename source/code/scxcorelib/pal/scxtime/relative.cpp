@@ -188,7 +188,7 @@ SCXRelativeTime &SCXRelativeTime::SetDecimalCount(scxdecimalnr decimalCount) {
 //! \returns If or not the amount may be used as offset from UTC
 bool SCXRelativeTime::IsValidAsOffsetFromUTC() const {
     return m_years == 0 && m_months == 0 && m_days == 0 && m_microseconds == 0
-        && IsAscending(-13 * 60, m_hours * 60 + m_minutes, 12 * 60);
+        && IsAscending(-13 * 60, m_hours * 60 + m_minutes, 13 * 60);
 }
 
 /*----------------------------------------------------------------------------*/

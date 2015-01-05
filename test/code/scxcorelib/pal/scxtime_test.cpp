@@ -50,6 +50,7 @@ class SCXTimeTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST( TestCalendarTimeToExtendedISO8601 );
     CPPUNIT_TEST( TestCalendarTimeToLocalizedTime );
     CPPUNIT_TEST( TestCalendarTimeDecimalCount );
+    CPPUNIT_TEST( TestRelativeTimeAllowsAucklandNZ );
     CPPUNIT_TEST( TestRelativeTimeToBasicISO8601Time );
     CPPUNIT_TEST( TestRelativeTimeToExtendedISO8601Time );
     CPPUNIT_TEST( TestAddYears );
@@ -834,6 +835,14 @@ public:
         CPPUNIT_ASSERT(timeStr == L"19941210161415,00Z");        
     }
     
+    void TestRelativeTimeAllowsAucklandNZ() {
+        // Auckland, NZ is an oddity: During DST, it is 13 hours ahead of UTC
+        // (most everything else is <= UTC+12).  Verify this is actually allowed.
+
+        SCXRelativeTime time1(0, 0, 0, 13, 0, 0.0);
+        CPPUNIT_ASSERT( time1.IsValidAsOffsetFromUTC() );
+    }
+
     void TestRelativeTimeToBasicISO8601Time() {
         SCXRelativeTime time1(0, 0, 0, 3, 4, 5.2, 2);
         wstring time1Str(time1.ToBasicISO8601Time());
