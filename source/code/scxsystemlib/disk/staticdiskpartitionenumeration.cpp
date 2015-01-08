@@ -964,11 +964,17 @@ namespace SCXSystemLib
         std::istringstream processInput;
         std::ostringstream processOutput, processErr;
         bool success = false;
+#if defined(PF_DISTRO_SUSE)
+        std::wstring parted_path = L"/usr/sbin/parted";
+#else
+        std::wstring parted_path = L"/sbin/parted";
+#endif
         
         try
         {
-            SCX_LOGTRACE(m_log, L"Invoking command : \"parted -l\"");
-            int ret = m_deps->Run(L"parted -l", processInput, processOutput, processErr, 15000);
+            std::wstring command = parted_path + L" -l";
+            SCX_LOGTRACE(m_log, L"Invoking command : \"" + command + L"\"");
+            int ret = m_deps->Run(command, processInput, processOutput, processErr, 15000);
 
             std::string errOut = processErr.str();
             partedOutput = processOutput.str();
@@ -985,14 +991,16 @@ namespace SCXSystemLib
         {
             try
             {
-                SCX_LOGTRACE(m_log, L"Using fallback interactive parted command : \"parted -i\"");
+                std::wstring command = parted_path + L" -i";
+                SCX_LOGTRACE(m_log, L"Using fallback interactive parted command : \"" + command + L"\"");
+
                 processErr.str(""); // Reset the error stream
 
                 // We use ignore in case parted shows an interactive warning
                 std::istringstream input("ignore\nprint\nquit\n");
 
                 // We need the -i flag for stdin to be used correctly
-                int ret = m_deps->Run(L"parted -i", input, processOutput, processErr, 15000);
+                int ret = m_deps->Run(command, input, processOutput, processErr, 15000);
 
                 std::string errOut = processErr.str();
                 partedOutput = processOutput.str();

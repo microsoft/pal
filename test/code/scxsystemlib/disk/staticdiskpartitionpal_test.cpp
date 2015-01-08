@@ -34,8 +34,8 @@ public:
             (void)mystdin;
             (void)mystderr;
             (void)timeout;
-        (void)cwd;
-        (void)chrootPath;
+            (void)cwd;
+            (void)chrootPath;
             mystdout << "Not a match, yet not an error" << endl;
             return 0;
         }
@@ -57,7 +57,7 @@ public:
         (void)timeout;
         (void)cwd;
         (void)chrootPath;
-        if (command == L"parted -l")
+        if (command == L"/usr/sbin/parted -l" || command == L"/sbin/parted -l")
         {
             ifstream parted_file("testfiles/orapdb01_parted_output.txt");
             mystdout << parted_file.rdbuf();
