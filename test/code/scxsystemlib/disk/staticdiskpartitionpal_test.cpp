@@ -115,26 +115,6 @@ public:
         }
     }
 
-    // On linux systems we do not want to fail unit tests if parted is not installed
-    bool CheckPrerequisites(std::wstring testName)
-    {
-#if defined(linux)
-        if (SCXCoreLib::SCXFile::Exists(L"/usr/sbin/parted") || 
-            SCXCoreLib::SCXFile::Exists(L"/sbin/parted"))
-        {
-            return true;
-        }
-
-        std::wstring warnText;
-
-        warnText = L"Utility \"parted\" must exist to run " + testName + L" test";
-        SCXUNIT_WARNING(warnText);
-        return false;
-#else
-        return true;
-#endif
-    }
-
     void TestCreation(void)
     {
         SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps( new DiskDependTest() );
@@ -403,31 +383,38 @@ public:
 
     void TestHasBootPartition()
     {
-        if (CheckPrerequisites(L"TestHasBootPartition"))
+        // On linux systems we do not want to fail unit tests if parted is not installed
+#if defined(linux)
+        std::wstring parted_path;
+        if ( ! SCXSystemLib::StaticDiskPartitionEnumeration::GetPartedPath(parted_path) )
         {
-            SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps( new SCXSystemLib::DiskDependDefault() );
-            CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum = new SCXSystemLib::StaticDiskPartitionEnumeration(deps));
-            CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum->Init());
+            SCXUNIT_WARNING(L"Utility \"parted\" must exist to run the TestHasBootPartition test");
+            return;
+        }
+#endif
+    
+        SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps(new SCXSystemLib::DiskDependDefault());
+        CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum = new SCXSystemLib::StaticDiskPartitionEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum->Init());
 
-            SCXSystemLib::EntityEnumeration<SCXSystemLib::StaticDiskPartitionInstance>::EntityIterator iter;
-            bool hasBootPartition = false;
-            bool resBool = false;
+        SCXSystemLib::EntityEnumeration<SCXSystemLib::StaticDiskPartitionInstance>::EntityIterator iter;
+        bool hasBootPartition = false;
+        bool resBool = false;
 
-            for (iter = m_diskPartEnum->Begin(); iter != m_diskPartEnum->End(); iter++)
-            {
-                SCXCoreLib::SCXHandle<SCXSystemLib::StaticDiskPartitionInstance> dp = *iter;
-                CPPUNIT_ASSERT(0 != dp);
-                CPPUNIT_ASSERT_NO_THROW(dp->Update());
-                CPPUNIT_ASSERT(dp->GetBootPartition(resBool));
-                hasBootPartition |= resBool;
-            }
+        for (iter = m_diskPartEnum->Begin(); iter != m_diskPartEnum->End(); iter++)
+        {
+            SCXCoreLib::SCXHandle<SCXSystemLib::StaticDiskPartitionInstance> dp = *iter;
+            CPPUNIT_ASSERT(0 != dp);
+            CPPUNIT_ASSERT_NO_THROW(dp->Update());
+            CPPUNIT_ASSERT(dp->GetBootPartition(resBool));
+            hasBootPartition |= resBool;
+        }
 
 #if defined(PF_DISTRO_SUSE) && PF_MAJOR == 12
-            CPPUNIT_ASSERT_MESSAGE("Could not find a boot partition. On SuSE 12, this happens if parted fails, which can occur if CD-ROM is mounted. Dismount CD-ROM drive via 'umount' and then 'eject'.", hasBootPartition);
+        CPPUNIT_ASSERT_MESSAGE("Could not find a boot partition. On SuSE 12, this happens if parted fails, which can occur if CD-ROM is mounted. Dismount CD-ROM drive via 'umount' and then 'eject'.", hasBootPartition);
 #else
-            CPPUNIT_ASSERT_MESSAGE("Could not find a boot partition.", hasBootPartition);
+        CPPUNIT_ASSERT_MESSAGE("Could not find a boot partition.", hasBootPartition);
 #endif
-        }
     }
 
 #if defined(sun)

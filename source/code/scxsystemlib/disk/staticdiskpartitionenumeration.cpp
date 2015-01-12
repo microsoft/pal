@@ -957,18 +957,39 @@ namespace SCXSystemLib
 #endif// hpux
 
 #if defined(linux)
+
+    bool StaticDiskPartitionEnumeration::GetPartedPath(std::wstring &parted_path)
+    {
+        std::vector<wstring> possible_paths;
+        possible_paths.push_back(L"/sbin/parted");
+        possible_paths.push_back(L"/usr/sbin/parted");
+
+        for (std::vector<wstring>::const_iterator it = possible_paths.begin(); it != possible_paths.end(); ++it)
+        {
+            if (SCXFile::Exists(*it))
+            {
+                parted_path = *it;
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool StaticDiskPartitionEnumeration::GetPartedOutput(std::string &partedOutput)
     {
+        static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTrace);
         SCX_LOGTRACE(m_log, L"DiskPartitionEnum::GetPartedOutput() Entering");
 
         std::istringstream processInput;
         std::ostringstream processOutput, processErr;
         bool success = false;
-#if defined(PF_DISTRO_SUSE)
-        std::wstring parted_path = L"/usr/sbin/parted";
-#else
-        std::wstring parted_path = L"/sbin/parted";
-#endif
+        std::wstring parted_path;
+        
+        if (!StaticDiskPartitionEnumeration::GetPartedPath(parted_path))
+        {
+            SCX_LOG(m_log, suppressor.GetSeverity(L"NoPartedFound"), L"Could not find parted in /sbin or /usr/sbin");
+            return false;
+        }
         
         try
         {
@@ -984,7 +1005,9 @@ namespace SCXSystemLib
         }
         catch (SCXCoreLib::SCXInternalErrorException &e) 
         {
-            SCX_LOGERROR(m_log, L"Attempt to execute parted command for the purpose of retrieving partition information failed : " + e.What());
+            std::wostringstream error;
+            error << L"Attempt to execute parted command for the purpose of retrieving partition information failed : " << e.What();
+            SCX_LOG(m_log, suppressor.GetSeverity(L"InternalError"), error.str());
         }
 
         if (!success)
@@ -1014,13 +1037,15 @@ namespace SCXSystemLib
             }
             catch (SCXCoreLib::SCXInternalErrorException &e) 
             {
-                SCX_LOGERROR(m_log, L"Attempt to execute parted command for the purpose of retrieving partition information failed : " + e.What());
+                std::wostringstream error;
+                error << L"Attempt to execute parted command for the purpose of retrieving partition information failed : " << e.What();
+                SCX_LOG(m_log, suppressor.GetSeverity(L"InternalError"), error.str());
             }
         }
 
         if (partedOutput.size() == 0)
         {
-            SCX_LOGERROR(m_log, L"Unable to retrieve partition information from OS...");
+            SCX_LOG(m_log, suppressor.GetSeverity(L"EmptyOutput"), L"Unable to retrieve partition information from OS...");
             return false;
         }
 

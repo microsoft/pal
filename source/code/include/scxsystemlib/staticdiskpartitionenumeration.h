@@ -145,6 +145,16 @@ namespace SCXSystemLib
         void GetLogicalVolumesBoot(vector<SCXLogicalVolumes> &logVol, bool &bootLvFound, size_t &fullBootLvIndex);
 #endif// hpux
 #if defined (linux)
+    public:
+        /*----------------------------------------------------------------------------*/
+        /**
+            Return the location of parted.
+
+            \param (out) The path of the parted utility.
+            \returns     True if parted is found.
+        */
+        static bool GetPartedPath(std::wstring &partedPath);
+    private:
         /*----------------------------------------------------------------------------*/
         /**
             Gets the output of the parted command.
