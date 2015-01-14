@@ -381,17 +381,28 @@ public:
 #endif
     }
 
-    void TestHasBootPartition()
+    // On linux systems we do not want to fail unit tests if parted is not installed
+    bool CheckPrerequisites(std::wstring testName)
     {
-        // On linux systems we do not want to fail unit tests if parted is not installed
 #if defined(linux)
         std::wstring parted_path;
         if ( ! SCXSystemLib::StaticDiskPartitionEnumeration::GetPartedPath(parted_path) )
         {
-            SCXUNIT_WARNING(L"Utility \"parted\" must exist to run the TestHasBootPartition test");
+            SCXUNIT_WARNING(L"Utility \"parted\" must exist to run " + testName + L" test");
+            return false;
+        }
+        return true;
+#else
+        return true;
+#endif
+    }
+
+    void TestHasBootPartition()
+    {
+        if (!CheckPrerequisites(L"TestHasBootPartition"))
+        {
             return;
         }
-#endif
     
         SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps(new SCXSystemLib::DiskDependDefault());
         CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum = new SCXSystemLib::StaticDiskPartitionEnumeration(deps));
@@ -432,6 +443,11 @@ public:
 #if defined(linux)
     void TestAllPartedPartitionsEnumerated()
     {
+        if (!CheckPrerequisites(L"TestAllPartedPartitionsEnumerated"))
+        {
+            return;
+        }
+        
         SCXCoreLib::SCXHandle<TestStaticDiskPartEnumerationDeps> deps( new TestStaticDiskPartEnumerationDeps() );
         deps->SetProcPartitionsPath(L"testfiles/orapdb01_proc_partitions.txt");
         CPPUNIT_ASSERT_NO_THROW(m_diskPartEnum = new SCXSystemLib::StaticDiskPartitionEnumeration(deps));
