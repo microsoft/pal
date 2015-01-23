@@ -1020,7 +1020,7 @@ namespace SCXSystemLib
                 processErr.str(""); // Reset the error stream
 
                 // We use ignore in case parted shows an interactive warning
-                std::istringstream input("ignore\nprint\nquit\n");
+                std::istringstream input("ignore\nignore\nprint\nquit\n");
 
                 // We need the -i flag for stdin to be used correctly
                 int ret = m_deps->Run(command, input, processOutput, processErr, 15000);
@@ -1040,6 +1040,12 @@ namespace SCXSystemLib
                 std::wostringstream error;
                 error << L"Attempt to execute parted command for the purpose of retrieving partition information failed : " << e.What();
                 SCX_LOG(m_log, suppressor.GetSeverity(L"InternalError"), error.str());
+            }
+            catch (SCXCoreLib::SCXInterruptedProcessException &e)
+            {
+                std::wostringstream error;
+                error << L"The parted process was interrupted while retrieving partition information : " << e.What();
+                SCX_LOG(m_log, suppressor.GetSeverity(L"Interrupted"), error.str());
             }
         }
 
