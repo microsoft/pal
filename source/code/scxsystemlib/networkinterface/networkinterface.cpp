@@ -1768,7 +1768,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
 
         for (ifa = ifAddr.GetIFAddr(); ifa != NULL; ifa = ifa->ifa_next)
         {
-            if (ifa->ifa_addr->sa_family == AF_INET6 && strcmp(ifa->ifa_name, StrToUTF8(m_name).c_str()) == 0)
+            if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET6 && strcmp(ifa->ifa_name, StrToUTF8(m_name).c_str()) == 0)
             { 
                 pTmpAddr = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
                 char addrStr[INET6_ADDRSTRLEN];
