@@ -242,6 +242,8 @@ class InstalledSoftware_test : public CPPUNIT_NS::TestFixture
 #if defined(PF_DISTRO_ULINUX)
     CPPUNIT_TEST(testDPKGParser_Version);
     CPPUNIT_TEST(testDPKGParser_UTF);
+#else
+    CPPUNIT_TEST(testInstallDate);
 #endif
     SCXUNIT_TEST_ATTRIBUTE(testGetSoftwareAttr,SLOW);
 
@@ -415,7 +417,6 @@ public:
 #endif
     }
 
-
 #if defined(PF_DISTRO_ULINUX)
     /*
       This unit test injects a dpkg status file to be parsed by the InstalledSoftwareDependencies class.
@@ -484,6 +485,43 @@ public:
         bool versionsMatch = (version == foundVersion) ? true : false;
         
         CPPUNIT_ASSERT_MESSAGE(outmsg, versionsMatch);
+    }
+#else  // defined(PF_DISTRO_ULINUX)
+    /* This property should be implemented on platforms that do not use dpkg. Test it without mocking the deps */
+    void testInstallDate()
+    {
+        m_pEnum = new InstalledSoftwareEnumeration();
+        m_pEnum->Init();
+        m_pEnum->Update();
+
+        CPPUNIT_ASSERT_MESSAGE("The InstalledSoftwareEnumeration did not find any installed software", m_pEnum->Size() > 0);
+
+        SCXCalendarTime installDate;
+        SCXCalendarTime currentTime = SCXCalendarTime::CurrentLocal();
+        wstring productName;
+        ostringstream err_detail;
+        bool hasInstallDate;
+        int installDateFoundCount = 0;
+
+        for(std::vector< SCXCoreLib::SCXHandle<InstalledSoftwareInstance> >::iterator it = m_pEnum->Begin();
+            it != m_pEnum->End(); ++it)
+        {
+            productName = (*it)->GetId();
+            hasInstallDate = (*it)->GetInstallDate(installDate);
+            installDateFoundCount += hasInstallDate ? 1 : 0;
+            
+            if (hasInstallDate)
+            {
+                err_detail.str("");
+                err_detail << StrToUTF8(productName)
+                        << ", Current Time: " << StrToUTF8(currentTime.ToBasicISO8601())
+                        << ", Install Time: " << StrToUTF8(installDate.ToBasicISO8601());
+                CPPUNIT_ASSERT_MESSAGE("Found sofware installed in the future: " + err_detail.str() , currentTime > installDate);
+                CPPUNIT_ASSERT_MESSAGE("Found software installed over 10 years ago: " + err_detail.str(), currentTime.GetYear() - installDate.GetYear() <= 10);
+            }
+        }
+        std::cout << " " << installDateFoundCount << " / " << m_pEnum->Size();
+        CPPUNIT_ASSERT_MESSAGE("Failed to retrieve install date of all instances", installDateFoundCount > 0);
     }
 #endif
 };
