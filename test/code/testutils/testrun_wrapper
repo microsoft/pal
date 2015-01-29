@@ -17,7 +17,7 @@ if [ -f $ENV_FILE ]; then SOURCE_ENV=". $ENV_FILE $1;"; fi
 #       If driver is not loaded, error will result, which we ignore
 if [ "`uname -s`" = "Linux" ]; then
     echo "Attempting to remove ata_piix.ko driver"
-    sudo rmmod /lib/modules/$(uname -r)/kernel/drivers/ata/ata_piix.ko
+    sudo rmmod /lib/modules/"$(uname -r)"/kernel/drivers/ata/ata_piix.ko
 fi
 
 # Execute the testrunner with root privileges
