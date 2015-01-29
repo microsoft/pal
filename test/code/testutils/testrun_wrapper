@@ -12,6 +12,14 @@ ENV_FILE=`dirname $0`/env.sh
 SOURCE_ENV=""
 if [ -f $ENV_FILE ]; then SOURCE_ENV=". $ENV_FILE $1;"; fi
 
+# Try to unload the ata_piix module in case it's loaded (causes disk unit test failures)
+# Note: If the driver is in use, unload will fail (and unit tests will continue to fail)
+#       If driver is not loaded, error will result, which we ignore
+if [ "`uname -s`" = "Linux" ]; then
+    echo "Attempting to remove ata_piix.ko driver"
+    sudo rmmod /lib/modules/$(uname -r)/kernel/drivers/ata/ata_piix.ko
+fi
+
 # Execute the testrunner with root privileges
 sudo sh -c "$SOURCE_ENV $1/testrunner $2 $3"
 # Preserve exit status
