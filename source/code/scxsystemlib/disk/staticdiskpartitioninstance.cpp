@@ -470,15 +470,15 @@ namespace SCXSystemLib
         SCXRegexPtr solLsPatternPtr(NULL);
 
         wstring solLsPattern(c_SolLsPatternBeg);
-#if defined(sparc) &&  PF_MAJOR == 5 && PF_MINOR  == 9
-        // Replace "disk" by "sd"
+
+        // Replace "disk" by "disk" or "sd"
         wstring from(L"disk");
         size_t start_pos = bootInterfacePath.find(from);
         if(start_pos != std::string::npos)
         {
-            bootInterfacePath.replace(start_pos, from.length(), L"sd");
+            bootInterfacePath.replace(start_pos, from.length(), L"(disk|sd)");
         }
-#endif
+
         solLsPattern += bootInterfacePath;
         matchingVector.clear();  //clear the decks!
 
