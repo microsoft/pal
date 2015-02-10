@@ -30,14 +30,21 @@ class SCXRegexTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE_END();
 
 private:
+    SCXCoreLib::SCXRegex *patternPtr;
 
 public:
     void setUp(void)
     {
+        patternPtr = NULL;
     }
 
     void tearDown(void)
     {
+        if (patternPtr != NULL)
+        {
+            delete patternPtr;
+            patternPtr = NULL;
+        }
     }
 
     void TestIsMatch(void)
@@ -83,7 +90,6 @@ public:
     {
         bool ret = true;
         std::vector<std::wstring> retMtch;
-        SCXCoreLib::SCXRegex *patternPtr = NULL;
 
         //Compile it:
         try
@@ -93,7 +99,6 @@ public:
         catch(SCXCoreLib::SCXInvalidRegexException &e)
         {
             std::wcout << L"Exception caught during compile of regex2: " << e.What() << std::endl;
-            delete patternPtr;
             ret = false;
         }
 
@@ -107,7 +112,6 @@ public:
         catch(SCXCoreLib::SCXInvalidRegexException &e)
         {
             std::wcout << L"Exception caught during First match of regex: " << e.What() << std::endl;
-            delete patternPtr;
             ret = false;
         }
 
@@ -125,7 +129,6 @@ public:
         catch(SCXCoreLib::SCXInvalidRegexException &e)
         {
             std::wcout << L"Exception caught during compile or match of regex: " << e.What() << std::endl;
-            delete patternPtr;
             ret = true;
         }
 
@@ -147,7 +150,6 @@ public:
         catch(SCXCoreLib::SCXInvalidRegexException &e)
         {
             std::wcout << L"Exception caught during compile of regex: " << e.What() << std::endl;
-            delete patternPtr;
             ret = false;
         }
 
@@ -161,7 +163,6 @@ public:
         catch(SCXCoreLib::SCXInvalidRegexException &e)
         {
             std::wcout << L"Exception caught during Solaris match of regex: " << e.What() << std::endl;
-            delete patternPtr;
             ret = false;
         }
 
@@ -179,7 +180,6 @@ public:
         catch(SCXCoreLib::SCXInvalidRegexException &e)
         {
             std::wcout << L"Exception caught during compile or match of regex: " << e.What() << std::endl;
-            delete patternPtr;
             ret = true;
         }
 
@@ -188,7 +188,7 @@ public:
         retMtch.clear();
 
         delete patternPtr;
-
+        patternPtr = NULL;
     }
 
     void TestReturnMatchPartialAndSub(void)

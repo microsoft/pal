@@ -38,7 +38,7 @@ private:
     int m_i;
     A() : m_i(0) {}
     A(const A&) : SCXCoreLib::SCXSingleton<A>(), m_i(0) {}
-    A& operator=(const A&) { return *this; }
+    A& operator=(const A&) { m_i = 0; return *this; }
 };
 
 class B : public SCXCoreLib::SCXSingleton<B>

@@ -77,7 +77,7 @@ static int test_cnt;
 class MyKstatDeps : public SCXKstatDependencies
 {
 public:
-    MyKstatDeps() { }
+    MyKstatDeps() : m_chain(NULL) { }
     
     void SetKstat(kstat_ctl_t* kstat_ctl) {
         m_chain = kstat_ctl;
@@ -572,7 +572,10 @@ public:
     DLPINetworkInterfaceDependencies(std::vector<dl_hp_ppa_info_t> p, std::map<int, mib_ifEntry> s) :
         m_isOpen(false),
         ppaVector(p),
-        statsMap(s)
+        statsMap(s),
+        curREQ(-1),
+        curPPA(-1),
+        currentBufPtr(NULL)
     {
     }
     

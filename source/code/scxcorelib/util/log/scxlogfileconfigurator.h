@@ -54,7 +54,7 @@ namespace SCXCoreLib
         /**
             private assignment operator.
         */
-        SCXLogFileConfigurator& operator=(const SCXLogFileConfigurator&) { return *this; }
+        SCXLogFileConfigurator& operator=(const SCXLogFileConfigurator&) { m_ConfigVersion = 0; return *this; }
         bool ParseConfigFile();
         bool IsConfigurationChanged() const;
 

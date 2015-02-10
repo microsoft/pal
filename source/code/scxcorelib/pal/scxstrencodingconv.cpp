@@ -472,7 +472,7 @@ static bool Utf16nativeToUtf8(const std::vector<unsigned char>& inUtf16Bytes, st
                                   (unsigned char*)&outUtf8Str[0]);
         }
     }
-    catch (SCXCoreLib::InvalidCodeUnitException e)
+    catch (SCXCoreLib::InvalidCodeUnitException &e)
     {
         return false;
     }
@@ -522,7 +522,7 @@ namespace SCXCoreLib
                                       (unsigned short*)&outUtf16Bytes[2]);
             }
         }
-        catch (SCXCoreLib::InvalidCodeUnitException e)
+        catch (SCXCoreLib::InvalidCodeUnitException &e)
         {
             return false;
         }
@@ -568,7 +568,7 @@ namespace SCXCoreLib
                                       (unsigned short*)&outUtf16LEBytes[0]);
             }
         }
-        catch (SCXCoreLib::InvalidCodeUnitException e)
+        catch (SCXCoreLib::InvalidCodeUnitException &e)
         {
             return false;
         }

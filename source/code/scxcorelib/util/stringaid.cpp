@@ -403,7 +403,7 @@ namespace SCXCoreLib
     */
     unsigned int StrToUInt(const wstring& str)
     {
-        unsigned int tmp;
+        unsigned int tmp = 0;
         wstringstream ss(str);
 
         // Note: This line may not indicate an error on some systems,
@@ -437,7 +437,7 @@ namespace SCXCoreLib
     */
     double StrToDouble(const wstring& str)
     {
-        double tmp;
+        double tmp = 0;
         wstringstream ss(str);
 
         bool conv_result = (ss >> tmp) != 0;

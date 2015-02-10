@@ -948,10 +948,9 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         // So we need to write to a file to get sensible output.
         // top -d 1 -n 1 -u -f <filename>
 
-        char topcmd[] = "/usr/bin/top -d 1 -n 1 -u -f ";
+        std::string topcmd("/usr/bin/top -d 1 -n 1 -u -f ");
         char tmpnambuf[L_tmpnam];
         char topbuf[256];
-        char cmdbuf[256];
         bool done = false;
         int eno = 0;
 
@@ -961,11 +960,9 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         CPPUNIT_ASSERT(tmpnam(tmpnambuf));
 
         // Compose command
-        strncpy(cmdbuf, topcmd, sizeof(cmdbuf));
-        strncat(cmdbuf, tmpnambuf, sizeof(cmdbuf) - sizeof(topcmd));
-        cmdbuf[sizeof(cmdbuf) - 1] = '\0';
+        std::string cmd = topcmd + std::string(tmpnambuf);
 
-        if (system(cmdbuf) < 0) {
+        if (system(cmd.c_str()) < 0) {
             CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
             return;
         }

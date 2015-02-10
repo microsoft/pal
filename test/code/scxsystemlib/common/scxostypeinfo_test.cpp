@@ -199,7 +199,7 @@ public:
         // Per-platform indication whether test code collect value dynamically or not
         // In the end it would be nice to eliminate this and have dynamic for all 
         // platforms...
-        bool bCompareWithDynamic; 
+        bool bCompareWithDynamic = false;
 #if defined(hpux)
         bCompareWithDynamic = false;
 #elif defined(linux) && defined(PF_DISTRO_REDHAT)

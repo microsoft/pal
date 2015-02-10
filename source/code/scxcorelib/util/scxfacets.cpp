@@ -51,10 +51,6 @@ bool Encode(wchar_t wc, mbstate_t &state) {
     }
     return encodedOk;
 #else
-    // Prevent compiler warnings
-    wc = wc;
-    state = state;
-
     throw SCXCoreLib::SCXNotSupportedException(std::wstring(L"Not yet implemented"), SCXSRCLOCATION);
 
     // Never reached, but will pacify compiler to return a value
@@ -102,13 +98,7 @@ bool WriteTo(char *&toNext, const char *toEnd, mbstate_t &state) {
 #endif
     return allWritten;
 #else
-    // Prevent compiler warnings
-    toNext = toNext;
-    toEnd = toEnd;
-    state = state;
-
     throw SCXCoreLib::SCXNotSupportedException(L"Not yet implemented", SCXSRCLOCATION);
-
     // Never reached, but will pacify compiler to return a value
     return false;
 #endif

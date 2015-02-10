@@ -228,7 +228,6 @@ namespace SCXCoreLib
         SCX_LOGTRACE(m_logHandle, L"NormalizePattern()");
 
         string separator(1, folderSeparator);
-        string dot(1, '.');
 
 #ifndef WIN32
         // Throws an exception if the pattern does not start with a separator character.
@@ -240,6 +239,7 @@ namespace SCXCoreLib
         // Throws an exception if found a relative path.
         // The ls command supports relative paths -- commenting out the following check
         // in order to emulate the ls command's behaviour.
+        // string dot(1, '.');
         /*if (string::npos != this->m_pattern.find(dot+separator) || // "./"
             string::npos != this->m_pattern.find(dot+dot+separator)) // "../"
         {

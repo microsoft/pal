@@ -162,9 +162,9 @@ public:
         if (0 != pid)
             return pid; // parent process;
         sprintf(buf, ">/tmp/find.test.%u", ++i); 
-        freopen("/dev/null","r",stdin);
-        freopen(buf,"w",stdout);
-        freopen(buf,"w",stderr);
+        CPPUNIT_ASSERT(freopen("/dev/null","r",stdin) != NULL);
+        CPPUNIT_ASSERT(freopen(buf,"w",stdout) != NULL);
+        CPPUNIT_ASSERT(freopen(buf,"w",stderr) != NULL);
         execlp("find","find",path,"-name","*","-type","f","-xdev", static_cast<char*>(0));
         exit(0);
 #if defined(aix)
@@ -1044,9 +1044,9 @@ private:
         }
         else if (0 == sync_pid)
         { // child process
-            freopen("/dev/null","r",stdin);
-            freopen("/dev/null","w",stdout);
-            freopen("/dev/null","w",stderr);
+            CPPUNIT_ASSERT(freopen("/dev/null","r",stdin)  != NULL);
+            CPPUNIT_ASSERT(freopen("/dev/null","w",stdout) != NULL);
+            CPPUNIT_ASSERT(freopen("/dev/null","w",stderr) != NULL);
                         // Looks like this can take a while on certain platforms/certain circumstances
             execlp("sync","sync", static_cast<char*>(0));
             exit(0);

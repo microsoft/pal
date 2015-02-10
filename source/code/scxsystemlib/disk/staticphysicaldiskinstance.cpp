@@ -1423,23 +1423,17 @@ namespace SCXSystemLib
         SCXStream::NLFs nlfs;
         SCXFile::ReadAllLines(SCXFilePath(proc_part), allLines, nlfs);
         m_Properties.partitions = 0;
-        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end();)
+        vector<wstring> partitions;
+        for(vector<wstring>::iterator it = allLines.begin(); it != allLines.end(); ++it)
         {
             wistringstream is(*it);
             is>>major>>minor>>blocks>>name;
             if(0 == name.find(dev_name) && name != dev_name && isdigit(name[dev_name.size()]) )
             {
                 ++m_Properties.partitions;
-                *it = dev_dir + name;
-                ++it;
-            }
-            else
-            {
-                allLines.erase(it);
+                partitions.push_back(dev_dir + name);
             }
         }
-
-        vector<wstring> partitions(allLines);
         allLines.clear();
         SCXFile::ReadAllLines(SCXFilePath(L"/proc/mounts"), allLines, nlfs);
         m_Properties.mediaLoaded = false;

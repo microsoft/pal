@@ -320,7 +320,7 @@ void XMLReader::_ToCharRef(Utf8String& /*unused*/, char& ch)
         // This is hex
         isHex = true;
         // Move one more for x
-        *m_CharStartPos++;
+        m_CharStartPos++;
         m_CharPos++;
  
         i = 2;
@@ -348,8 +348,8 @@ void XMLReader::_ToCharRef(Utf8String& /*unused*/, char& ch)
             }
         }
 
-        *m_CharStartPos++;
-         m_CharPos++;
+        m_CharStartPos++;
+        m_CharPos++;
     }
 
     tempString += '\0';
@@ -494,7 +494,7 @@ Utf8String XMLReader::_ReduceAttrValue(/*Utf8String& pInOut,*/ Utf8String::Char 
         {
             char c = c_NullChar;
             
-            *m_CharStartPos++;
+            m_CharStartPos++;
             m_CharPos++;
 
             _ToRef(m_InternalString, c);
@@ -517,7 +517,7 @@ Utf8String XMLReader::_ReduceAttrValue(/*Utf8String& pInOut,*/ Utf8String::Char 
             // No conversion -- add to the output
             end.Append(*m_CharStartPos);
 
-            *m_CharStartPos++;
+            m_CharStartPos++;
             m_CharPos++;
         }
     }
@@ -1896,8 +1896,6 @@ void XMLReader::XML_PutError( void )
 void XMLReader::XML_Raise(const char* format, ...)
 {
     va_list ap;
-    memset(&ap, 0, sizeof(ap));
-
     m_Status = -1;
     m_Message[0] = c_NullChar;
 

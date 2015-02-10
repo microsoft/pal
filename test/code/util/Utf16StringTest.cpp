@@ -56,6 +56,7 @@ CodePointRange SurrogateLowCodeUnit =  {0xDC00, 0xDFFF};
 class Utf16StringTest : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE (Utf16StringTest);
+        // CPPUNIT_TEST (TestCharSize);
         CPPUNIT_TEST (EmptyCtorTest);
         CPPUNIT_TEST (CharArrayCtor_SimpleTest);
         CPPUNIT_TEST (Ctor_HandleBOMTest);
@@ -73,8 +74,8 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
 
         void TestCharSize()
         {
-            char arr1[] = {0x65, 0x66, 0x67};
-            for (size_t i = 0; i < 5; i++)
+            char arr1[] = {0x65, 0x66, 0x67, 0x00};
+            for (size_t i = 0; i < sizeof(arr1); i++)
             {
                 printf(" 0x%x", arr1[i]);
             }
@@ -102,10 +103,10 @@ class Utf16StringTest : public CPPUNIT_NS::TestFixture
                 printf(" 0x%x", str1[i]);
             }
 
-            std::string s = "ABCD";
+            std::string s = "ABCDXY";
             s[4] = 'Z';
             s[5] = 'Q';
-            for (size_t i = 0; i < 7; i++)
+            for (size_t i = 0; i < s.size() ; i++)
             {
                 printf(" 0x%x", s[i]);
             }

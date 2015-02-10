@@ -472,7 +472,7 @@ namespace SCXSystemLib
         char *buffer = new char[bufsize+1];
         int status = confstr(_CS_MACHINE_MODEL,buffer,bufsize+1);
         model = StrFromUTF8(buffer);
-        delete buffer;
+        delete[] buffer;
         if (status <= 0)
             return false;
         SCX_LOGINFO(m_log, model);

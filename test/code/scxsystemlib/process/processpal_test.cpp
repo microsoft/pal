@@ -1476,7 +1476,7 @@ public:
         CPPUNIT_ASSERT_EQUAL( "", error.str() );
         // Convert stdout to numeric form
         stringstream ss( output.str() );
-        int countPS;
+        int countPS(0);
         bool conv_result = (ss >> countPS) != 0;
         CPPUNIT_ASSERT_EQUAL_MESSAGE( "Failure converting 'ps -ef | wc -l' to numeric form", true, conv_result );
         // Subtract 4 due to overhead from 'ps' command:

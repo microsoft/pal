@@ -73,6 +73,8 @@ namespace
         DiskDependTest()
 #if defined(linux)        
             : m_WI_479079_TestNumber(-1)
+#elif defined(hpux)
+            : m_pDiskInfo(NULL), m_pDiskInfoCount(0)
 #endif
         {
 
@@ -127,11 +129,14 @@ namespace
 
         virtual bool open(const char* pathname, int flags)
         {
-            if (m_openErrno.end() == m_openErrno.find(pathname))
-                return SCXSystemLib::DiskDependDefault::open(pathname, flags);
-            if (0 != m_openErrno.find(pathname)->second)
+            std::map<std::string, int> ::const_iterator openErrnoIt = m_openErrno.find(pathname);
+            if (openErrnoIt == m_openErrno.end())
             {
-                errno = m_openErrno.find(pathname)->second;
+                return SCXSystemLib::DiskDependDefault::open(pathname, flags);
+            }
+            else if (0 != openErrnoIt->second)
+            {
+                errno = openErrnoIt->second;
                 return false;
             }
             return true;
@@ -147,9 +152,13 @@ namespace
         virtual bool FileExists(const std::wstring& path)
         {
             std::string pathname = SCXCoreLib::StrToUTF8(path);
-            if (m_openErrno.end() == m_openErrno.find(pathname))
+            std::map<std::string, int> ::const_iterator openErrnoIt = m_openErrno.find(pathname);
+
+            if (openErrnoIt == m_openErrno.end())
+            {
                 return SCXSystemLib::DiskDependDefault::FileExists(path);
-            if (0 != m_openErrno.find(pathname)->second)
+            }
+            else if (0 != openErrnoIt->second)
             {
                 return false;
             }
@@ -1562,7 +1571,15 @@ namespace
                 if (m_Tests[testIndex].ioctl_SG_IO_OK)
                 {
                     sg_io_hdr_t* io_hdr = static_cast<sg_io_hdr_t*>(data);
-                    CPPUNIT_ASSERT_EQUAL(6, io_hdr->cmd_len);// We support only SCSI INQUIRY command.
+                    if (io_hdr == NULL)
+                    {
+                        CPPUNIT_ASSERT_MESSAGE("io_hdr pointer is null", false);
+                    }
+                    else
+                    {
+                        CPPUNIT_ASSERT_EQUAL(6, io_hdr->cmd_len);// We support only SCSI INQUIRY command.
+                    }
+
                     if (s_instrumentTests)
                     {
                         if (io_hdr == NULL)

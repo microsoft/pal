@@ -93,8 +93,6 @@ namespace SCXCoreLib {
         // Currently MACOS has no support for anything but the "C" locale
         m_current = locale::classic();
         locale::global(m_current);
-        lname = lname;          // Keep g++ happy
-        cat = cat;
 #else
         m_current = locale(locale::classic(), lname, cat);
         locale::global(m_current);
@@ -282,7 +280,7 @@ namespace { // put it in anonymous namespace
     class SCXLocaleInit {
     private:
         SCXCoreLib::SCXLocaleContext *ctx;    //!< Locale context that we've initiated
-
+        SCXLocaleInit( const SCXLocaleInit &obj);  // Disable copy
     public:
         /** The constructor sets the global locale. */
         SCXLocaleInit()

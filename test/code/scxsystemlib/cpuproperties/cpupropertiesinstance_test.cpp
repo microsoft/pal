@@ -414,8 +414,8 @@ public:
         inst->Update();
 
         std::string deviceId = "CPU ";
-        unsigned short family;
-        unsigned int normSpeed, currentSpeed;
+        unsigned short family(0);
+        unsigned int normSpeed(0), currentSpeed(0);
         std::string stepping;
 
         string manufacturer, name, chipId, model;
