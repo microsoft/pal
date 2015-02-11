@@ -517,7 +517,7 @@ public:
                         << ", Current Time: " << StrToUTF8(currentTime.ToBasicISO8601())
                         << ", Install Time: " << StrToUTF8(installDate.ToBasicISO8601());
                 CPPUNIT_ASSERT_MESSAGE("Found sofware installed in the future: " + err_detail.str() , currentTime > installDate);
-                CPPUNIT_ASSERT_MESSAGE("Found software installed over 10 years ago: " + err_detail.str(), currentTime.GetYear() - installDate.GetYear() <= 10);
+                CPPUNIT_ASSERT_MESSAGE("Found software installed over 20 years ago: " + err_detail.str(), currentTime.GetYear() - installDate.GetYear() <= 20);
             }
         }
         std::cout << " " << installDateFoundCount << " / " << m_pEnum->Size();
