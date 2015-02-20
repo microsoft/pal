@@ -16,8 +16,8 @@ if [ -f $ENV_FILE ]; then SOURCE_ENV=". $ENV_FILE $1;"; fi
 # Note: If the driver is in use, unload will fail (and unit tests will continue to fail)
 #       If driver is not loaded, error will result, which we ignore
 if [ "`uname -s`" = "Linux" ]; then
-    echo "Attempting to remove ata_piix.ko driver"
-    sudo rmmod /lib/modules/"$(uname -r)"/kernel/drivers/ata/ata_piix.ko
+    echo "Attempting to remove ata_piix.ko driver..."
+    sudo rmmod /lib/modules/"$(uname -r)"/kernel/drivers/ata/ata_piix.ko 2>&1 | sed s/"error\s\?:\?\s\?"//I
 fi
 
 # Execute the testrunner with root privileges
