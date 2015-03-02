@@ -83,6 +83,7 @@ namespace SCXCoreLib
 
     void StrTokenize(const std::wstring& str, std::vector<std::wstring>& tokens, const std::wstring& delimiters = L" \n", bool trim=true, bool emptyTokens=false, bool keepDelimiters = false);
     void StrTokenizeStr(const std::wstring& str, std::vector<std::wstring>& tokens, const std::wstring& delimiter, bool trim=true, bool emptyTokens=false);
+    void StrTokenizeQuoted(const std::wstring& str, std::vector<std::wstring>& tokens, const std::wstring& delimiters, bool emptyTokens=false);
     bool StrMergeTokens(std::vector<std::wstring>& tokens, const std::map<std::wstring,std::wstring>& mergePairs, const std::wstring& glue);
 
     bool StrIsPrefix(const std::wstring& str, const std::wstring& prefix, bool ci=false);

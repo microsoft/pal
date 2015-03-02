@@ -690,6 +690,102 @@ namespace SCXCoreLib
 
     /*----------------------------------------------------------------------------*/
     /**
+        Extract a vector of the substrings that are separated by one of the delimter characters,
+        honoring quoted characters (quoted strings are never split by delimiter, and quoted strings
+        with leading or trailing spaces will never be trimmed).
+
+        \param    str          String to tokenize
+        \param    tokens       Return a vector of tokens
+        \param    delimiters   String containing the delimeter charachters
+        \param    emptyTokens  false if empty tokens should be removed from the result (default), otherwise true.
+    */
+    void StrTokenizeQuoted(const wstring& str, vector<std::wstring>& tokens,
+                           const wstring& delimiters, bool emptyTokens /* = false */)
+    {
+        tokens.clear();
+
+        const wstring quoteDelimiters = L"\"'\\";
+        const wstring allDelimiters = delimiters + quoteDelimiters;
+        if ( wstring::npos != delimiters.find_first_of(quoteDelimiters) )
+        {
+            throw SCXInvalidArgumentException(L"delimiters", L"Delimiters can't include quote characters", SCXSRCLOCATION);
+        }
+
+        wstring::size_type lastPos = 0;
+        wstring::size_type pos = delimiters.empty() ? wstring::npos : str.find_first_of(allDelimiters);
+
+        // endingQuote acts as a boolean as well as a value:
+        //   If empty, then we're not in a quoted string
+        //   If non-empty, it contains the type of quote to terminate our string
+        wstring endingQuote;
+
+        while (wstring::npos != pos)
+        {
+            if ( L'\\' == str[pos] )
+            {
+                // Found quoted character?  If so, ignore next byte and continue looking
+                pos = str.find_first_of(endingQuote.size() ? endingQuote : allDelimiters, pos + 2);
+                continue;
+            }
+            else if ( wstring::npos != quoteDelimiters.find(str[pos]) )
+            {
+                // Looks like we found either single quote or double quote (can't be '\\')
+                if ( endingQuote.empty() )
+                {
+                    endingQuote = wstring(str, pos, 1) + L"\\";
+                    pos = str.find_first_of(endingQuote, pos + 1);
+                    continue;
+                }
+
+                // We found trailing quote from a quoted string, look for the next delimiter (or next quote)
+                endingQuote.clear();
+                pos = str.find_first_of(allDelimiters, pos + 1);
+                continue;
+            }
+
+            // Non-quoted element, so we must have found a delimiter
+            wstring tmp = str.substr(lastPos, pos - lastPos);
+
+            if ( ! tmp.empty() )
+            {
+                tmp = StrTrim(tmp);
+
+                // Trim quotes around element (i.e. "A, B "; trim " bytes)
+                if ( tmp.size() > 1 && (L'\'' == tmp[0] || L'"' == tmp[0] ) && ( tmp[0] == tmp[tmp.size()-1] ) )
+                {
+                    tmp = tmp.substr(1, tmp.size() - 2);
+                }
+            }
+
+            if ( ! tmp.empty() || emptyTokens )
+            {
+                tokens.push_back(tmp);
+            }
+            lastPos = pos + 1;
+
+            // Find next byte of interest
+            pos = str.find_first_of(allDelimiters, lastPos);
+        }
+
+        wstring tmp = str.substr(lastPos, wstring::npos);
+        if ( ! tmp.empty() )
+        {
+            tmp = StrTrim(tmp);
+
+            // Trim quotes around element (i.e. "A, B "; trim " bytes)
+            if ( tmp.size() > 1 && (L'\'' == tmp[0] || L'"' == tmp[0] ) && ( tmp[0] == tmp[tmp.size()-1] ) )
+            {
+                tmp = tmp.substr(1, tmp.size() - 2);
+            }
+        }
+        if ( ! tmp.empty() || emptyTokens)
+        {
+            tokens.push_back(tmp);
+        }
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
        Merge tokens using pairs of merge identifiers. For example this can be used to merge tokens
        "a,b" to "ab".
 

@@ -129,6 +129,21 @@ class SCXStringAid_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testUNIX03 );
 #endif
 
+    CPPUNIT_TEST( test_Empty_String );
+    CPPUNIT_TEST( test_Nonquoted_String_OnlySpaces );
+    CPPUNIT_TEST( test_Nonquoted_String_EmptyTokensOnly );
+    CPPUNIT_TEST( test_Nonquoted_String );
+    CPPUNIT_TEST( test_Nonquoted_String_ReturnEmptyTokens );
+    CPPUNIT_TEST( test_QuotedQuotes_Ignored );
+    CPPUNIT_TEST( test_Quoted_String );
+    CPPUNIT_TEST( test_Quoted_String_Double );
+    CPPUNIT_TEST( test_Quoted_SingleQuote );
+    CPPUNIT_TEST( test_Quoted_SingleQuote_ReturnEmptyTokens );
+    CPPUNIT_TEST( test_Quoted_SingleQuote_QuotedSpaces );
+    CPPUNIT_TEST( test_Quoted_String_QuotedQuotes );
+    CPPUNIT_TEST( test_Quoted_SingleQuotedElement );
+    CPPUNIT_TEST( test_Quoted_UnterminatedQuote );
+
     CPPUNIT_TEST_SUITE_END();
 
 protected:
@@ -659,6 +674,142 @@ protected:
         va_end(ap2);
         return size;
     }
+
+    // Debugging routine
+    void DumpVector(const std::vector<std::wstring>& vector)
+    {
+        std::wcout << std::endl;
+        std::wcout << L"  Vector size: " << vector.size() << std::endl;
+        for (size_t i = 0; i < vector.size(); ++i)
+        {
+            std::wcout << L"   Element " << i << L": \"" << vector[i] << L"\"" << std::endl;
+        }
+    }
+
+    void test_Empty_String()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L"", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), tokens.size() );
+    }
+
+    void test_Nonquoted_String_OnlySpaces()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L"    ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), tokens.size() );
+    }
+
+    void test_Nonquoted_String_EmptyTokensOnly()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L"  ,  ,  ,   ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), tokens.size() );
+    }
+
+    void test_Nonquoted_String()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" A, B , ,  C  ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(3), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A"), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"B"), tokens[1] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"C"), tokens[2] );
+    }
+
+    void test_Nonquoted_String_ReturnEmptyTokens()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" A, B , ,  C  ", tokens, L",", true);
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(4), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A"), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"B"), tokens[1] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L""), tokens[2] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"C"), tokens[3] );
+    }
+
+    void test_QuotedQuotes_Ignored()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" A, B \\\" , ,  C  ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(3), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A"), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"B \\\""), tokens[1] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"C"), tokens[2] );
+    }
+
+    void test_Quoted_String()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" \"A, B \", ,  C  ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(2), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A, B "), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"C"), tokens[1] );
+    }
+
+    void test_Quoted_String_Double()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" \"A, B ', C, D' \", ,  E  ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(2), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A, B ', C, D' "), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"E"), tokens[1] );
+    }
+
+    void test_Quoted_SingleQuote()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" 'A, B ', ,  C  ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(2), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A, B "), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"C"), tokens[1] );
+    }
+
+    void test_Quoted_SingleQuote_ReturnEmptyTokens()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" 'A, B ', ,  C  ", tokens, L",", true);
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(3), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A, B "), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L""), tokens[1] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"C"), tokens[2] );
+    }
+
+    void test_Quoted_SingleQuote_QuotedSpaces()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" ' ', ,  A  ", tokens, L",", true);
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(3), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L" "), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L""), tokens[1] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A"), tokens[2] );
+    }
+
+    void test_Quoted_String_QuotedQuotes()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L"    \"A, B \\\" CD \\\" \"  , E ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(2), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A, B \\\" CD \\\" "), tokens[0] );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"E"), tokens[1] );
+    }
+
+    void test_Quoted_SingleQuotedElement()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" \"A, B \"  ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(1), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"A, B "), tokens[0] );
+    }
+
+    void test_Quoted_UnterminatedQuote()
+    {
+        std::vector<std::wstring> tokens;
+        StrTokenizeQuoted(L" \"A, B ", tokens, L",");
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(1), tokens.size() );
+        CPPUNIT_ASSERT_EQUAL( std::wstring(L"\"A, B"), tokens[0] );
+    }
+
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION( SCXStringAid_Test );
