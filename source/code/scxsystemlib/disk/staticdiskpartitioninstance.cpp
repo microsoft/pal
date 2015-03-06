@@ -393,7 +393,12 @@ namespace SCXSystemLib
 
         try 
         {
-            m_deps->Run(cmdPrtString, processInputPrt, processOutputPrt, processErrPrt, 15000);
+            int retCode = m_deps->Run(cmdPrtString, processInputPrt, processOutputPrt, processErrPrt, 15000);
+            if (retCode)
+            {
+                SCX_LOGERROR(m_log, L"Error returned from prtconf, unable to determine boot partition. Error code=" + StrFrom(retCode));
+                return false;
+            }
             prtconfResult = processOutputPrt.str();
             SCX_LOGTRACE(m_log, L"  Got this output from " + cmdPrtString + L" : " + StrFromUTF8(prtconfResult) );
             size_t lengthCaptured = prtconfResult.length();
@@ -463,15 +468,9 @@ namespace SCXSystemLib
             }
             SCX_LOG(m_log, suppressor.GetSeverity(warningMsg.str()), warningMsg.str());
             return false;
-        }     
+        }
 
-
-        // Now we need to build up our pattern to find the bootdisk, using our results from above:
-        SCXRegexPtr solLsPatternPtr(NULL);
-
-        wstring solLsPattern(c_SolLsPatternBeg);
-
-        // Replace "disk" by "disk" or "sd"
+        // Replace "disk" by "disk" or "sd" to normalize the boot interface path
         wstring from(L"disk");
         size_t start_pos = bootInterfacePath.find(from);
         if(start_pos != std::string::npos)
@@ -479,8 +478,11 @@ namespace SCXSystemLib
             bootInterfacePath.replace(start_pos, from.length(), L"(disk|sd)");
         }
 
+        wstring solLsPattern(c_SolLsPatternBeg);
         solLsPattern += bootInterfacePath;
-        matchingVector.clear();  //clear the decks!
+
+        // Now we need to build up our pattern to find the bootdisk, using our results from above:
+        SCXRegexPtr solLsPatternPtr(NULL);
 
         //Let's build our RegEx:
         try
@@ -493,7 +495,6 @@ namespace SCXSystemLib
             SCX_LOGERROR(m_log, L"Exception caught in compiling LS Pattern regex: " + e.What());
             return false;
         }
-
 
         // Retrieve the bootdrive using the bootInterface and driveLetter
         wstring cmdStringLs = L"/usr/bin/ls -l /dev/dsk";
