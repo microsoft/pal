@@ -204,9 +204,10 @@ template<class T> void TearDownAgent(TestableContext &context, std::wstring errM
 /*----------------------------------------------------------------------------*/
 //! Enumerates all instances and returns vector with instance data.
 //! \param      T Type of object to be enumerated.
-//! \param[out]  context Object containing returned instances data and the return code.
-//! \param[in]  errMsg       String containing error messages.
-//! \param[in]  keysOnly True if only keys should be returned, otherwise all properties are returned.
+//! \param[out] context   Object containing returned instances data and the return code.
+//! \param[in]  errMsg    String containing error messages.
+//! \param[in]  keysOnly  True if only keys should be returned, otherwise all properties are returned.
+//! \param[in]  filter    Optional filter to pass to EnumerateInstances method.
 template<class T> void EnumInstances(TestableContext &context, std::wstring errMsg, bool keysOnly = false, MI_Filter* filter = NULL)
 {
     mi::Module Module;
@@ -309,7 +310,7 @@ template<class T, class TN> MI_Result CreateInstance(TestableContext& context, s
     agent.CreateInstance(context, NULL, newInstance);
     if (context.GetResult() != MI_RESULT_OK)
     {
-	return context.GetResult();
+        return context.GetResult();
     }
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 1u, context.Size());
     return MI_RESULT_OK;
@@ -393,12 +394,13 @@ template<class T, class TN> MI_Result DeleteInstance(TestableContext &context, s
 //! \param[in]  allKeyNames  Names of key properties.
 //! \param[in]  invalidKey   Index of a key to be set to invalid value, -1 if all valid.
 //! \param[in]  errMsg       String containing error messages.
+//! \param[in]  filter       Optional filter to pass to EnumerateInstances method.
 //! \returns    MI_RESULT_OK on success, otherwise error code.
 template<class T, class TN> MI_Result VerifyGetInstanceByCompleteKeySuccess(
-    const std::vector<std::wstring>& allKeyNames, size_t invalidKey, std::wstring errMsg)
+    const std::vector<std::wstring>& allKeyNames, size_t invalidKey, std::wstring errMsg, MI_Filter* filter = NULL)
 {
     TestableContext originalContext;
-    EnumInstances<T>(originalContext, CALL_LOCATION(errMsg));
+    EnumInstances<T>(originalContext, CALL_LOCATION(errMsg), false, filter);
     const std::vector<TestableInstance> &originalInstances = originalContext.GetInstances();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, originalInstances.size() != 0);
     const TestableInstance &originalInstance = originalInstances[0];
@@ -507,15 +509,17 @@ Standard tests, usualy run on every provider.
 //! \param[in]  context         Object containing all retrieved instances. Can be used
 //!                             for further provider specific validation.
 //! \param[in]  errMsg          String containing error messages.
+//! \param[in]  filter          Optional filter to pass to EnumerateInstances method.
 template<class T> void StandardTestEnumerateKeysOnly(const std::vector<std::wstring>& allKeyNames,
-    TestableContext &context, std::wstring errMsg)
+    TestableContext &context, std::wstring errMsg, MI_Filter* filter = NULL)
 {
-    EnumInstances<T>(context, CALL_LOCATION(errMsg), true);// Second parameter is true to get keys only.
+    EnumInstances<T>(context, CALL_LOCATION(errMsg), true, filter);// Third parameter is true to get keys only.
     const std::vector<TestableInstance> &instances = context.GetInstances();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());// We should always receive at least one instance.
     for (size_t i = 0; i < instances.size(); i++)
     {
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, allKeyNames.size(), instances[i].GetNumberOfKeys());
+        // Since we're only enumerating keys, make sure we don't have any extranious properties
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, instances[i].GetNumberOfKeys(), instances[i].GetNumberOfProperties());
         for (size_t k = 0; k < allKeyNames.size(); k++)
         {
@@ -569,9 +573,10 @@ template<class T> void StandardTestCheckKeyValues(const std::vector<std::wstring
 /*----------------------------------------------------------------------------*/
 //! Calls the provider's EnumerateInstances method and returns its result.
 //! \param      T Type of object to be enumerated.
-//! \param[out] context Object containing returned instances data and the return code.
-//! \param[in]  errMsg       String containing error messages.
-//! \param[in]  keysOnly True if only keys should be returned, otherwise all properties are returned.
+//! \param[out] context   Object containing returned instances data and the return code.
+//! \param[in]  errMsg    String containing error messages.
+//! \param[in]  keysOnly  True if only keys should be returned, otherwise all properties are returned.
+//! \param[in]  filter    Optional filter to pass to EnumerateInstances method.
 //! \returns    MI_Result error code.
 template<class T> MI_Result EnumerateInstancesResult(TestableContext &context, std::wstring errMsg, bool keysOnly = false, MI_Filter* filter = NULL)
 {
@@ -588,10 +593,11 @@ template<class T> MI_Result EnumerateInstancesResult(TestableContext &context, s
 //! \param[in]  context        Object containing all retrieved instances. Can be used
 //!                            for further provider specific validation.
 //! \param[in]  errMsg         String containing error messages.
+//! \param[in]  filter         Optional filter to pass to EnumerateInstances method.
 template<class T> void StandardTestEnumerateInstances(const std::vector<std::wstring>& allKeyNames,
-    TestableContext &context, std::wstring errMsg)
+    TestableContext &context, std::wstring errMsg, MI_Filter* filter = NULL)
 {
-    EnumInstances<T>(context, CALL_LOCATION(errMsg));
+    EnumInstances<T>(context, CALL_LOCATION(errMsg), false, filter);
     const std::vector<TestableInstance> &instances = context.GetInstances();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());// We should always receive at least one instance.
     for (size_t i = 0; i < instances.size(); i++)
@@ -613,13 +619,14 @@ template<class T> void StandardTestEnumerateInstances(const std::vector<std::wst
 //!                          for further provider specific validation.
 //! \param[in]  numberOfKeys Number of keys instance should have.
 //! \param[in]  errMsg       String containing error messages.
+//! \param[in]  filter       Optional filter to pass to EnumerateInstances method.
 template<class T, class TN> void StandardTestGetInstance(TestableContext &context, size_t numberOfKeys,
-    std::wstring errMsg)
+    std::wstring errMsg, MI_Filter* filter = NULL)
 {
     // First retrieve all instance names just to know what instance
     // to ask for.
     TestableContext originalContext;
-    EnumInstances<T>(originalContext, CALL_LOCATION(errMsg), true);
+    EnumInstances<T>(originalContext, CALL_LOCATION(errMsg), true, filter);
     const std::vector<TestableInstance> &instances = originalContext.GetInstances();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, numberOfKeys, instances[0].GetNumberOfKeys());
