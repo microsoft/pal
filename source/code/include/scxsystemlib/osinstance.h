@@ -11,38 +11,6 @@
 */
 /*----------------------------------------------------------------------------*/
 
-
-//////////////////////////////////////////////////////////////////////////
-//
-// Portions of this code are closely related to those from Open Pegasus
-//
-// Licensed to The Open Group (TOG) under one or more contributor license
-// agreements.  Refer to the OpenPegasusNOTICE.txt file distributed with
-// this work for additional information regarding copyright ownership.
-// Each contributor licenses this file to you under the OpenPegasus Open
-// Source License; you may not use this file except in compliance with the
-// License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the "Software"),
-// to deal in the Software without restriction, including without limitation
-// the rights to use, copy, modify, merge, publish, distribute, sublicense,
-// and/or sell copies of the Software, and to permit persons to whom the
-// Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-//////////////////////////////////////////////////////////////////////////
-
 #ifndef OSINSTANCE_H
 #define OSINSTANCE_H
 
@@ -194,82 +162,81 @@ namespace SCXSystemLib
 
     /**
        A constant returned by the GetOSType call.
-       This comes from the Pegasus code. Source of the original definition
-       is unknown.
+       This is defined by the CIM standard for Operating System type.
     */
     enum OSTYPE {
-        /* Useless documentation to make doxygen happy */
-        Unknown,            //!< Unknown
-        Other,              //!< Other
-        MACOS,              //!< MACOS
-        ATTUNIX,            //!< ATTUNIX
-        DGUX,               //!< DGUX
-        DECNT,              //!< DECNT
-        Digital_Unix,       //!< Digital_Unix
-        OpenVMS,            //!< OpenVMS
-        HP_UX,              //!< UX
-        AIX,                //!< AIX
-        MVS,                //!< MVS
-        OS400,              //!< OS400
-        OS2,                //!< OS2
-        JavaVM,             //!< JavaVM
-        MSDOS,              //!< MSDOS
-        WIN3x,              //!< WIN3x
-        WIN95,              //!< WIN95
-        WIN98,              //!< WIN98
-        WINNT,              //!< WINNT
-        WINCE,              //!< WINCE
-        NCR3000,            //!< NCR3000
-        NetWare,            //!< NetWare
-        OSF,                //!< OSF
-        DCOS,               //!< DCOS
-        Reliant_UNIX,       //!< Reliant UNIX
-        SCO_UnixWare,       //!< SCO UnixWare
-        SCO_OpenServer,     //!< SCO OpenServer
-        Sequent,            //!< Sequent
-        IRIX,               //!< IRIX
-        Solaris,            //!< Solaris
-        SunOS,              //!< SunOS
-        U6000,              //!< U6000
-        ASERIES,            //!< ASERIES
-        TandemNSK,          //!< TandemNSK
-        TandemNT,           //!< TandemNT
-        BS2000,             //!< BS2000
-        LINUX,              //!< LINUX
-        Lynx,               //!< Lynx
-        XENIX,              //!< XENIX
-        VM_ESA,             //!< VM/ESA
-        Interactive_UNIX,   //!< Interactive UNIX
-        BSDUNIX,            //!< BSDUNIX
-        FreeBSD,            //!< FreeBSD
-        NetBSD,             //!< NetBSD
-        GNU_Hurd,           //!< Hurd
-        OS9,                //!< OS9
-        MACH_Kernel,        //!< Mach Kernel
-        Inferno,            //!< Inferno
-        QNX,                //!< QNX
-        EPOC,               //!< EPOC
-        IxWorks,            //!< IxWorks
-        VxWorks,            //!< VxWorks
-        MiNT,               //!< MiNT
-        BeOS,               //!< BeOS
-        HP_MPE,             //!< HP MPE
-        NextStep,           //!< NextStep
-        PalmPilot,          //!< PalmPilot
-        Rhapsody,           //!< Rhapsody
-        Windows_2000,       //!< Windows 2000
-        Dedicated,          //!< Dedicated
-        OS_390,             //!< OS 390
-        VSE,                //!< VSE
-        TPF,                //!< TPF
-        Windows_Me,         //!< Me
-        Open_UNIX,          //!< Open UNIX
-        OpenBDS,            //!< OpenBDS
-        NotApplicable,      //!< NotApplicable
-        Windows_XP,         //!< Windows XP
-        zOS,                //!< zOS
-        Windows_2003,       //!< Windows 2003
-        Windows_2003_64     //!< Windows_2003_64
+        /* Pacify doxygen */
+        Unknown,
+        Other,
+        MACOS,
+        ATTUNIX,
+        DGUX,
+        DECNT,
+        Digital_Unix,
+        OpenVMS,
+        HP_UX,
+        AIX,
+        MVS,
+        OS400,
+        OS2,
+        JavaVM,
+        MSDOS,
+        WIN3x,
+        WIN95,
+        WIN98,
+        WINNT,
+        WINCE,
+        NCR3000,
+        NetWare,
+        OSF,
+        DCOS,
+        Reliant_UNIX,
+        SCO_UnixWare,
+        SCO_OpenServer,
+        Sequent,
+        IRIX,
+        Solaris,
+        SunOS,
+        U6000,
+        ASERIES,
+        TandemNSK,
+        TandemNT,
+        BS2000,
+        LINUX,
+        Lynx,
+        XENIX,
+        VM_ESA,
+        Interactive_UNIX,
+        BSDUNIX,
+        FreeBSD,
+        NetBSD,
+        GNU_Hurd,
+        OS9,
+        MACH_Kernel,
+        Inferno,
+        QNX,
+        EPOC,
+        IxWorks,
+        VxWorks,
+        MiNT,
+        BeOS,
+        HP_MPE,
+        NextStep,
+        PalmPilot,
+        Rhapsody,
+        Windows_2000,
+        Dedicated,
+        OS_390,
+        VSE,
+        TPF,
+        Windows_Me,
+        Open_UNIX,
+        OpenBDS,
+        NotApplicable,
+        Windows_XP,
+        zOS,
+        Windows_2003,
+        Windows_2003_64
     };
 
     /**
