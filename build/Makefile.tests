@@ -3,8 +3,8 @@
 # Copyright (c) Microsoft Corporation.  All rights reserved.
 #--------------------------------------------------------------------------------
 # 2007-08-23
-# 
-# Definition of all unit tests for SCXCore 
+#
+# Definition of all unit tests for SCXCore
 #
 #--------------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ endif
 
 
 #--------------------------------------------------------------------------------
-# Support for BullseyeCoverage from Bullseye Testing Technology 
+# Support for BullseyeCoverage from Bullseye Testing Technology
 ifeq ($(BUILD_TYPE),Bullseye)
 	BULLSEYE_LINK=-L/opt/Bullseye/lib -lcov
 	COVFILE=$(INTERMEDIATE_DIR)/OpsMgr.cov
@@ -36,7 +36,7 @@ endif
 TESTRUNNER_SRCFILES = \
 	$(SCX_SHARED_TEST_ROOT)/testutils/testrunner.cpp \
 	$(SCX_SHARED_TEST_ROOT)/testutils/scxassert_cppunit.cpp \
-	$(SCX_SHARED_TEST_ROOT)/testutils/testrunnerlogpolicy.cpp 
+	$(SCX_SHARED_TEST_ROOT)/testutils/testrunnerlogpolicy.cpp
 
 TESTRUNNER_OBJFILES = $(call src_to_obj,$(TESTRUNNER_SRCFILES))
 # Extra include dir for test code
@@ -89,13 +89,13 @@ POSIX_UNITTESTS_LINK_STATICLIBS = $(addprefix -l, $(POSIX_UNITTESTS_STATICLIB_DE
 POSIX_UNITTESTS_CORE_LINK_STATICLIBS = $(addprefix -l, $(POSIX_UNITTESTS_CORE_STATICLIB_DEPS))
 
 #--------------------------------------------------------------------------------
-# Check if user has requested a subset of the unit tests only 
+# Check if user has requested a subset of the unit tests only
 ifneq ($(UNITTESTS_SUBSET),)
 UNITTESTS_OBJFILES = $(TESTRUNNER_OBJFILES) $(call src_to_obj,$(UNITTESTS_SUBSET))
 UNITTESTS_CORE_OBJFILES = $(TESTRUNNER_OBJFILES) $(call src_to_obj,$(UNITTESTS_SUBSET))
 else
-UNITTESTS_OBJFILES = $(TESTRUNNER_OBJFILES) $(POSIX_UNITTESTS_OBJFILES) 
-UNITTESTS_CORE_OBJFILES = $(TESTRUNNER_OBJFILES) $(POSIX_UNITTESTS_CORE_OBJFILES) 
+UNITTESTS_OBJFILES = $(TESTRUNNER_OBJFILES) $(POSIX_UNITTESTS_OBJFILES)
+UNITTESTS_CORE_OBJFILES = $(TESTRUNNER_OBJFILES) $(POSIX_UNITTESTS_CORE_OBJFILES)
 endif
 
 
@@ -113,7 +113,7 @@ $(TARGET_DIR)/closefiledescriptors : $(CLOSEFILEDESCRIPTOR_OBJFILES)
 testrunner-status:
 	$(ECHO) "========================= Performing make PAL testrunner"
 
-$(TARGET_DIR)/testrunner : testrunner-status $(UNITTESTS_OBJFILES) $(POSIX_UNITTESTS_STATICLIB_DEPFILES) 
+$(TARGET_DIR)/testrunner : testrunner-status $(UNITTESTS_OBJFILES) $(POSIX_UNITTESTS_STATICLIB_DEPFILES)
 	-$(MKPATH) $(TARGET_DIR)
 	$(QUANTIFY) $(LINK) $(LINK_OUTFLAG) $(UNITTESTS_OBJFILES) $(CPPUNIT_LIB_PATH)/libcppunit.a $(POSIX_UNITTESTS_LINK_STATICLIBS) $(BULLSEYE_LINK) $(LDFLAGS_TESTRUNNER)
 
@@ -121,7 +121,7 @@ testbuild :  $(TARGET_DIR)/testrunner
 
 
 # The tool itself
-$(TARGET_DIR)/testrunner_core : testrunner-status $(UNITTESTS_CORE_OBJFILES) $(POSIX_UNITTESTS_CORE_STATICLIB_DEPFILES) 
+$(TARGET_DIR)/testrunner_core : testrunner-status $(UNITTESTS_CORE_OBJFILES) $(POSIX_UNITTESTS_CORE_STATICLIB_DEPFILES)
 	-$(MKPATH) $(TARGET_DIR)
 	$(PROFILING) $(LINK) $(LINK_OUTFLAG) $(UNITTESTS_CORE_OBJFILES) $(CPPUNIT_LIB_PATH)/libcppunit.a $(POSIX_UNITTESTS_CORE_LINK_STATICLIBS) $(LDFLAGS_TESTRUNNER)
 
@@ -145,21 +145,21 @@ testrun_copy : $(TARGET_DIR)/closefiledescriptors
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/testrun_wrapper $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/killgrouptest.sh $(TARGET_DIR)/testfiles/
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/testutils/killgrouptest_hang.sh $(TARGET_DIR)/testfiles/
-	sed "s@<RelDir>@.@" $(SYSTEMLIB_ROOT)/common/GetLinuxOS.sh | sed "s@EtcPath=\"/etc\"@if [ -n \"\$${1}\" ]; then EtcPath=\$$1; else EtcPath=\"/etc\"; fi@" > $(TARGET_DIR)/testfiles/GetLinuxOS.sh
 	$(COPY) $(SCX_SHARED_TEST_ROOT)/scxsystemlib/software/dpkg_status_test $(TARGET_DIR)/testfiles/
 	rm -f $(TARGET_DIR)/testfiles/killgrouptest_hang.pid
 	chmod u+x $(TARGET_DIR)/testfiles/createEnv.sh
 	chmod u+x $(TARGET_DIR)/testfiles/testrun_wrapper
 	chmod u+x $(TARGET_DIR)/testfiles/killgrouptest.sh
 	chmod u+x $(TARGET_DIR)/testfiles/killgrouptest_hang.sh
-	chmod u+x $(TARGET_DIR)/testfiles/GetLinuxOS.sh
 	chmod u+w $(TARGET_DIR)/report.xsl
 	$(COPY) $(TARGET_DIR)/closefiledescriptors $(TARGET_DIR)/testfiles/
 ifeq ($(PF),Linux)
+	sed "s@<RelDir>@.@" $(SYSTEMLIB_ROOT)/common/GetLinuxOS.sh | sed "s@EtcPath=\"/etc\"@if [ -n \"\$${1}\" ]; then EtcPath=\$$1; else EtcPath=\"/etc\"; fi@" > $(TARGET_DIR)/testfiles/GetLinuxOS.sh
+	chmod u+x $(TARGET_DIR)/testfiles/GetLinuxOS.sh
 	$(COPY) -fR $(SCX_SHARED_TEST_ROOT)/scxsystemlib/common/platforms $(TARGET_DIR)/testfiles
 endif
 
-create_environment_sh : 
+create_environment_sh :
 	cd $(TARGET_DIR); testfiles/createEnv.sh
 
 testrun_setup : $(TARGET_DIR)/testrunner testrun_copy create_environment_sh
@@ -174,8 +174,8 @@ BUILD_TESTRUN_PACKAGE=
 endif
 
 # During code coverage run, the coverage file is OpsMgr.cov. That is also the name
-# of the empty coverage file in the package. Once run as unit test, copy the file 
-# with unit test coverage data to the target folder. 
+# of the empty coverage file in the package. Once run as unit test, copy the file
+# with unit test coverage data to the target folder.
 testrun_copycovfile :
 	if [ $(BUILD_TYPE) = Bullseye ]; then $(COPY) $(COVFILE) $(TARGET_DIR)/UnitTest.cov; fi
 

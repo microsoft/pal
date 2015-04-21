@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------
-    Copyright (c) Microsoft Corporation.  All rights reserved. 
-    
+    Copyright (c) Microsoft Corporation.  All rights reserved.
+
 */
 /**
     \file        getlinuxos_test.cpp
@@ -52,6 +52,7 @@ class SCXGetLinuxOS_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestPlatform_Debian_5_0_10 );
     CPPUNIT_TEST( TestPlatform_Ubuntu_11 );
     CPPUNIT_TEST( TestPlatform_CentOS_5 );
+    CPPUNIT_TEST( TestPlatform_CentOS_7 );
     CPPUNIT_TEST( TestPlatform_Debian_7_0 );
     CPPUNIT_TEST( TestPlatform_openSUSE_11_4 );
     CPPUNIT_TEST( TestPlatform_openSUSE_12_3 );
@@ -114,7 +115,7 @@ public:
     }
 
     // Helper routine - run the script (passing any parameters to the script)
-    void ExecuteScript(const wstring param)
+    void ExecuteScript(const wstring &param)
     {
         // Run the script.
         istringstream input;
@@ -129,7 +130,7 @@ public:
     }
 
     // Helper routine - run the script and load the results into a map
-    void ExecuteScript(const wstring param, map<string,string>& releaseFile )
+    void ExecuteScript(const wstring &param, map<string,string>& releaseFile )
     {
         ExecuteScript( param );
         LoadReleaseFile( releaseFile );
@@ -289,7 +290,7 @@ public:
 
         // Verify our data:
         //      OSName = Enterprise Linux Server
-        //      OSVersion = 5 
+        //      OSVersion = 5
         //      OSFullName = Enterprise Linux Server 5 (x86_64)
         //      OSAlias = UniversalR
         //      OSManufacturer = Oracle Corporation
@@ -402,6 +403,27 @@ public:
         CPPUNIT_ASSERT_EQUAL( string("CentOS"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("5.0"), releaseFile["OSVersion"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS 5.0") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("Central Logistics GmbH"), releaseFile["OSManufacturer"] );
+    }
+
+    // Platform CentOS 7:
+    void TestPlatform_CentOS_7()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/centos_7", releaseFile );
+
+        // Verify our data:
+        //      OSName = CentOS Linux
+        //      OSVersion = 7.0
+        //      OSFullName = CentOS Linux 7.0
+        //      OSAlias = UniversalR
+        //      OSManufacturer = Central Logistics GmbH
+
+        CPPUNIT_ASSERT_EQUAL( string("CentOS Linux"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS Linux 7.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Central Logistics GmbH"), releaseFile["OSManufacturer"] );
     }

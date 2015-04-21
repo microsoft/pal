@@ -2,7 +2,7 @@
 
 #####################################################################
 ## Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-## Name: GetLinuxOS.sh 
+## Name: GetLinuxOS.sh
 ## Date: 7/1/2012
 ## Version: 1.0
 ## Description: Release file parsing for Linux Operating Systems
@@ -20,7 +20,7 @@ RelDir="<RelDir>"
 RelFile="$RelDir/scx-release"
 DisableFile="$RelDir/disablereleasefileupdates"
 
-if [ ! -e ${RelDir} ]; then 
+if [ ! -e ${RelDir} ]; then
     mkdir -p $RelDir
 fi
 
@@ -46,36 +46,36 @@ GetLinuxInfo() {
     # Determine release file
 
     # Try to find -release file
-    if [ -z ${ReleaseFile} ]; then 
+    if [ -z ${ReleaseFile} ]; then
         ReleaseFile=`ls -F ${EtcPath}/*-release 2>/dev/null | grep -v lsb-release |grep -v release@| grep -v scx-release| sed -n '1p'`
     fi
 
     # Fall back to lsb-release (e.g. Ubunutu)
-    if [ -z ${ReleaseFile} ]; then 
+    if [ -z ${ReleaseFile} ]; then
         if [ -e "${EtcPath}/lsb-release" ]; then ReleaseFile="${EtcPath}/lsb-release"; fi
     fi
 
     # Debian (no lsb-release, but debian_version exists)
-    if [ -z ${ReleaseFile} ]; then 
+    if [ -z ${ReleaseFile} ]; then
         TestFile="${EtcPath}/debian_version"
         if [ -e $TestFile ]; then ReleaseFile=$TestFile; fi
     fi
 
     # Try RHEL/CentOS
     TestFile="${EtcPath}/redhat-release"
-    if [ ! -h $TestFile -a -e $TestFile ]; then ReleaseFile=$TestFile; fi
+    if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
     # Try OEL
     TestFile="${EtcPath}/oracle-release"
-    if [ ! -h $TestFile -a -e $TestFile ]; then ReleaseFile=$TestFile; fi
+    if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
     # Try NeoKylin
     TestFile="${EtcPath}/neokylin-release"
-    if [ ! -h $TestFile -a -e $TestFile ]; then ReleaseFile=$TestFile; fi
+    if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
     # Try SLES
     TestFile="${EtcPath}/SUSE-release"
-    if [ ! -h $TestFile -a -e $TestFile ]; then ReleaseFile=$TestFile; fi
+    if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
 
     # Get OS Name
@@ -125,7 +125,7 @@ GetLinuxInfo() {
             GetKitType
 
             # The os-release files contain TAG=VALUE pairs; just read it in
-            . $ReleaseFile
+            . "$ReleaseFile"
 
             # Some fields are optional, for details see the WWW site:
             #   http://www.freedesktop.org/software/systemd/man/os-release.html
@@ -138,12 +138,17 @@ GetLinuxInfo() {
             case $ID in
                 debian)
                     OSManufacturer="Softare in the Public Interest, Inc."
-       	            OSAlias="UniversalD"
+                    OSAlias="UniversalD"
                     ;;
 
                 opensuse)
                     OSManufacturer="SUSE GmbH"
-       	            OSAlias="UniversalR"
+                    OSAlias="UniversalR"
+                    ;;
+
+                centos)
+                    OSManufacturer="Central Logistics GmbH"
+                    OSAlias="UniversalR"
                     ;;
             esac
 
@@ -200,7 +205,7 @@ GetLinuxInfo() {
                 OSManufacturer="Softare in the Public Interest, Inc."
                 Version=`cat ${EtcPath}/debian_version`
             fi
-                        
+
             # Ubuntu
             if [ `echo $OSName | grep "Ubuntu" | wc -l` -gt 0 ]; then
                 OSName="Ubuntu"
