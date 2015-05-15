@@ -322,14 +322,19 @@ template<class T, class TN> MI_Result CreateInstance(TestableContext& context, s
 //! \param      TN Type of instance name object to be used.
 //! \param[in]  keyNames Vector of the keys describing the requested object instance.
 //! \param[in]  keyValues Vector of the key values describing the requested object instance.
+//! \param[in]  propNames Vector of the property names describing the modified object instance.
+//! \param[in]  propValues Vector of the property values describing the modified object instance.
 //! \param[in]  context Object containing all retrieved instance. Only one instance is returned.
 //! \param[in]  errMsg String containing error messages.
 //! \returns    MI_RESULT_OK on success, otherwise error code.
 template<class T, class TN> MI_Result ModifyInstance(
-    const std::vector<std::wstring>& keyNames, const std::vector<std::wstring>& keyValues, TestableContext &context,
+    const std::vector<std::wstring>& keyNames, const std::vector<std::wstring>& keyValues,
+    const std::vector<std::wstring>& propNames, const std::vector<std::wstring>& propValues,
+    TestableContext &context,
     std::wstring errMsg)
 {
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames.size(), keyValues.size());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, propNames.size(), propValues.size());
 
     TN modifiedInstance;
 
@@ -345,7 +350,18 @@ template<class T, class TN> MI_Result ModifyInstance(
         miField->Set(keyValue);
     }
 
-    // Modify instance with these keys.
+    // Set all property values.
+    for (k = 0; k < propNames.size(); k++)
+    {
+        std::string propName = SCXCoreLib::StrToUTF8(propNames[k]);
+        Field* field;
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, FindFieldString(modifiedInstance, propName.c_str(), field));
+        mi::Field<mi::String> *miField = reinterpret_cast<mi::Field<mi::String> *>(field);
+        mi::String propValue(SCXCoreLib::StrToUTF8(propValues[k]).c_str());
+        miField->Set(propValue);
+    }
+
+    // Modify instance with these properties.
     mi::Module Module;
     T agent(&Module);
     agent.ModifyInstance(context, NULL, modifiedInstance, context.GetPropertySet());
@@ -353,15 +369,7 @@ template<class T, class TN> MI_Result ModifyInstance(
     {
         return context.GetResult();
     }
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 1u, context.Size());
-    // Verify we got the proper instance back.
-    for (k = 0; k < keyNames.size(); k++)
-    {
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames[k], context[0].GetKeyName(static_cast<MI_Uint32>(k),
-            CALL_LOCATION(errMsg)));
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyValues[k], context[0].GetKeyValue(static_cast<MI_Uint32>(k),
-            CALL_LOCATION(errMsg)));
-    }
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, 0u, context.Size());
     return MI_RESULT_OK;
 }
 
