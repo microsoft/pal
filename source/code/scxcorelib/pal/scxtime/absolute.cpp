@@ -191,7 +191,6 @@ namespace SCXCoreLib {
             throw SCXInvalidTimeFormatException(L"Not formatted according to CIM DATETIME",
                     str, SCXSRCLOCATION);
         }
-        std::wistringstream source(str);
         unsigned int year = StrToUInt(str.substr(0, 4));
         unsigned int month = StrToUInt(str.substr(4, 2));
         unsigned int day = StrToUInt(str.substr(6, 2));
@@ -387,6 +386,40 @@ namespace SCXCoreLib {
     }
 
     /*----------------------------------------------------------------------------*/
+    //! Retrieves the local offset from UTC of the passed in time
+    //! \param[in]   posixTime           Unix epoch
+    //! \returns How much "east of" UTC in minutes
+    int SCXCalendarTime::GetMinutesFromUTC(scxlong posixTime)
+    {
+        int minutesFromUTC = 0;
+#if defined(SCX_UNIX)
+        tm localparts;
+        timeval utc;
+
+        utc.tv_sec = (time_t) posixTime;
+        utc.tv_usec = 0;
+        if (localtime_r(&utc.tv_sec, &localparts) != &localparts) {
+            throw SCXInternalErrorException(UnexpectedErrno(L"Call to localtime_r failed", errno), SCXSRCLOCATION);
+        }
+
+#if defined(linux) || defined(macos)
+        minutesFromUTC = static_cast<unsigned int>(localparts.tm_gmtoff / 60);
+#elif defined(sun) || defined(hpux) || defined(aix)
+        minutesFromUTC = -timezone / 60 + ( (localparts.tm_isdst > 0 && daylight) ? 60 : 0);
+#else
+        struct timezone tz;
+        if (gettimeofday(&utc, &tz) < 0) {
+            throw SCXInternalErrorException(UnexpectedErrno(L"Call to gettimeofday failed", errno), SCXSRCLOCATION);
+        }
+        minutesFromUTC = -timezone / 60 + ( (tz.tz_dsttime > 0) ? 60 : 0);
+#endif
+        return minutesFromUTC;
+#else
+#error Unexpected platform
+#endif
+    }
+
+    /*----------------------------------------------------------------------------*/
     //! Retrieve the current time as UTC
     //! \returns Current time expressed as UTC
     SCXCalendarTime SCXCalendarTime::CurrentUTC() {
@@ -445,18 +478,8 @@ namespace SCXCoreLib {
         scxminute minute = 0;
         unsigned int microsecond;
         CopyFromStruct(localparts, static_cast<int>(utc.tv_usec), year, month, day, hour, minute, microsecond);
-#if defined(linux) || defined(macos)
-        int minutesFromUTC = static_cast<unsigned int>(localparts.tm_gmtoff / 60);
-#elif defined(sun) || defined(hpux) || defined(aix)
-        int minutesFromUTC = -timezone / 60 + ( (localparts.tm_isdst > 0 && daylight) ? 60 : 0);
-#else
-        struct timezone tz;
-        if (gettimeofday(&utc, &tz) < 0) {
-            throw SCXInternalErrorException(UnexpectedErrno(L"Call to gettimeofday failed", errno), SCXSRCLOCATION);
-        }
 
-        int minutesFromUTC = -timezone / 60 + ( (tz.tz_dsttime > 0) ? 60 : 0);
-#endif
+        int minutesFromUTC = GetMinutesFromUTC(utc.tv_sec);
         return SCXCalendarTime(year, month, day, hour, minute, microsecond, 6, minutesFromUTC);
 #else
 #error Unexpected platform
@@ -858,6 +881,26 @@ namespace SCXCoreLib {
         SCXCalendarTime copy(*this);
         copy.MakeUTC();
         copy.m_minutesFromUTC = offsetFromUTC.GetHours() * 60 + offsetFromUTC.GetMinutes();
+        scxlong microsecondsToAdd = static_cast<scxlong>(copy.m_minutesFromUTC) * (60*1000*1000);
+        if (microsecondsToAdd > 0) {
+            copy.AddMicroseconds(microsecondsToAdd);
+        } else {
+            copy.SubtractMicroseconds(-microsecondsToAdd);
+        }
+        *this = copy;
+        return *this;
+    }
+
+    /*----------------------------------------------------------------------------*/
+    //! Adjust the timestamp to local timezone
+    //! \returns    *this
+    SCXCalendarTime& SCXCalendarTime::MakeLocal() {
+        SCXASSERT(m_initialized);
+
+        SCXCalendarTime copy(*this);
+        copy.MakeUTC();
+        copy.m_minutesFromUTC = GetMinutesFromUTC(ToPosixTime());
+
         scxlong microsecondsToAdd = static_cast<scxlong>(copy.m_minutesFromUTC) * (60*1000*1000);
         if (microsecondsToAdd > 0) {
             copy.AddMicroseconds(microsecondsToAdd);

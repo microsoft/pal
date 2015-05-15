@@ -10,7 +10,7 @@
    \date        08-03-04 15:22:00
 
 //////////////////////////////////////////////////////////////////////////
-// -- Included per LCA request based on significant commonality to 
+// -- Included per LCA request based on significant commonality to
 // OpenPegasus Code...
 //
 // Licensed to The Open Group (TOG) under one or more contributor license
@@ -228,7 +228,7 @@ static LocaleInfo LocaleInfoTable[] =
     { "ro", "RO", 0x0418,  40, 65001 }, // Romanian-Romania
     { "hr", "HR", 0x041A, 385, 65001 }, // Croatian-Croatia
     { "sr", "RS", 0x081A, 381, 65001 }, // Serbian-Serbia (Latin alphabet)
-    { "sk", "SK", 0x041B, 421, 28591 }, // Slovak default to Slovakia 
+    { "sk", "SK", 0x041B, 421, 28591 }, // Slovak default to Slovakia
     { "sq", "AL", 0x041C, 355, 65001 }, // Albanian-Albania
     { "mk", "MK", 0x042F, 389, 65001 }, // Macedonian-Macedonia
     { "be", "BY", 0x0423, 375, 65001 }, // Belarusian-Belarus
@@ -661,7 +661,7 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-       Updates instance with latest data in preparation for read of individual 
+       Updates instance with latest data in preparation for read of individual
        properties.
     */
     void OSInstance::Update()
@@ -761,7 +761,7 @@ namespace SCXSystemLib
     */
     void OSInstance::PrecomputeMaxProcesses(void)
     {
-        // VERY inspired by the Pegasus code. 
+        // VERY inspired by the Pegasus code.
 
         //-- prior to 2.4.* kernels, this will not work.  also, this is
         //   technically the maximum number of threads allowed; since
@@ -771,7 +771,7 @@ namespace SCXSystemLib
         const char proc_file[] = "/proc/sys/kernel/threads-max";
         const size_t MAXPATHLEN = 80;
         char buffer[MAXPATHLEN];
-        
+
         m_MaxProcesses = 0;
         FILE* vf = fopen(proc_file, "r");
         if (vf)
@@ -795,7 +795,7 @@ namespace SCXSystemLib
     {
         if ((m_system_boot_isValid = m_psts_isValid)) {
             m_system_boot = SCXCalendarTime::FromPosixTime(m_psts.boot_time);
-            m_system_boot.MakeLocal(SCXCalendarTime::CurrentOffsetFromUTC());
+            m_system_boot.MakeLocal();
         }
     }
 
@@ -817,7 +817,7 @@ namespace SCXSystemLib
             SCX_LOGERROR(m_log, StrAppend(L"Could not open UTMP file. errno = ", errno));
             return;
         }
-        
+
         while (read(fd, &record, reclen) == reclen)
         {
             if (strcmp(record.ut_line, "system boot") == 0 || // Aix
@@ -829,7 +829,7 @@ namespace SCXSystemLib
                 try
                 {
                     m_system_boot = SCXCalendarTime::FromPosixTime((scxulong)boot_time);
-                    m_system_boot.MakeLocal(SCXCalendarTime::CurrentOffsetFromUTC());
+                    m_system_boot.MakeLocal();
                     m_system_boot_isValid = true;
                 }
                 catch (const SCXNotSupportedException& e)
@@ -866,7 +866,7 @@ namespace SCXSystemLib
         }
         else
         {
-            SCX_LOGERROR(m_log, StrAppend(L"Could not open /proc/uptime. errno = ", errno));        
+            SCX_LOGERROR(m_log, StrAppend(L"Could not open /proc/uptime. errno = ", errno));
         }
         fclose(uptimeFile);
 #else
@@ -874,7 +874,7 @@ namespace SCXSystemLib
         {
             time_t nowTime = time(0);   // get time now
             time_t bootTime = m_system_boot.ToPosixTime();
-            
+
             m_upsec = nowTime - bootTime;
             m_upsec_isValid = true;
         }
@@ -886,7 +886,7 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-    Get OS lang setting. 
+    Get OS lang setting.
 
     \param      value - the extracted value if there is one
     Return false if can not get the value of "LANG" SETTING
@@ -959,14 +959,14 @@ namespace SCXSystemLib
 #endif
         }
 
-    /*  
+    /*
      * Get Country Code
      * Parameters: cc - RETURN: Country Code of OS instance
      * Retval:     true if a value is supported by this platform
      * Throw:      SCXNotSupportedException - For not implemented platform
          */
     bool OSInstance::GetCountryCode(wstring& cc) const
-    {   
+    {
         cc = m_osDetailInfo.CountryCode;
 #if defined(linux) || defined(sun)
         if(!cc.empty())
@@ -984,16 +984,16 @@ namespace SCXSystemLib
 #endif
     }
 
-    /*  
+    /*
      * Get OSLanguage
      * Parameters: lang - RETURN: OSLanguage of OS instance
      * Retval:     true if a value is supported by this platform
      * Throw:      SCXNotSupportedException - For not implemented platform
      */
     bool OSInstance::GetOSLanguage(unsigned int& lang) const
-    {   
+    {
         lang = m_osDetailInfo.OSLanguage;
-#if defined(linux)  || defined(sun) 
+#if defined(linux)  || defined(sun)
         if (m_osDetailInfo.OSLanguage != 0)
         {
            lang = m_osDetailInfo.OSLanguage;
@@ -1008,16 +1008,16 @@ namespace SCXSystemLib
 #endif
     }
 
-    /*  
+    /*
      * Get MUI(Multiling User Interface) Pack Languages
      * Parameters: langs - RETURN: MUILanguages of OS instance
      * Retval:     true if a value is supported by this platform
      * Throw:      SCXNotSupportedException - For not implemented platform
      */
     bool OSInstance::GetMUILanguages(vector<wstring>& langs) const
-    {   
+    {
         langs = m_osDetailInfo.MUILanguages;
-#if defined(linux) && defined(PF_DISTRO_REDHAT)  
+#if defined(linux) && defined(PF_DISTRO_REDHAT)
         return true;
 #elif defined(linux) && defined(PF_DISTRO_ULINUX)
         if (langs.size() > 0)
@@ -1031,14 +1031,14 @@ namespace SCXSystemLib
 #endif
     }
 
-    /* 
+    /*
      * Get Product Type  TODO: How to determine the type in future releases??
      * Parameters: pt - RETURN: Product Type of OS instance
      * Retval:     true if a value is supported by this platform
      * Throw:      SCXNotSupportedException - For not implemented platform
      */
         bool OSInstance::GetProductType(unsigned int& pt) const
-    {   
+    {
 #if defined(SCX_UNIX)
         pt = ePTServer;
         return true;
@@ -1046,11 +1046,11 @@ namespace SCXSystemLib
         #error Platform not supported
 #endif
 
-    } 
+    }
 
-    /* 
+    /*
      * Get Manufacturer
-     * Parameters: manufacturer - RETURN: Manufacturer 
+     * Parameters: manufacturer - RETURN: Manufacturer
      * Retval:     true if a value is supported by this platform
      */
     bool OSInstance::GetManufacturer(wstring& manufacturer) const
@@ -1162,9 +1162,9 @@ namespace SCXSystemLib
             oss << PF_MINOR;
             ver.assign(StrFromUTF8(oss.str()));
             fRet = true;
-            
+
 #elif defined(PF_DISTRO_ULINUX)
-            ver = m_osInfo.GetOSVersion();  
+            ver = m_osInfo.GetOSVersion();
             fRet = !ver.empty();
 #elif defined(sun)
             const char *sminv = strrchr(m_unameInfo.release, '.');
@@ -1320,7 +1320,7 @@ namespace SCXSystemLib
         }
         return true;
 #elif defined(sun)
-        // According to the Pegasus Solaris implementation they don't know how 
+        // According to the Pegasus Solaris implementation they don't know how
         // to determine this number, but they still return 0 for unlimited.
         nolu = 0;
         return true;
@@ -1342,13 +1342,13 @@ namespace SCXSystemLib
     bool OSInstance::GetNumberOfUsers(unsigned int& numberOfUsers) const
     {
 #if defined(SCX_UNIX)
-        // This is the Pegasus code, straight up. 
-        // Note that getutxent() isn't thread safe, but that's no problem 
+        // This is the Pegasus code, straight up.
+        // Note that getutxent() isn't thread safe, but that's no problem
         // since access here is protected.
         struct utmpx * utmpp;
-        
+
         numberOfUsers = 0;
-        
+
         while ((utmpp = getutxent()) != NULL)
         {
             if (utmpp->ut_type == USER_PROCESS)
@@ -1426,8 +1426,8 @@ namespace SCXSystemLib
         return res == 0;
 #elif defined(hpux)
         // Pegasus implements a very elaborate scheme that supports many
-        // different versions of HP/UX through various mechanisms to get 
-        // kernel configuration data. Since we only support 11v3 and on 
+        // different versions of HP/UX through various mechanisms to get
+        // kernel configuration data. Since we only support 11v3 and on
         // we can cut out all the older stuff and just reuse what we need.
         // But corrected to return the output in Kilobytes.
 
@@ -1459,7 +1459,7 @@ namespace SCXSystemLib
     bool OSInstance::GetMaxProcessesPerUser(unsigned int& mppu) const
     {
 #if defined(linux) || defined(sun) || defined(aix)
-        // Not supported on Solaris, for some reason. We reuse the Linux code. 
+        // Not supported on Solaris, for some reason. We reuse the Linux code.
         // Here's the Pegasus implementation for Linux. Spot the problem?
         // return sysconf(_SC_CHILD_MAX);
         long res = sysconf(_SC_CHILD_MAX);

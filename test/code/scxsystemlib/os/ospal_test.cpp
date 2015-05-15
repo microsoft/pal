@@ -198,7 +198,7 @@ public:
     string GetCommandLineBootTime()
     {
         string bootString = CheckOutput(L"who -b");
-        
+
         // On SUSE the output of "who -b" is sometimes empty.
         // We use a fallback instead of an #ifdef block because PF_DISTRO_SUSE is undefined in Universal builds
         if (bootString.size() == 0)
@@ -238,14 +238,14 @@ public:
         timeStruct.tm_year = yearHint - 1900;
 #else
         (void) yearHint;
-#endif        
+#endif
         timeStruct.tm_sec = 0;
         timeStruct.tm_isdst = -1; // Unknown Daylight Saving Time
 
         // Convert to POSIX time
         time_t time = mktime(&timeStruct);
         ostringstream invalid_date_err_msg;
-        invalid_date_err_msg << "Invalid date in timeStruct:\n'" << "Date='" << bootTime 
+        invalid_date_err_msg << "Invalid date in timeStruct:\n'" << "Date='" << bootTime
                              << "' Format='" << timeFormat << "'\n " << timeStruct.tm_year + 1900 << "-"
                              << timeStruct.tm_mon + 1 << "-" << timeStruct.tm_mday << " "
                              << timeStruct.tm_hour << ":" << timeStruct.tm_min << ":" << timeStruct.tm_sec;
@@ -264,23 +264,22 @@ public:
         SCXCalendarTime SCXBootTime;
 
         inst->GetLastBootUpTime(SCXBootTime);
-        CPPUNIT_ASSERT((currentTime.GetYear()-SCXBootTime.GetYear() ) <= 2);
-        CPPUNIT_ASSERT(currentTime > SCXBootTime);
+        CPPUNIT_ASSERT_MESSAGE("The boot time is way off from the current time.", (currentTime.GetYear() - SCXBootTime.GetYear()) <= 2);
+        CPPUNIT_ASSERT_MESSAGE("The boot time is in the future! Compare the output of \"who -b\" and \"date\"", currentTime > SCXBootTime);
 
-        // The boot time should be in the same time zone as the current local
-        CPPUNIT_ASSERT_EQUAL(SCXCalendarTime::CurrentOffsetFromUTC().GetMinutes(), SCXBootTime.GetOffsetFromUTC().GetMinutes());
+        CPPUNIT_ASSERT_MESSAGE("The boot time does not have a UTC offset. Are you really in the GMT time zone?", SCXBootTime.GetOffsetFromUTC().GetMinutes() != 0);
 
         string whoBoutput = GetCommandLineBootTime();
         CPPUNIT_ASSERT_MESSAGE("No output was found to compare boot time", whoBoutput.size() > 0);
         scxlong CMDBootTime = parseBootTime(whoBoutput, (int)SCXBootTime.GetYear());
-#if defined(hpux)
-        // Accept one hour of fudge for HP because there is sometimes a larger difference
-        // between the boot time returned by who -b and the one returned by the pstat_getstatic system call
-        scxlong acceptable_fudge_seconds = 60 * 61;
-#else
+
         scxlong acceptable_fudge_seconds = 61;
-#endif
-        SCXUNIT_ASSERT_BETWEEN(SCXBootTime.ToPosixTime(), CMDBootTime - acceptable_fudge_seconds, CMDBootTime + acceptable_fudge_seconds);
+        ostringstream errmsg;
+        errmsg << "boot time not in range : " << CMDBootTime - acceptable_fudge_seconds
+               << " <= " << SCXBootTime.ToPosixTime()
+               << " <= " << CMDBootTime + acceptable_fudge_seconds;
+
+        SCXUNIT_ASSERT_BETWEEN_MESSAGE(errmsg.str(), SCXBootTime.ToPosixTime(), CMDBootTime - acceptable_fudge_seconds, CMDBootTime + acceptable_fudge_seconds);
     }
 
     void testUpTime()
@@ -290,11 +289,11 @@ public:
         m_osEnum->Update(true);
         SCXCoreLib::SCXHandle<OSInstance> inst = m_osEnum->GetTotalInstance();
         scxulong uptime;
-        
+
         CPPUNIT_ASSERT(inst->GetSystemUpTime(uptime));
         CPPUNIT_ASSERT(uptime > 0);
         string uptimeStr = CheckOutput(L"uptime");
-        
+
         // Remove the part before the number of days from any of the below formats
         //  12:47:05 up 261 days,  2:37,  0 users,  load average: 1.27, 1.61, 1.59
         //    3:39pm  up 159 days 23:18,  0 users,  load average: 0.18, 0.45, 0.40
@@ -325,20 +324,18 @@ public:
         SCXCalendarTime ASCXCalendarTime;
         scxulong Ascxulong;
         unsigned short Aunsignedshort;
-        vector<wstring> Avector;
-        vector<unsigned short> Aushortvector;
         wstring Ascxstring;
         short Ashort;
         unsigned int Auint;
         bool retVal;
-        
+
         CPPUNIT_ASSERT(inst->GetOSType(Aunsignedshort));
         CPPUNIT_ASSERT(inst->GetOtherTypeDescription(Ascxstring));
 #if !defined(PF_DISTRO_ULINUX)
         CPPUNIT_ASSERT(inst->GetVersion(Ascxstring));
         CPPUNIT_ASSERT(inst->GetManufacturer(Ascxstring));
-#endif    
-        
+#endif
+
         CPPUNIT_ASSERT(inst->GetLastBootUpTime(ASCXCalendarTime));
         CPPUNIT_ASSERT(inst->GetLocalDateTime(ASCXCalendarTime));
         CPPUNIT_ASSERT(inst->GetCurrentTimeZone(Ashort));
