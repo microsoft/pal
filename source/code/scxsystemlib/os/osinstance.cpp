@@ -56,10 +56,14 @@
 #include <utmpx.h>
 #include <fcntl.h>
 
-#if defined(aix) && !defined(UTMPX_FILE)
-#define UTMPX_FILE UTMP_FILE //compatibility hack
+// Not all utmpx.h headers define the UTMPX_FILE macro
+#ifndef UTMPX_FILE
+    #ifdef UTMP_FILE
+        #define UTMPX_FILE UTMP_FILE
+    #else
+        #define UTMPX_FILE "/etc/utmpx"
+    #endif
 #endif
-
 
 #if defined(linux) || defined(sun)
 // Regexp includes
@@ -681,20 +685,16 @@ namespace SCXSystemLib
             SCX_LOGERROR(m_log, StrAppend(L"Could not do uname(). errno = ", errno));
         }
 
-#if defined(linux) || defined(aix) || defined(sun)
         SetBootTime();
         SetUptime();
-#elif defined(hpux)
+
+#if defined(hpux)
         /* Get information about the system dynamic variables */
         m_pstd_isValid = true;
         if (pstat_getdynamic(&m_pstd, sizeof(m_pstd), 1, 0) != 1) {
             SCX_LOGERROR(m_log, StrAppend(L"Could not do pstat_getdynamic(). errno = ",errno));
             m_pstd_isValid = false;
         }
-#elif defined(macos)
-        // Nothing extra for these platforms
-#else
-        #error Platform not supported
 #endif
 
         //
@@ -706,7 +706,6 @@ namespace SCXSystemLib
         m_osDetailInfo.CodeSet = L"20127";   // 7-bit US ASCII, the "C" locale
         if (getOSLangSetting(m_LangSetting))
         {
-            std::string langSetting;
             codePageSpecified = ParseLangVariable(m_LangSetting,
                                                   m_osDetailInfo.CountryCode,
                                                   m_osDetailInfo.OSLanguage,
@@ -762,7 +761,6 @@ namespace SCXSystemLib
     void OSInstance::PrecomputeMaxProcesses(void)
     {
         // VERY inspired by the Pegasus code.
-
         //-- prior to 2.4.* kernels, this will not work.  also, this is
         //   technically the maximum number of threads allowed; since
         //   linux has no notion of kernel-level threads, this is the
@@ -780,26 +778,10 @@ namespace SCXSystemLib
                 sscanf(buffer, "%u", &m_MaxProcesses);
             fclose(vf);
         }
-
     }
 
 #endif /* linux */
 
-#if defined(hpux)
-    /**
-     * Determines system boot up time.
-     *
-     * Call this once only, after pstat_getstatic was called.
-     */
-    void OSInstance::SetBootTime(void)
-    {
-        if ((m_system_boot_isValid = m_psts_isValid)) {
-            m_system_boot = SCXCalendarTime::FromPosixTime(m_psts.boot_time);
-            m_system_boot.MakeLocal();
-        }
-    }
-
-#elif defined(aix) || defined(sun) || defined(linux)
     /**
      *  Sets the time related member variables.
      *  Information is read from the utmp file
@@ -876,13 +858,10 @@ namespace SCXSystemLib
             time_t bootTime = m_system_boot.ToPosixTime();
 
             m_upsec = nowTime - bootTime;
-            m_upsec_isValid = true;
+            m_upsec_isValid = (m_upsec > 0);
         }
 #endif
     }
-#else
-    #error "Not implemented for this platform."
-#endif
 
     /*----------------------------------------------------------------------------*/
     /**
@@ -1504,14 +1483,9 @@ namespace SCXSystemLib
     */
     bool OSInstance::GetSystemUpTime(scxulong& sut) const
     {
-#if defined(linux) || defined(sun) || defined(aix)
+#if defined(linux) || defined(sun) || defined(aix) || defined(hpux)
         sut = m_upsec;
         return m_upsec_isValid;
-#elif defined(hpux)
-        // It's simpler to reuse the Pegasus implementation here, than to use our time PAL
-        time_t timeval = time(0);
-        sut = timeval - m_psts.boot_time;
-        return (timeval > 0) && m_psts_isValid;
 #else
         #error Platform not supported
 #endif

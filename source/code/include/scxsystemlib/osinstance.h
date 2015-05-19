@@ -30,7 +30,7 @@
 #include <sys/pstat.h>
 #endif
 
-#if defined(linux) || defined(sun) 
+#if defined(linux) || defined(sun)
 #include <langinfo.h>
 #endif
 
@@ -140,17 +140,16 @@ namespace SCXSystemLib
         struct pst_dynamic m_pstd;              //!< Holds output from pstat_getdynamic
         bool m_psts_isValid;                    //!< Is m_psts valid now?
         bool m_pstd_isValid;                    //!< Is m_pstd valid now?
-#else
+#endif
         void SetUptime(void);                   //!< Sets the upsec variables
         scxulong m_upsec;                       //!< Uptime in seconds
         bool m_upsec_isValid;                   //!< Is m_upsec valid now?
-#endif
 
         std::wstring m_LangSetting;               //!< System LANG environment variable setting
 
         /*----------------------------------------------------------------------------*/
         /**
-        Get OS lang setting. 
+        Get OS lang setting.
 
         Parameters:  OSLang - RETURN: OSLang id
 
