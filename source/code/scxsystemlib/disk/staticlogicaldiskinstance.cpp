@@ -478,21 +478,18 @@ namespace SCXSystemLib
     /* Do a statvfs() call to get file system statistics */
     SCXStatVfs fsstat;
     if (0 != m_deps->statvfs(SCXCoreLib::StrToUTF8(GetId()).c_str(), &fsstat))
-          {
+    {
         // Ignore EOVERFLOW (if disk is too big) to keep disk 'on-line' even without statistics
-        if ( EOVERFLOW == errno ){
-          m_online = true;
+      if ( EOVERFLOW == errno )
+      {
           SCX_LOGHYSTERICAL(m_log, SCXCoreLib::StrAppend(L"statvfs() failed with EOVERFLOW for ", GetId()));
-        }
-        else
-          {
-                    SCX_LOGERROR(m_log,
-                         SCXCoreLib::StrAppend(L"statvfs() failed for " + GetId() + L"; errno = ", errno ) );
-                    m_online = false;
-          }
-        return;
-          }
-    m_online = true;
+      }
+      else
+      {
+          SCX_LOGERROR(m_log, SCXCoreLib::StrAppend(L"statvfs() failed for " + GetId() + L"; errno = ", errno));
+      }
+      return;
+    }
     m_sizeInBytes = static_cast<scxulong> (fsstat.f_blocks) * fsstat.f_frsize;
     m_isReadOnly = (fsstat.f_flag & ST_RDONLY);
     m_availableSpace = static_cast<scxulong> (fsstat.f_bfree) * fsstat.f_frsize;
@@ -599,7 +596,7 @@ namespace SCXSystemLib
   {
     unsigned int driveType = (unsigned int)eUnknown;
     SCX_LOGTRACE(m_log, L"File system type is: " + m_fileSystemType);
-          
+
     // Get RAMDisk type via Anchor string "/dev/ram". If not contained, compare against the CDROMFS type.
     //
     if (std::wstring::npos != m_device.find(anchorRAMDisk))
@@ -613,21 +610,21 @@ namespace SCXSystemLib
     else if (m_fileSystemType.compare(cUFSFS) == 0)
       {
 #if defined(linux)
-        driveType = eCompactDisk; 
+        driveType = eCompactDisk;
 #else
         switch(m_diskRemovability)
           {
           case eDiskCapSupportsRemovableMedia:
-            driveType = eRemovableDisk; 
-            break; 
-                
+            driveType = eRemovableDisk;
+            break;
+
           case eDiskCapOther:
-            driveType = eLocalDisk; // i.e., not removable 
-            break; 
+            driveType = eLocalDisk; // i.e., not removable
+            break;
 
           case eDiskCapUnknown: // drop through to default
           default:
-            driveType = eUnknown; 
+            driveType = eUnknown;
             break;
           }
 #endif

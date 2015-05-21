@@ -1,12 +1,12 @@
 /*--------------------------------------------------------------------------------
     Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-    
+
 */
 /**
-    \file        
+    \file
 
     \brief       Implements the physical disk enumeration pal for statistical information.
-    
+
     \date        2008-04-28 15:20:00
 
 */
@@ -20,7 +20,7 @@
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxthreadlock.h>
 #include <scxcorelib/scxmath.h>
-#include <sys/stat.h> 
+#include <sys/stat.h>
 #if defined(hpux)
 #include <sys/pstat.h>
 #include <scxsystemlib/scxlvmtab.h>
@@ -40,13 +40,13 @@ namespace SCXSystemLib
 
     */
     StatisticalLogicalDiskEnumeration::StatisticalLogicalDiskEnumeration(SCXCoreLib::SCXHandle<DiskDepend> deps) : m_deps(0), m_sampler(0)
-    { 
+    {
         m_log = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.system.disk.statisticallogicaldiskenumeration");
         m_lock = SCXCoreLib::ThreadLockHandleGet();
         m_deps = deps;
 #if defined(hpux)
         // Try to init LVM TAB and log errors.
-        try 
+        try
         {
             m_deps->GetLVMTab();
         }
@@ -63,7 +63,7 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Destructor
-    
+
        Kills the sampler thread hard if not shut down gracefully (by using CleanUp).
 
     */
@@ -82,7 +82,7 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Dump the object as a string for logging purposes.
-    
+
        \returns     String representation of object, suitable for logging.
 
     */
@@ -94,9 +94,9 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Find a disk instance given its device.
-    
+
        \param       device - Disk device to search for.
-       \param       includeSamplerDevice - if true sampler devices (which may be 
+       \param       includeSamplerDevice - if true sampler devices (which may be
        different) are also searched. Default is false.
        \returns     Pointer to disk instance with given device or zero if not found.
 
@@ -110,7 +110,7 @@ namespace SCXSystemLib
             return GetTotalInstance();
         }
 
-        for (EntityIterator iter = Begin(); iter != End(); iter++)
+        for (EntityIterator iter = Begin(); iter != End(); ++iter)
         {
             SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = *iter;
             SCXCoreLib::SCXFilePath path(disk->m_device);
@@ -136,7 +136,7 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Initializes the disk collection and starts the sampler thread.
-    
+
     */
     void StatisticalLogicalDiskEnumeration::Init()
     {
@@ -150,10 +150,10 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Initializes the disk instances.
-    
+
        \note This method is a helper to the Init method and can be used directly
        if the sampler thread is not needed.
-    
+
     */
     void StatisticalLogicalDiskEnumeration::InitInstances()
     {
@@ -166,10 +166,10 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Release the resources allocated.
-    
-       Must be called before deallocating this object. Will wait when stopping 
+
+       Must be called before deallocating this object. Will wait when stopping
        the sampler thread.
-    
+
     */
     void StatisticalLogicalDiskEnumeration::CleanUp()
     {
@@ -183,7 +183,7 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Update the enumeration potentially discovering new instances.
-    
+
        \param       updateInstances If true, update state of all instances in collection.
        \throws      SCXInternalErrorException If object is of unknown disk enumeration type.
 
@@ -192,7 +192,7 @@ namespace SCXSystemLib
     {
         SCXCoreLib::SCXThreadLock lock(m_lock);
         FindLogicalDisks();
-        
+
         if (updateInstances)
         {
             UpdateInstances();
@@ -221,10 +221,11 @@ namespace SCXSystemLib
         if (0 != total)
         {
             total->Reset();
+            SCX_LOGTRACE(m_log, L"Device being set to ONLINE for TOTAL instance");
             total->m_online = true;
         }
-        
-        for (EntityIterator iter = Begin(); iter != End(); iter++)
+
+        for (EntityIterator iter = Begin(); iter != End(); ++iter)
         {
             SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = *iter;
             disk->Update();
@@ -271,7 +272,7 @@ namespace SCXSystemLib
                 total->m_wPercentage = total_wPercent/Size();
                 total->m_tPercentage = total_tPercent/Size();
             }
-                    
+
             if (total_reads != 0)
             {
                 total->m_secPerRead = static_cast<double>(total_rTime) / static_cast<double>(total_reads) / 1000.0;
@@ -302,7 +303,7 @@ namespace SCXSystemLib
 #if defined(linux)
         m_deps->RefreshProcDiskStats();
 #endif
-        for (EntityIterator iter = Begin(); iter != End(); iter++)
+        for (EntityIterator iter = Begin(); iter != End(); ++iter)
         {
             SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = *iter;
 
@@ -322,7 +323,7 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        The disk sampler thread body.
-    
+
        \param       param - thread parameters.
 
     */
@@ -364,23 +365,25 @@ namespace SCXSystemLib
     /*----------------------------------------------------------------------------*/
     /**
        Discover logical disks.
-    
+
        Logical disks are identified by the /etc/mnttab file (by design). If ever
-       seen in that file, the disk will be discovered. If the disk is removed it 
+       seen in that file, the disk will be discovered. If the disk is removed it
        will be marked as offline.
-    
+
     */
     void StatisticalLogicalDiskEnumeration::FindLogicalDisks()
     {
-        for (EntityIterator iter=Begin(); iter!=End(); iter++)
+        SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Size of enumeration: ", this->Size()));
+        for (EntityIterator iter=Begin(); iter!=End(); ++iter)
         {
             SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = *iter;
+            SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Device being set to OFFLINE, disk: ", disk->m_mountPoint));
             disk->m_online = false;
         }
 
         m_deps->RefreshMNTTab();
-        for (std::vector<MntTabEntry>::const_iterator it = m_deps->GetMNTTab().begin(); 
-             it != m_deps->GetMNTTab().end(); it++)
+        for (std::vector<MntTabEntry>::const_iterator it = m_deps->GetMNTTab().begin();
+             it != m_deps->GetMNTTab().end(); ++it)
         {
             if ( ! m_deps->FileSystemIgnored(it->fileSystem) && ! m_deps->DeviceIgnored(it->device))
             {
@@ -434,6 +437,7 @@ namespace SCXSystemLib
                     m_deps->AddDeviceInstance(disk->m_device, L"", disk->FindLVInfoByID(m_pathToRdev.find(disk->m_device)->second), m_pathToRdev.find(disk->m_device)->second);
 #endif
                 }
+                SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Device being set to ONLINE, disk: ", disk->m_mountPoint));
                 disk->m_online = true;
             }
         }

@@ -212,7 +212,6 @@ namespace SCXSystemLib
                 // Grab the inode information while we have it
                 m_inodesTotal = s_vfs.f_files;
                 m_inodesFree = s_vfs.f_ffree;
-                m_online = true;
             }
             else
             {
@@ -221,7 +220,6 @@ namespace SCXSystemLib
                 {
                     SCX_LOGERROR(m_log, 
                         SCXCoreLib::StrAppend(L"statvfs() failed for " + m_mountPoint + L"; errno = ", errno ) );
-                    m_online = false;
                 } 
                 else 
                 {
