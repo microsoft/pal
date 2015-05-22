@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------------
-  Copyright (c) Microsoft Corporation.  All rights reserved. 
-    
+  Copyright (c) Microsoft Corporation.  All rights reserved.
+
 */
 /**
-   \file        
+   \file
 
    \brief       Disk PAL tests for static information on logical disks.
 
@@ -13,10 +13,10 @@
 /*----------------------------------------------------------------------------*/
 #include <scxcorelib/scxcmn.h>
 #include <scxsystemlib/diskdepend.h>
-#include <scxsystemlib/staticlogicaldiskenumeration.h> 
+#include <scxsystemlib/staticlogicaldiskenumeration.h>
 #include <scxsystemlib/staticlogicaldiskfullenumeration.h>
-#include <scxsystemlib/staticlogicaldiskinstance.h> 
-#include <scxsystemlib/statisticallogicaldiskenumeration.h> 
+#include <scxsystemlib/staticlogicaldiskinstance.h>
+#include <scxsystemlib/statisticallogicaldiskenumeration.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <testutils/scxunit.h>
 #include <scxcorelib/scxexception.h>
@@ -59,6 +59,7 @@ class SCXStaticLogicalDiskPalTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( SanityTestSameLogicalDisksAsStatisticalDisks );
     SCXUNIT_TEST_ATTRIBUTE(TestSameLogicalDisksAsStatisticalDisks, SLOW);
 #if defined (linux)
+    CPPUNIT_TEST( TestGetHealthStateChanges );
     CPPUNIT_TEST( TestDeviceTypesForLinux );
 #endif
 #if defined (sun)
@@ -76,7 +77,7 @@ public:
     SCXStaticLogicalDiskPalTest()
     {
         fauxMntTab = L"test_mnttab";
-        fauxDevTab = L"test_devicetab"; 
+        fauxDevTab = L"test_devicetab";
     }
 
     void setUp(void)
@@ -177,7 +178,7 @@ public:
 
             res = di->GetCompressionMethod(strVal);
             CPPUNIT_ASSERT_MESSAGE("Method GetCompressionMethod() failed", res);
-            CPPUNIT_ASSERT_MESSAGE("GetCompressionMethod() value wrong", 
+            CPPUNIT_ASSERT_MESSAGE("GetCompressionMethod() value wrong",
                 (strVal == L"Not Compressed" ||
                  (strVal == L"Unknown" && strFSType == L"zfs")) );
 
@@ -188,8 +189,8 @@ public:
 
             res = di->GetEncryptionMethod(strVal);
             CPPUNIT_ASSERT_MESSAGE("Method GetEncryptionMethod() failed", res);
-            CPPUNIT_ASSERT_MESSAGE("GetEncryptionMethod() value wrong", 
-                                   (strVal == L"Not Encrypted" || 
+            CPPUNIT_ASSERT_MESSAGE("GetEncryptionMethod() value wrong",
+                                   (strVal == L"Not Encrypted" ||
                                     (strVal == L"Unknown" && strFSType == L"zfs" )) );
 
             /* The file systems that are thrown to us ("real" file systems) are all persistent */
@@ -237,7 +238,7 @@ public:
             CPPUNIT_ASSERT_MESSAGE("Method GetBlockSize() value wrong",
                                    ulongVal == 512 || ulongVal == 1024 || ulongVal == 2048 ||
                                    ulongVal == 4096 || ulongVal == 8192 ||
-                                   ulongVal == 65536 /* Oddball case for HP-UX pa-risc /stand file system */|| 
+                                   ulongVal == 65536 /* Oddball case for HP-UX pa-risc /stand file system */||
                                    ulongVal == 131072 /* this one was found on SUN/zfs */ );
         }
     }
@@ -275,6 +276,59 @@ public:
     }
 
 #if defined (linux)
+
+    void TestGetHealthStateChanges()
+    {
+        bool res, online;
+        SCXCoreLib::SCXHandle<DiskDependTest> deps( new DiskDependTest() );
+        SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
+        FILE* fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
+        CPPUNIT_ASSERT(fp != NULL);
+        std::string mtabInit("/dev/mapper/VolGroup-lv_root / ext4 rw 0 0\n"
+            "proc /proc proc rw 0 0\n"
+            "sysfs /sys sysfs rw 0 0\n"
+            "devpts /dev/pts devpts rw,gid=5,mode=620 0 0\n"
+            "tmpfs /dev/shm tmpfs rw,rootcontext=\"system_u:object_r:tmpfs_t:s0\" 0 0\n"
+            "/dev/sda1 /boot ext4 rw 0 0\n"
+            "none /proc/sys/fs/binfmt_misc binfmt_misc rw 0 0\n");
+        std::string graphite("/dev/sdb1 /opt/graphite ext4 rw 0 0\n");
+        fputs(mtabInit.c_str(), fp);
+        fclose(fp);
+        deps->SetMountTabPath(fauxMntTab);
+
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum = new SCXSystemLib::StaticLogicalDiskEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
+
+        // Initially the tested disk is not present
+        SCXCoreLib::SCXHandle<SCXSystemLib::StaticLogicalDiskInstance> disk;
+        disk = m_diskEnum->GetInstance(L"/opt/graphite");
+        CPPUNIT_ASSERT_MESSAGE("Found unexpected disk instance", disk == NULL);
+
+        // When we add the disk, it should be present and online
+        fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
+        CPPUNIT_ASSERT(fp != NULL);
+        fputs((mtabInit + graphite).c_str(), fp);
+        fclose(fp);
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
+        disk = m_diskEnum->GetInstance(L"/opt/graphite");
+        CPPUNIT_ASSERT_MESSAGE("Did not find expected disk", disk != NULL);
+        res = disk->GetHealthState(online);
+        CPPUNIT_ASSERT_MESSAGE("Method GetHealthState() failed", res);
+        CPPUNIT_ASSERT_MESSAGE("Disk should be online", online);
+
+        // When the disk is removed, it should still be present but offline
+        fp = fopen(SCXCoreLib::StrToUTF8(fauxMntTab).c_str(), "wb");
+        CPPUNIT_ASSERT(fp != NULL);
+        fputs(mtabInit.c_str(), fp);
+        fclose(fp);
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
+        disk = m_diskEnum->GetInstance(L"/opt/graphite");
+        CPPUNIT_ASSERT_MESSAGE("Did not find expected disk", disk != NULL);
+        res = disk->GetHealthState(online);
+        CPPUNIT_ASSERT_MESSAGE("Method GetHealthState() failed", res);
+        CPPUNIT_ASSERT_MESSAGE("Disk should be offline", !online);
+    }
 
     void TestDeviceTypesForLinux()
     {
@@ -347,7 +401,7 @@ public:
         return;
     }
 
-#endif
+#endif // defined (linux)
 
 #if defined (sun)
     /*----------------------------------------------------------------------------*/
@@ -560,7 +614,7 @@ public:
     void TestSimulatedLogicalDisks()
     {
 
-#if defined(linux) 
+#if defined(linux)
         SCXCoreLib::SCXHandle<DiskDependTest> deps( new DiskDependTest() );
         SCXCoreLib::SelfDeletingFilePath mntTab(fauxMntTab);
 
@@ -614,7 +668,7 @@ public:
         OneLogicalDiskTest(1, mountPoint1_frsize, mountPoint1_frsize*mountPoint1_blocks, mountPoint1_frsize*mountPoint1_bfree,
                            mountPoint1_namemax, mountPoint1_devName, mountPoint1_name, mountPoint1_name, mountPoint1_basetype);
 #endif// defined(aix) || defined(hpux)
-    } 
+    }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION( SCXStaticLogicalDiskPalTest );
