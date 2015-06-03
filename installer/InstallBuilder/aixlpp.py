@@ -24,6 +24,7 @@ class AIXLPPFile:
         self.preInstallPath = os.path.join(self.tempDir, self.filesetName + '.pre_i')
         self.postInstallPath = os.path.join(self.tempDir, self.filesetName + '.config')
         self.preUninstallPath = os.path.join(self.tempDir, self.filesetName + '.unconfig')
+        self.postUninstallPath = os.path.join(self.tempDir, self.filesetName + '.unpost_i')
         self.preUpgradePath = os.path.join(self.tempDir, self.filesetName + '.pre_rm')
         self.fullversion_dashed = self.fullversion = self.variables["VERSION"]
         if "RELEASE" in self.variables:
@@ -44,6 +45,7 @@ class AIXLPPFile:
         self.WriteScriptFile(self.preUpgradePath, "Preupgrade")
         self.WriteScriptFile(self.postInstallPath, "Postinstall")
         self.WriteScriptFile(self.preUninstallPath, "Preuninstall")
+        self.WriteScriptFile(self.postUninstallPath, "Postuninstall")
 
     def GeneratePackageDescriptionFiles(self):
         self.GenerateScripts()
