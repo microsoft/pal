@@ -314,7 +314,6 @@ namespace SCXSystemLib
         SCX_LOGHYSTERICAL(m_log, StrAppend(L"    irq delta = ", irq_delta_tics));
         SCX_LOGHYSTERICAL(m_log, StrAppend(L"    softirq delta = ", softirq_delta_tics));
 
-        m_processorTime = GetPercentageSafe(idle_delta_tics,   total_delta_tics, true);
         m_idleTime      = GetPercentageSafe(idle_delta_tics,   total_delta_tics);
         m_userTime      = GetPercentageSafe(user_delta_tics,   total_delta_tics);
         m_niceTime      = GetPercentageSafe(nice_delta_tics,   total_delta_tics);
@@ -322,6 +321,11 @@ namespace SCXSystemLib
         m_iowaitTime    = GetPercentageSafe(iowait_delta_tics, total_delta_tics);
         m_interruptTime = GetPercentageSafe(irq_delta_tics,    total_delta_tics);
         m_dpcTime       = GetPercentageSafe(softirq_delta_tics,total_delta_tics);
+        // m_processorTime is sum of non-idle time NOT including I/O wait time
+        // (Adding the percentages gives rounding err)
+        m_processorTime = GetPercentageSafe(
+            user_delta_tics + nice_delta_tics + system_delta_tics + irq_delta_tics + softirq_delta_tics,
+            total_delta_tics);
 
 #elif defined(aix)
 
@@ -352,9 +356,9 @@ namespace SCXSystemLib
         m_privilegedTime = GetPercentageSafe(system_delta_tics, total_delta_tics);
         m_iowaitTime = GetPercentageSafe(iowait_delta_tics, total_delta_tics);
         m_idleTime = GetPercentageSafe(idle_delta_tics, total_delta_tics);
-        // m_processorTime is sum of non-idle time. (Adding the percentages gives rounding err)
-        m_processorTime = GetPercentageSafe(user_delta_tics + system_delta_tics
-                                            + iowait_delta_tics, total_delta_tics);
+        // m_processorTime is sum of non-idle time NOT including I/O wait time
+        // (Adding the percentages gives rounding err)
+        m_processorTime = GetPercentageSafe(user_delta_tics + system_delta_tics, total_delta_tics);
 
 #else
 #error "Implement this!"
