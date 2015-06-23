@@ -1090,10 +1090,16 @@ namespace SCXSystemLib
             headCnt = kernelGeometry.heads;
             sectorsPerTrack = kernelGeometry.sectors;
         }
-        else if (ret != 0)
+        else if (ret == -1)
         {
             std::wstringstream out;
-            out << L"On device \"" << m_device << L"\" ioctl(HDIO_GETTEO) failed with errno = " << StrFrom(errno) << L".";
+            out << L"On device \"" << m_device << L"\" ioctl(HDIO_GETGEO) failed with errno = " << StrFrom(errno) << L".";
+            SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
+        }
+        else
+        {
+            std::wstringstream out;
+            out << L"On device \"" << m_device << L"\" ioctl(HDIO_GETGEO) returned non-zero value = " << StrFrom(ret) << L".";
             SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
         }
 
@@ -1102,10 +1108,16 @@ namespace SCXSystemLib
         {
             sectorSize = kernelSectorSize;
         }
-        else
+        else if (ret == -1)
         {
             std::wstringstream out;
             out << L"On device \"" << m_device << L"\" ioctl(BLKSSZGET) failed with errno = " << StrFrom(errno) << L".";
+            SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
+        }
+        else
+        {
+            std::wstringstream out;
+            out << L"On device \"" << m_device << L"\" ioctl(BLKSSZGET) returned non-zero value = " << StrFrom(ret) << L".";
             SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
         }
 
@@ -1114,7 +1126,7 @@ namespace SCXSystemLib
         {
             totalSize = kernelTotalSize64;
         }
-        else
+        else if (ret == -1)
         {
             std::wstringstream out;
             out << L"On device \"" << m_device << L"\" ioctl(BLKGETSIZE64) failed with errno = " <<
@@ -1127,13 +1139,24 @@ namespace SCXSystemLib
             {
                 totalSize = kernelTotalSize * 512;
             }
+            else if (ret == -1)
+            {
+                out.str(L"");
+                out << L"On device \"" << m_device << L"\" ioctl(BLKGETSIZE) failed with errno = " << StrFrom(errno) << L".";
+                SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
+            }
             else
             {
                 out.str(L"");
-                out << L"On device \"" << m_device << L"\" ioctl(BLKGETSIZE) failed with errno = " <<
-                        StrFrom(errno) << L".";
+                out << L"On device \"" << m_device << L"\" ioctl(BLKGETSIZE) returned non-zero value = " << StrFrom(ret) << L".";
                 SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
             }
+        }
+        else
+        {
+            std::wstringstream out;
+            out << L"On device \"" << m_device << L"\" ioctl(BLKGETSIZE64) returned non-zero value = " << StrFrom(ret) << L".";
+            SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
         }
         GetDiskGeometry(totalSize, sectorSize, cylinderCnt, headCnt, sectorsPerTrack);
     }

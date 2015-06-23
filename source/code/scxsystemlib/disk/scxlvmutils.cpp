@@ -86,9 +86,24 @@ namespace SCXSystemLib {
         SCXCoreLib::SCXLogHandle log = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.system.disk.scxlvmutils");
         std::wstringstream       out;
 
+        SCX_LOGHYSTERICAL(log, SCXCoreLib::StrAppend(L"Looking for LVM device: ", lvmDevice));
+
+        // WI 891635: Debian 8 DiskDrive reports weird file system
+        //
+        // Turns out that Debian 8 LVM is set up slightly differently, such that
+        // the raw DM device (i.e. /dev/dm-0) is mounted directly. Just return
+        // the device if that's what we got.
+        if (SCXCoreLib::StrIsPrefix(lvmDevice, L"/dev/dm-"))
+        {
+            SCX_LOGHYSTERICAL(log, SCXCoreLib::StrAppend(SCXCoreLib::StrAppend(L"Device ", lvmDevice), L" is already DM device, returning it"));
+            return lvmDevice;
+        }
+
         // All LVM devices are in the /dev/mapper directory.
         if (IsDMDevice(lvmDevice))
         {
+            SCX_LOGHYSTERICAL(log, SCXCoreLib::StrAppend(SCXCoreLib::StrAppend(L"Device: ", lvmDevice), L" IsDMDevice ..."));
+
             // Stat the LVM device.  Its minor ID number will indicate which
             // dm device it maps to.
             unsigned int major = 0;
@@ -110,6 +125,11 @@ namespace SCXSystemLib {
             try
             {
                 isMatch = StatPathId(dmDevice.str(), dmMajor, dmMinor);
+                SCX_LOGHYSTERICAL(log, SCXCoreLib::StrAppend(
+                                           SCXCoreLib::StrAppend(
+                                               SCXCoreLib::StrAppend(L"  Stat of ", dmDevice.str()),
+                                               L" succeeded, isMatch: "),
+                                           SCXCoreLib::StrFrom(isMatch)));
             }
             catch (SCXCoreLib::SCXFilePathNotFoundException & e)
             {
@@ -168,6 +188,8 @@ namespace SCXSystemLib {
             }
 
             // done, found best match 100% confidence
+
+            SCX_LOGHYSTERICAL(log, SCXCoreLib::StrAppend(L"Returning Device: ", dmDevice.str()));
             return dmDevice.str();
         }
         else
@@ -178,6 +200,7 @@ namespace SCXSystemLib {
             SCX_LOGHYSTERICAL(log, out.str());
         }
 
+        SCX_LOGHYSTERICAL(log, SCXCoreLib::StrAppend(L"Returning result: ", result));
         return result;
     }
 
