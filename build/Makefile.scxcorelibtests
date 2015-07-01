@@ -37,6 +37,7 @@ POSIX_UNITTESTS_CORE_SRCFILES = \
 	$(CORELIB_UNITTEST_ROOT)/pal/scxthreadpool_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/pal/scxtime_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/pal/scxuser_test.cpp \
+	$(CORELIB_UNITTEST_ROOT)/pal/scxipvalidation_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxexception_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxhandle_test.cpp \
 	$(CORELIB_UNITTEST_ROOT)/util/scxmath_test.cpp \

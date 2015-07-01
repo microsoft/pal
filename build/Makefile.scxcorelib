@@ -61,7 +61,8 @@ STATIC_CORELIB_SRCFILES = \
 	$(CORELIB_ROOT)/pal/scxlocale.cpp \
 	$(CORELIB_ROOT)/util/persist/scxfilepersistmedia.cpp \
 	$(CORELIB_ROOT)/util/persist/scxfilepersistdatareader.cpp \
-	$(CORELIB_ROOT)/util/persist/scxfilepersistdatawriter.cpp
+	$(CORELIB_ROOT)/util/persist/scxfilepersistdatawriter.cpp \
+	$(CORELIB_ROOT)/pal/scxip.cpp
 
 
 # Extra include dirs for certain include files
