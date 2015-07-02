@@ -214,9 +214,9 @@
   <!-- 
   <Target Name="GenerateDocumentation">
     <Message Text="Generating documentation with Doxygen on $(UnixBuildServer)" />
-    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\sources\bootstrap" 
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\src\bootstrap" 
           Command='PowerShell .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/bootstrap/RunBuild.bsh $(UnixWorkspaceName) $(DoxygenMakeTarget) $(ConfigToBuild)' />
-    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\sources\bootstrap"
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\src\bootstrap"
           Command='PowerShell .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/bootstrap/DropDocumentation.bsh $(UnixWorkspaceName) $(DropShare) $(DoxygenDropFolder)' />
   </Target>-->
 
