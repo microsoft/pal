@@ -43,8 +43,8 @@ POSIX_UNITTESTS_SYSTEM_SRCFILES += \
 	$(SYSTEMLIB_UNITTEST_ROOT)/cpuproperties/cpupropertiesenumeration_test.cpp \
 	$(SYSTEMLIB_UNITTEST_ROOT)/cpuproperties/cpupropertiesinstance_test.cpp \
 	$(SYSTEMLIB_UNITTEST_ROOT)/computersystem/computersystemenumeration_test.cpp \
-	$(SYSTEMLIB_UNITTEST_ROOT)/computersystem/computersysteminstance_test.cpp
-
+	$(SYSTEMLIB_UNITTEST_ROOT)/computersystem/computersysteminstance_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/netroute/nxnetroute_test.cpp
 endif
 
 

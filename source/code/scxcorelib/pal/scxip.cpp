@@ -1,5 +1,7 @@
 #include <scxcorelib/scxip.h>
 #include <arpa/inet.h>
+#include <sstream>
+#include <scxcorelib/stringaid.h>
 
 namespace SCXCoreLib
 {
@@ -33,6 +35,51 @@ namespace SCXCoreLib
 //do nothing
         return 0;
 #endif
-
     }
+
+    std::wstring IP::ConvertHexToIpAddress(std::wstring hex)
+    {
+#if defined (linux)
+
+        std::stringstream ss;        
+        ss << StrToUTF8(hex);
+        uint32_t val;
+        ss  >> std::hex >>  val;
+        struct in_addr addr;
+        addr.s_addr = htonl(val);
+        std::string ipaddress = inet_ntoa(addr);
+        return StrFromUTF8(ipaddress);  
+#else
+//do nothing
+        return L"REQUEST_NOT_AVAILABLE";
+#endif
+    }
+
+    std::wstring IP::ConvertIpAddressToHex(std::wstring ipAddress)
+    {
+#if defined (linux)
+        const unsigned bits_per_term = 8;
+        const unsigned num_terms = 4;
+
+        std::istringstream ip(StrToUTF8(ipAddress));
+        uint32_t packed = 0;
+        for (unsigned int i = 0; i < num_terms; ++i)
+        {
+            unsigned int term;
+            ip >> term;
+            ip.ignore();
+            packed += term << (bits_per_term * (num_terms-i-1));
+        }
+
+        std::wstringstream wss;
+        wss << L"00000000" << std::hex << std::uppercase << packed;
+        
+        int pos = static_cast<uint32_t>(wss.str().length()) - 8;
+        return wss.str().substr(pos);
+    
+#else
+//do nothing
+        return L"REQUEST_NOT_AVAILABLE";
+#endif
+}
 }
