@@ -46,8 +46,6 @@ public:
     CPPUNIT_TEST( TestInvalidCharacterIPv6 );
     CPPUNIT_TEST( TestOutOfBoundsIPv6 );
     CPPUNIT_TEST( TestIPStringValid );
-    CPPUNIT_TEST( TestHexToIPAddressConversion);
-    CPPUNIT_TEST( TestIPAddressToHexConversion);
 
 #else
 #endif
@@ -164,42 +162,6 @@ public:
     {
         const std::string testipv4Normal = "192.168.0.1";
         CPPUNIT_ASSERT_EQUAL(1, SCXCoreLib::IP::IsValidIPAddress(testipv4Normal));
-    }
-
-
-    void TestHexToIPAddressConversion()
-    {
-        CPPUNIT_ASSERT_EQUAL( StrToUTF8(IP::ConvertHexToIpAddress(L"0xA8EAFFFF")), "168.234.255.255");
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"00F8E70A").compare(L"0.248.231.10") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"A8EAFFFF").compare(L"168.234.255.255") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"01008000").compare(L"1.0.128.0") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"DFCFFFFF").compare(L"223.207.255.255") == 0 );
-
-        // min and max private addresses
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"0A000000").compare(L"10.0.0.0") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"C0A8FFFF").compare(L"192.168.255.255") == 0 );
-
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"7FFFFFFF").compare(L"127.255.255.255") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"7F000000").compare(L"127.0.0.0") == 0 );
-    }
-
-    void TestIPAddressToHexConversion()
-    {
-        std::wstring ipAddress(L"0.248.231.10");
-        std::wstring hex = SCXCoreLib::IP::ConvertIpAddressToHex(ipAddress);
-        CPPUNIT_ASSERT( (hex.compare(L"00F8E70A")==0));
-
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"0.248.231.10").compare(L"00F8E70A") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"168.234.255.255").compare(L"A8EAFFFF") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"1.0.128.0").compare(L"01008000") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"223.207.255.255").compare(L"DFCFFFFF") == 0 );
-
-        // min and max private addresses
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"10.0.0.0").compare(L"0A000000") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"192.168.255.255").compare(L"C0A8FFFF") == 0 );
-
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"127.0.0.0").compare(L"7F000000") == 0 );
-        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"127.255.255.255").compare(L"7FFFFFFF") == 0 );
     }
 
 };
