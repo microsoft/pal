@@ -308,7 +308,7 @@ namespace SCXSystemLib
             {
                 SCXFile::ReadAllLines(SCXFilePath(*it), lines, nlfs);
                 if (lines.size() > 0)
-                {               
+                {
                     // parse input like dhcp
                     ParseDHCP(lines);
                     return;
@@ -319,14 +319,14 @@ namespace SCXSystemLib
             {
                 SCXFile::ReadAllLines(SCXFilePath(*it), lines, nlfs);
                 if (lines.size() > 0)
-                {               
+                {
                     // parse input like dhcpcd
                     ParseDHCPCD(lines);
                     return;
                 }
             }
         }
- 
+
 #elif defined(sun)
         std::vector<std::wstring> tokens;
         std::istringstream processInput;
@@ -346,7 +346,7 @@ namespace SCXSystemLib
 
             lines.clear();
             SCXCoreLib::SCXStream::ReadAllLinesAsUTF8(dhcpResult, lines, nlfs);
-            
+
             std::wstring errOut = StrFromUTF8(processErr.str());
             for (int i = 0; i < (int) lines.size(); i++)
             {
@@ -360,7 +360,7 @@ namespace SCXSystemLib
                 }
             }
         }
-        catch (SCXCoreLib::SCXException &e) 
+        catch (SCXCoreLib::SCXException &e)
         {
             SCX_LOGERROR(m_log, L"Exception on netstat process:" + e.What());
         }
@@ -386,47 +386,47 @@ namespace SCXSystemLib
         }
         SCXFile::ReadAllLines(SCXFilePath(leaseFile), lines, nlfs);
         std::vector< std::vector<std::wstring> > parsedLines;
-        
+
         // For a set of lines of form
         //      <code> <length> f1 f2 f3 ... f<n>, where <code> and <length> are ints
         // put f1 ... f<n> in vector parsedLines[<code>]
         /* For example:
                00 4 lan0
-               01 0 
-               02 0 
-               03 0 
-               04 0 
+               01 0
+               02 0
+               03 0
+               04 0
                05 7 SCX.com
                06 4 43200
                07 4 1334804239
                08 4 0
                09 4 0
                10 4 1
-               11 6 16 aa 19 ff 30 7a 
+               11 6 16 aa 19 ff 30 7a
                12 4 10.217.5.127
                13 4 255.255.254.0
                14 4 0.0.0.0
-               15 4 10.217.4.1 
+               15 4 10.217.4.1
                16 4 10.217.2.6
                17 4 0.0.0.0
-               18 0 
-               19 8 10.217.2.6 10.195.172.6 
-               20 0 
+               18 0
+               19 8 10.217.2.6 10.195.172.6
+               20 0
                21 4 0.0.0.0
-               22 0 
-               23 0 
+               22 0
+               23 0
                24 64 63 82 53 63 35 1 5 3a 4 0 0 54 60 3b 4 0 0 93 a8 33 4 0 0 a8 c0 36 4 a d9 ... etc
                00 4 lan1
                01 ...
                ...
                24 5 ab cd ef 12 34
         */
-        
+
         // <length> seems to be the number of bytesfor a single or list of ip addresses
         //                                            (e.g., two ip addresses is 8 octets)
         //                      the number of space delimited substrings, for a mac address or option list
         //                      the number of characters, for the interface name
-        
+
         bool foundInterface = false;
         for (int i = 0; i < lines.size(); i++)
         {
@@ -455,13 +455,13 @@ namespace SCXSystemLib
                 }
                 continue;
             }
-            
+
             // Skip other codes if they belong to the wrong interface
             if (!foundInterface)
             {
                 continue;
             }
-            
+
             // Otherwise, we're at the following codes for the right interface.  Create a vector for this line's tokens.
             std::vector<std::wstring> lineTokens;
             // Save tokens 2 to end
@@ -471,13 +471,13 @@ namespace SCXSystemLib
             }
             parsedLines.push_back(lineTokens);
         }
-        
+
         // No member variables can be set if we never found the right interface, so quit.
         if (!foundInterface)
         {
             return;
         }
-        
+
         // Compute intervals from lease duration and renewal percent
         int leaseDurationSecs = StrToUInt(parsedLines[LEASE_DURATION][0]);
         SCXAmountOfTime leaseDurationInterval;
@@ -497,9 +497,13 @@ namespace SCXSystemLib
         m_DHCPServer =     strJoin(parsedLines[SERVER_ADDR],     L".");
         m_domainName =     strJoin(parsedLines[DOMAIN_NAME],     L".");
         m_defaultGateway = strJoin(parsedLines[DEFAULT_GATEWAY], L".");
+#elif defined(aix)
+        //Not implemented
+#else
+    #error Platform not supported
 #endif
     }
-    
+
     struct tm DHCPLeaseInfo::parseYmd(std::wstring ymd)
     {
         struct tm date;
@@ -515,7 +519,7 @@ namespace SCXSystemLib
         date.tm_mday = SCXCoreLib::StrToUInt(parsedDate[2]);
         return date;
    }
-   
+
    SCXCalendarTime DHCPLeaseInfo::strToSCXCalendarTime(std::wstring date, std::wstring time)
    {
        struct tm edate;
@@ -533,13 +537,13 @@ namespace SCXSystemLib
                edate = edateLoc;
            }
        }
-       
+
        struct tm etime;
        strptime(SCXCoreLib::StrToUTF8(time).c_str(), "%H:%M", &etime); // 24 hour clock
-       
+
        return SCXCalendarTime(edate.tm_year+1900, edate.tm_mon+1, edate.tm_mday, etime.tm_hour, etime.tm_min, 0, SCXRelativeTime());
    }
-   
+
    std::wstring DHCPLeaseInfo::strJoin(std::vector<std::wstring> parts, std::wstring sep)
    {
         std::wstring result;
@@ -553,6 +557,6 @@ namespace SCXSystemLib
             }
         }
         return result;
-   }       
+   }
 
 }

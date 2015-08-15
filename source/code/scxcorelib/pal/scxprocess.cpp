@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------------------
     Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-    
+
 */
 /**
     \file        scxprocess.cpp
 
-    \brief       Implements the process handling PAL. 
-    
+    \brief       Implements the process handling PAL.
+
     \date        2007-10-12 15:43:00
- 
+
 */
 /*----------------------------------------------------------------------------*/
 
@@ -45,7 +45,7 @@
 
 namespace SCXCoreLib
 {
- 
+
     SignalBlock::SignalBlock(int sigmask) : m_sigmask(sigmask)
     {
         sigemptyset(&m_set);
@@ -75,9 +75,9 @@ namespace SCXCoreLib
     /*----------------------------------------------------------------------------*/
     /**
         Retrieve the calling process', process id.
-    
+
         \returns      SCXProcessId of the calling thread.
-        
+
     */
     SCXProcessId SCXProcess::GetCurrentProcessID()
     {
@@ -109,15 +109,15 @@ namespace SCXCoreLib
     //!
     //! \note   Parts are delimited by spaces, not the quotes. If one were to list all files
     //          of the directory /usr/local/apache-tomcat/, it could be written as follows:
-    //!         ls "/usr/"local/'apache-tomcat/'. That is useful if a command consists of 
+    //!         ls "/usr/"local/'apache-tomcat/'. That is useful if a command consists of
     //!         single as well as double quotes.
     std::vector<std::wstring> SCXProcess::SplitCommand(const std::wstring &command) {
         std::vector<std::wstring> parts;
-        
+
         std::wostringstream part;
         bool newPart = false, escape = false;
         wchar_t quote = 0;
-        for (std::wstring::size_type i = 0; i < command.length(); i++) 
+        for (std::wstring::size_type i = 0; i < command.length(); i++)
         {
             wchar_t c = command.at(i);
             if (c == '\\')
@@ -134,21 +134,21 @@ namespace SCXCoreLib
                     escape = true;
                 }
             }
-            else if (c == ' ') 
+            else if (c == ' ')
             {
-                if (quote) 
+                if (quote)
                 {
                     part << c;
                 }
-                else if (newPart) 
+                else if (newPart)
                 {
                     parts.push_back(part.str());
-                    part.str(L"");                    
+                    part.str(L"");
                     newPart = false;
                 }
                 escape = false;
-            } 
-            else if (c == '\'' || c == '"') 
+            }
+            else if (c == '\'' || c == '"')
             {
                 if (escape && c == '\'')
                 {
@@ -164,7 +164,7 @@ namespace SCXCoreLib
                     }
                     else if (quote)
                     {
-                        part << c;                   
+                        part << c;
                     }
                     else
                     {
@@ -177,7 +177,7 @@ namespace SCXCoreLib
                     escape = false;
                 }
             }
-            else 
+            else
             {
                 part << c;
                 newPart = true;
@@ -185,11 +185,11 @@ namespace SCXCoreLib
             }
         }
         if (newPart) {
-            parts.push_back(part.str());      
+            parts.push_back(part.str());
         }
         return parts;
     }
-    
+
 #if defined(SCX_UNIX)
 
         /**********************************************************************************/
@@ -205,7 +205,7 @@ namespace SCXCoreLib
     //! \throws     SCXInternalErrorException           Failure that could not be prevented
     //! This call will block as long as the process writes to its stdout or stderr
     //! \note   Make sure that "mystdout" and "mystderr" does not block when written to.
-    //! 
+    //!
     //! \date        2007-12-05 15:43:00
     int SCXProcess::Run(const std::wstring &command,
                         std::istream &mystdin,
@@ -228,12 +228,12 @@ namespace SCXCoreLib
         return Run(SplitCommand(command), mystdin, mystdout,mystderr, timeout, cwd, chrootPath);
 #endif
     }
-    
+
 
     /**********************************************************************************/
-    //! Class for running a process with an option to timeout 
+    //! Class for running a process with an option to timeout
     class ProcessThreadParam : public SCXThreadParam
-    {   
+    {
     public:
         //! Constructor that starts a process
         //! \param[in]  process     Process to monitor
@@ -250,9 +250,9 @@ namespace SCXCoreLib
         //! \param[in]  mystderr    Represents stderr of process
         //! \returns Return code from process being run.
         int WaitForReturn(std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr)
-        {               
+        {
             int returnCode = -1;
-            try 
+            try
             {
                 returnCode =  m_process->WaitForReturn(mystdin, mystdout, mystderr);
                 m_processTerminated = true;
@@ -267,10 +267,10 @@ namespace SCXCoreLib
 
         /**********************************************************************************/
         //! Wait a limited amount of time for the process to terminate.
-        void WaitForReturn() 
+        void WaitForReturn()
         {
             // Good enough way of waiting for the process
-            int timeoutLeft = m_timeout;             
+            int timeoutLeft = m_timeout;
             while (timeoutLeft > 0 && !m_processTerminated)
             {
                 const int timeBetweenChecks = 1000;
@@ -284,7 +284,7 @@ namespace SCXCoreLib
         }
 
     private:
-        ProcessThreadParam(const ProcessThreadParam &);             //!< Prevent copying               
+        ProcessThreadParam(const ProcessThreadParam &);             //!< Prevent copying
         ProcessThreadParam &operator=(const ProcessThreadParam &);  //!< Prevent assignment
 
         SCXProcess *m_process;      //!< Process to run
@@ -297,7 +297,7 @@ namespace SCXCoreLib
     //! \param[in]  handle      Parameters of thread
     //! \note Meant to be called in a separate thread by being passed as argument to Thread constructor
     void WaitForReturnFn(SCXCoreLib::SCXThreadParamHandle& handle)
-    {        
+    {
         ProcessThreadParam* param = static_cast<ProcessThreadParam *>(handle.GetData());
         param->WaitForReturn();
     }
@@ -324,13 +324,13 @@ namespace SCXCoreLib
     //! \throws     SCXInternalErrorException           Failure that could not be prevented
     //! This call will block as long as the process writes to its stdout or stderr
     //! \note   Make sure that "mystdout" and "mystderr" does not block when written to.
-    //! 
+    //!
     //! \date        2007-12-05 15:43:00
     int SCXProcess::Run(const std::vector<std::wstring> &myargv,
                         std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
                         unsigned timeout,
                         const SCXFilePath& cwd/* = SCXFilePath()*/,
-                        const SCXFilePath& chrootPath /* = SCXFilePath() */) 
+                        const SCXFilePath& chrootPath /* = SCXFilePath() */)
     {
         SCXProcess process(myargv, cwd, chrootPath);
         return Run(process, mystdin, mystdout, mystderr, timeout);
@@ -349,7 +349,7 @@ namespace SCXCoreLib
     //! \note   Make sure that "mystdout" and "mystderr" does not block when written to.
     //!
     //! \date        2009-05-13 10:20:00
-    int SCXProcess::Run(SCXProcess& process, 
+    int SCXProcess::Run(SCXProcess& process,
                         std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr, unsigned timeout /*= 0*/)
     {
         int returnCode = -1;
@@ -393,12 +393,12 @@ namespace SCXCoreLib
             m_timeoutOverhead(0)
     {
         // Convert arguments to types expected by the system function for running processes
-        for (std::vector<char *>::size_type i = 0; i < myargv.size(); i++) 
+        for (std::vector<char *>::size_type i = 0; i < myargv.size(); i++)
         {
             m_cargv.push_back(strdup(StrToUTF8(myargv[i]).c_str()));
         }
         m_cargv.push_back(0);
-        
+
         // Create pipes for communicating with the child process
         if ( -1 == pipe(m_inForChild) ) {
                throw SCXInternalErrorException(L"Failed to open pipe for m_inForChild", SCXSRCLOCATION);
@@ -415,14 +415,15 @@ namespace SCXCoreLib
         const ssize_t c_magicGUID_length = 36;
 
         m_pid = fork();                         // Create child process, duplicates file descriptors
-        if (m_pid == 0) 
+        if (m_pid == 0)
         {
-            // Set the pgid of the forked process to be the same as the forked process's pid, so that 
+            char error_msg[1024];
+            // Set the pgid of the forked process to be the same as the forked process's pid, so that
             // we can kill the forked process and all subprocesses (if necessary) by calling killpg.
             setpgid(0, 0);
- 
+
             // Communicate with the parent process that the child process has set its process group id.
-            write(m_outForChild[W], c_magicGUID, c_magicGUID_length);
+            ssize_t bytes_written = DoWrite(m_outForChild[W], c_magicGUID, c_magicGUID_length);
 
             // Child process.
             // The file descriptors are duplicates, created by "fork",  of those in the parent process
@@ -436,7 +437,17 @@ namespace SCXCoreLib
             close(m_errForChild[R]);                  // The child only writes to its stdout
             close(m_errForChild[W]);                  // Close duplicate
 
-            char error_msg[1024];
+            if (bytes_written == -1)
+            {
+                snprintf(error_msg,
+                            sizeof(error_msg),
+                            "Failed to communicate with the parent process errno=%d",
+                            errno);
+                // Still try to inform the parent of imminent death
+                DoWrite(STDERR_FILENO, error_msg, strlen(error_msg));
+                CloseAndDie();
+            }
+
             if (L"" != chrootPath.Get())
             {
                 if ( 0 != ::chroot(StrToUTF8(chrootPath.Get()).c_str()))
@@ -549,7 +560,7 @@ namespace SCXCoreLib
                     }
                     break;
                 }
-                else if (readVal < 0) 
+                else if (readVal < 0)
                 {
                     if (errno == EAGAIN)
                     {
@@ -584,9 +595,9 @@ namespace SCXCoreLib
         mystdin.read(&m_stdinChars[m_stdinCharCount], m_stdinChars.size() - m_stdinCharCount);
         stdinCharsRead = mystdin.gcount();
 
-        if (!mystdin.eof() && !mystdin.good()) 
+        if (!mystdin.eof() && !mystdin.good())
         {
-            throw SCXInternalErrorException(L"Process parent communication failed", SCXSRCLOCATION);            
+            throw SCXInternalErrorException(L"Process parent communication failed", SCXSRCLOCATION);
         }
 
         m_stdinCharCount += static_cast<int>(stdinCharsRead);
@@ -595,8 +606,8 @@ namespace SCXCoreLib
         {
             bytesWritten = DoWrite(m_inForChild[W], &m_stdinChars[0], m_stdinCharCount);
         }
-        
-        if (bytesWritten < 0) 
+
+        if (bytesWritten < 0)
         {
             if (EPIPE == errno)
             {
@@ -613,7 +624,7 @@ namespace SCXCoreLib
 
         return (0 != stdinCharsRead || 0 != m_stdinCharCount);
     }
-    
+
     /**********************************************************************************/
     //! Perform I/O to/from stdin, stdout, and stderr for a process
     //! \param[in]  mystdin     Content that must be sent to the process stdin
@@ -663,8 +674,8 @@ namespace SCXCoreLib
         if (pollStatus < 0)             /* Error occurred */
         {
             throw SCXInternalErrorException(UnexpectedErrno(L"Process communication failed", errno), SCXSRCLOCATION);
-        }                
-        
+        }
+
         if (pollStatus > 0)             /* No timeout */
         {
             // Check if we can write to the child's stdin channel
@@ -676,7 +687,7 @@ namespace SCXCoreLib
             {
                 m_stdinActive = SendInput(mystdin);
             }
-       
+
             // Check if we have data to read from streams
             // (If no data to read, check if stream has closed)
             if (fds[1].revents & POLLIN)
@@ -706,7 +717,7 @@ namespace SCXCoreLib
     //! \param[in]  mystdin     Content that must be sent to the process stdin
     //! \param[in]  mystdout    Receiver of content that the process writes to stdout
     //! \param[in]  mystderr    Receiver of content that the process writes to stderr
-    //! \returns true if there is possibly more data to fetch (process still executing 
+    //! \returns true if there is possibly more data to fetch (process still executing
     //!          and stderr and/or stdout still open for read.
     bool SCXProcess::PerformIO(
         std::istream &mystdin,
@@ -740,15 +751,15 @@ namespace SCXCoreLib
         {
             throw SCXInternalErrorException(UnexpectedErrno(L"Failed to wait for child process", errno), SCXSRCLOCATION);
         }
-        if (!WIFEXITED(child_status)) 
+        if (!WIFEXITED(child_status))
         {
             throw SCXInterruptedProcessException(SCXSRCLOCATION);
         }
-        return WEXITSTATUS(child_status);       
+        return WEXITSTATUS(child_status);
     }
-    
+
     /**********************************************************************************/
-    //! Interacts with the process while waiting for the it to return, 
+    //! Interacts with the process while waiting for the it to return,
     //! that is, terminate normally or by beeing signaled
     //! \param[in]  mystdin     Stdin of process
     //! \param[in]  mystdout    Stdout of process
@@ -759,14 +770,14 @@ namespace SCXCoreLib
         while (fetched)
         {
             fetched = PerformIO(mystdin, mystdout, mystderr);
-        }  
+        }
 
         return WaitForReturn();
     }
-    
+
     /**********************************************************************************/
     //! Destructor
-    SCXProcess::~SCXProcess() 
+    SCXProcess::~SCXProcess()
     {
         // Free remaining resources held by the parent process
         // The child process manages its own resources
@@ -775,7 +786,7 @@ namespace SCXCoreLib
         close(m_errForChild[R]);
 
         // Free everything except the terminating NULL
-        for (std::vector<char *>::size_type i = 0; i < m_cargv.size() - 1; i++) 
+        for (std::vector<char *>::size_type i = 0; i < m_cargv.size() - 1; i++)
         {
             free(m_cargv[i]);
         }
@@ -783,17 +794,17 @@ namespace SCXCoreLib
 
     /**********************************************************************************/
     //! Terminate the process
-    void SCXProcess::Kill() 
+    void SCXProcess::Kill()
     {
-        if (killpg(m_pid, SIGKILL) < 0 && errno != ESRCH) 
+        if (killpg(m_pid, SIGKILL) < 0 && errno != ESRCH)
         {
             throw SCXInternalErrorException(UnexpectedErrno(L"Unable to kill child process group", errno), SCXSRCLOCATION);
         }
     }
-    
+
     /**********************************************************************************/
     //! Terminate the parent process, explicitly closing STDIN/OUT/ERR (so they flush)
-    void SCXProcess::CloseAndDie() 
+    void SCXProcess::CloseAndDie()
     {
         /*
           Make an attempt to exit with proper error code, so parent will pick up the
@@ -805,7 +816,7 @@ namespace SCXCoreLib
         binExit.push_back( strdup("-c") );
         binExit.push_back( strdup("exit 1") );
         binExit.push_back( 0 );
-        
+
         execvp(binExit[0], &binExit[0]);                // Replace the child process image
 
         /*
@@ -827,7 +838,7 @@ namespace SCXCoreLib
         // contructed from the parent may not distruct properly (mutexes, etc).
         abort();
     }
-    
+
     /**********************************************************************************/
     //! Read available data from socket and put it in the stream.
     //! \param fd Socket/file descriptor to read from.
@@ -858,10 +869,10 @@ namespace SCXCoreLib
         }
             stream.write(&m_buffer[0], bytesRead);
         } while (true);
-        
+
         return true;
     }
-    
+
     /**********************************************************************************/
     //! Thin wrapper around write system call.
     //! \param fd File descriptor to write to.
@@ -886,7 +897,7 @@ namespace SCXCoreLib
         SCXProcessId pid = 0;
         if (m_waitCompleted)
         {
-            pid = m_pid;            
+            pid = m_pid;
         }
         else
         {
