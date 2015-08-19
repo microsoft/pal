@@ -238,7 +238,7 @@ public:
             {
                 return 0;
             }
-                
+
             if (statistic == L"pgpgin")
             {
                 return c_totalPageReads;
@@ -392,7 +392,7 @@ public:
             m_freeMemory(freeMemory),
             m_buffers(buffers),
             m_cached(cached) {}
-            
+
     virtual ~TestWI11691MemoryDependencies() {}
 
     std::vector<wstring> GetMemInfoLines()
@@ -526,9 +526,9 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
 
         memInstance->Update();
 
-        scxulong totalPhysicalMemory = 0;    
-        scxulong availableMemory = 0; 
-        scxulong usedMemory = 0;      
+        scxulong totalPhysicalMemory = 0;
+        scxulong availableMemory = 0;
+        scxulong usedMemory = 0;
         scxulong totalSwap = 0;
         scxulong availableSwap = 0;
         scxulong usedSwap = 0;
@@ -625,31 +625,31 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
     void testAvailablemem_wi11691()
     {
 #if defined(linux)
-        // available memory on linux platforms should be calculated as 
+        // available memory on linux platforms should be calculated as
         // MemFree + Buffers + Cached
         const scxulong c_totalMemory = 512;
         const scxulong c_free = 26;
         const scxulong c_buffer = 214;
         const scxulong c_cached = 189;
-        
-        
+
+
         SCXCoreLib::SCXHandle<TestableMemoryInstance> memInstance( new TestableMemoryInstance(
             SCXCoreLib::SCXHandle<MemoryDependencies>(new TestWI11691MemoryDependencies(
             c_totalMemory, c_free, c_buffer, c_cached )) ) );
 
         memInstance->Update();
 
-        scxulong availableMemory = 0; 
-        scxulong usedMemory = 0;      
+        scxulong availableMemory = 0;
+        scxulong usedMemory = 0;
 
         memInstance->GetAvailableMemory(availableMemory);
         memInstance->GetUsedMemory(usedMemory);
-        
+
         CPPUNIT_ASSERT( availableMemory/(1024*1024) == ( c_free + c_buffer + c_cached ));
         CPPUNIT_ASSERT( usedMemory/(1024*1024) == ( c_totalMemory - (c_free + c_buffer + c_cached) ));
 
         memInstance->VerifyMeminfoFileReadProperly();
-#endif        
+#endif
     }
 
     private:
@@ -659,65 +659,64 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         char buf[256];
 
         FILE* topFile = popen("TERM=xterm top -b -n 1 | grep \"Mem:\\|Swap:\"", "r");
-
         if (topFile)
+        {
+            CPPUNIT_ASSERT(fgets(buf, 256, topFile) != NULL);
+            std::string topOutput = buf;
+            CPPUNIT_ASSERT(fgets(buf, 256, topFile) != NULL);
+            topOutput.append(buf);
+
+            pclose(topFile);
+
+            std::vector<std::string> topTokens;
+            Tokenize(topOutput, topTokens);
+
+            /*
+            ----------------------------------------------------------
+            ---------- Output from most Linux systems: ---------------
+            ----------------------------------------------------------
+            Mem:   2047248k total,  1164684k used,   882564k free,    11456k buffers
+            Swap:  4128760k total,        0k used,  4128760k free,   589628k cached
+            ----------------------------------------------------------
+            ---------- Output from Redhat 7 systems: -----------------
+            ----------------------------------------------------------
+            KiB Mem:   2043048 total,  1781884 used,   261164 free,      108 buffers
+            KiB Swap:  2113532 total,        8 used,  2113524 free.  1093844 cached Mem
+            ----------------------------------------------------------
+            */
+
+#if (defined(PF_DISTRO_REDHAT) && PF_MAJOR >= 7) || (defined(PF_DISTRO_SUSE) && PF_MAJOR >= 12) || defined(PF_DISTRO_UBUNTU)
+            if (topTokens.size() >= 21)
             {
-                fgets(buf, 256, topFile);
-                std::string topOutput = buf;
-                fgets(buf, 256, topFile);
-                topOutput.append(buf);
-
-                pclose(topFile);
-
-                std::vector<std::string> topTokens;
-                Tokenize(topOutput, topTokens);
-
-                /*
-                ----------------------------------------------------------
-                ---------- Output from most Linux systems: ---------------
-                ----------------------------------------------------------
-                Mem:   2047248k total,  1164684k used,   882564k free,    11456k buffers
-                Swap:  4128760k total,        0k used,  4128760k free,   589628k cached
-                ----------------------------------------------------------
-                ---------- Output from Redhat 7 systems: -----------------
-                ----------------------------------------------------------
-                KiB Mem:   2043048 total,  1781884 used,   261164 free,      108 buffers
-                KiB Swap:  2113532 total,        8 used,  2113524 free.  1093844 cached Mem
-                ----------------------------------------------------------
-                */
-
-#if (defined(PF_DISTRO_REDHAT) && PF_MAJOR >= 7) || (defined(PF_DISTRO_SUSE) && PF_MAJOR >= 12)
-                if (topTokens.size() >= 21)
-                {
-                    keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2]);
-                    keyValues["AvailableMemory"] = ToSCXUlong(topTokens[6]);
-                    keyValues["UsedMemory"]      = ToSCXUlong(topTokens[4]);
-                    keyValues["TotalSwap"]       = ToSCXUlong(topTokens[12]);
-                    keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[16]);
-                    keyValues["UsedSwap"]        = ToSCXUlong(topTokens[14]);
-                }
-#else
-                if (topTokens.size() >= 18)
-                {
-                    keyValues["TotalMemory"]     = ToSCXUlong(topTokens[1]);
-                    keyValues["AvailableMemory"] = ToSCXUlong(topTokens[5]);
-                    keyValues["UsedMemory"]      = ToSCXUlong(topTokens[3]);
-                    keyValues["TotalSwap"]       = ToSCXUlong(topTokens[10]);
-                    keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[14]);
-                    keyValues["UsedSwap"]        = ToSCXUlong(topTokens[12]);
-                }
-#endif
+                keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2]);
+                keyValues["AvailableMemory"] = ToSCXUlong(topTokens[6]);
+                keyValues["UsedMemory"]      = ToSCXUlong(topTokens[4]);
+                keyValues["TotalSwap"]       = ToSCXUlong(topTokens[12]);
+                keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[16]);
+                keyValues["UsedSwap"]        = ToSCXUlong(topTokens[14]);
             }
+#else
+            if (topTokens.size() >= 18)
+            {
+                keyValues["TotalMemory"]     = ToSCXUlong(topTokens[1]);
+                keyValues["AvailableMemory"] = ToSCXUlong(topTokens[5]);
+                keyValues["UsedMemory"]      = ToSCXUlong(topTokens[3]);
+                keyValues["TotalSwap"]       = ToSCXUlong(topTokens[10]);
+                keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[14]);
+                keyValues["UsedSwap"]        = ToSCXUlong(topTokens[12]);
+            }
+#endif
+        }
 
-            // We did look up the value for UsedMemory/UsedSwap above
-            //
-            // However, on Linux, the memory provider computes these values by
-            // taking used=Total-Available, as this is all that's available in
-            // the /proc/meminfo file.  We do the same here to avoid any
-            // rounding problems ...
+        // We did look up the value for UsedMemory/UsedSwap above
+        //
+        // However, on Linux, the memory provider computes these values by
+        // taking used=Total-Available, as this is all that's available in
+        // the /proc/meminfo file.  We do the same here to avoid any
+        // rounding problems ...
 
-            keyValues["UsedMemory"] = keyValues["TotalMemory"] - keyValues["AvailableMemory"];
-            keyValues["UsedSwap"] = keyValues["TotalSwap"] - keyValues["AvailableSwap"];
+        keyValues["UsedMemory"] = keyValues["TotalMemory"] - keyValues["AvailableMemory"];
+        keyValues["UsedSwap"] = keyValues["TotalSwap"] - keyValues["AvailableSwap"];
     }
 
     void GetAIXData(std::map<std::string, scxulong>& keyValues)
@@ -726,7 +725,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         if (file)
         {
             char buf[256];
-            
+
             for (char *o = fgets(buf, 256, file); o != NULL; o = fgets(buf, 256, file))
             {
                 std::string output = buf;
@@ -784,7 +783,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         if (file)
         {
             char buf[256];
-            
+
             for (char *o = fgets(buf, 256, file); o != NULL; o = fgets(buf, 256, file))
             {
                 std::string output = buf;
@@ -798,7 +797,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
                 {
                     if ("page" == tokens[1] && "ins" == tokens[2])
 
-#else                
+#else
 
                 if (tokens.size() > 3)
                 {
@@ -814,7 +813,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
 
                     else if ("page" == tokens[1] && "outs" == tokens[2])
 
-#else                
+#else
 
                     else if ("pages" == tokens[1] && "paged" == tokens[2] && "out" == tokens[3])
 
@@ -824,7 +823,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
                         break;
                     }
                 }
-                
+
             }
             pclose(file);
         }

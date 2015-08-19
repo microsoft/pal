@@ -174,7 +174,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         //SCXCoreLib::SCXDirectoryInfo dir(fp);
 
         vector<SCXCoreLib::SCXFilePath> files;
-        CPPUNIT_ASSERT_THROW(files = SCXCoreLib::SCXDirectory::GetFileSystemEntries(fp), SCXCoreLib::SCXFilePathNotFoundException); 
+        CPPUNIT_ASSERT_THROW(files = SCXCoreLib::SCXDirectory::GetFileSystemEntries(fp), SCXCoreLib::SCXFilePathNotFoundException);
     }
 
     /** Try to read a protected directory
@@ -235,7 +235,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
     void TestAlternateListFilesCommandForDirectories()
     {
         // American-style dates
-        TestAlternateListFilesSuccessCommandHelper(L"02/05/2009  02:01 PM    <DIR>          6b507d1f6a0e351ea1ee2f70", L"6b507d1f6a0e351ea1ee2f70", true); 
+        TestAlternateListFilesSuccessCommandHelper(L"02/05/2009  02:01 PM    <DIR>          6b507d1f6a0e351ea1ee2f70", L"6b507d1f6a0e351ea1ee2f70", true);
         TestAlternateListFilesSuccessCommandHelper(L"10/02/2009  11:07 AM    <DIR>          devel", L"devel", true);
         TestAlternateListFilesSuccessCommandHelper(L"06/10/2009  03:07 PM    <DIR>          Documents and Settings", L"Documents and Settings", true);
         TestAlternateListFilesSuccessCommandHelper(L"07/09/2008  01:24 PM    <DIR>          Inetpub", L"Inetpub", true);
@@ -287,7 +287,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
      * Verify that edge case that no files are returned when aimed at an empty directory.
      */
     void TestListRegularFilesDeterministic_ZeroFiles(void)
-    {   
+    {
         // (1) Setup
         std::wstring wideDirName = CreateFauxDirectoryStructure();
         string narrowDirName = SCXCoreLib::StrToUTF8(wideDirName);
@@ -369,7 +369,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
     {
 #ifdef WIN32
         std::wstring wideRootDir = GetRootDir();
-        SCXCoreLib::SCXFilePath fp(wideRootDir); 
+        SCXCoreLib::SCXFilePath fp(wideRootDir);
 #else
         SCXCoreLib::SCXFilePath fp(L"/etc/");
 #endif
@@ -454,7 +454,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         SCXCoreLib::SCXFilePath fp(L"/etc/");
 #endif
         CPPUNIT_ASSERT(SCXCoreLib::SCXDirectory::Exists(fp));
-        
+
         vector<SCXCoreLib::SCXFilePath> fpa;
         CPPUNIT_ASSERT_NO_THROW(fpa = SCXCoreLib::SCXDirectory::GetDirectories(fp));
         std::sort(fpa.begin(), fpa.end(), onPath);
@@ -524,7 +524,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         SCXCoreLib::SCXFilePath fp(L"/dev/");
 #endif
         CPPUNIT_ASSERT(SCXCoreLib::SCXDirectory::Exists(fp));
-        
+
         vector<SCXCoreLib::SCXFilePath> fpa;
         CPPUNIT_ASSERT_NO_THROW(fpa = SCXCoreLib::SCXDirectory::GetSysFiles(fp));
         std::sort(fpa.begin(), fpa.end(), onPath);
@@ -604,7 +604,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
             std::wstring deployDir = GetDeploymentDirectory().Get();
             std::stringstream createDirectoryStructure;
             createDirectoryStructure << "mkdir " << SCXCoreLib::StrToUTF8(deployDir);
-            system(createDirectoryStructure.str().c_str());
+            CPPUNIT_ASSERT_EQUAL(0, system(createDirectoryStructure.str().c_str()));
 
             SCXCoreLib::SCXDirectoryInfo dir(deployDir);
             CPPUNIT_ASSERT(dir.PathExists());
@@ -654,7 +654,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
             CPPUNIT_ASSERT_EQUAL(static_cast<scxulong>(statData.st_nlink), dir.GetLinkCount());
             CPPUNIT_ASSERT_EQUAL(static_cast<scxulong>(statData.st_size), dir.GetSize());
 #if defined(SCX_UNIX)
-            CPPUNIT_ASSERT_EQUAL(static_cast<scxulong>(statData.st_blksize), dir.GetBlockSize());      
+            CPPUNIT_ASSERT_EQUAL(static_cast<scxulong>(statData.st_blksize), dir.GetBlockSize());
             CPPUNIT_ASSERT_EQUAL(static_cast<scxulong>(statData.st_blocks), dir.GetBlockCount());
 #endif
             CPPUNIT_ASSERT_EQUAL(statData.st_uid, dir.GetUserID());
@@ -834,7 +834,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
     /***********************************************************************************/
     /* Utility methods */
     /***********************************************************************************/
-    
+
     /**
      * Test Utility Method for returning the name of the root
      * directory on this system.
@@ -954,7 +954,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         return static_cast<int>(strrchr(in, ' ') - in + 1);
 #elif defined(aix)
         /* On AIX the output of the file name is always in the same column,
-           provided that the locale and all other options are the same. 
+           provided that the locale and all other options are the same.
            Unfortunately that position is 57 on AIX 5.3, and 58 on AIX 6.1
            and AIX 7.1.
         */
@@ -975,11 +975,11 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         for (int i = 53; in[i]; ++i) {
           if (in[i] == ' ') { return i + 1; }
         }
-        return -1;  
+        return -1;
 #elif defined(macos)
         // Exmaple line on mac:
         // -rw-rw-r--@   1 admin       admin         6148 Sep 10 04:52:10 2008 .DS_Store
-        // Get position of last : and then add 5 to get past space before year and then 
+        // Get position of last : and then add 5 to get past space before year and then
         // search for next space to get filename right after that
         const char *colpos = strrchr(in, ':');
         if (colpos == 0) return -1;             // Not found
@@ -987,7 +987,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
         for (int i = pos; in[i]; ++i) {
           if (in[i] == ' ') { return i + 1; }
         }
-        return -1;  
+        return -1;
 #else
         /* This is the proper implementation for systems with ISO date */
         const char *colpos = strchr(in, ':');
@@ -1242,7 +1242,7 @@ class SCXDirectoryInfoTest : public CPPUNIT_NS::TestFixture
             // Different versions of windows have different layouts of DIR. It's a mess!!!
             std::wstring name(L"");
             bool isDir = false;
-        
+
             if (tmp[4] == '-' || tmp[2] == '/') { //A date with yyyy-MM-dd or MM/dd/yyyy
                 isDir = ParseDirLine(tmp, name);
             } else { continue; }                // Means that we don't have a date first

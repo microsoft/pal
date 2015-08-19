@@ -150,6 +150,11 @@ GetLinuxInfo() {
                     OSManufacturer="Central Logistics GmbH"
                     OSAlias="UniversalR"
                     ;;
+
+                ubuntu)
+                    OSManufacturer="Canonical"
+                    OSAlias="UniversalD"
+                    ;;
             esac
 
         elif [ ! -z $ReleaseFile ]; then

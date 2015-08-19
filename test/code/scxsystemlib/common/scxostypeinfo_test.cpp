@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------------
-    Copyright (c) Microsoft Corporation.  All rights reserved. 
-    
+    Copyright (c) Microsoft Corporation.  All rights reserved.
+
 */
 /**
-    \file        
+    \file
 
     \brief       Test cases for the OS Info code
 
@@ -15,7 +15,7 @@
 
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxprocess.h>
-#include <scxsystemlib/scxostypeinfo.h> 
+#include <scxsystemlib/scxostypeinfo.h>
 #include <scxsystemlib/scxsysteminfo.h>
 #include <testutils/scxunit.h> /* This will include CPPUNIT helper macros too */
 #include <testutils/scxtestutils.h>
@@ -51,11 +51,11 @@ public:
 
 class SCXOSTypeInfoTest : public CPPUNIT_NS::TestFixture
 {
-    CPPUNIT_TEST_SUITE( SCXOSTypeInfoTest ); 
-    CPPUNIT_TEST( TestOSName ); 
+    CPPUNIT_TEST_SUITE( SCXOSTypeInfoTest );
+    CPPUNIT_TEST( TestOSName );
     CPPUNIT_TEST( TestGetOSNameCompatFlag );
-    CPPUNIT_TEST( TestOSVersion ); 
-    CPPUNIT_TEST( TestOSAlias ); 
+    CPPUNIT_TEST( TestOSVersion );
+    CPPUNIT_TEST( TestOSAlias );
     CPPUNIT_TEST( TestOSFamily );
     CPPUNIT_TEST( TestUnameArchitecture );
     CPPUNIT_TEST( TestArchitecture );
@@ -115,7 +115,7 @@ public:
     #endif
   #elif defined(PF_DISTRO_SUSE)
     #if (PF_MAJOR < 10)
-        // Caseing differences on SLES9, WI9326 
+        // Caseing differences on SLES9, WI9326
         correctAnswer = L"SUSE LINUX Enterprise Server";
     #else
         correctAnswer = L"SUSE Linux Enterprise Server";
@@ -128,7 +128,7 @@ public:
         correctAnswer = L"SunOS";
 #elif defined(macos)
         correctAnswer = L"Mac OS";
-#else 
+#else
 #warning "Platform not supported for OSAlias"
         correctAnswer = L"This platform does not seem to be implemented";
 #endif
@@ -136,7 +136,7 @@ public:
         // OK, let's verify that PAL returns that
         wostringstream sout;
         sout << L"\"" << infoObject.GetOSName() << L"\" != \"" << correctAnswer << L"\"";
-        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
                                infoObject.GetOSName() == correctAnswer);
     }
 
@@ -144,7 +144,7 @@ public:
     {
         wstring correctAnswer;
         SCXOSTypeInfo infoObject;
-        
+
 #if defined(linux) && defined(PF_DISTRO_SUSE)
         correctAnswer = L"SuSE Distribution";
 #elif defined(linux) && defined(PF_DISTRO_REDHAT)
@@ -152,15 +152,15 @@ public:
 #elif defined(linux) && defined(PF_DISTRO_ULINUX)
         correctAnswer = L"Linux Distribution";
 #else
-        // For all the other, the correct answer should be same as with 
+        // For all the other, the correct answer should be same as with
         // compat flag. Note that this includes SLED and RHED too.
         correctAnswer = infoObject.GetOSName();
 #endif
 
         wostringstream sout;
-        
+
         sout << infoObject.GetOSName(true) << L" != " << correctAnswer;
-        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
                                infoObject.GetOSName(true) == correctAnswer);
     }
 
@@ -181,7 +181,7 @@ public:
         correctAnswer = L"AIX";
 #elif defined(macos)
         correctAnswer = L"MacOS";
-#else 
+#else
 #warning "Platform not supported for OSAlias"
 #endif
 
@@ -197,7 +197,7 @@ public:
 
         wstring correctAnswer;
         // Per-platform indication whether test code collect value dynamically or not
-        // In the end it would be nice to eliminate this and have dynamic for all 
+        // In the end it would be nice to eliminate this and have dynamic for all
         // platforms...
         bool bCompareWithDynamic = false;
 #if defined(hpux)
@@ -227,23 +227,23 @@ public:
         FILE* cmdOutput = popen("sw_vers -productVersion", "r");
         fgets(buf, 256, cmdOutput);
         pclose(cmdOutput);
-        string correctAnswerMB;  // Multi-byte string 
+        string correctAnswerMB;  // Multi-byte string
         correctAnswerMB = buf;
         correctAnswer = StrTrim(StrFromUTF8(correctAnswerMB));
         bCompareWithDynamic = true;
-#else 
+#else
 #warning "Platform not supported for OSAlias"
 #endif
-        if (bCompareWithDynamic) 
+        if (bCompareWithDynamic)
         {
             wostringstream sout;
             sout << L"[" << infoObject.GetOSVersion() << L"] != [" << correctAnswer << L"]";
-            CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
+            CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
                                    infoObject.GetOSVersion() == correctAnswer);
         }
         else
         {
-            CPPUNIT_ASSERT_MESSAGE("GetOSVersion() returned string of zero length", 
+            CPPUNIT_ASSERT_MESSAGE("GetOSVersion() returned string of zero length",
                                    infoObject.GetOSVersion().length() > 0);
         }
     }
@@ -265,18 +265,18 @@ public:
         correctAnswer = L"AIX";
 #elif defined(macos)
         correctAnswer = L"MacOS";
-#else 
+#else
 
 #endif
         wostringstream sout;
 #if defined(PF_DISTRO_ULINUX)
-        // Universal Linux has many acceptable aliases, 
+        // Universal Linux has many acceptable aliases,
         // so just ensure the alias is an actual string with length > 0
         sout << infoObject.GetOSAlias().size() << L" == " << 0;
         CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), infoObject.GetOSAlias().size() != 0);
 #else
         sout << infoObject.GetOSAlias() << L" != " << correctAnswer;
-        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
                                infoObject.GetOSAlias() == correctAnswer);
 #endif
     }
@@ -292,8 +292,8 @@ public:
 #endif
         // If this fail we have some fundamental problem
         CPPUNIT_ASSERT(unameOutput);
-        
-        fgets(buf, 256, unameOutput);
+
+        CPPUNIT_ASSERT(fgets(buf, 256, unameOutput) != NULL);
         std::string testUnameString = buf;
         pclose(unameOutput);
 
@@ -304,7 +304,7 @@ public:
 
         wostringstream sout;
         sout << palUname << L" != " << testUname;
-        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(), 
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
                                palUname == testUname);
     }
 
@@ -314,7 +314,7 @@ public:
         SCXHandle<SCXOSTypeInfoTestDependencies> deps(new SCXOSTypeInfoTestDependencies());
         SCXOSTypeInfo infoObject(deps);
 
-        CPPUNIT_ASSERT_MESSAGE("GetArchitectureString() returned an empty string", 
+        CPPUNIT_ASSERT_MESSAGE("GetArchitectureString() returned an empty string",
                                infoObject.GetArchitectureString().length() > 0);
 
 #if defined(macos)
@@ -387,10 +387,10 @@ public:
         SCXHandle<SCXOSTypeInfoTestDependencies> deps(new SCXOSTypeInfoTestDependencies());
         SCXOSTypeInfo infoObject(deps);
 
-        std::wstring caption = infoObject.GetCaption(); 
-        CPPUNIT_ASSERT_MESSAGE("GetCaption() returned an empty string", 
+        std::wstring caption = infoObject.GetCaption();
+        CPPUNIT_ASSERT_MESSAGE("GetCaption() returned an empty string",
                                caption.length() > 0);
-        CPPUNIT_ASSERT_MESSAGE("GetCaption() should not report global zone support, ever", caption.find(L"Global Zone") == wstring::npos);        
+        CPPUNIT_ASSERT_MESSAGE("GetCaption() should not report global zone support, ever", caption.find(L"Global Zone") == wstring::npos);
     }
 
     void TestGetDescription(void)
@@ -398,13 +398,13 @@ public:
         SCXHandle<SCXOSTypeInfoTestDependencies> deps(new SCXOSTypeInfoTestDependencies());
         SCXOSTypeInfo infoObject(deps);
         std::wstring description = infoObject.GetDescription();
-        CPPUNIT_ASSERT_MESSAGE("GetDescription() returned an empty string", 
+        CPPUNIT_ASSERT_MESSAGE("GetDescription() returned an empty string",
                                description.length() > 0);
 
         std::istringstream in;
         std::ostringstream out, err;
 #if defined(sun) && (PF_MAJOR > 5 || PF_MINOR >= 10)
-        
+
         if (SCXCoreLib::SCXProcess::Run(std::wstring(L"zonename"), in, out, err) == 0)
         {
             CPPUNIT_ASSERT_MESSAGE(std::string("Running \'zonename\' caused data to be written to stderr:") + err.str(), err.str().length() == 0);
@@ -414,29 +414,29 @@ public:
             // names one of our test machines "global" we are OK here.
             if (out.str().compare("global"))
             {
-                // Global zone 
-                CPPUNIT_ASSERT_MESSAGE("GetDescription() did not return zone support string properly", 
+                // Global zone
+                CPPUNIT_ASSERT_MESSAGE("GetDescription() did not return zone support string properly",
                                        description.find(L"Global Zone") != wstring::npos && description.find(L"Non-Global") == wstring::npos);
             }
             else
             {
                 // Non-global
-                CPPUNIT_ASSERT_MESSAGE("GetDescription() should not report global zone support on this platform", 
+                CPPUNIT_ASSERT_MESSAGE("GetDescription() should not report global zone support on this platform",
                                        description.find(L"Non-Global Zone") != wstring::npos);
             }
         }
         // No global zone support
         else
         {
-            CPPUNIT_ASSERT_MESSAGE(std::string("zonename failed, stderr output follows:") + (err.str().length() > 0 ? err.str() : std::string("(none)")), 
-                                   false); 
+            CPPUNIT_ASSERT_MESSAGE(std::string("zonename failed, stderr output follows:") + (err.str().length() > 0 ? err.str() : std::string("(none)")),
+                                   false);
         }
 #else
-        CPPUNIT_ASSERT_MESSAGE(std::string("\'zonename\' should not be supported on this platform, but it seems to have run anyway, output is:") + (out.str().length() ? out.str() : std::string("(none)")), 
-                               SCXCoreLib::SCXProcess::Run(std::wstring(L"zonename"), in, out, err) != 0); 
-        
+        CPPUNIT_ASSERT_MESSAGE(std::string("\'zonename\' should not be supported on this platform, but it seems to have run anyway, output is:") + (out.str().length() ? out.str() : std::string("(none)")),
+                               SCXCoreLib::SCXProcess::Run(std::wstring(L"zonename"), in, out, err) != 0);
+
         // No sun platform, no global zones, please
-        CPPUNIT_ASSERT_MESSAGE("GetDescription() should not report global zone support on this platform", 
+        CPPUNIT_ASSERT_MESSAGE("GetDescription() should not report global zone support on this platform",
                                description.find(L"Non-Global Zone") == wstring::npos);
 #endif
     }

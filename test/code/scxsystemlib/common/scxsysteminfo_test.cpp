@@ -284,7 +284,7 @@ public:
         if (0 != fp)
         {
             // Get response, strip newline
-            fgets(buf, sizeof(buf), fp);
+            CPPUNIT_ASSERT(fgets(buf, sizeof(buf), fp) != NULL);
             if (buf[strlen(buf)-1] == '\n')
             {
                 buf[strlen(buf)-1] = '\0';

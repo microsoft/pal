@@ -63,11 +63,11 @@ public:
         : m_disks(disks)
     {
     }
-    
+
     /*
       This function expects on first call that name->name is FIRST_DISKPATH. This will initialize
-      the static int curDisk, which is used to keep track of current position in the vector.  
-      perfstat_disk is called once for each disk, and our code assumes that name->name = FIRST_DISKPATH 
+      the static int curDisk, which is used to keep track of current position in the vector.
+      perfstat_disk is called once for each disk, and our code assumes that name->name = FIRST_DISKPATH
       when there are no more disks in to be looked at.
     */
     virtual int perfstat_disk(perfstat_id_t* name, perfstat_disk_t* buf, size_t struct_size, int n)
@@ -90,7 +90,7 @@ public:
             strcpy(name->name, FIRST_DISKPATH);
             return -1;
         }
-        
+
         if (curDisk == m_disks.size() - 1)
         {
             // if this is the last disk, communicate this by setting name->name = FIRST_DISKPATH
@@ -161,7 +161,7 @@ public:
         pid_t pid = fork();
         if (0 != pid)
             return pid; // parent process;
-        sprintf(buf, ">/tmp/find.test.%u", ++i); 
+        sprintf(buf, ">/tmp/find.test.%u", ++i);
         CPPUNIT_ASSERT(freopen("/dev/null","r",stdin) != NULL);
         CPPUNIT_ASSERT(freopen(buf,"w",stdout) != NULL);
         CPPUNIT_ASSERT(freopen(buf,"w",stderr) != NULL);
@@ -180,7 +180,7 @@ public:
 
     static void ExerciseDiskProcessCleanup()
     {
-        system("rm -rf /tmp/find.test.*");
+        CPPUNIT_ASSERT(system("rm -rf /tmp/find.test.*") != -1);
     }
 
     TestDisks()
@@ -243,19 +243,20 @@ public:
 
         if (0 != fp)
         {
-            fgets(buf, sizeof(buf), fp); // Header
-            fgets(buf, sizeof(buf), fp); // Header
+            CPPUNIT_ASSERT(fgets(buf, sizeof(buf), fp) != NULL); // Header
+            CPPUNIT_ASSERT(fgets(buf, sizeof(buf), fp) != NULL); // Header
 #if defined(aix)
             while (std::string("Disks:") != std::string(buf, 6))
             {
-                fgets(buf, sizeof(buf), fp); // Header
+                CPPUNIT_ASSERT(fgets(buf, sizeof(buf), fp) != NULL); // Header
             }
 #endif
             while ( ! feof(fp))
             {
                 SCXCoreLib::SCXHandle<TestDisk> disk(0);
                 memset(buf, 0, sizeof(buf));
-                fgets(buf, sizeof(buf), fp);
+                char *ret = fgets(buf, sizeof(buf), fp);
+                CPPUNIT_ASSERT_MESSAGE("There was an error reading from : " + command.str() , ret != NULL || feof(fp));
                 std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
                 SCXCoreLib::StrTokenize(line, parts, L" \n\t");
@@ -287,7 +288,7 @@ public:
                         disk->m_dev = L"/dev/dsk/" + parts[0];
                         if ( ! IsInMnttab(disk->m_dev) && // For example CD-ROMs might show up like this
                              ! IsInLVMtab(disk->m_dev)) // Old style names may occur in LVMTAB too.
-                        { 
+                        {
                             continue;
                         }
                     }
@@ -421,7 +422,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
                         disk = new TestDisk();
                         break;
                     }
-                    
+
                     if (0 != disk)
                     {
                         disk->m_dev = id;
@@ -441,11 +442,12 @@ loop1      0      0       0       0      0      0       0       0      0      0
         std::stringstream command("");
         command << "grep -l " << SCXCoreLib::StrToUTF8(path) << " /etc/lvmtab";
         FILE *fp = popen(command.str().c_str(), "r");
-        
+
         if (0 != fp)
         {
             memset(buf, 0, sizeof(buf));
-            fgets(buf, sizeof(buf), fp);
+            char *ret = fgets(buf, sizeof(buf), fp);
+            CPPUNIT_ASSERT_MESSAGE("There was an error reading from : " + command.str() , ret != NULL || feof(fp));
             std::wstring line = SCXCoreLib::StrTrim(SCXCoreLib::StrFromUTF8(buf));
             if (line == L"/etc/lvmtab")
             {
@@ -475,16 +477,17 @@ loop1      0      0       0       0      0      0       0       0      0      0
         if (0 != fp)
         {
 #if ! defined(sun)
-            fgets(buf, sizeof(buf), fp); // Header
+            CPPUNIT_ASSERT(fgets(buf, sizeof(buf), fp) != NULL); // Header
 #if defined(aix)
-            fgets(buf, sizeof(buf), fp); // Header
+            CPPUNIT_ASSERT(fgets(buf, sizeof(buf), fp) != NULL); // Header
 #endif
 #endif
             while ( ! feof(fp))
             {
                 SCXCoreLib::SCXHandle<TestDisk> disk(0);
                 memset(buf, 0, sizeof(buf));
-                fgets(buf, sizeof(buf), fp);
+                char *ret = fgets(buf, sizeof(buf), fp);
+                CPPUNIT_ASSERT_MESSAGE("There was an error reading from : " + command.str() , ret != NULL || feof(fp));
                 std::wstring line = SCXCoreLib::StrFromUTF8(buf);
 
 #if !defined(sun)
@@ -641,7 +644,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
             // All documentation points to the fact there is no command line command to get this but it is always this value.
             // So using minimum test effort in this case we just assume this value until proven wrong. Note that the PAL code
             // retrieves this value using system calls.
-            disk->m_blockSize = 4096; 
+            disk->m_blockSize = 4096;
             continue;
 #endif
             std::string mp = SCXCoreLib::StrToUTF8(disk->m_mountPoint);
@@ -656,7 +659,8 @@ loop1      0      0       0       0      0      0       0       0      0      0
                 while ( ! feof(fp) )
                 {
                     memset(buf, 0, sizeof(buf));
-                    fgets(buf, sizeof(buf), fp);
+                    char *ret = fgets(buf, sizeof(buf), fp);
+                    CPPUNIT_ASSERT_MESSAGE("There was an error reading from : " + command.str() , ret != NULL || feof(fp));
 #if defined(hpux)
                     std::string line = buf;
                     if (std::string::npos != line.find("file system block size"))
@@ -691,7 +695,8 @@ loop1      0      0       0       0      0      0       0       0      0      0
             while ( ! feof(fp))
             {
                 memset(buf, 0, sizeof(buf));
-                fgets(buf, sizeof(buf), fp);
+                char *ret = fgets(buf, sizeof(buf), fp);
+                CPPUNIT_ASSERT_MESSAGE("There was an error reading from : df -n" , ret != NULL || feof(fp));
                 std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
 #if defined(sun)
@@ -730,12 +735,13 @@ loop1      0      0       0       0      0      0       0       0      0      0
 
         if (0 != fp)
         {
-            fgets(buf, sizeof(buf), fp); // Header
+            CPPUNIT_ASSERT(fgets(buf, sizeof(buf), fp) != NULL); // Header
 
             while ( ! feof(fp))
             {
                 memset(buf, 0, sizeof(buf));
-                fgets(buf, sizeof(buf), fp);
+                char *ret = fgets(buf, sizeof(buf), fp);
+                CPPUNIT_ASSERT_MESSAGE("There was an error reading from : " + command.str() , ret != NULL || feof(fp));
                 std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
                 SCXCoreLib::StrTokenize(line, parts, L" \n\t");
@@ -792,7 +798,8 @@ loop1      0      0       0       0      0      0       0       0      0      0
             while ( ! feof(fp))
             {
                 memset(buf, 0, sizeof(buf));
-                fgets(buf, sizeof(buf), fp);
+                char *ret = fgets(buf, sizeof(buf), fp);
+                CPPUNIT_ASSERT_MESSAGE("There was an error reading from : " + command.str() , ret != NULL || feof(fp));
                 std::wstring line = SCXCoreLib::StrFromUTF8(buf);
                 std::vector<std::wstring> parts;
                 SCXCoreLib::StrTokenize(line, parts, L" \n\t");
@@ -1009,12 +1016,12 @@ private:
 
     // This method is used to generate disk read and write events.
     // The m_try member is used to control how disk should be excercised.
-    // m_try is incremented before method returns. Number returned is the number of 
+    // m_try is incremented before method returns. Number returned is the number of
     // seconds disk was excercised.
     // The overall strategy is:
     // - Total excercise time is 10s for first 10 calls, then 20s for call 11-20 and so on.
     // - 1st, 11th, 21st, ... call uses a single find to excercise disk, 2nd, 12th, ... use 2 finds
-    // - The last second of the test is sleeping (after find processes have been killed) 
+    // - The last second of the test is sleeping (after find processes have been killed)
     //   in order to "stabilize" disk data minimizing differences between two tsatistics reads.
     void ExcerciseDisk()
     {
@@ -1055,7 +1062,7 @@ private:
     }
 
 public:
-    SCXStatisticalDiskPalSanityTest() : 
+    SCXStatisticalDiskPalSanityTest() :
         m_diskEnumPhysical(0),
         m_diskEnumLogical(0),
         m_try(0),
@@ -1158,7 +1165,7 @@ public:
             L"inotifyfs",   L"eventpollfs", L"devpts",      L"ramfs",       L"hugetlbfs",
             L"mqueue",      L"vmware-hgfs", L"binfmt_misc", L"cifs",
             L"vmblock",     L"vmhgfs",      L"rpc_pipefs",  L"nfs",         L"usbfs",
-            L"subfs",   L"fusectl", 
+            L"subfs",   L"fusectl",
 #if defined(linux)
             L"udev", L"devtmpfs",
 #endif
@@ -1181,7 +1188,7 @@ public:
 
     void AllowedFilesystemShouldNotBeCaseSensitive()
     {
-        static std::wstring FS[] = { 
+        static std::wstring FS[] = {
             L"jfs2", L"reiserfs", L"ufs", L"vxfs",
 #if defined(sun)
             L"zfs",
@@ -1197,7 +1204,7 @@ public:
             CPPUNIT_ASSERT_MESSAGE(msg, ! deps.FileSystemIgnored(fs));
         }
     }
-    
+
     void LinkToPhysicalFilesystemShouldBeCaseInsensitive()
     {
         static std::wstring FS[] = {
@@ -1257,7 +1264,7 @@ public:
             L"autofs",
             L"bdev", L"binfmt_misc",
             L"cachefs", L"cdfs", L"cdrfs", L"cifs", L"cgroup", L"configfs", L"ctfs",
-            L"debugfs", L"devfs", L"devpts", 
+            L"debugfs", L"devfs", L"devpts",
 #if defined(sun) && ((PF_MAJOR == 5 && PF_MINOR >= 11) || (PF_MAJOR > 5))
             // On Solaris 11, /dev is a pseudo file system.
             // Always ignore to eliminate inode detection, etc
@@ -1265,7 +1272,7 @@ public:
 #endif
 #if defined(linux)
             L"devtmpfs",
-#endif               
+#endif
             L"eventpollfs",
             L"fd", L"ffs", L"fifofs", L"fusectl", L"futexfs",
             L"hugetlbfs", L"hsfs",
@@ -1303,14 +1310,14 @@ public:
 
     /*----------------------------------------------------------------------------*/
     /**
-       Create a message containing expected devices and devices found in the 
+       Create a message containing expected devices and devices found in the
        enumerated list.
 
        \param disks1 TestDisk instance.
        \returns The error message.
 
        \date            2/22/2008
-    */ 
+    */
     std::wstring GetExpectFoundPhysical(TestDisks & disks1)
     {
         std::wostringstream ss;
@@ -1377,7 +1384,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) );
         }
     }
 
@@ -1462,7 +1469,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) );
         }
     }
 
@@ -1506,7 +1513,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) );
         }
     }
 
@@ -1552,7 +1559,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) );
         }
     }
 
@@ -1608,13 +1615,13 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) );
         }
     }
 
     // PerfCounters are tested using the following strategy:
     // - Take a snap shot of disk values.
-    // - Excercise disk. 
+    // - Excercise disk.
     // - Verify that counters that should increase do that.
     // BVT tests are used to test they actually return good enough values.
     void TestPhysicalDiskPerfCounters()
@@ -1751,7 +1758,7 @@ public:
                 wTest = wOps?(static_cast<double>(wOpsT)/static_cast<double>(wOps)/1000.0):0;
                 tTest = (rOps||wOps)?((static_cast<double>(rOpsT+wOpsT))/(static_cast<double>(rOps+wOps))/1000.0):0;
 
-                CPPUNIT_ASSERT(disk->GetDiskQueueLength(qLength));      
+                CPPUNIT_ASSERT(disk->GetDiskQueueLength(qLength));
 
 #if defined(linux)
                 CPPUNIT_ASSERT(disk->GetIOTimes(rTime, wTime));
@@ -1770,7 +1777,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) );
         }
     }
 
@@ -1957,7 +1964,7 @@ public:
         {
             std::wostringstream ss;
             ss << e.What() << std::endl << e.Where() << std::endl;
-            CPPUNIT_FAIL( StrToUTF8(ss.str()) ); 
+            CPPUNIT_FAIL( StrToUTF8(ss.str()) );
         }
     }
 
@@ -2099,7 +2106,7 @@ public:
         SCXUNIT_ASSERT_BETWEEN(spr, secondsPerRead[MIN_VALUE], secondsPerRead[MAX_VALUE]);
         SCXUNIT_ASSERT_BETWEEN(spw, secondsPerWrite[MIN_VALUE], secondsPerWrite[MAX_VALUE]);
         SCXUNIT_ASSERT_BETWEEN(spt, secondsPerTransfer[MIN_VALUE], secondsPerTransfer[MAX_VALUE]);
-        
+
 #if defined(sun)
         // Avoid division by zero if we have no physical disks
         if ( HasPhysicalDisks(L"TestLogicalDiskPerfCounters", true) )
@@ -2165,7 +2172,7 @@ public:
             CPPUNIT_ASSERT(disk->GetDiskSize(mbu, mbf));
             mbUsed += mbu;
             mbFree += mbf;
-#if defined(aix)    
+#if defined(aix)
             CPPUNIT_ASSERT( ! disk->GetReadsPerSecond(rps));
             CPPUNIT_ASSERT( ! disk->GetWritesPerSecond(wps));
             CPPUNIT_ASSERT( ! disk->GetBytesPerSecond(rbps, wbps));
@@ -2281,7 +2288,7 @@ public:
         SCXUNIT_ASSERT_BETWEEN(spr, secondsPerRead[MIN_VALUE], secondsPerRead[MAX_VALUE]);
         SCXUNIT_ASSERT_BETWEEN(spw, secondsPerWrite[MIN_VALUE], secondsPerWrite[MAX_VALUE]);
         SCXUNIT_ASSERT_BETWEEN(spt, secondsPerTransfer[MIN_VALUE], secondsPerTransfer[MAX_VALUE]);
-        
+
 #if defined(sun)
         scxulong tP;
         CPPUNIT_ASSERT(total->GetIOPercentageTotal(tP));
@@ -2306,7 +2313,7 @@ public:
         // Simulate the customer's return values from perfstat_disk
         const size_t numElements = 83;
         const char* dev_array[] = {
-            "hdisk1", "hdisk0", "hdisk32", "hdisk30", "hdisk19", "hdisk28", "hdisk34", "hdisk43", "hdisk23", "hdisk27", 
+            "hdisk1", "hdisk0", "hdisk32", "hdisk30", "hdisk19", "hdisk28", "hdisk34", "hdisk43", "hdisk23", "hdisk27",
             "hdisk33", "hdisk24", "hdisk22", "hdisk31", "hdisk50", "hdisk55", "hdisk29", "hdisk57", "hdisk51", "hdisk26",
             "hdisk52", "hdisk53", "hdisk54", "hdisk35", "hdisk25", "hdisk14", "hdisk5", "hdisk3", "hdisk12", "hdisk13",
             "hdisk10", "hdisk6", "hdisk16", "hdisk4", "hdisk40", "hdisk11", "hdisk7", "hdisk44", "hdisk17", "hdisk15",
@@ -2323,18 +2330,18 @@ public:
         {
             disks.push_back(std::string(dev_array[i]));
         }
-        
+
         SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps(new TestDiskDependDefault(disks));
         m_diskEnumPhysical = new SCXSystemLib::StatisticalPhysicalDiskEnumeration(deps);
 
         // This was previously throwing an exception due to the asm/acfs_vol001-41 name.
         CPPUNIT_ASSERT_NO_THROW(m_diskEnumPhysical->InitInstances());
-        
+
         // Ensure that all disks can be found with FindDiskByDevice.
         for (size_t i = 0; i< numElements; i++)
         {
             std::string name = std::string(dev_array[i]);
-            CPPUNIT_ASSERT_MESSAGE("Cannot find disk with name " + name, m_diskEnumPhysical->FindDiskByDevice(L"/dev/" + SCXCoreLib::StrFromUTF8(name)) != 0);       
+            CPPUNIT_ASSERT_MESSAGE("Cannot find disk with name " + name, m_diskEnumPhysical->FindDiskByDevice(L"/dev/" + SCXCoreLib::StrFromUTF8(name)) != 0);
         }
 
         CPPUNIT_ASSERT_NO_THROW(m_diskEnumPhysical->Update(true));

@@ -4,7 +4,7 @@
 /**
    \file      scxlibglob_test.cpp
    \brief     Unit test implementation for LibGlob class
-   
+
    \date      12-17-12 15:30:00
 */
 /*----------------------------------------------------------------------------*/
@@ -30,7 +30,7 @@ public:
     CPPUNIT_TEST(testOneDirectoryTwoVersions);
     CPPUNIT_TEST(testManyDirectoriesManyVersions);
     CPPUNIT_TEST(testManyVersionTypes);
-    CPPUNIT_TEST_SUITE_END();    
+    CPPUNIT_TEST_SUITE_END();
 
 private:
     /* The current working directory. */
@@ -61,50 +61,52 @@ public:
         mkdir("./lg5", S_IRWXU);
 
         int out;
-        
+        static const char to_write []= "Here is some data\n";
+        static const int count = (int)strlen(to_write);
+
         out = open("./lg1/libtest.so.1.0.9", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg1/libtest.so.1.0.10", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg2/libtest.so.1.1.2", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg3/libtest.so.2.1.0", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg3/libtest.so.3.0.1", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg3/libtest.so.2.40.5", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg4/libtest.so.2.6.7", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg5/libtestdb-4.4.so", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg5/libtest-4.4.so", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         out = open("./lg5/libtest.so", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR|S_IXUSR);
-        write(out, "Here is some data\n", 18);
+        CPPUNIT_ASSERT_EQUAL(count, write(out, to_write, count));
         close(out);
 
         char *buffer = new char[BUFSIZ];
         buffer[BUFSIZ-1] = '\0';
-        getcwd(buffer, BUFSIZ-1);
+        CPPUNIT_ASSERT(getcwd(buffer, BUFSIZ-1) != NULL);
         cwd = StrFromUTF8(buffer);
     }
 
@@ -177,7 +179,7 @@ public:
           This tests behavior when version numbers are not the only differences between matched filenames.
           For example, on some test systems "librpm" has the filename "librpm-4.4.so", but on others it has
           "librpm.so.1.0.0".
-          There are also some test systems where globbing for "librpm*so*" matches libraries like "librpmdb-4.4.so".  
+          There are also some test systems where globbing for "librpm*so*" matches libraries like "librpmdb-4.4.so".
           This library would come before the "librpm.so" library, because it differs alphabetically before any numeric value.
          */
         vector<wstring> dirs;
