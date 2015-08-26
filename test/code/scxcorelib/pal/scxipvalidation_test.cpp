@@ -1,6 +1,5 @@
-
 /**
-    \file
+   \file         scxipvalidation_test.cpp
 
     \brief       Test of network interface configuration
 
@@ -11,24 +10,19 @@
 
 #include <scxcorelib/scxcmn.h>
 #include <testutils/scxunit.h>
-#include <scxcorelib/scxprocess.h>
-#include <scxcorelib/scxstream.h>
-#include <string.h>
-#include <errno.h>
-#include <arpa/inet.h>
 #include <scxcorelib/scxip.h>
 
 using namespace SCXCoreLib;
 
-using namespace std;
-
 //! Tests IP address validation in the PAL
-class SCXIsValidIPAddressTest : public CPPUNIT_NS::TestFixture /* CUSTOMIZE: use a class name with relevant name */
+class SCXIsValidIPAddressTest : public CPPUNIT_NS::TestFixture
 {
 
 public:
-    CPPUNIT_TEST_SUITE( SCXIsValidIPAddressTest ); /* CUSTOMIZE: Name must be same as classname */
-#if defined(linux)
+    CPPUNIT_TEST_SUITE( SCXIsValidIPAddressTest );
+
+#if defined (SCX_UNIX)
+
     CPPUNIT_TEST( TestIPv4addressIsValid );
     CPPUNIT_TEST( TestIPv4MalformedAddress );
     CPPUNIT_TEST( TestIPv4IncompleteAddress );
@@ -46,9 +40,27 @@ public:
     CPPUNIT_TEST( TestInvalidCharacterIPv6 );
     CPPUNIT_TEST( TestOutOfBoundsIPv6 );
     CPPUNIT_TEST( TestIPStringValid );
+    CPPUNIT_TEST( TestHexAddressMinimumValue );
+    CPPUNIT_TEST( TestHextAddressMaximumValue );
+    CPPUNIT_TEST( TestHexAddressWithIncorrect0xPrefix );
+    CPPUNIT_TEST( TestHexAddressWithBadCharacter );
+    CPPUNIT_TEST( TestHexAddressWithAllCharactersPartOne );
+    CPPUNIT_TEST( TestHexAddressWithAllCharactersPartTwo );
+    CPPUNIT_TEST( TextHexAddressIncorrectLengthTooShort );
+    CPPUNIT_TEST( TestHexAddressIncorrectLengthTooLong );
+    CPPUNIT_TEST( TestHexToIPAddressConversionMinimumValue );
+    CPPUNIT_TEST( TestHexToIPAddressConversionMaximumValue );
+    CPPUNIT_TEST( TestHexToIPAddressConversionWithAllCharactersPartOne );
+    CPPUNIT_TEST( TestHexToIPAddressConversionWithAllCharactersPartTwo );
+    CPPUNIT_TEST( TestHexToIPAddressConversionWithBadInputParameter );
+    CPPUNIT_TEST( TestIPAddressToHexConversionMinimumValue );
+    CPPUNIT_TEST( TestIPAddressToHexConversionMaximumValue );
+    CPPUNIT_TEST( TestIPAddressToHexConversionWithAllCharactersPartOne );
+    CPPUNIT_TEST( TestIPAddressToHexConversionWithAllCharactersPartTwo );
+    CPPUNIT_TEST( TestIPAddressToHexConversionWithBadInputParameter );
 
-#else
 #endif
+
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -115,7 +127,7 @@ public:
         const char * testipv6Normal = "2001:4898:80e8:ee31::3";
         CPPUNIT_ASSERT_EQUAL(1, SCXCoreLib::IP::IsValidIPAddress(testipv6Normal));
     }
-    
+
     void TestIPv6MalformedAddress()
     {
         const char * testipv6MALFORMED = "2001:4132.00e8::0";
@@ -161,9 +173,100 @@ public:
     void TestIPStringValid()
     {
         const std::string testipv4Normal = "192.168.0.1";
-        CPPUNIT_ASSERT_EQUAL(1, SCXCoreLib::IP::IsValidIPAddress(testipv4Normal));
+        CPPUNIT_ASSERT_EQUAL(1, SCXCoreLib::IP::IsValidIPAddress(testipv4Normal.c_str()));
     }
 
+    void TestHexAddressMinimumValue()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("00000000")==true);
+    }
+
+    void TestHextAddressMaximumValue()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("FFFFFFFF")==true);
+    }
+
+    void TestHexAddressWithIncorrect0xPrefix()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("0x00F8E70A")==false);
+    }
+
+    void TestHexAddressWithBadCharacter()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("00F8E70#")==false);
+    }
+
+    void TestHexAddressWithAllCharactersPartOne()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("ABCDEF01")==true);
+    }
+
+    void TestHexAddressWithAllCharactersPartTwo()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("23456789")==true);
+    }
+
+    void TextHexAddressIncorrectLengthTooShort()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("F8E7A39")==false);
+    }
+
+    void TestHexAddressIncorrectLengthTooLong()
+    {
+        CPPUNIT_ASSERT(IP::IsValidHexAddress("F8E7A3987")==false);
+    }
+
+    void TestHexToIPAddressConversionMinimumValue()
+    {
+        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"00000000").compare(L"0.0.0.0") == 0 );
+    }
+
+    void TestHexToIPAddressConversionMaximumValue()
+    {
+        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"FFFFFFFF").compare(L"255.255.255.255") == 0 );
+    }
+
+    void TestHexToIPAddressConversionWithAllCharactersPartOne()
+    {
+        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"ABCDEf01").compare(L"171.205.239.1") == 0 );
+    }
+
+    void TestHexToIPAddressConversionWithAllCharactersPartTwo()
+    {
+        CPPUNIT_ASSERT( IP::ConvertHexToIpAddress(L"23456789").compare(L"35.69.103.137") == 0 );
+    }
+
+    void TestHexToIPAddressConversionWithBadInputParameter()
+    {
+        SCXUNIT_ASSERT_THROWN_EXCEPTION( IP::ConvertIpAddressToHex(L"127.255.255.25n"), SCXCoreLib::SCXInvalidArgumentException, L"not a valid ip address" );
+        SCXUNIT_ASSERTIONS_FAILED_ANY();
+    }
+
+    void TestIPAddressToHexConversionMinimumValue()
+    {
+        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"0.0.0.0").compare(L"00000000") == 0 );
+    }
+
+    void TestIPAddressToHexConversionMaximumValue()
+    {
+        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"255.255.255.255").compare(L"FFFFFFFF") == 0 );
+    }
+
+    void TestIPAddressToHexConversionWithAllCharactersPartOne()
+    {
+        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"171.205.239.1").compare(L"ABCDEF01") == 0 );
+    }
+
+    void TestIPAddressToHexConversionWithAllCharactersPartTwo()
+    {
+        CPPUNIT_ASSERT( IP::ConvertIpAddressToHex(L"35.69.103.137").compare(L"23456789") == 0 );
+    }
+
+    void TestIPAddressToHexConversionWithBadInputParameter()
+    {
+        SCXUNIT_ASSERT_THROWN_EXCEPTION( IP::ConvertHexToIpAddress(L"7F00000n"), SCXCoreLib::SCXInvalidArgumentException, L"not a valid hex number" );
+        SCXUNIT_ASSERTIONS_FAILED_ANY();
+    }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION( SCXIsValidIPAddressTest ); /* CUSTOMIZE: Name must be same as classname */

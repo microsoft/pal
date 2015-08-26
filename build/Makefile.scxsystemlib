@@ -66,6 +66,9 @@ STATIC_SYSTEMPALLIB_SRCFILES += \
 	$(SYSTEMLIB_ROOT)/computersystem/computersystemenumeration.cpp \
 	$(SYSTEMLIB_ROOT)/computersystem/computersysteminstance.cpp \
 	$(SYSTEMLIB_ROOT)/computersystem/computersystemdependencies.cpp \
+	$(SYSTEMLIB_ROOT)/netroute/nxnetroutedependencies.cpp \
+	$(SYSTEMLIB_ROOT)/netroute/nxnetrouteenumeration.cpp \
+	$(SYSTEMLIB_ROOT)/netroute/nxnetrouteinstance.cpp \
 
 endif
 

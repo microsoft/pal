@@ -6,6 +6,8 @@ namespace SCXCoreLib
     {
     public:
         static int IsValidIPAddress(const char *ipAddress);
-        static int IsValidIPAddress(const std::string &ipAddress);
+        static int IsValidHexAddress(const char *hexAddress);
+        static std::wstring ConvertIpAddressToHex(std::wstring ipAddress);
+        static std::wstring ConvertHexToIpAddress(std::wstring hex);
     };
 }
