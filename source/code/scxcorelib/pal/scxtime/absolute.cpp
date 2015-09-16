@@ -948,7 +948,10 @@ namespace SCXCoreLib {
         const char timeFormat[] = "%x %X"; ///> format string for strftime (date time)
         char timeBuffer[128];
 
-        struct tm* timeInfo = localtime(&posixTime);
+        struct tm timeInfo;
+        if (localtime_r(&posixTime, &timeInfo) != &timeInfo) {
+            throw SCXInternalErrorException(UnexpectedErrno(L"Call to localtime_r failed", errno), SCXSRCLOCATION);
+        }
 
         // Someone may be relying on the 'default' LC_TIME locale;
         // after formatting our string we should restore the default
@@ -956,7 +959,7 @@ namespace SCXCoreLib {
 
         // Switch to user defined locale to format time string
         setlocale(LC_TIME, "");
-        if (strftime(timeBuffer, 128, timeFormat, timeInfo) == 0) {
+        if (strftime(timeBuffer, 128, timeFormat, &timeInfo) == 0) {
             // error timeBuffer length not enough
             timeBuffer[0] = '\0';
         }
