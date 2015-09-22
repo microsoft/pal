@@ -59,6 +59,12 @@ namespace SCXSystemLib
 
         /*--------------------------------------------------------------------------------------------*/
         /**
+          @param[in] pathToProcNetRouteFile  Set the path to the route file as a wide string.
+        */
+        void SetPathToFile(const std::wstring pathToProcNetRouteFile);
+
+        /*--------------------------------------------------------------------------------------------*/
+        /**
           @return std::vector& A vector containing the lines of the route file
         */
         std::vector<std::wstring>& GetLines();
@@ -68,11 +74,6 @@ namespace SCXSystemLib
         std::vector<std::wstring> m_lines;/*!< holds each line of the route file */
         std::wstring m_pathToProcNetRouteFile; /*!< the fully qualified path to the route file (ie, proc/net/route) */
 
-        /*--------------------------------------------------------------------------------------------*/
-        /**
-          @param[in] pathToProcNetRouteFile  Set the path to the route file as a wide string.
-        */
-        void SetPathToFile(const std::wstring pathToProcNetRouteFile);
     };
 }
 

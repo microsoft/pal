@@ -21,6 +21,7 @@ rep
 #include <scxcorelib/scxstream.h>
 #include <scxcorelib/scxfile.h>
 #include <scxcorelib/stringaid.h>
+#include <cassert>
 
 using namespace SCXCoreLib;
 using namespace SCXSystemLib;
@@ -29,6 +30,8 @@ static const wstring s_LogModuleName = L"scx.core.common.pal.system.netroute.nxn
 
 class NxNetRouteTestDependencies : public NxNetRouteDependencies
 {
+    friend class NxNetRouteEnumeration;
+    friend class NxNetRouteDependencies;
 
 public:
     NxNetRouteTestDependencies()
@@ -73,6 +76,9 @@ class NxNetRoute_Test: public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(testNxNetRouteAddOneNetRouteInstance);
     CPPUNIT_TEST(testParseLines);
     CPPUNIT_TEST(testNonRequiredParameters);
+    CPPUNIT_TEST(testWrite);
+    CPPUNIT_TEST(testReadAndWriteRealRouteFile);
+    CPPUNIT_TEST(testNoFileWrittenWhenNothingToWrite);
 #endif
 
     CPPUNIT_TEST_SUITE_END();
@@ -96,6 +102,10 @@ public:
     void testNxNetRouteAddOneNetRouteInstance();
     void testParseLines();
     void testNonRequiredParameters();
+    void testWrite();
+    void testReadAndWriteRealRouteFile();
+    void testNoFileWrittenWhenNothingToWrite();
+
 };
 
 void NxNetRoute_Test::setUp(void)
@@ -300,7 +310,7 @@ void NxNetRoute_Test::testIfaceInvalidEth()
     CPPUNIT_ASSERT_EQUAL(m_netrouteenum->ValidateIface(L"abc"), false);
 }
 
-void NxNetRoute_Test:: testNonRequiredParameters()
+void NxNetRoute_Test::testNonRequiredParameters()
 {
     SCXHandle<NxNetRouteTestDependencies>deps(new NxNetRouteTestDependencies());
     m_netrouteenum = new NxNetRouteEnumeration(deps);
@@ -315,6 +325,132 @@ void NxNetRoute_Test:: testNonRequiredParameters()
     CPPUNIT_ASSERT_EQUAL(m_netrouteenum->ValidateNonRequiredParameters(testWstring), false);
     testWstring = L"134";
     CPPUNIT_ASSERT_EQUAL(m_netrouteenum->ValidateNonRequiredParameters(testWstring), true);
+}
+
+void NxNetRoute_Test::testWrite()
+{
+    SCXHandle<NxNetRouteTestDependenciesWithLines>deps(new NxNetRouteTestDependenciesWithLines());
+    m_netrouteenum = new NxNetRouteEnumeration(deps);
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<long unsigned int>(0), m_netrouteenum->Size());
+    m_netrouteenum->Update(false);// false means use the lines pre-loaded in TestDependencies class
+    CPPUNIT_ASSERT_EQUAL(static_cast<long unsigned int>(2), m_netrouteenum->Size());
+
+    SCXFilePath tempFilePath(SCXFile::CreateTempFile(L"route"));
+    CPPUNIT_ASSERT(SCXFile::Exists(tempFilePath));
+
+    // set our newly create temp file path
+    deps->SetPathToFile(tempFilePath);
+
+    // write to our unique temp file
+    m_netrouteenum->Write();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<long unsigned int>(2), m_netrouteenum->Size());
+    // read our temp file
+    m_netrouteenum->Update();
+    CPPUNIT_ASSERT_EQUAL(static_cast<long unsigned int>(2), m_netrouteenum->Size());
+
+
+    SCXHandle<NxNetRouteInstance>instance = m_netrouteenum->GetInstance(0);
+
+    CPPUNIT_ASSERT_EQUAL(instance->GetInterface() , L"eth3");
+    CPPUNIT_ASSERT_EQUAL(instance->GetDestination() , L"18.115.171.49");
+    CPPUNIT_ASSERT_EQUAL(instance->GetGateway() , L"168.234.255.255");
+    CPPUNIT_ASSERT_EQUAL(instance->GetGenMask() , L"5.23.128.0");
+    CPPUNIT_ASSERT_EQUAL(instance->GetFlags() , L"0003");
+    CPPUNIT_ASSERT_EQUAL(instance->GetRefCount() , L"a");
+    CPPUNIT_ASSERT_EQUAL(instance->GetUse() , L"b");
+    CPPUNIT_ASSERT_EQUAL(instance->GetMetric() , L"2");
+    CPPUNIT_ASSERT_EQUAL(instance->GetMtu(), L"x");
+    CPPUNIT_ASSERT_EQUAL(instance->GetWindow() ,L"y");
+    CPPUNIT_ASSERT_EQUAL(instance->GetIrtt() , L"z");
+
+    instance = m_netrouteenum->GetInstance(1);
+
+    CPPUNIT_ASSERT_EQUAL(instance->GetInterface() , L"eth0");
+    CPPUNIT_ASSERT_EQUAL(instance->GetDestination() , L"0.128.59.152");
+    CPPUNIT_ASSERT_EQUAL(instance->GetGenMask() , L"0.252.255.255");
+    CPPUNIT_ASSERT_EQUAL(instance->GetGateway() , L"0.0.0.0");
+    CPPUNIT_ASSERT_EQUAL(instance->GetFlags() , L"0001");
+    CPPUNIT_ASSERT_EQUAL(instance->GetRefCount() , L"0");
+    CPPUNIT_ASSERT_EQUAL(instance->GetUse() , L"0");
+    CPPUNIT_ASSERT_EQUAL(instance->GetMetric() , L"1");
+    CPPUNIT_ASSERT_EQUAL(instance->GetWindow() ,L"0");
+    CPPUNIT_ASSERT_EQUAL(instance->GetIrtt() , L"0");
+
+    // clean up our temp file
+    SCXFile::Delete(tempFilePath);
+    CPPUNIT_ASSERT(!SCXFile::Exists(tempFilePath));
+}
+
+void NxNetRoute_Test::testReadAndWriteRealRouteFile()
+{
+    SCXHandle<NxNetRouteDependencies>deps(new NxNetRouteDependencies());
+    m_netrouteenum = new NxNetRouteEnumeration(deps);
+
+    // make sure we have the real route file
+    assert(deps->GetPathToFile().compare(L"/proc/net/route") == 0);
+
+    // read in the real file
+    m_netrouteenum->Update();
+
+    SCXFilePath tempFilePath(SCXFile::CreateTempFile(L"route"));
+    CPPUNIT_ASSERT(SCXFile::Exists(tempFilePath));
+
+    // set the path to the  newly created temp file path
+    deps->SetPathToFile(tempFilePath);
+
+    // make sure we are NOT writing to the real route file
+    assert(deps->GetPathToFile().compare(L"/proc/net/route") != 0);
+
+    // write to our unique temp file
+    m_netrouteenum->Write();
+
+
+    // compare the whole lines of the original route file to the one we just wrote
+    SCXStream::NLFs nlfs;
+    vector<wstring> realRouteLines;
+    vector<wstring> tempRouteLines;
+
+    SCXFile::ReadAllLines(SCXFilePath(L"/proc/net/route"), realRouteLines, nlfs);
+    SCXFile::ReadAllLines(SCXFilePath(tempFilePath), tempRouteLines, nlfs);
+
+    CPPUNIT_ASSERT_EQUAL(realRouteLines.size(), tempRouteLines.size());
+
+    for(unsigned int i=0; i < realRouteLines.size(); i++)
+    {
+        wstring originalLine = realRouteLines.at(i);
+        wstring providerWrittenLine = tempRouteLines.at(i);
+
+        CPPUNIT_ASSERT_EQUAL(originalLine.length(), providerWrittenLine.length() );
+        CPPUNIT_ASSERT(originalLine.compare(providerWrittenLine) == 0);
+    }
+
+    // clean up our temp file
+    SCXFile::Delete(tempFilePath);
+    CPPUNIT_ASSERT(!SCXFile::Exists(tempFilePath));
+}
+
+void NxNetRoute_Test::testNoFileWrittenWhenNothingToWrite()
+{
+    SCXFilePath tempFilePath(SCXFile::CreateTempFile(L"route"));
+
+    // delete the file so I have a path with no existing file
+    SCXFile::Delete(tempFilePath);
+
+    SCXHandle<NxNetRouteTestDependenciesWithLines>deps(new NxNetRouteTestDependenciesWithLines());
+    m_netrouteenum = new NxNetRouteEnumeration(deps);
+
+    // set our temp path as the file output path
+    deps->SetPathToFile(tempFilePath);
+
+    // verify there is nothing to write
+    CPPUNIT_ASSERT_EQUAL(static_cast<long unsigned int>(0), m_netrouteenum->Size());
+    m_netrouteenum->Write();
+
+    // a file should not exist if there was nothing to write
+    CPPUNIT_ASSERT(!SCXFile::Exists(tempFilePath));
+
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION( NxNetRoute_Test );

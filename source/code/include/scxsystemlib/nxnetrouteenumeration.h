@@ -33,8 +33,7 @@ namespace SCXSystemLib
     */
     class NxNetRouteEnumeration: public EntityEnumeration<NxNetRouteInstance>
     {
-        //friend class NxNetRouteDependencies;
-
+ 
     public:
         NxNetRouteEnumeration(SCXCoreLib::SCXHandle<NxNetRouteDependencies> deps = SCXCoreLib::SCXHandle<NxNetRouteDependencies>(new NxNetRouteDependencies()));
         virtual ~NxNetRouteEnumeration();
@@ -45,6 +44,7 @@ namespace SCXSystemLib
         bool ValidateIface(std::wstring iface);
         bool ValidateNonRequiredParameters(std::wstring &param);
         void ValidateFlags(std::wstring &param);
+        void Write();
 
     private:
         SCXCoreLib::SCXLogHandle m_log; /*!< logging object */

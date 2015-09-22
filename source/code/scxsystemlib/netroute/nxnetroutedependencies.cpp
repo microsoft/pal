@@ -51,6 +51,10 @@ namespace SCXSystemLib
     {
         SCX_LOGTRACE(m_log, L"NxNetRouteDependencies Init()");
 
+        // since there is nothing stopping init from being called
+        // multiple times, ensure a clear slate before each call.
+        m_lines.clear();
+
         // read from file
         SCXStream::NLFs nlfs;
         std::vector<std::wstring> lines;

@@ -26,6 +26,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved. See license.txt licen
 #include <scxcorelib/scxprocess.h>
 #include <scxcorelib/scxstream.h>
 #include <scxcorelib/scxregex.h>
+#include <scxcorelib/scxip.h>
 
 #include <cassert>
 #include <sstream>
@@ -39,7 +40,7 @@ namespace SCXSystemLib
     /**
        Constructor
        \detailed Contains the default path and acts as the default constructor if no value provided.
-       \param[in] deps Dependenciea from Net Route Enumeration.
+       \param[in] deps Dependency object for Net Route Enumeration.
     */
     NxNetRouteEnumeration::NxNetRouteEnumeration(SCXCoreLib::SCXHandle<NxNetRouteDependencies> deps /* = SCXCoreLib::SCXHandle<NxNetRouteDependencies>(new NxNetRouteDependencies()) */):
         EntityEnumeration<NxNetRouteInstance>(),
@@ -91,6 +92,8 @@ namespace SCXSystemLib
     */
     void NxNetRouteEnumeration::Update(bool updateInstances /* = true */ )
     {
+        SCX_LOGTRACE(m_log, L"NxNetRouteEnumeration Update()");
+
         if( updateInstances )
         {
             m_deps->Init(); // read in data from file
@@ -100,7 +103,7 @@ namespace SCXSystemLib
 
         vector<std::wstring>::iterator iter;
 
-        iter = m_deps->GetLines().begin();// get iterator at beginnging of file
+        iter = m_deps->GetLines().begin();// get iterator at beginning of file
 
         while (iter != m_deps->GetLines().end())
         {
@@ -147,6 +150,54 @@ namespace SCXSystemLib
         }
 
         SCX_LOGTRACE(m_log, L"NxNetRouteEnumeration Update()");
+    }
+
+    /*------------------------------------------------------------------------------*/
+    /**
+       Write the instances to a route file
+       /detailed Each instance becomes a line in the route file.  They are added to
+                 file in the order they were added to this instance.  To make the resulting
+                 file look exactly like a route file found on the computer, trailing spaces
+                 are added to the end of each line.
+    */
+    void NxNetRouteEnumeration::Write()
+    {
+        SCX_LOGTRACE(m_log, L"NxNetRouteEnumeration Write()");
+
+        if(0 == Size())
+        {
+            SCX_LOGTRACE(m_log, L"NxNetRouteEnumeration Write called with nothing to write()");
+            return;
+        }
+
+        std::vector<wstring>lines;
+        lines.push_back(L"Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT                                                       ");
+
+        for(size_t i = 0; i < Size(); ++i)
+        {
+            SCXHandle<NxNetRouteInstance>instance = GetInstance(i);
+            std::wostringstream oss;
+
+            oss << instance->GetInterface() <<  L"\t";
+            oss << SCXCoreLib::IP::ConvertIpAddressToHex(instance->GetDestination()) << L"\t";
+            oss << SCXCoreLib::IP::ConvertIpAddressToHex(instance->GetGateway()) << L"\t";
+            oss << instance->GetFlags() << L"\t";
+            oss << instance->GetRefCount() << L"\t";
+            oss << instance->GetUse() << L"\t";
+            oss << instance->GetMetric() << L"\t";
+            oss << SCXCoreLib::IP::ConvertIpAddressToHex(instance->GetGenMask()) << L"\t";
+            oss << instance->GetMtu() << L"\t";
+            oss << instance->GetWindow() << L"\t";
+            oss << instance->GetIrtt();
+
+            // each line should be 127 characters long with padding spaces at end
+            oss << L"                                                                                                                           ";
+
+            lines.push_back(oss.str().substr(0,127));
+        }
+
+        lines.push_back(L"");// add a blank line at end of file
+        SCXFile::WriteAllLines(m_deps->GetPathToFile(), lines, std::ios_base::out);
     }
 
     /*------------------------------------------------------------------------------*/
