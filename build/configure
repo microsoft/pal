@@ -121,6 +121,7 @@ case $uname in
             if [ "$DISTRIB_ID" = "Ubuntu" ]; then
                 PF_MAJOR=`echo $DISTRIB_RELEASE | cut -d '.' -f 1`
                 PF_MINOR=`echo $DISTRIB_RELEASE | cut -d '.' -f 2`
+                PF_DISTRO_ULINUX_D=1
                 PF_DISTRO=UBUNTU
                 PKG_SUFFIX=deb
                 BUILD_DPKG=1

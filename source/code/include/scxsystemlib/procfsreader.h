@@ -94,8 +94,8 @@ protected:
         while ( true )
         {
             const char keyValueSep = ':';
-            const unsigned short MAXLINECC = (sizeof(cpuInfoProperty)/sizeof(cpuInfoProperty[0]));
-            const unsigned short MAXKEYCC = (sizeof(cpuInfoKey)/sizeof(cpuInfoKey[0]));
+            const size_t MAXLINECC = (sizeof(cpuInfoProperty)/sizeof(cpuInfoProperty[0]));
+            const size_t MAXKEYCC = (sizeof(cpuInfoKey)/sizeof(cpuInfoKey[0]));
 
             ifs.getline(cpuInfoProperty, MAXLINECC);
             if ( !ifs.good() )
