@@ -152,7 +152,7 @@ GetLinuxInfo() {
                     ;;
 
                 ubuntu)
-                    OSManufacturer="Canonical"
+                    OSManufacturer="Canonical Group Limited"
                     OSAlias="UniversalD"
                     ;;
             esac
