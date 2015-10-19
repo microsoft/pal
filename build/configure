@@ -116,6 +116,14 @@ case $uname in
             PF_MAJOR=`head -n 1 /etc/redhat-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
             PF_MINOR=`(head -n 1 /etc/redhat-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
             PF_DISTRO=REDHAT
+        elif [ -n "$CHECK_CENTOS" ]; then
+            PF_MAJOR=`head -n 1 /etc/redhat-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
+            PF_MINOR=`(head -n 1 /etc/redhat-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
+            if [ $PF_MAJOR -eq 5 -a $PF_MINOR -eq 0 ]; then
+                set_ulinux_pf
+            else
+                PF_DISTRO=REDHAT
+            fi
         elif [ -e /etc/lsb-release ]; then
             source /etc/lsb-release
             if [ "$DISTRIB_ID" = "Ubuntu" ]; then
