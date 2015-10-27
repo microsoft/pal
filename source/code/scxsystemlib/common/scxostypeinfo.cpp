@@ -34,11 +34,13 @@
 #include <sys/types.h>
 #endif // defined(PF_DISTRO_ULINUX)
 
+#include <scxcorelib/logsuppressor.h>
 #include <scxcorelib/scxfile.h>
 #include <scxcorelib/scxprocess.h>
 #include <scxcorelib/scxstream.h>
 #include <scxcorelib/stringaid.h>
 
+#include <scxcorelib/scxconfigfile.h>
 #include <scxsystemlib/scxostypeinfo.h>
 #include <scxsystemlib/scxsysteminfo.h>
 #include <scxsystemlib/scxproductdependencies.h>
@@ -112,6 +114,11 @@ namespace SCXSystemLib
     {
         return ( 0 == geteuid() );
     }
+
+    const wstring SCXOSTypeInfoDependencies::getConfigPath() const
+    {
+        return L"/etc/opt/microsoft/scx/conf/scxconfig.conf";
+    }
 #endif // defined(PF_DISTRO_ULINUX)
 
     //
@@ -126,7 +133,7 @@ namespace SCXSystemLib
     
     SCXOSTypeInfo::SCXOSTypeInfo(SCXCoreLib::SCXHandle<SCXOSTypeInfoDependencies> deps) :
         m_deps(deps),
-        m_osVersion(L""), m_osName(L""), m_osAlias(L""),
+        m_osVersion(L""), m_osName(L""), m_osCompatName(L""), m_osAlias(L""),
         m_unameIsValid(false), m_osArchitString(L""), m_osProcessor(L""),
         m_osHardwarePlatform(L""), m_osOperatingSystem(L""), m_osManufacturer(L"")
     {
@@ -179,7 +186,7 @@ namespace SCXSystemLib
 #elif defined(linux) && defined(PF_DISTRO_REDHAT)
             return L"Red Hat Distribution";
 #elif defined(linux) && defined(PF_DISTRO_ULINUX)
-            return L"Linux Distribution";
+            return m_osCompatName;
 #endif
             // For all other, fall through since compat mode is irrelevant
         }
@@ -483,7 +490,7 @@ namespace SCXSystemLib
 
         // Look in release file for O/S information
 
-        static const string sFile = StrToUTF8(m_deps->getReleasePath());
+        string sFile = StrToUTF8(m_deps->getReleasePath());
         wifstream fin(sFile.c_str());
         SCXStream::ReadAllLines(fin, lines, nlfs); 
 
@@ -500,6 +507,58 @@ namespace SCXSystemLib
             m_osAlias = L"Universal";
         }
 
+        // Behavior for m_osCompatName (method GetOSName) should be as follows:
+        //   PostInstall scripts will first look for SCX-RELEASE file (only on universal kits)
+        //   If found, add "ORIGINAL_KIT_TYPE=Universal" to scxconfig.conf file,
+        //      else   add "ORIGINAL_KIT_TYPE=!Universal" to scxconfig.conf file.
+        //   After that is set up, the SCX-RELEASE file is created.
+        //
+        //   A RHEL system should of OSAlias of "RHEL, SLES system should have "SuSE" (in scx-release)
+        //
+        //   We need to mimic return values for RHEL and SLES on universal kits that did not
+        //   have a universal kit installed previously, but only for RHEL and SLES kits.  In
+        //   all other cases, continue to return "Linux Distribution".
+
+        wstring configFilename(m_deps->getConfigPath());
+        SCXConfigFile configFile(configFilename);
+
+        try
+        {
+            configFile.LoadConfig();
+        }
+        catch(SCXFilePathNotFoundException &e)
+        {
+            // Something's whacky with postinstall, so we can't follow algorithm
+            static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTrace);
+            wstring logMessage(L"Unable to load configuration file " + configFilename);
+            SCX_LOG(m_log, suppressor.GetSeverity(logMessage), logMessage);
+
+            m_osCompatName = L"Unknown Linux Distribution";
+        }
+
+        if ( m_osCompatName.empty() )
+        {
+            wstring kitType;
+            if ( configFile.GetValue(L"ORIGINAL_KIT_TYPE", kitType) )
+            {
+                if ( L"!Universal" == kitType )
+                {
+                    if ( L"RHEL" == m_osAlias )
+                    {
+                        m_osCompatName = L"Red Hat Distribution";
+                    }
+                    else if ( L"SLES" == m_osAlias )
+                    {
+                        m_osCompatName = L"SuSE Distribution";
+                    }
+                }
+            }
+
+            if ( m_osCompatName.empty() )
+            {
+                m_osCompatName = L"Linux Distribution";
+            }
+        }
 #else
 #error "Linux Platform not supported";
 #endif

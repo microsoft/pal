@@ -37,6 +37,7 @@ namespace SCXSystemLib
         virtual const std::wstring getScriptPath() const;
         virtual const std::wstring getReleasePath() const;
         virtual bool isReleasePathWritable() const;
+        virtual const std::wstring getConfigPath() const;
 #endif // defined(PF_DISTRO_ULINUX)
     };
 
@@ -81,6 +82,7 @@ namespace SCXSystemLib
         SCXCoreLib::SCXHandle<SCXOSTypeInfoDependencies> m_deps;   //!< Dependency object for unit tests
         std::wstring m_osVersion;               //!< Cached value for osVersion
         std::wstring m_osName;                  //!< Cached value for osName
+        std::wstring m_osCompatName;            //!< Cached value for osName (Compatible)
         std::wstring m_osAlias;                 //!< Cached value for osAlias
         bool m_unameIsValid;                    //!< Is m_unameInfo valid now?
         struct utsname m_unameInfo;             //!< Saves the output from uname()

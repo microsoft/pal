@@ -46,6 +46,11 @@ public:
     {
         return true;
     }
+
+    const wstring getConfigPath() const
+    {
+        return L"./scxconfig.conf";
+    }
 #endif // defined(PF_DISTRO_ULINUX)
 };
 
@@ -54,6 +59,11 @@ class SCXOSTypeInfoTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE( SCXOSTypeInfoTest );
     CPPUNIT_TEST( TestOSName );
     CPPUNIT_TEST( TestGetOSNameCompatFlag );
+#if defined(linux) && defined(PF_DISTRO_ULINUX)
+    CPPUNIT_TEST( TestGetOSNameCompatFlagNoConfigFile );
+    CPPUNIT_TEST( TestGetOSNameCompatFlagRedhat );
+    CPPUNIT_TEST( TestGetOSNameCompatFlagSuSE );
+#endif
     CPPUNIT_TEST( TestOSVersion );
     CPPUNIT_TEST( TestOSAlias );
     CPPUNIT_TEST( TestOSFamily );
@@ -142,8 +152,17 @@ public:
 
     void TestGetOSNameCompatFlag(void)
     {
+        SCXHandle<SCXOSTypeInfoTestDependencies> deps(new SCXOSTypeInfoTestDependencies());
+
+#if defined(linux) && defined(PF_DISTRO_ULINUX)
+        // Create empty config file
+        SelfDeletingFilePath configFile( deps->getConfigPath() );
+        vector<wstring> emptyVector;
+        SCXFile::WriteAllLines( deps->getConfigPath(), emptyVector, ios_base::out );
+#endif
+
         wstring correctAnswer;
-        SCXOSTypeInfo infoObject;
+        SCXOSTypeInfo infoObject(deps);
 
 #if defined(linux) && defined(PF_DISTRO_SUSE)
         correctAnswer = L"SuSE Distribution";
@@ -164,6 +183,81 @@ public:
                                infoObject.GetOSName(true) == correctAnswer);
     }
 
+#if defined(linux) && defined(PF_DISTRO_ULINUX)
+
+    void TestGetOSNameCompatFlagNoConfigFile()
+    {
+        SCXHandle<SCXOSTypeInfoTestDependencies> deps(new SCXOSTypeInfoTestDependencies());
+
+        // No configuration file means invalid indicator returned
+        {
+            SelfDeletingFilePath configFile( deps->getConfigPath() );
+        }
+
+        wstring correctAnswer;
+        SCXOSTypeInfo infoObject(deps);
+
+        correctAnswer = L"Unknown Linux Distribution";
+        wostringstream sout;
+
+        sout << infoObject.GetOSName(true) << L" != " << correctAnswer;
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
+                               infoObject.GetOSName(true) == correctAnswer);
+    }
+
+    void TestGetOSNameCompatFlagRedhat()
+    {
+        SCXHandle<SCXOSTypeInfoTestDependencies> deps(new SCXOSTypeInfoTestDependencies());
+        vector<wstring> configVector, releaseVector;
+
+        // Create empty config file
+        SelfDeletingFilePath configFile( deps->getConfigPath() );
+        configVector.push_back( L"ORIGINAL_KIT_TYPE=!Universal" );
+        SCXFile::WriteAllLines( deps->getConfigPath(), configVector, ios_base::out );
+
+        // Create scx-release file with Redhat alias
+        SelfDeletingFilePath releaseFile( deps->getReleasePath() );
+        releaseVector.push_back( L"OSAlias=RHEL" );
+        SCXFile::WriteAllLines( deps->getReleasePath(), releaseVector, ios_base::out );
+
+        wstring correctAnswer;
+        SCXOSTypeInfo infoObject(deps);
+
+        correctAnswer = L"Red Hat Distribution";
+        wostringstream sout;
+
+        sout << infoObject.GetOSName(true) << L" != " << correctAnswer;
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
+                               infoObject.GetOSName(true) == correctAnswer);
+    }
+
+    void TestGetOSNameCompatFlagSuSE()
+    {
+        SCXHandle<SCXOSTypeInfoTestDependencies> deps(new SCXOSTypeInfoTestDependencies());
+        vector<wstring> configVector, releaseVector;
+
+        // Create empty config file
+        SelfDeletingFilePath configFile( deps->getConfigPath() );
+        configVector.push_back( L"ORIGINAL_KIT_TYPE=!Universal" );
+        SCXFile::WriteAllLines( deps->getConfigPath(), configVector, ios_base::out );
+
+        // Create scx-release file with Redhat alias
+        SelfDeletingFilePath releaseFile( deps->getReleasePath() );
+        releaseVector.push_back( L"OSAlias=SLES" );
+        SCXFile::WriteAllLines( deps->getReleasePath(), releaseVector, ios_base::out );
+
+        wstring correctAnswer;
+        SCXOSTypeInfo infoObject(deps);
+
+        correctAnswer = L"SuSE Distribution";
+        wostringstream sout;
+
+        sout << infoObject.GetOSName(true) << L" != " << correctAnswer;
+        CPPUNIT_ASSERT_MESSAGE(StrToUTF8(sout.str()).c_str(),
+                               infoObject.GetOSName(true) == correctAnswer);
+    }
+
+#endif
 
     void TestOSFamily(void)
     {
