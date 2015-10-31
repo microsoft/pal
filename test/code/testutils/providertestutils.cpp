@@ -584,7 +584,9 @@ std::wstring GetDistributionName(std::wstring errMsg)
 #elif defined(PF_DISTRO_REDHAT)
     distributionName =  L"Red Hat Distribution";
 #elif defined(PF_DISTRO_ULINUX)
-    distributionName =  L"Linux Distribution";
+    // We can't generally mock this above the PAL layer, so just say Unknown
+    // (We can't determine if we should mimic a RHEL or SuSE installation)
+    distributionName =  L"Unknown Linux Distribution";
 #endif // defined(PF_DISTRO_SUSE)
 #endif // defined(sun) || defined(aix) || defined(HPUX)
     return distributionName;
