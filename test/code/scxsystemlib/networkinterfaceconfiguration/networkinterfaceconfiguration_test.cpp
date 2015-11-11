@@ -671,7 +671,7 @@ public:
             // Verify the defaultIPGateway is not empty.
             CPPUNIT_ASSERT(!defaultIPGateway.empty());
             // Verify we have the right address (may need minor edit if DEV network undergoes reconfiguration)
-            CPPUNIT_ASSERT_EQUAL("10.200.8.129", StrToUTF8(defaultIPGateway[0]));
+            CPPUNIT_ASSERT_EQUAL("10.193.246.1", StrToUTF8(defaultIPGateway[0]));
         }
 #endif
     }
