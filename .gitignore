@@ -1,7 +1,8 @@
 # git ignore file for pal project
 
-intermediate
-target
+intermediate/
+target/
 build/config.mak
 build/Makefile.version
 installer/InstallBuilder/*.pyc
+installer/InstallBuilder/unittests/staging
