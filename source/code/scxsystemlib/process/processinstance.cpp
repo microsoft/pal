@@ -295,8 +295,12 @@ namespace SCXSystemLib
      */
     ProcessInstance::ProcessInstance(scxpid_t pid, const char* basename) :
         EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
-        m_scxPriorityValid(false), m_scxPriority(0), m_uid(0), m_gid(0), m_delta_UserTime(0), m_delta_SystemTime(0),
-        m_delta_HardPageFaults(0)
+        m_scxPriorityValid(false), m_scxPriority(0), m_uid(0), m_gid(0),
+        m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_HardPageFaults_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_delta_UserTime(0), m_delta_SystemTime(0), m_delta_HardPageFaults(0)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
         SCX_LOGHYSTERICAL(m_log, L"ProcessInstance constructor");
@@ -521,7 +525,13 @@ namespace SCXSystemLib
     ProcessInstance::ProcessInstance(scxpid_t pid, const char* basename) :
         EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
         m_scxPriorityValid(false), m_scxPriority(0), m_logged64BitError(false), m_delta_BlockOut(0),
-        m_delta_BlockInp(0), m_delta_HardPageFaults(0)
+        m_delta_BlockInp(0), m_delta_HardPageFaults(0),
+        m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_BlockOut_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_BlockInp_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_HardPageFaults_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
         SCX_LOGTRACE(m_log, L"ProcessInstance constructor");
@@ -875,7 +885,13 @@ namespace SCXSystemLib
     ProcessInstance::ProcessInstance(scxpid_t pid, struct pst_status *) :
         EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
         m_scxPriorityValid(false), m_scxPriority(0), m_delta_UserTime(0), m_delta_SystemTime(0), m_delta_BlockOut(0),
-        m_delta_BlockInp(0), m_delta_HardPageFaults(0)
+        m_delta_BlockInp(0), m_delta_HardPageFaults(0),
+        m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_BlockOut_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_BlockInp_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_HardPageFaults_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
         SCX_LOGTRACE(m_log, L"ProcessInstance constructor");
@@ -1045,7 +1061,10 @@ namespace SCXSystemLib
      */
     ProcessInstance::ProcessInstance(scxpid_t pid, struct procentry64 *procInfo) :
         EntityInstance(false), m_pid(pid), m_found(true), m_accessViolationEncountered(false),
-        m_scxPriorityValid(false), m_scxPriority(0)
+        m_scxPriorityValid(false), m_scxPriority(0),
+        m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+        m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES)
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
         SCX_LOGTRACE(m_log, L"ProcessInstance constructor");

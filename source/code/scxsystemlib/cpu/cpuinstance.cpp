@@ -37,8 +37,17 @@ namespace SCXSystemLib
         Parameters:  procNumber - Number of processor, used as base for instance name
                      isTotal - Whether the instance represents a Total value of a collection
     */
-    CPUInstance::CPUInstance(unsigned int procNumber, bool isTotal) : EntityInstance(isTotal)
-    {
+    CPUInstance::CPUInstance(unsigned int procNumber, size_t sampleSize, bool isTotal)
+      : EntityInstance(isTotal),
+        m_UserCPU_tics(sampleSize),
+        m_NiceCPU_tics(sampleSize),
+        m_SystemCPUTime_tics(sampleSize),
+        m_IdleCPU_tics(sampleSize),
+        m_IOWaitTime_tics(sampleSize),
+        m_IRQTime_tics(sampleSize),
+        m_SoftIRQTime_tics(sampleSize),
+        m_Total_tics(sampleSize)
+   {
         m_log = SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.system.cpu.cpuinstance");
 
         if (isTotal)

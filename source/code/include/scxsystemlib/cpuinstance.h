@@ -28,13 +28,13 @@
 namespace SCXSystemLib
 {
     /** Number of samples collected in the datasampler for CPU. */
-    const int MAX_CPUINSTANCE_DATASAMPER_SAMPLES = 6;
+    const size_t MAX_CPUINSTANCE_DATASAMPER_SAMPLES = 6;
 
     /** Datasampler for CPU information. */
 #if defined(aix)
-    typedef DataSampler<u_longlong_t, MAX_CPUINSTANCE_DATASAMPER_SAMPLES> CPUInstanceDataSampler;
+    typedef DataSampler<u_longlong_t> CPUInstanceDataSampler;
 #else
-    typedef DataSampler<scxulong, MAX_CPUINSTANCE_DATASAMPER_SAMPLES> CPUInstanceDataSampler;
+    typedef DataSampler<scxulong> CPUInstanceDataSampler;
 #endif
     /*----------------------------------------------------------------------------*/
     /**
@@ -49,7 +49,7 @@ namespace SCXSystemLib
 
     public:
 
-        CPUInstance(unsigned int procNumber, bool isTotal = false);
+        CPUInstance(unsigned int procNumber, size_t sampleSize, bool isTotal = false);
         virtual ~CPUInstance();
 
         const std::wstring& GetProcName() const;

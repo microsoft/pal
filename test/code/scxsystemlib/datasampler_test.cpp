@@ -44,7 +44,7 @@ public:
 
     void testAddSample()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         CPPUNIT_ASSERT(0 == test.GetNumberOfSamples());
         test.AddSample(1);
         CPPUNIT_ASSERT(1 == test.GetNumberOfSamples());
@@ -64,7 +64,7 @@ public:
 
     void testHasWrapped()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         CPPUNIT_ASSERT(!test.HasWrapped(5));
         test.AddSample(10);
         CPPUNIT_ASSERT(!test.HasWrapped(5));
@@ -90,7 +90,7 @@ public:
 
     void testGetAverage()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         
         CPPUNIT_ASSERT(0 == test.GetAverage<int>());
 
@@ -109,7 +109,7 @@ public:
 
     void testGetAverageDelta()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         
         // With 0 samples, the average delta should be 0.
         CPPUNIT_ASSERT(0 == test.GetAverageDelta(0));
@@ -148,7 +148,7 @@ public:
 
     void testGetAverageDeltaFactored ()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         test.AddSample(10);
         test.AddSample(20);
         CPPUNIT_ASSERT_EQUAL(420, test.GetAverageDeltaFactored(2, 42));
@@ -156,7 +156,7 @@ public:
     
     void testGetDelta ()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         test.AddSample(2);
         test.AddSample(2);
         test.AddSample(4);
@@ -165,7 +165,7 @@ public:
 
     void testGetAt ()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         test.AddSample(1);
         test.AddSample(2);
         test.AddSample(3);
@@ -179,7 +179,7 @@ public:
 
     void testClear ()
     {
-        DataSampler<int, 5> test;
+        DataSampler<int> test(5);
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), test.GetNumberOfSamples());
         test.Clear();
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), test.GetNumberOfSamples());

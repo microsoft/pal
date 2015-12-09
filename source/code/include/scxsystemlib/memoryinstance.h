@@ -37,7 +37,7 @@ namespace SCXSystemLib
     const int MEMORY_SECONDS_PER_SAMPLE = 60;
 
     /** Datasampler for memory information. */
-    typedef DataSampler<scxulong, MAX_MEMINSTANCE_DATASAMPER_SAMPLES> MemoryInstanceDataSampler;
+    typedef DataSampler<scxulong> MemoryInstanceDataSampler;
 
     /*----------------------------------------------------------------------------*/
     /**

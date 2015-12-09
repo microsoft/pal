@@ -32,7 +32,24 @@ namespace SCXSystemLib
    \returns     N/A
     
 */
-    StatisticalDiskInstance::StatisticalDiskInstance(SCXCoreLib::SCXHandle<DiskDepend> deps, bool isTotal /* = false*/) : EntityInstance(isTotal) , m_deps(0)
+    StatisticalDiskInstance::StatisticalDiskInstance(
+        SCXCoreLib::SCXHandle<DiskDepend> deps,
+        bool isTotal /* = false*/)
+      : EntityInstance(isTotal),
+        m_deps(0),
+        m_reads(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_writes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_transfers(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_tBytes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_rBytes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_wBytes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_waitTimes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_tTimes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_rTimes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_wTimes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_runTimes(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_timeStamp(MAX_DISKINSTANCE_DATASAMPER_SAMPLES),
+        m_qLengths(MAX_DISKINSTANCE_DATASAMPER_SAMPLES)
 #if defined(sun)
            , m_kstat(0)
 #endif

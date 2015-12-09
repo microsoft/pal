@@ -97,7 +97,7 @@ namespace SCXSystemLib
     class CPUEnumeration : public EntityEnumeration<CPUInstance>
     {
     public:
-        explicit CPUEnumeration(SCXCoreLib::SCXHandle<CPUPALDependencies> = SCXCoreLib::SCXHandle<CPUPALDependencies>(new CPUPALDependencies()) );
+        explicit CPUEnumeration(SCXCoreLib::SCXHandle<CPUPALDependencies> = SCXCoreLib::SCXHandle<CPUPALDependencies>(new CPUPALDependencies()), time_t = CPU_SECONDS_PER_SAMPLE, size_t = MAX_CPUINSTANCE_DATASAMPER_SAMPLES);
         ~CPUEnumeration();
         virtual void Init();
         virtual void Update(bool updateInstances=true);
@@ -147,6 +147,8 @@ namespace SCXSystemLib
         SCXCoreLib::SCXHandle<CPUPALDependencies> m_deps; //!< Collects external dependencies of this class.
         SCXCoreLib::SCXLogHandle m_log;         //!< Log handle.
         SCXCoreLib::SCXThreadLockHandle m_lock; //!< Handles locking in the cpu enumeration.
+        time_t m_sampleSecs;			//!< Number of seconds between samples
+        size_t m_sampleSize;                    //!< Number of elements stored in sample set
 
         SCXCoreLib::SCXHandle<SCXCoreLib::SCXThread> m_dataAquisitionThread; //!< Thread pointer.
         static void DataAquisitionThreadBody(SCXCoreLib::SCXThreadParamHandle& param);

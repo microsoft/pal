@@ -34,7 +34,7 @@ namespace SCXSystemLib
     const int DISK_SECONDS_PER_SAMPLE = 60;
 
     /** Datasampler for disk information. */
-    typedef DataSampler<scxulong, MAX_DISKINSTANCE_DATASAMPER_SAMPLES> DiskInstanceDataSampler;
+    typedef DataSampler<scxulong> DiskInstanceDataSampler;
 
     /*----------------------------------------------------------------------------*/
     /**

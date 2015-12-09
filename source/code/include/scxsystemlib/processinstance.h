@@ -216,15 +216,15 @@ namespace SCXSystemLib
     typedef scxulong scxpid_t;  //!< Internal type of process id
 
     /** Number of samples collected in the datasampler for CPU. */
-    const int MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES = 6;
+    const size_t MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES = 6;
 
     /** Datasampler for CPU information. */
-    typedef DataSampler<scxulong, MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES> ScxULongDataSampler_t;
+    typedef DataSampler<scxulong> ScxULongDataSampler_t;
     /** Datasampler for time stored as a struct timeval */
-    typedef DataSampler<struct timeval, MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES> TvDataSampler_t;
+    typedef DataSampler<struct timeval> TvDataSampler_t;
 #if defined(sun) || defined(aix)
     /** Datasampler for time stored as a scx_timestruc_t (which is specific for solaris&aix) */
-    typedef DataSampler<scx_timestruc_t, MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES> TsDataSampler_t;
+    typedef DataSampler<scx_timestruc_t> TsDataSampler_t;
 #endif
     
     /*----------------------------------------------------------------------------*/
@@ -244,6 +244,30 @@ namespace SCXSystemLib
         // This constructor is added for unit-test purposes (See WI 516119).
         // Never use this for general use; it is solely for unit testing specific issues!
         ProcessInstance(const std::string &cmd, const std::string &params)
+#if defined(linux)
+          : m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_HardPageFaults_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES)
+#elif defined(sun)
+          : m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_BlockOut_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_BlockInp_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_HardPageFaults_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES)
+#elif defined(hpux)
+          : m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_BlockOut_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_BlockInp_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_HardPageFaults_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES)
+#elif defined(aix)
+          : m_RealTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_UserTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES),
+            m_SystemTime_tics(MAX_PROCESSINSTANCE_DATASAMPER_SAMPLES)
+#endif
         {
 #if defined(linux)
             strncpy(m.command, cmd.c_str(), sizeof(m.command));

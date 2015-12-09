@@ -517,8 +517,8 @@ namespace SCXSystemLib
         m_totalSwap(0),
         m_availableSwap(0),
         m_usedSwap(0),
-        m_pageReads(),
-        m_pageWrites(),
+        m_pageReads(MAX_MEMINSTANCE_DATASAMPER_SAMPLES),
+        m_pageWrites(MAX_MEMINSTANCE_DATASAMPER_SAMPLES),
 #if defined(sun)
         m_reservedMemoryIsSupported(false),
         m_kstat_lock_handle(std::wstring(L"MemoryInstance")),

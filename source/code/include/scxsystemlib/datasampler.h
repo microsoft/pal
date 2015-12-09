@@ -21,19 +21,21 @@
 namespace SCXSystemLib  
 {
     // Note: This class can only be used with native data types (i.e. not a class or struct)
-    template<class T, size_t N>
+    template<class T>
     class FixedSizeVector
     {
     public:
         typedef T* iterator;
         typedef const T* const_iterator;
 
-        FixedSizeVector() : _size(0)
+        FixedSizeVector(size_t maxsize) : _maxSize(maxsize), _size(0)
         {
+            _data = new T[_maxSize];
         }
 
-        FixedSizeVector(const FixedSizeVector& x) : _size(0)
+        FixedSizeVector(const FixedSizeVector& x) : _maxSize(x._maxSize), _size(0)
         {
+            _data = new T[_maxSize];
             for (const_iterator p = x.begin(); p != x.end(); p++)
                 push_back(*p);
         }
@@ -41,6 +43,7 @@ namespace SCXSystemLib
         ~FixedSizeVector()
         {
             clear();
+            delete [] _data;
         }
 
         FixedSizeVector& operator=(const FixedSizeVector& x)
@@ -73,7 +76,7 @@ namespace SCXSystemLib
 
         T* begin() 
         { 
-            return  _data;
+            return _data;
         }
 
         const T* begin() const 
@@ -98,7 +101,7 @@ namespace SCXSystemLib
 
         void push_front(const T& x)
         {
-            if (_size != N)
+            if (_size != _maxSize)
             {
                 memmove(begin() + 1, begin(), sizeof(T) * _size);
                 _data[0] = x;
@@ -108,7 +111,7 @@ namespace SCXSystemLib
 
         void push_back(const T& x)
         {
-            if (_size != N)
+            if (_size != _maxSize)
             {
                 _data[_size] = x;
                 _size++;
@@ -122,10 +125,11 @@ namespace SCXSystemLib
 
     private:
         // Data elements.
-        T _data[N];
+        T* _data;                       //!< Data elements
 
-        // Current size (not to exceed N)
-        size_t _size;
+        size_t _maxSize;                //!< Maximum size
+        size_t _size;                   //!< Current size (not to exceed _maxSize)
+
     };
 
     /*----------------------------------------------------------------------------*/
@@ -142,17 +146,19 @@ namespace SCXSystemLib
         a counter value changes over time.
 
     */
-    template<class T, int maxSamples> class DataSampler
+    template<class T> class DataSampler
     {
     public:
-        typedef FixedSizeVector<T, maxSamples> Samples;
+        typedef FixedSizeVector<T> Samples;
 
         /*----------------------------------------------------------------------------*/
         /**
             Constructor.
             
         */
-        DataSampler() : m_lock(SCXCoreLib::ThreadLockHandleGet())
+        DataSampler(size_t numElements) : m_lock(SCXCoreLib::ThreadLockHandleGet()),
+                                          m_samples(numElements),
+                                          m_numElements(numElements)
         {
         }
 
@@ -167,7 +173,7 @@ namespace SCXSystemLib
         {
             SCXCoreLib::SCXThreadLock lock(m_lock);
 
-            if ( m_samples.size() == maxSamples)
+            if ( m_samples.size() == m_numElements)
                 m_samples.pop_back();
 
             m_samples.push_front(sample);
@@ -344,6 +350,7 @@ namespace SCXSystemLib
     private:
         SCXCoreLib::SCXThreadLockHandle m_lock;  //!< Makes the datasampler thread safe.
         Samples m_samples;                 //!< Contains the samples.
+        size_t m_numElements;              //!< Maximum number of elements
     };
 }
 

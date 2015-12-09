@@ -277,10 +277,15 @@ namespace SCXSystemLib
 
      \param[in]     deps Dependencies for the CPU Enumeration.
     */
-    CPUEnumeration::CPUEnumeration(SCXCoreLib::SCXHandle<CPUPALDependencies> deps) :
-        EntityEnumeration<CPUInstance>(),
+    CPUEnumeration::CPUEnumeration(
+        SCXCoreLib::SCXHandle<CPUPALDependencies> deps,
+        time_t sampleSecs,
+        size_t sampleSize)
+      : EntityEnumeration<CPUInstance>(),
         m_deps(deps),
         m_lock(SCXCoreLib::ThreadLockHandleGet()),
+        m_sampleSecs(sampleSecs),
+        m_sampleSize(sampleSize),
         m_dataAquisitionThread(NULL)
 #if defined(aix)
         , m_dataarea(deps->sysconf(_SC_NPROCESSORS_CONF))
@@ -691,7 +696,7 @@ namespace SCXSystemLib
         for (size_t i=Size(); i<count; i++)
         {
             SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - Adding CPU ", i));
-            AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(static_cast<unsigned int>(i))));
+            AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(static_cast<unsigned int>(i), m_sampleSize)));
         }
         SCX_LOGTRACE(m_log, L"CPUEnumeration Update() - end Add loop for Linux CPU enumeration.");
 
@@ -814,7 +819,7 @@ namespace SCXSystemLib
                 if (!found)
                 {
                     SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - Adding CPU ", i));
-                    AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i)));
+                    AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i,  m_sampleSize)));
                 }
             }
         }
@@ -1119,7 +1124,7 @@ namespace SCXSystemLib
         for (unsigned int i = Size(); i < cpucount; i++)
         {
             SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - Adding CPU ", i));
-            AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i)));
+            AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i, m_sampleSize)));
         }
 
         /* Remove instances that has gone off-line. AIX guarantees that it always
@@ -1209,7 +1214,9 @@ namespace SCXSystemLib
         }
 
         bool bUpdate = true;
-        params->m_cond.SetSleep(CPU_SECONDS_PER_SAMPLE * 1000);
+        // Sleep for sample seconds (generally CPU_SECONDS_PER_SAMPLE,
+        // unless using 'real time' provider instance)
+        params->m_cond.SetSleep(cpuenum->m_sampleSecs * 1000);
         {
             SCXConditionHandle h(params->m_cond);
 
