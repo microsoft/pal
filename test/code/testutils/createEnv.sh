@@ -6,6 +6,9 @@ ENV_FILE=`dirname $0`/env.sh
 
 echo "#!/bin/sh" > $ENV_FILE
 echo >> $ENV_FILE
+
+# Use the en_US locale for tests sensitive to date/time formatting
+[ -z "$LANG" ] && LANG=en_US.UTF-8
 echo "LANG=\"$LANG\"; export LANG" >> $ENV_FILE
 
 if [ "`uname`" = "SunOS" ]; then
