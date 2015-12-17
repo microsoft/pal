@@ -328,7 +328,7 @@ namespace SCXSystemLib
     {
         SCX_LOGTRACE(m_log, L"CPUEnumeration Init()");
 
-        SetTotalInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(0, true)));
+        SetTotalInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(0, m_sampleSize, true)));
 
         Update(false);
 
@@ -819,7 +819,7 @@ namespace SCXSystemLib
                 if (!found)
                 {
                     SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - Adding CPU ", i));
-                    AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i,  m_sampleSize)));
+                    AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i, m_sampleSize)));
                 }
             }
         }

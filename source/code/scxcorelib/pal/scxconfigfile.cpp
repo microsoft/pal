@@ -23,7 +23,7 @@ namespace SCXCoreLib
 {
     using std::string;
     using std::wstring;
-    
+
     /*----------------------------------------------------------------------------*/
     /**
        Constructor
@@ -32,7 +32,7 @@ namespace SCXCoreLib
     */
     SCXConfigFile::SCXConfigFile(const SCXFilePath& configpath) : m_configLoaded(false), m_configFilePath(configpath)
     {}
-    
+
     /*----------------------------------------------------------------------------*/
     /**
        Loads the configuration file into memory.
@@ -44,7 +44,7 @@ namespace SCXCoreLib
        \throws     SCXLineStreamContentException           Invalid byte sequence according to UTF8
        \throws     SCXInternalErrorException               If there was an error in the config file
        \throws     SCXFilePathNotFoundException
-    */  
+    */
     void SCXConfigFile::LoadConfig()
     {
         m_configLoaded = true;
@@ -53,7 +53,7 @@ namespace SCXCoreLib
         {
             throw SCXFilePathNotFoundException(m_configFilePath, SCXSRCLOCATION);
         }
-        
+
         std::vector<wstring> lines;
         SCXStream::NLFs nlfs;
         SCXFile::ReadAllLinesAsUTF8(m_configFilePath, lines, nlfs);
@@ -85,7 +85,7 @@ namespace SCXCoreLib
                 }
             }
         }
-        
+
         if (internalError)
         {
             throw SCXInvalidConfigurationFile( m_configFilePath.Get() + L"\n" + error_reasons.str(), SCXSRCLOCATION);
@@ -100,7 +100,7 @@ namespace SCXCoreLib
     void SCXConfigFile::SaveConfig() const
     {
         ThrowExceptionIfNotLoaded();
-        std::vector<wstring> lines(m_config.size(), L"");       
+        std::vector<wstring> lines(m_config.size(), L"");
         int i=0;
 
         for (std::map<wstring, wstring>::const_iterator it=m_config.begin(); it!=m_config.end(); ++it)
@@ -123,7 +123,7 @@ namespace SCXCoreLib
        \throws    SCXInvalidStateException if the config file is not loaded
        \param[in] Key.
        \param[out] Reference to set
-       \return Whether the output param was set 
+       \return Whether the output param was set
     */
     bool SCXConfigFile::GetValue(const wstring& key, wstring& value) const
     {
@@ -175,7 +175,7 @@ namespace SCXCoreLib
             throw SCXInvalidArgumentException(L"key", L"Key not found : " + key, SCXSRCLOCATION);
         }
     }
-        
+
     /*----------------------------------------------------------------------------*/
     /**
        \return Wheter the key exists in the configuration
