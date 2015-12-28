@@ -34,7 +34,8 @@ do
           echo "Cannot build for ULINUX on non-Linux platforms"
           exit 1
       fi
-      ULINUX=1
+      BUILD_RPM=1
+      BUILD_DPKG=1
     ;;
 
     *)
@@ -70,75 +71,23 @@ EOF
     exit 0
 fi
 
-set_ulinux_pf()
-{
-    PF_MAJOR=1
-    PF_MINOR=0
-    PF_DISTRO=ULINUX
-    PF_DISTRO_ULINUX_D=`[ -e /usr/bin/dpkg ] && echo 1`
-    if [ -n "$PF_DISTRO_ULINUX_D" ]; then
-        PF_DISTOR_ULINUX_R=
-        BUILD_DPKG=1
-        PKG_SUFFIX=deb
-    else
-        PF_DISTRO_ULINUX_R=`[ -e /usr/bin/rpmbuild ] && echo 1`
-        BUILD_RPM=1
-    fi
-}
-
 uname=`uname`
 case $uname in
     Linux)
-        PF=Linux
-        PKG_SUFFIX=rpm
-        if [ -e /etc/SuSE-release ]; then
-            CHECK_SUSE=1
-        fi
-        if [ -e /etc/redhat-release ]; then
-            CHECK_RHEL_OR_CENTOS=1
-        fi
-        if [ -n "$CHECK_RHEL_OR_CENTOS" ]; then
-            CHECK_CENTOS=`grep -i "Red Hat" /etc/redhat-release || echo 1`
-            if [ "$CHECK_CENTOS" != "1" ]; then
-                CHECK_RHEL=1
-            fi
-        fi
+	ULINUX=1
 
-        if [ "$ULINUX" = "1" ]; then
-            set_ulinux_pf
-            BUILD_RPM=1
-            BUILD_DPKG=1
-        elif [ -n "$CHECK_SUSE" ]; then
-            PF_MAJOR=`head -n 1 /etc/SuSE-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
-            PF_MINOR=`(head -n 1 /etc/SuSE-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
-            PF_DISTRO=SUSE
-        elif [ -n "$CHECK_RHEL" ]; then
-            PF_MAJOR=`head -n 1 /etc/redhat-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
-            PF_MINOR=`(head -n 1 /etc/redhat-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
-            PF_DISTRO=REDHAT
-        elif [ -n "$CHECK_CENTOS" ]; then
-            PF_MAJOR=`head -n 1 /etc/redhat-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
-            PF_MINOR=`(head -n 1 /etc/redhat-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
-            if [ $PF_MAJOR -eq 5 -a $PF_MINOR -eq 0 ]; then
-                set_ulinux_pf
-            else
-                PF_DISTRO=REDHAT
-            fi
-        elif [ -e /etc/lsb-release ]; then
-            source /etc/lsb-release
-            if [ "$DISTRIB_ID" = "Ubuntu" ]; then
-                PF_MAJOR=`echo $DISTRIB_RELEASE | cut -d '.' -f 1`
-                PF_MINOR=`echo $DISTRIB_RELEASE | cut -d '.' -f 2`
-                PF_DISTRO_ULINUX_D=1
-                PF_DISTRO=UBUNTU
-                PKG_SUFFIX=deb
-                BUILD_DPKG=1
-            else
-                set_ulinux_pf
-            fi
-        else
-           set_ulinux_pf
-        fi
+        PF=Linux
+	PF_MAJOR=1
+	PF_MINOR=0
+        PKG_SUFFIX=rpm
+	PF_DISTRO=ULINUX
+
+	if [ -e /usr/bin/dpkg ]; then
+	    BUILD_DPKG=1
+	    PKG_SUFFIX=deb
+	elif [ -e /usr/bin/rpmbuild ]; then
+	    BUILD_RPM=1
+	fi
 
         case `uname -m` in
             *64*)
@@ -233,8 +182,6 @@ ARCH=$ARCH
 PF_WIDTH=$PF_WIDTH
 PF_DISTRO=$PF_DISTRO
 ULINUX=$ULINUX
-PF_DISTRO_ULINUX_D=$PF_DISTRO_ULINUX_D
-PF_DISTRO_ULINUX_R=$PF_DISTRO_ULINUX_R
 BUILD_CONFIGURATION=$BUILD_CONFIGURATION
 SCXPAL_INTERMEDIATE_DIR=`cd ..; pwd -P`/intermediate/$BUILD_CONFIGURATION
 SCXPAL_TARGET_DIR=`cd ..; pwd -P`/target/$BUILD_CONFIGURATION

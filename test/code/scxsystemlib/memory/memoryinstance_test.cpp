@@ -658,7 +658,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
     {
         char buf[256];
 
-        FILE* topFile = popen("TERM=xterm top -b -n 1 | grep \"Mem:\\|Swap:\"", "r");
+        FILE* topFile = popen("TERM=xterm top -b -n 1 | egrep \"Mem:|Mem :|Swap:\"", "r");
         if (topFile)
         {
             CPPUNIT_ASSERT(fgets(buf, 256, topFile) != NULL);
@@ -685,18 +685,23 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
             ----------------------------------------------------------
             */
 
-#if (defined(PF_DISTRO_REDHAT) && PF_MAJOR >= 7) || (defined(PF_DISTRO_SUSE) && PF_MAJOR >= 12) || defined(PF_DISTRO_UBUNTU)
-            if (topTokens.size() >= 21)
+            if ( (topTokens.size() >= 21) && (topTokens[0] == "KiB") )
             {
-                keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2]);
-                keyValues["AvailableMemory"] = ToSCXUlong(topTokens[6]);
-                keyValues["UsedMemory"]      = ToSCXUlong(topTokens[4]);
-                keyValues["TotalSwap"]       = ToSCXUlong(topTokens[12]);
-                keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[16]);
-                keyValues["UsedSwap"]        = ToSCXUlong(topTokens[14]);
+                // We may have "Mem:" or "Mem :", which affects the offset (RH vs. CentOS, strangely)
+                size_t toffset = 0;
+                if ( ":" == topTokens[2] )
+                {
+                    toffset++;
+                }
+
+                keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2 + toffset]);
+                keyValues["AvailableMemory"] = ToSCXUlong(topTokens[6 + toffset]);
+                keyValues["UsedMemory"]      = ToSCXUlong(topTokens[4 + toffset]);
+                keyValues["TotalSwap"]       = ToSCXUlong(topTokens[12 + toffset]);
+                keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[16 + toffset]);
+                keyValues["UsedSwap"]        = ToSCXUlong(topTokens[14 + toffset]);
             }
-#else
-            if (topTokens.size() >= 18)
+            else if (topTokens.size() >= 18)
             {
                 keyValues["TotalMemory"]     = ToSCXUlong(topTokens[1]);
                 keyValues["AvailableMemory"] = ToSCXUlong(topTokens[5]);
@@ -705,7 +710,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
                 keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[14]);
                 keyValues["UsedSwap"]        = ToSCXUlong(topTokens[12]);
             }
-#endif
+
         }
 
         // We did look up the value for UsedMemory/UsedSwap above
