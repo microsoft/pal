@@ -248,9 +248,9 @@ for arg in sys.argv[1:]:
         args.append(arg)
 
 if Variables["PF"] == "Linux":
-    if Variables["PFDISTRO"] == "REDHAT" or Variables["PFDISTRO"] == "SUSE" or (Variables["PFDISTRO"] == "ULINUX" and Variables["PF_DISTRO_ULINUX_R"] == "1"):
+    if (Variables["PFDISTRO"] == "ULINUX" and Variables["PF_DISTRO_ULINUX_KIT"] == "R"):
         PACKAGE_TYPE = "RPM"
-    elif ((Variables["PFDISTRO"] == "ULINUX" or Variables["PFDISTRO"] == "UBUNTU")and Variables["PF_DISTRO_ULINUX_D"] == "1"):
+    elif (Variables["PFDISTRO"] == "ULINUX" and Variables["PF_DISTRO_ULINUX_KIT"] == "D"):
         PACKAGE_TYPE = "DPKG"
     else:
         error("Invalid Platform")

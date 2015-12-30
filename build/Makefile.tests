@@ -10,6 +10,17 @@
 
 
 #--------------------------------------------------------------------------------
+# Determine what type of kit we're going to test against
+
+ifeq ($(PF_DISTRO),ULINUX)
+  ifeq ("$(wildcard /usr/bin/dpkg-deb)","")
+    ULINUX_TESTFLAGS=--PF_DISTRO_ULINUX_KIT=R
+  else
+    ULINUX_TESTFLAGS=--PF_DISTRO_ULINUX_KIT=D
+  endif
+endif
+
+#--------------------------------------------------------------------------------
 # Support for Quantify from Rational Software (IBM now)
 
 ifeq ($(BUILD_PROFILING),quantify)
@@ -190,9 +201,7 @@ ifeq ($(SCX_TESTRUN_NAMES),)
 		--PFDISTRO=$(PF_DISTRO) \
 		--PFARCH=$(PF_ARCH) \
 		--PFMAJOR=$(PF_MAJOR) \
-		--PFMINOR=$(PF_MINOR) \
-		--PF_DISTRO_ULINUX_D=$(PF_DISTRO_ULINUX_D) \
-		--PF_DISTRO_ULINUX_R=$(PF_DISTRO_ULINUX_R)
+		--PFMINOR=$(PF_MINOR) $(ULINUX_TESTFLAGS)
 endif
 
 # Make a little more compatible with other projects
