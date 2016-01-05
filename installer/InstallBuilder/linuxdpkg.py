@@ -166,5 +166,5 @@ class LinuxDebFile:
             exit(1)
 
         package_filename = open(self.targetDir + "/" + "package_filename", 'w')
-        package_filename.write(pkgName)
+        package_filename.write("%s\n" % pkgName)
         package_filename.close()

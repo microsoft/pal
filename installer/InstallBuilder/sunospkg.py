@@ -137,7 +137,7 @@ class SunOSPKGFile:
             exit(1)
 
         package_filename = open(self.targetDir + "/" + "package_filename", 'w')
-        package_filename.write(basepkgfilename)
+        package_filename.write("%s\n" % basepkgfilename)
         package_filename.close()
 
 class PKGInfoFile:

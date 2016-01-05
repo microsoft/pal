@@ -161,7 +161,7 @@ class LinuxRPMFile:
             exit(1)
 
         package_filename = open(self.targetDir + "/" + "package_filename", 'w')
-        package_filename.write(rpmNewFileName)
+        package_filename.write("%s\n" % rpmNewFileName)
         package_filename.close()
 
     def BuildPackage(self):
