@@ -71,6 +71,12 @@ class LinuxDebFile:
         scxutil.ChMod(self.preUninstallPath, 755)
         scxutil.ChMod(self.postUninstallPath, 755)
 
+        retval = os.system('sudo chown --no-dereference 0:0 %s %s %s %s' \
+                          % (self.preInstallPath, self.postInstallPath, self.preUninstallPath, self.postUninstallPath))
+        if retval != 0:
+            print("Error: Unable to chown package scripts.")
+            exit(1)
+
         # Fix up owner/permissions in staging directory
         # (Files are installed on destination as staged)        
 
@@ -85,6 +91,7 @@ class LinuxDebFile:
                           % (l.owner, l.group, filePath))
             if retval != 0:
                 print("Error: Unable to chown " + l.stagedLocation)
+                exit(1)
 
     def GetSizeInformation(self):
         pipe = os.popen("du -s " + self.stagingDir)
@@ -131,6 +138,7 @@ class LinuxDebFile:
         controlfile.write('Description:  ' + self.variables["LONG_NAME"] + '\n')
         controlfile.write(' %s\n' % self.variables['DESCRIPTION'])
         controlfile.write('\n')
+        controlfile.close()
 
         conffile = open(self.configFileName, 'w')
 
@@ -138,6 +146,13 @@ class LinuxDebFile:
         for f in self.sections["Files"]:
             if f.type == "conffile":
                 conffile.write(f.stagedLocation + '\n')
+
+        conffile.close()
+
+        retval = os.system('sudo chown --no-dereference 0:0 %s %s' % (self.controlFileName, self.configFileName))
+        if retval != 0:
+            print("Error: Unable to chown package conf files.")
+            exit(1)
 
     def BuildPackage(self):
         if 'OUTPUTFILE' in self.variables:
