@@ -440,7 +440,7 @@ loop1      0      0       0       0      0      0       0       0      0      0
     {
         char buf[256];
         std::stringstream command("");
-        command << "grep -l " << SCXCoreLib::StrToUTF8(path) << " /etc/lvmtab";
+        command << "/bin/sh -c \"LANG=C grep -l " << SCXCoreLib::StrToUTF8(path) << " /etc/lvmtab\"";
         FILE *fp = popen(command.str().c_str(), "r");
 
         if (0 != fp)

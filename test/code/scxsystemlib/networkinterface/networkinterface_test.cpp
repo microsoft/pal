@@ -1922,8 +1922,8 @@ public:
         std::istringstream input;
         std::ostringstream output;
         std::ostringstream error;
-        SCXProcess::Run(L"/usr/sbin/lanscan", input, output, error, 1000);
-        
+        SCXProcess::Run(L"/bin/sh -c \"LANG=C /usr/sbin/lanscan\"", input, output, error, 1000);
+
         // check error for output
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Error output from lanscan: " + error.str(), (size_t)0, error.str().size());
         
