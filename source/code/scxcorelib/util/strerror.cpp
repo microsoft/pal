@@ -34,7 +34,7 @@ namespace SCXCoreLib
         result = buf;
 #elif (defined(hpux) && (PF_MINOR==23)) || (defined(sun) && (PF_MAJOR==5) && (PF_MINOR<=9))
         // WI7938
-        result = strerror(errnum);
+        result = ::strerror(errnum);
 #elif (defined(hpux) && (PF_MINOR>23)) || (defined(sun) && (PF_MAJOR==5) && (PF_MINOR>9)) || (defined(aix)) || (defined(macos))
         char buf[128];
         int r = strerror_r(errnum, buf, sizeof(buf));
