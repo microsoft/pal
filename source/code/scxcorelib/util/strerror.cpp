@@ -39,7 +39,7 @@ namespace SCXCoreLib
         char buf[128];
         int r = strerror_r(errnum, buf, sizeof(buf));
         if (0 != r) {
-            snprintf(buf, buflen, "Unknown error %d", errnum);
+            snprintf(buf, sizeof(buf), "Unknown error %d", errnum);
         }
         result = buf;
 #else
