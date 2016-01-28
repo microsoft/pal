@@ -19,6 +19,8 @@
 #include <scxcorelib/scxexception.h>
 #include <scxcorelib/scxdumpstring.h>
 #include <scxcorelib/logsuppressor.h>
+#include <scxcorelib/strerror.h>
+
 #include <sstream>
 #include <iomanip>
 
@@ -203,7 +205,7 @@ using namespace SCXCoreLib;
 
     wstring wstrerror(int err)
     {
-        return SCXCoreLib::StrFromUTF8(strerror(err));
+        return SCXCoreLib::StrFromUTF8(SCXCoreLib::strerror(err));
     }
 
 #if defined(sun)

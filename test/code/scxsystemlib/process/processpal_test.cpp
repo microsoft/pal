@@ -1823,7 +1823,7 @@ public:
         FILE* psEFile = popen(psecmd, "r");
         if (psEFile == 0) {
             CPPUNIT_ASSERT_MESSAGE("Can't do popen", psEFile);
-            CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
+            CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(errno), errno == 0);
             return;
         }
 
@@ -1894,7 +1894,7 @@ public:
         if (!feof(psEFile)) { eno = errno; }
         pclose(psEFile);
         errno = eno;            // Just for documentation purposes!
-        CPPUNIT_ASSERT_MESSAGE(strerror(eno), errno == 0);
+        CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(eno), errno == 0);
     }
 
     /**
@@ -1928,7 +1928,7 @@ public:
         FILE* psEFile = popen(psecmd, "r");
         if (psEFile == 0) {
             CPPUNIT_ASSERT_MESSAGE("Can't do popen", psEFile);
-            CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
+            CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(errno), errno == 0);
             return;
         }
 
@@ -1955,7 +1955,7 @@ public:
         if (!feof(psEFile)) { eno = errno; }
         pclose(psEFile);
         errno = eno;            // Just for documentation purposes!
-        CPPUNIT_ASSERT_MESSAGE(strerror(eno), errno == 0);
+        CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(eno), errno == 0);
         CPPUNIT_ASSERT_MESSAGE("Didn't find pid", done);
     }
 
@@ -1985,7 +1985,7 @@ public:
         if (psEFile == 0)
         {
             CPPUNIT_ASSERT(psEFile);
-            CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
+            CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(errno), errno == 0);
             return;
         }
 

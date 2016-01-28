@@ -19,6 +19,7 @@
 #include <scxcorelib/scxexception.h>
 #include <scxcorelib/scxdirectoryinfo.h>
 #include <scxcorelib/scxfile.h>
+#include <scxcorelib/strerror.h>
 
 #include <string>
 #include <vector>
@@ -460,7 +461,7 @@ namespace
                     throw SCXCoreLib::SCXFilePathNotFoundException(path.GetDirectory(), SCXSRCLOCATION);
                 }
 
-                std::string errtxt(strerror(eno));
+                std::string errtxt(SCXCoreLib::strerror(eno));
 
                 if (eno == EACCES || eno == ENOTDIR) {
                     throw SCXCoreLib::SCXInvalidArgumentException(wdirname, SCXCoreLib::StrFromUTF8(errtxt), SCXSRCLOCATION);

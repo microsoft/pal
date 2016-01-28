@@ -103,6 +103,10 @@ typedef uint64_t scxulong;
 /* Include scxcompat.h so it can be used without special requirements */
 #include <scxcorelib/scxcompat.h>
 
+/* Include strerror.h so consumers must be clear on what version to use */
+/* (Can't imagine a case where they's want the system one, but do give a choice) */
+#include <scxcorelib/strerror.h>
+
 // Based on g++ usage for Red Hat and SuSE, it appears that GCC v4.4 and later don't need to disable dynamic_cast. So the last condition was added at the end.
 
 // At this point, we THINK dynamic_cast is okay ... but keep this in code "just in case"

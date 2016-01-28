@@ -517,7 +517,7 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
         regfree(&re);
 
         errno = eno;
-        CPPUNIT_ASSERT_MESSAGE(strerror(eno), errno == 0);
+        CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(eno), errno == 0);
 
         return success;
     }

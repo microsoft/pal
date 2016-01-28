@@ -934,7 +934,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         struct pst_static psts;
         errno = 0;
         CPPUNIT_ASSERT(pstat_getstatic(&psts, sizeof(psts), (size_t)1, 0) > 0);
-        CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
+        CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(errno), errno == 0);
 
         keyValues["TotalMemory"] = psts.physical_memory * 4; // From 4K pages to 1K.
 
@@ -967,14 +967,14 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         std::string cmd = topcmd + std::string(tmpnambuf);
 
         if (system(cmd.c_str()) < 0) {
-            CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
+            CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(errno), errno == 0);
             return;
         }
 
         /* Now read the output */
         FILE *topFile = fopen(tmpnambuf, "r");
         if (topFile == 0) {
-            CPPUNIT_ASSERT_MESSAGE(strerror(errno), errno == 0);
+            CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(errno), errno == 0);
             return;
         }
 
@@ -997,7 +997,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         fclose(topFile);
         remove(tmpnambuf);
         errno = eno;            // Just for documentation purposes!
-        CPPUNIT_ASSERT_MESSAGE(strerror(eno), errno == 0);
+        CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(eno), errno == 0);
         CPPUNIT_ASSERT_MESSAGE("Didn't get expected values from top", done);
     }
 
@@ -1041,7 +1041,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         if (!feof(swapinfoFile)) { eno = errno; }
         pclose(swapinfoFile);
         errno = eno;            // Just for documentation purposes!
-        CPPUNIT_ASSERT_MESSAGE(strerror(eno), errno == 0);
+        CPPUNIT_ASSERT_MESSAGE(SCXCoreLib::strerror(eno), errno == 0);
         CPPUNIT_ASSERT_MESSAGE("Didn't get expected values from swapinfo", done);
     }
 

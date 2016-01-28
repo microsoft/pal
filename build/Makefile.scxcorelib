@@ -47,6 +47,7 @@ STATIC_CORELIB_SRCFILES = \
 	$(CORELIB_ROOT)/util/scxexception.cpp \
 	$(CORELIB_ROOT)/util/scxmath.cpp \
 	$(CORELIB_ROOT)/util/utftoupper.cpp \
+	$(CORELIB_ROOT)/util/strerror.cpp \
 	$(CORELIB_ROOT)/util/stringaid.cpp \
 	$(CORELIB_ROOT)/util/log/scxlogfilebackend.cpp \
 	$(CORELIB_ROOT)/util/log/scxlogstdoutbackend.cpp \

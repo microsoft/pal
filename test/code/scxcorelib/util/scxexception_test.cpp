@@ -734,9 +734,9 @@ public:
         SCXHandle<SCXErrnoException> e(new SCXErrnoException(L"FUNCTION", EINVAL, SCXSRCLOCATION));
         VerifyException(e, L"FUNCTION");
         VerifyException(e, StrFrom(EINVAL));
-        VerifyException(e, StrFromUTF8(strerror(EINVAL)));
+        VerifyException(e, StrFromUTF8(SCXCoreLib::strerror(EINVAL)));
         CPPUNIT_ASSERT_EQUAL(EINVAL, e->ErrorNumber());
-        CPPUNIT_ASSERT_EQUAL(string(strerror(EINVAL)), e->ErrorText());
+        CPPUNIT_ASSERT_EQUAL(SCXCoreLib::strerror(EINVAL), e->ErrorText());
     }
 
     void CoverageForErrnoFileException()
@@ -745,7 +745,7 @@ public:
         VerifyException(e, L"FUNCTION");
         VerifyException(e, L"PATH");
         VerifyException(e, StrFrom(EINVAL));
-        VerifyException(e, StrFromUTF8(strerror(EINVAL)));
+        VerifyException(e, StrFromUTF8(SCXCoreLib::strerror(EINVAL)));
         VerifyException(e, e->GetFnkcall());
         VerifyException(e, e->GetPath());
     }
