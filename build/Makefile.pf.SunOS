@@ -24,7 +24,7 @@ DEFINES += -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D_LARGEFILE64_SOURCE=1
 
 # Compiler flags that regulates warning levels
 # Suppresses warnings about extern "C":
-CXX_WARN_FLAGS=-errtags -erroff=badargtype2w,wbadinit,wnoretvalue,truncwarn -xwe +w
+CXX_WARN_FLAGS=-errtags -erroff=badargtype2w,wbadinit,wnoretvalue,truncwarn,arrowrtn2 -xwe +w
 
 # CXX Compiler flags 
 CXXFLAGS=$(DEFINES) $(CXX_WARN_FLAGS) -KPIC -mt -xspace -xtarget=generic -xarch=generic

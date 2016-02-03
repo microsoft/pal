@@ -171,10 +171,9 @@ namespace SCXSystemLib
             m_computersystemAttr.model = tmpRes;
         }
 
-        if(m_deps->GetSystemInfo(SI_HW_PROVIDER, tmpRes) >0)
-        {
-            m_computersystemAttr.manufacturer = tmpRes;
-        }
+        // Newer Sun hardware and system revisions return unexpected bytes,
+        // (perhaps special characters), so just hard code what we expect
+        m_computersystemAttr.manufacturer = L"Oracle Corporation";
 
         if (m_deps->GetPowerCfg(m_powerConfAllLines))
         {

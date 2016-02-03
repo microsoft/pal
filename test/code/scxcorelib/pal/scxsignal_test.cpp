@@ -58,10 +58,13 @@ int SCXSignalTest::sm_cHandler2Signals = 0;
 int cDispatchedSignals = 0;
 SCXSignalTest *pDispatchSignalTest = NULL;
 
-static void SignalDispatch(int sig, siginfo_t *si, void *ucontext)
+extern "C"
 {
-    cDispatchedSignals++;
-    pDispatchSignalTest->Dispatcher(sig, si, ucontext);
+    static void SignalDispatch(int sig, siginfo_t *si, void *ucontext)
+    {
+        cDispatchedSignals++;
+        pDispatchSignalTest->Dispatcher(sig, si, ucontext);
+    }
 }
 
 

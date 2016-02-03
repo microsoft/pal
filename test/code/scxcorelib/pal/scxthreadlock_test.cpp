@@ -20,6 +20,11 @@
 #error "Not implemented for this plattform"
 #endif
 
+extern "C"
+{
+    typedef void* (*pThreadFn)(void *);
+}
+
 class SCXThreadLockTest : public CPPUNIT_NS::TestFixture
 {
 public:
@@ -83,7 +88,7 @@ private:
     static thread_handle_t StartThread(void*(*fn)(void*), void* param, int* /*id*/)
     {
         thread_handle_t h;
-        int r = pthread_create(&h, NULL, fn, param);
+        int r = pthread_create(&h, NULL, (pThreadFn) fn, param);
         if (0 != r)
             return 0;
         return h;

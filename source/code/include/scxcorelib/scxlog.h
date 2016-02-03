@@ -247,6 +247,9 @@ namespace SCXCoreLib
         SCXHandle<SCXLogItemConsumerIf> m_LogMediator; //!< Handle to log mediator.
         SCXHandle<SCXLogConfiguratorIf> m_LogConfigurator; //!< Handle to log configurator.
     };
+
+    template<> SCXHandle<SCXLogHandleFactory> SCXSingleton<SCXLogHandleFactory>::s_instance;
+    template<> SCXHandle<SCXThreadLockHandle> SCXSingleton<SCXLogHandleFactory>::s_lockHandle;
 }
 
 /** Log a message with severity. */

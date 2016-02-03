@@ -22,6 +22,11 @@
 #error "Not implemented for this plattform"
 #endif
 
+extern "C"
+{
+    typedef void* (*pThreadFn)(void *);
+}
+
 class A : public SCXCoreLib::SCXSingleton<A>
 {
     friend class SCXCoreLib::SCXSingleton<A>;
@@ -40,6 +45,10 @@ private:
     A(const A&) : SCXCoreLib::SCXSingleton<A>(), m_i(0) {}
     A& operator=(const A&) { m_i = 0; return *this; }
 };
+
+template<> SCXCoreLib::SCXHandle<A> SCXCoreLib::SCXSingleton<A>::s_instance (0);
+template<> SCXCoreLib::SCXHandle<SCXCoreLib::SCXThreadLockHandle> SCXCoreLib::SCXSingleton<A>::s_lockHandle (
+    new SCXCoreLib::SCXThreadLockHandle(SCXCoreLib::ThreadLockHandleGet (true)) );
 
 class B : public SCXCoreLib::SCXSingleton<B>
 {
@@ -68,6 +77,10 @@ private:
     B& operator=(const B&) { return *this; }
 };
 
+template<> SCXCoreLib::SCXHandle<B> SCXCoreLib::SCXSingleton<B>::s_instance (0);
+template<> SCXCoreLib::SCXHandle<SCXCoreLib::SCXThreadLockHandle> SCXCoreLib::SCXSingleton<B>::s_lockHandle (
+    new SCXCoreLib::SCXThreadLockHandle(SCXCoreLib::ThreadLockHandleGet (true)) );
+
 int B::s_constructed = 0;
 
 class SCXSingletonTest : public CPPUNIT_NS::TestFixture
@@ -94,7 +107,7 @@ private:
     static thread_handle_t StartThread(void*(*fn)(void*), void* param, int* /*id*/)
     {
         thread_handle_t h;
-        int r = pthread_create(&h, NULL, fn, param);
+        int r = pthread_create(&h, NULL, (pThreadFn) fn, param);
         if (0 != r)
             return 0;
         return h;

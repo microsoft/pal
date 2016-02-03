@@ -101,7 +101,6 @@ public:
 
     bool GetSystemRunLevel(wstring &runLevel) const
     {
-
         runLevel = L"run-level 3";
         return true;
     }
@@ -129,7 +128,6 @@ public:
         allLines.push_back(L"autoshutdown            30              9:00 9:00               default");
         return true;
     }
-
 };
 #endif
 
@@ -253,20 +251,16 @@ public:
 
         //-----Manufacturer-------------
         wstring tmpData = L"";
-#if defined(linux) || defined(aix) || defined(hpux) || defined(sun) && defined(sparc)
+#if defined(linux) || defined(aix) || defined(hpux) || defined(sun)
         CPPUNIT_ASSERT(inst->GetManufacturer(tmpData));
 #if defined(linux)
-        CPPUNIT_ASSERT_EQUAL(L"Xen", tmpData); 
+        CPPUNIT_ASSERT_EQUAL(wstring(L"Xen"), tmpData); 
 #elif defined(hpux)
-        CPPUNIT_ASSERT_EQUAL(L"Hewlett-Packard Company", tmpData);
+        CPPUNIT_ASSERT_EQUAL(wstring(L"Hewlett-Packard Company"), tmpData);
 #elif defined(aix)
-        CPPUNIT_ASSERT_EQUAL(L"International Business Machines Corporation", tmpData);
-#elif defined(sun) && defined(sparc)
-    #if (PF_MAJOR > 5 || (PF_MAJOR == 5 && PF_MINOR >= 11))
-        CPPUNIT_ASSERT_EQUAL(L"Oracle Corporation", tmpData);
-    #else 
-        CPPUNIT_ASSERT_EQUAL(L"Sun_Microsystems", tmpData);
-    #endif
+        CPPUNIT_ASSERT_EQUAL(wstring(L"International Business Machines Corporation"), tmpData);
+#elif defined(sun)
+        CPPUNIT_ASSERT_EQUAL(wstring(L"Oracle Corporation"), tmpData);
 #endif
 #endif
 

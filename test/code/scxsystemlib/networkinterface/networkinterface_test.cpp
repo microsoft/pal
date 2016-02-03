@@ -13,6 +13,12 @@
 /*----------------------------------------------------------------------------*/
 
 #include <scxcorelib/scxcmn.h>
+
+// Solaris Studio 12.4 has construct in net/if.h that requires
+// that it be included prior to #include <map> ...
+#include <errno.h>
+#include <net/if.h>
+
 #include <scxsystemlib/networkinterface.h>
 #include <scxsystemlib/networkinterfaceenumeration.h>
 #include <scxsystemlib/scxsysteminfo.h>
@@ -21,6 +27,7 @@
 #include <scxcorelib/scxexception.h> /* CUSTOMIZE: Only needed if you want to test exception throwing */
 #include <scxcorelib/scxprocess.h>
 #include <testutils/scxunit.h>
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <scxsystemlib/scxnetworkadapterip_test.h>
@@ -40,8 +47,6 @@
 #include <vector>
 #endif
 
-#include <errno.h>
-#include <net/if.h>
 #include <queue>
 
 using namespace SCXSystemLib;
@@ -1773,7 +1778,7 @@ public:
     }
 
     //! Check the soundness of next value
-    void CheckNextValue(bool valueSupported, scxulong value, const wstring &name, map<wstring, scxulong> &valueOnInterface, bool &valueOnSome) {
+    void CheckNextValue(bool valueSupported, scxulong value, const wstring &name, std::map<wstring, scxulong> &valueOnInterface, bool &valueOnSome) {
         if (valueSupported) {
             CPPUNIT_ASSERT(value >= valueOnInterface[name]);
             valueOnInterface[name] = value;
@@ -1785,10 +1790,10 @@ public:
     void TestEnumerationSoundness()
     {
         NetworkInterfaceEnumeration interfaces;
-        map<wstring, scxulong> packetsSentOnInterface;
-        map<wstring, scxulong> packetsReceivedOnInterface;
-        map<wstring, scxulong> bytesSentOnInterface;
-        map<wstring, scxulong> bytesReceivedOnInterface;
+        std::map<wstring, scxulong> packetsSentOnInterface;
+        std::map<wstring, scxulong> packetsReceivedOnInterface;
+        std::map<wstring, scxulong> bytesSentOnInterface;
+        std::map<wstring, scxulong> bytesReceivedOnInterface;
         interfaces.Init();
         interfaces.Update(true);
         bool packetsSentOnSome = false;

@@ -66,6 +66,11 @@ static const wstring s_LogModuleName = L"scx.core.common.pal.system.cpu.cpuenume
 
 class CPUPALTestDependencies;
 
+extern "C"
+{
+    typedef void* (*pThreadFn)(void *);
+}
+
 #if defined(sun)
 
 /**
@@ -1083,7 +1088,7 @@ public:
 
         bool stopLoad = false;
 
-        if (pthread_create(&t_loadcpu, NULL, LoadCPU, &stopLoad) != 0)
+        if (pthread_create(&t_loadcpu, NULL, (pThreadFn) LoadCPU, &stopLoad) != 0)
         {
             CPPUNIT_FAIL("Failed to create CPU load thread");
         }
@@ -1621,7 +1626,7 @@ private:
         while (!*stopLoad)
         {
             bool innerStopLoad = false;
-            if (pthread_create(&t1, NULL, FullLoadCPU, &innerStopLoad) == 0)
+            if (pthread_create(&t1, NULL, (pThreadFn) FullLoadCPU, &innerStopLoad) == 0)
             {
                 DoSleep(1);
                 innerStopLoad = true;
