@@ -25,7 +25,6 @@
 #include <scxcorelib/scxassert.h>
 #include <scxcorelib/scxexception.h>
 #include <scxcorelib/scxhandle.h>
-#include <util/LogHandleCache.h>
 #include <util/XMLWriter.h>
 
 namespace SCX {
@@ -418,7 +417,7 @@ namespace SCX {
                              XML_NAMESPACE_NONE(0),
                              m_CharStartPos(m_InternalString.Begin()),
                              m_CharPos(0),
-                             m_logHandle(LogHandleCache::Instance().GetLogHandle(std::string("scx.client.utilities.xml.XMLReader"))) {};
+                             m_logHandle(SCXCoreLib::SCXLogHandleFactory::GetLogHandle(L"scx.client.utilities.xml.XMLReader")) {};
 
                         /*----------------------------------------------------------------------------*/
                         /**

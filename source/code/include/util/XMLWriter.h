@@ -31,7 +31,6 @@
 #include <scxcorelib/scxassert.h>
 #include <scxcorelib/scxexception.h>
 #include <scxcorelib/scxhandle.h>
-#include <util/LogHandleCache.h>
 
 namespace SCX {
     namespace Util {

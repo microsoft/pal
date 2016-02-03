@@ -19,8 +19,7 @@ STATIC_UTILLIB_SRCFILES = \
 	$(UTILLIB_ROOT)/xml/XDocument.cpp \
 	$(UTILLIB_ROOT)/xml/XElement.cpp \
 	$(UTILLIB_ROOT)/xml/XMLReader.cpp \
-	$(UTILLIB_ROOT)/xml/XMLWriter.cpp \
-	$(UTILLIB_ROOT)/loghandlecache/LogHandleCache.cpp
+	$(UTILLIB_ROOT)/xml/XMLWriter.cpp
 
 STATIC_UTILLIB_OBJFILES = $(call src_to_obj,$(STATIC_UTILLIB_SRCFILES))
 

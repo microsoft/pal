@@ -454,7 +454,7 @@ void CXElement::CXElement_Dump( void )
     };
     size_t i;
 */
-    SCXCoreLib::SCXLogHandle logHandle(LogHandleCache::Instance().GetLogHandle(std::string("scx.client.utilities.xml.CSElement")));
+    SCXCoreLib::SCXLogHandle logHandle(SCXCoreLib::SCXLogHandleFactory::GetLogHandle(L"scx.client.utilities.xml.CSElement"));
 
     SCX_LOGINFO(logHandle, ("==== CXElement:"));
     //SCX_LOGINFO(logHandle, ("type=") + _typeNames[(int)m_Type]);
