@@ -1,16 +1,16 @@
 /*----------------------------------------------------------------------------
     Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-    
+
 */
 /**
-    \file        
+    \file
 
-    \brief       Instances of Process Items 
-    
+    \brief       Instances of Process Items
+
     \date        07-10-29 15:27:00
 
     PAL representation of a Process instance
-    
+
 */
 /*----------------------------------------------------------------------------*/
 #ifndef PROCESSINSTANCE_H
@@ -59,10 +59,10 @@
 #include <scxcorelib/scxlog.h>
 #include <scxcorelib/scxtime.h>
 
-namespace SCXSystemLib  
+namespace SCXSystemLib
 {
 #ifdef linux
-    
+
     struct LinuxProcStat {
         int processId;                           //!< %d  1
         char command[30];                        //!< %s
@@ -110,7 +110,7 @@ namespace SCXSystemLib
         static const int procstat_len = 40; //!< Number of fields not counting dummy
 
         /** The format string that should be supplied to fscanf() to read procstat_fields */
-        static const char *scanstring;  /* = 
+        static const char *scanstring;  /* =
         "%d %s %c %d %d %d %d %d %lu %lu " // 1 to 10
         "%lu %lu %lu %lu %lu %ld %ld %ld %ld %*ld " // 11 to 20
         "%ld %lu %lu %ld %lu %lu %lu %lu %lu %lu " // 21 to 30
@@ -123,7 +123,7 @@ namespace SCXSystemLib
     /** Holds Linux memory statistics */
     struct LinuxProcStatM {
 
-        unsigned long size;     //!< total program size 
+        unsigned long size;     //!< total program size
         unsigned long resident; //!< resident set size
         unsigned long share;    //!< shared pages
         unsigned long text;     //!< text (code)
@@ -140,27 +140,30 @@ namespace SCXSystemLib
     };
 
 #endif /* Linux */
+}
 
-    /** Implements subtraction for system type struct timeval.
-        \param tv1 A timeval
-        \param tv2 Another timeval
-        \returns Difference between tv1 and tv2
-        This is present so that the DataSampler class can work correctly.
-        std::vector<std::string> commands;
-    */
-    inline struct timeval operator-(const struct timeval& tv1, const struct timeval& tv2)
-    {
-        struct timeval tmp;
-        if (tv2.tv_usec > tv1.tv_usec) {
-            tmp.tv_usec = tv1.tv_usec + 1000000 - tv2.tv_usec;
-            tmp.tv_sec = tv1.tv_sec - tv2.tv_sec - 1;           
-        } else {
-            tmp.tv_usec = tv1.tv_usec - tv2.tv_usec;
-            tmp.tv_sec = tv1.tv_sec - tv2.tv_sec;
-        }
-        return tmp;
+/** Implements subtraction for system type struct timeval.
+    \param tv1 A timeval
+    \param tv2 Another timeval
+    \returns Difference between tv1 and tv2
+    This is present so that the DataSampler class can work correctly.
+    std::vector<std::string> commands;
+*/
+inline struct timeval operator-(const struct timeval& tv1, const struct timeval& tv2)
+{
+    struct timeval tmp;
+    if (tv2.tv_usec > tv1.tv_usec) {
+        tmp.tv_usec = tv1.tv_usec + 1000000 - tv2.tv_usec;
+        tmp.tv_sec = tv1.tv_sec - tv2.tv_sec - 1;
+    } else {
+        tmp.tv_usec = tv1.tv_usec - tv2.tv_usec;
+        tmp.tv_sec = tv1.tv_sec - tv2.tv_sec;
     }
+    return tmp;
+}
 
+namespace SCXSystemLib
+{
 #if defined(sun)
     /** Datatype used for time in /proc is redefined into a custom type. */
     typedef timestruc_t scx_timestruc_t;
@@ -168,6 +171,7 @@ namespace SCXSystemLib
     /** Datatype used for time in /proc is redefined into a custom type. */
     typedef pr_timestruc64_t scx_timestruc_t;
 #endif
+}
 
 #if defined(sun) || defined(aix)
     /** Implements subtraction for the type scx_timestruc_t.
@@ -176,9 +180,9 @@ namespace SCXSystemLib
         \returns Difference between ts1 and ts2
         This is present so that the DataSampler class can work correctly.
     */
-    inline scx_timestruc_t operator-(const scx_timestruc_t& ts1, const scx_timestruc_t& ts2)
+    inline SCXSystemLib::scx_timestruc_t operator-(const SCXSystemLib::scx_timestruc_t& ts1, const SCXSystemLib::scx_timestruc_t& ts2)
     {
-        scx_timestruc_t tmp;
+        SCXSystemLib::scx_timestruc_t tmp;
         if (ts2.tv_nsec > ts1.tv_nsec) {
             tmp.tv_nsec = ts1.tv_nsec + 1000000000UL - ts2.tv_nsec;
             tmp.tv_sec = ts1.tv_sec - ts2.tv_sec - 1;
@@ -195,9 +199,9 @@ namespace SCXSystemLib
         \param ts2 Another scx_timestruc_t
         \returns Sum of ts1 and ts2
     */
-    inline scx_timestruc_t operator+(const scx_timestruc_t& ts1, const scx_timestruc_t& ts2)
+    inline SCXSystemLib::scx_timestruc_t operator+(const SCXSystemLib::scx_timestruc_t& ts1, const SCXSystemLib::scx_timestruc_t& ts2)
     {
-        scx_timestruc_t tmp;
+        SCXSystemLib::scx_timestruc_t tmp;
         tmp.tv_nsec = ts1.tv_nsec + ts2.tv_nsec;
         tmp.tv_sec = ts1.tv_sec + ts2.tv_sec;
 
@@ -211,8 +215,10 @@ namespace SCXSystemLib
 #endif // defined(sun) || defined(aix)
 
 
-    /*----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 
+namespace SCXSystemLib
+{
     typedef scxulong scxpid_t;  //!< Internal type of process id
 
     /** Number of samples collected in the datasampler for CPU. */
@@ -226,7 +232,7 @@ namespace SCXSystemLib
     /** Datasampler for time stored as a scx_timestruc_t (which is specific for solaris&aix) */
     typedef DataSampler<scx_timestruc_t> TsDataSampler_t;
 #endif
-    
+
     /*----------------------------------------------------------------------------*/
 
     /**
@@ -384,9 +390,9 @@ namespace SCXSystemLib
 
         std::wstring DumpString(void);
     private:
-        /** Tests if this instance was detected when scanning live processes. */ 
+        /** Tests if this instance was detected when scanning live processes. */
         bool WasFound() { bool found = m_found; m_found = false; return found; }
-        void UpdateDataSampler(struct timeval& realtime); 
+        void UpdateDataSampler(struct timeval& realtime);
         void UpdateTimedValues(void);
         void CheckRootAccess(void) const;
 
@@ -395,18 +401,18 @@ namespace SCXSystemLib
         bool m_found;                           //!< Found during iteration
         bool m_accessViolationEncountered;      //!< Flag that we've had problems with access
         struct timeval m_timeOfDeath;           //!< When did process die
-        
+
         bool m_scxPriorityValid;                //!< Native priority successfuly mapped to windows priority levels.
         unsigned int m_scxPriority;             //!< Value of the native priority mapped to windows priority levels.
         template<class t> void PriorityOutOfRangeError(t rawPriority);  // Error handling helper.
 #if defined(linux)
         char m_procStatName[MAXPATHLEN];        //!< Name of /proc/#/stat file
         char m_procStatMName[MAXPATHLEN];       //!< Name of /proc/#/statm file
-        uid_t     m_uid;                        //!< User ID of owner 
-        gid_t     m_gid;                        //!< Group ID of owner 
+        uid_t     m_uid;                        //!< User ID of owner
+        gid_t     m_gid;                        //!< Group ID of owner
         LinuxProcStat m;                        //!< Linux specific process information
         LinuxProcStatM n;                       //!< Linux specific process information
-        static SCXCoreLib::SCXCalendarTime m_system_boot; //!< Time of system boot 
+        static SCXCoreLib::SCXCalendarTime m_system_boot; //!< Time of system boot
         unsigned int m_jiffies_per_second;              //!< Time base for PC Linux
         static const unsigned int m_pageSize = 4;       //!< Page size in KB on Linux
 
@@ -494,7 +500,7 @@ namespace SCXSystemLib
         struct pst_status m_pstatus;            //!< HP/UX specific process information
         static const unsigned int m_pageSize = 4; //!< Page size in KB on HP/UX
 
-        TvDataSampler_t       m_RealTime_tics;          //!< Data sampler for real time.  
+        TvDataSampler_t       m_RealTime_tics;          //!< Data sampler for real time.
         ScxULongDataSampler_t m_UserTime_tics;          //!< Data sampler for user time.
         ScxULongDataSampler_t m_SystemTime_tics;        //!< Data sampler for system time.
         //ScxULongDataSampler_t m_CPUTime_tics;           //!< Data sampler for cpu time.
@@ -581,7 +587,7 @@ namespace SCXSystemLib
 
     /**
        Constructs a identity string for debug printouts
-     
+
        This is exclusively meant for debug output. It will output pid and short name
        for process.
      */
@@ -620,11 +626,11 @@ namespace SCXSystemLib
        \param elapsedTime Delta of time
        \returns A measure of items per second
 
-       \note If we ever need this in something else that scxulong then 
+       \note If we ever need this in something else that scxulong then
        make this a template.
     */
-    inline scxulong 
-    ProcessInstance::ComputeItemsPerSecond(scxulong delta_item, 
+    inline scxulong
+    ProcessInstance::ComputeItemsPerSecond(scxulong delta_item,
                                            const struct timeval& elapsedTime) const
     {
         // Convert elapsed time to milliseconds
@@ -637,15 +643,15 @@ namespace SCXSystemLib
 
     /**
        Computes the percentage of measure of time in relation to another measure of time.
-       
+
        \param consumedTime Consumed time
        \param elapsedTime Elapsed time
        \returns A percentage number on how consumed time relates to elapsed time
 
-       \note Delta time on Linux is in jiffies. Like it or not. 
+       \note Delta time on Linux is in jiffies. Like it or not.
     */
-    inline unsigned int 
-    ProcessInstance::ComputePercentageOfTime(scxulong consumedTime, 
+    inline unsigned int
+    ProcessInstance::ComputePercentageOfTime(scxulong consumedTime,
                                              const struct timeval& elapsedTime) const
     {
         // Convert both to milliseconds to get a resonable resolution WO overflow
@@ -666,11 +672,11 @@ namespace SCXSystemLib
        \param elapsedTime Delta of time
        \returns A measure of items per second
 
-       \note If we ever need this in something else that scxulong then 
+       \note If we ever need this in something else that scxulong then
        make this a template.
     */
-    inline scxulong 
-    ProcessInstance::ComputeItemsPerSecond(scxulong delta_item, 
+    inline scxulong
+    ProcessInstance::ComputeItemsPerSecond(scxulong delta_item,
                                            const timeval& elapsedTime) const
     {
         // Convert elapsed time to milliseconds
@@ -679,17 +685,17 @@ namespace SCXSystemLib
 
         return 1000 * delta_item / el;
     }
-    
+
 
     /**
        Computes the percentage of measure of time in relation to another measure of time.
-       
+
        \param consumedTime Consumed time
        \param elapsedTime Elapsed time
        \returns A percentage number on how consumed time relates to elapsed time
     */
-    inline unsigned int 
-    ProcessInstance::ComputePercentageOfTime(const scx_timestruc_t& consumedTime, 
+    inline unsigned int
+    ProcessInstance::ComputePercentageOfTime(const scx_timestruc_t& consumedTime,
                                              const struct timeval& elapsedTime) const
     {
         if (elapsedTime.tv_sec == 0 && elapsedTime.tv_usec == 0) { return 0; }
@@ -697,11 +703,11 @@ namespace SCXSystemLib
         double el = elapsedTime.tv_sec + elapsedTime.tv_usec / 1000000.0L;
         if (!(el > 0)) { return 0; } // Avoid floating exceptions
         double co = consumedTime.tv_sec + consumedTime.tv_nsec / 1000000000.0L;
-        return static_cast<unsigned int>(100.0L * co / el);     
+        return static_cast<unsigned int>(100.0L * co / el);
     }
 
 #endif /* sun || aix */
-    
+
 #if defined(hpux)
     /**
        Computes a parameter for which we have a delta of some kind of item
@@ -711,11 +717,11 @@ namespace SCXSystemLib
        \param elapsedTime Delta of time
        \returns A measure of items per second
 
-       \note If we ever need this in something else that scxulong then 
+       \note If we ever need this in something else that scxulong then
        make this a template.
     */
-    inline scxulong 
-    ProcessInstance::ComputeItemsPerSecond(scxulong delta_item, 
+    inline scxulong
+    ProcessInstance::ComputeItemsPerSecond(scxulong delta_item,
                                            const struct timeval& elapsedTime) const
     {
         // Convert elapsed time to milliseconds
@@ -727,13 +733,13 @@ namespace SCXSystemLib
 
     /**
        Computes the percentage of measure of time in relation to another measure of time.
-       
+
        \param consumedTime Consumed time
        \param elapsedTime Elapsed time
        \returns A percentage number on how consumed time relates to elapsed time
     */
-    inline unsigned int 
-    ProcessInstance::ComputePercentageOfTime(scxulong consumedTime, 
+    inline unsigned int
+    ProcessInstance::ComputePercentageOfTime(scxulong consumedTime,
                                              const struct timeval& elapsedTime) const
     {
         // Convert both to milliseconds to get a resonable resolution WO overflow

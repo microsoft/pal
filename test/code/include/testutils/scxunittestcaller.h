@@ -3,7 +3,7 @@
 
 */
 /**
-    \file        
+    \file
 
     \brief       Unit test runner for SCX project.
 
@@ -35,6 +35,11 @@
 #include <scxcorelib/stringaid.h>
 
 #include <cppunit/ui/text/TestRunner.h>
+
+
+extern "C" {
+    typedef void* (*startThreadHndlrFn)(void *);
+}
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -207,9 +212,9 @@ SCXTestRunner SCXTestRunner::s_Instance;
 /*----------------------------------------------------------------------------*/
 /**
     Implements a test caller for the SCX project.
-    
+
     Will specify any unexpected exceptions and supports test timeouts.
-    
+
 */
 template <class Fixture>
 class SCXTestCaller : public CPPUNIT_NS::TestCaller<Fixture>
@@ -230,7 +235,7 @@ public:
 /*----------------------------------------------------------------------------*/
 /**
     Constructor
-    
+
     \param       name Name of test.
     \param       test Test method.
     \param       timeout Test timeout in seconds (default: 300).
@@ -243,7 +248,7 @@ public:
 /*----------------------------------------------------------------------------*/
 /**
     Constructor
-    
+
     \param       name Name of test.
     \param       test Test method.
     \param       fixture Reference to test fixture.
@@ -257,7 +262,7 @@ public:
 /*----------------------------------------------------------------------------*/
 /**
     Constructor
-    
+
     \param       name Name of test.
     \param       test Test method.
     \param       fixture Pointer to test fixture.
@@ -271,7 +276,7 @@ public:
 /*----------------------------------------------------------------------------*/
 /**
     Thread body used for running tests threaded.
-    
+
     \param       p Thread parameter. Should be of type SCXTestCaller.
     \returns     Zero.
 */
@@ -285,7 +290,7 @@ public:
 /*----------------------------------------------------------------------------*/
 /**
     A helper method used to actually run the test.
-    
+
     Will call the base class runTest.
 */
     void DoRunTest()
@@ -293,23 +298,23 @@ public:
         try {
             CPPUNIT_NS::TestCaller<Fixture>::runTest();
         }
-        catch (const CPPUNIT_NS::Exception& cue) 
-        { 
+        catch (const CPPUNIT_NS::Exception& cue)
+        {
             m_pMessageFromThread = new CPPUNIT_NS::Message(cue.message());
             m_pSourceLineFromThread = new CPPUNIT_NS::SourceLine(cue.sourceLine());
         }
-        catch (const SCXCoreLib::SCXException& scxe) 
-        { 
+        catch (const SCXCoreLib::SCXException& scxe)
+        {
             m_pMessageFromThread = new CPPUNIT_NS::Message( "unexpected exception caught" );
-        
+
             m_pMessageFromThread->addDetail( "Caught  : SCXCoreLib::SCXException or derived");
             m_pMessageFromThread->addDetail( "What()  : " + SCXCoreLib::StrToUTF8(scxe.What()));
             m_pMessageFromThread->addDetail( "Where() : " + SCXCoreLib::StrToUTF8(scxe.Where()));
         }
-        catch (const std::exception& e) 
-        { 
+        catch (const std::exception& e)
+        {
             m_pMessageFromThread = new CPPUNIT_NS::Message( "unexpected exception caught" );
-        
+
             m_pMessageFromThread->addDetail( "Caught  : std::exception or derived");
             m_pMessageFromThread->addDetail( "What()  : " + std::string(e.what()));
         }
@@ -322,12 +327,12 @@ public:
 /*----------------------------------------------------------------------------*/
 /**
     Run the test.
-    
+
     If timeout is non-zero a thread will be used to run the test. If the test
     runs for longer than the timeout, the test will fail with a timeout message.
 */
     void runTest()
-    { 
+    {
         thread_handle_t h = 0;
         try {
             if (0 == m_timeout) {
@@ -335,7 +340,7 @@ public:
             }
             else {
                 int id;
-                h = StartThread(runTestThread, this, &id);
+                h = StartThread((startThreadHndlrFn) runTestThread, this, &id);
                 WaitThread(h, m_timeout + 1); // Since time_t is used - allow one second margin.
                 if ( ! DoneThread(h)) {
                     StopThread(h);
@@ -343,7 +348,7 @@ public:
                     cpputMsg_.addDetail( " Timeout : " + SCXCoreLib::StrToUTF8(SCXCoreLib::StrFrom(m_timeout)));
                     FreeThread(h);
                     CPPUNIT_NS::Asserter::fail( cpputMsg_ );
-                } 
+                }
 #if defined(SCX_UNIX)
                 else
                     pthread_join(h->thread_handle, NULL);
@@ -351,7 +356,7 @@ public:
             }
         } catch ( const SCXCoreLib::SCXException& scxe) {
             CPPUNIT_NS::Message cpputMsg_( "unexpected exception caught" );
-        
+
             cpputMsg_.addDetail( "Caught  : SCXCoreLib::SCXException or derived");
             cpputMsg_.addDetail( "What()  : " + SCXCoreLib::StrToUTF8(scxe.What()));
             cpputMsg_.addDetail( "Where() : " + SCXCoreLib::StrToUTF8(scxe.Where()));
@@ -367,16 +372,16 @@ public:
                 CPPUNIT_NS::Asserter::fail( *m_pMessageFromThread );
             }
         }
-    }  
+    }
 
 /*----------------------------------------------------------------------------*/
 /**
     Test setup handler.
 */
     void setUp()
-    { 
+    {
         Log("setUp");
-        CPPUNIT_NS::TestCaller<Fixture>::setUp (); 
+        CPPUNIT_NS::TestCaller<Fixture>::setUp ();
     }
 
 /*----------------------------------------------------------------------------*/
@@ -384,8 +389,8 @@ public:
     Test teardown handler.
 */
     void tearDown()
-    { 
-        CPPUNIT_NS::TestCaller<Fixture>::tearDown (); 
+    {
+        CPPUNIT_NS::TestCaller<Fixture>::tearDown ();
 
         if (0 != m_pSourceLineFromThread) {
             delete m_pSourceLineFromThread;
@@ -403,8 +408,8 @@ public:
     String representation of object.
 */
     std::string toString() const
-    { 
-        return "SCXTestCaller " + CPPUNIT_NS::TestCaller<Fixture>::getName(); 
+    {
+        return "SCXTestCaller " + CPPUNIT_NS::TestCaller<Fixture>::getName();
     }
 
 /*----------------------------------------------------------------------------*/
@@ -421,7 +426,7 @@ public:
         SCX_LOGINFO(log, SCXCoreLib::StrFromUTF8(msg));
     }
 
-private: 
+private:
     unsigned int m_timeout; //!< Test timeout in seconds.
     CPPUNIT_NS::Message* m_pMessageFromThread; //!< Pointer to message created in run thread.
     CPPUNIT_NS::SourceLine* m_pSourceLineFromThread; //!< Pointer to source line created in thread.
@@ -432,16 +437,16 @@ private:
 /*----------------------------------------------------------------------------*/
 /**
     Helper method to start a thread.
-    
+
     \param       fn Thread body function.
     \param       param Thread parameters that will be passed to the thread body.
     \param       id Pointer to where thread id will be stored.
     \returns     A thread handle.
 */
 #if defined(WIN32)
-    static thread_handle_t StartThread(void* fn, void* param, int* id = 0)
+    static thread_handle_t StartThread(startThreadHndlrFn fn, void* param, int* id = 0)
 #elif defined(SCX_UNIX)
-    static thread_handle_t StartThread(void*(*fn)(void*), void* param, int* id = 0)
+    static thread_handle_t StartThread(startThreadHndlrFn fn, void* param, int* id = 0)
 #endif
     {
 #if defined(WIN32)
@@ -462,7 +467,7 @@ private:
 /*----------------------------------------------------------------------------*/
 /**
     Wait for a thread.
-    
+
     \param       h Thread handle.
     \param       timeout Number of seconds to wait or zero for no timeout (default: 0).
 */
@@ -482,7 +487,7 @@ private:
 /*----------------------------------------------------------------------------*/
 /**
     Used to force a thread to stop.
-    
+
     \param       h Thread handle to stop.
 */
     static void StopThread(thread_handle_t h)
@@ -497,7 +502,7 @@ private:
 /*----------------------------------------------------------------------------*/
 /**
     Check if a thread is running or not.
-    
+
     \param       h Thread handle to check.
     \returns     True if the thread is no longer running. Otherwise false.
 */
@@ -517,9 +522,9 @@ private:
 /*----------------------------------------------------------------------------*/
 /**
     Suspend the current thread for atleast the given time.
-    
+
     \param       milliSeconds Number of milliseconds to suspend thread.
-    
+
     Using zero milliSeconds should yield the thread letting some other thread execute.
 */
     static void SleepThread(unsigned int milliSeconds)
@@ -537,7 +542,7 @@ private:
 /*----------------------------------------------------------------------------*/
 /**
     Release resources associated with thread structure.
-    
+
     \param       h A thread handle.
 */
     static void FreeThread(thread_handle_t h)
@@ -550,7 +555,6 @@ private:
         delete h;
 #endif
     }
-
 };
 
 /** Redefine macro to use SCXTestCaller for timeout support */

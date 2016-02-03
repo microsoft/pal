@@ -26,6 +26,7 @@
 #error "Platform not implemented"
 #endif
 
+
 namespace SCXCoreLib
 {
     /*----------------------------------------------------------------------------*/
@@ -56,9 +57,9 @@ namespace SCXCoreLib
     */
     static
 #if defined(WIN32)
-    DWORD WINAPI ThreadStartRoutine(void* param)
+    DWORD WINAPI _InternalThreadStartRoutine(void* param)
 #elif defined(SCX_UNIX)
-    void* ThreadStartRoutine(void* param)
+    void* _InternalThreadStartRoutine(void* param)
 #endif
     {
         ThreadStartParams* p = static_cast<ThreadStartParams*>(param);
@@ -86,7 +87,18 @@ namespace SCXCoreLib
         delete p;
         return 0;
     }
+}
 
+extern "C"
+{
+    static void* ThreadStartRoutine(void* param)
+    {
+        return SCXCoreLib::_InternalThreadStartRoutine(param);
+    }
+}
+
+namespace SCXCoreLib
+{
     /*----------------------------------------------------------------------------*/
     /**
         Default constructor.
@@ -332,7 +344,7 @@ namespace SCXCoreLib
             p = new SCXThreadParam();
         }
         SCXThreadParamHandle h(p);
-        
+
         Start(proc, h, attr);
     }
 
@@ -344,7 +356,7 @@ namespace SCXCoreLib
        \param  param thread parameters handle (reference counted)
        \param  attr thread creation parameters (default: 0)
        \throws SCXThreadStartException if thread could not be started.
-        
+
        Uses SCXThread::SCXThreadStartHelper to actually start the thread.
 
     */
@@ -355,7 +367,7 @@ namespace SCXCoreLib
             throw SCXThreadStartException(L"Thread already started", SCXSRCLOCATION);
         }
         m_paramHandle = param;
-        
+
         if (attr == 0)
         {
             SCXThreadAttr attr_temp;
