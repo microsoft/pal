@@ -611,7 +611,21 @@ public:
                             clockspeed = (unsigned int)(StrToDouble(strClockspeed)*1000);
                         }
                     }
-                    else if ( 11 == newTokens.size() && 0 == newTokens[1].compare(L"Intel(R)") )//Intel machine 
+                    else if ( 9 == newTokens.size() && 0 == newTokens[1].compare(L"Intel(R)") )
+                    {
+                        // To cover the case: 8 Intel(R)  Itanium(R)  Processor 9540s (2.13 GHz, 24 MB)
+                        numPhysicalCPU = StrToUInt(newTokens[0]);
+                        strClockspeed = StrStripL(newTokens[5],  L"(");
+                        if (newTokens[6].compare(L"MHz,") == 0)
+                        {
+                            clockspeed = (unsigned int)(StrToDouble(strClockspeed));
+                        }
+                        else if (newTokens[6].compare(L"GHz,") == 0)
+                        {
+                            clockspeed = (unsigned int)(StrToDouble(strClockspeed)*1000);
+                        }
+                    }
+                    else if ( 11 == newTokens.size() && 0 == newTokens[1].compare(L"Intel(R)") )
                     {
                         // To cover the case: 2 Intel(R) Itanium 2 9100 series processors (1.42 GHz, 6 MB)
                         numPhysicalCPU = StrToUInt(newTokens[0]);
