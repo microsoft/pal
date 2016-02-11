@@ -62,6 +62,11 @@ ifeq ($(BUILD_TYPE),Release)
 	CXXFLAGS += -Os -fno-enforce-eh-specs
 endif 
 
+# C++ 11 for IBM atomic support
+ifeq  ($(ARCH),ppc)
+	CXXFLAGS += -std=c++11
+endif
+
 # Avoid stack frame corruption when throwing exceptions from 
 # callbacks by not allowing the optimizer to omit frame pointers
 # (implicit with the -Os option). This bug was observed with the

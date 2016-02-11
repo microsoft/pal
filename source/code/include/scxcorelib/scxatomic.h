@@ -19,6 +19,8 @@
 #include <machine/sys/inline.h>
 #elif defined(linux) && defined(SUSE10)
 #include <linux/config.h>
+#elif defined(linux) && defined(ppc)
+#include <atomic>
 #elif defined(sun)
 #if (PF_MAJOR==5) && (PF_MINOR>9)
 // atomic.h does not exist on Solaris 8/9 
@@ -39,29 +41,29 @@
 
 /* Definitions of the atomic datatype */
 #if defined(hpux)
-typedef volatile int32_t scx_atomic_t; //!< Atomic counter datatype.
+  typedef volatile int32_t scx_atomic_t; //!< Atomic counter datatype.
 #elif defined(linux)
-typedef volatile int scx_atomic_t; //!< Atomic counter datatype.
+  #if defined ppc
+    typedef atomic<int> scx_atomic_t; //!< Atomic counter datatype.
+  #else
+    typedef volatile int scx_atomic_t; //!< Atomic counter datatype.
+  #endif
 #elif defined(sun)
-
-#if (PF_MAJOR==5) && (PF_MINOR>9)
-typedef volatile scxulong scx_atomic_t; //!< Atomic counter datatype.
-#else
-typedef long scx_atomic_t;
-#endif
-
+  #if (PF_MAJOR==5) && (PF_MINOR>9)
+    typedef volatile scxulong scx_atomic_t; //!< Atomic counter datatype.
+  #else
+    typedef long scx_atomic_t;
+  #endif
 #elif defined(WIN32)
-typedef volatile long int scx_atomic_t;
+  typedef volatile long int scx_atomic_t;
 #elif defined(aix)
-// AIX uses atomic_p but that's just a pointer to int
-// No volatile since that messes up the type cast
-typedef int scx_atomic_t; //!< Atomic counter datatype.
+  // AIX uses atomic_p but that's just a pointer to int
+  // No volatile since that messes up the type cast
+  typedef int scx_atomic_t; //!< Atomic counter datatype.
 #elif defined(macos)
-
-typedef int scx_atomic_t; //!< Atomic counter datatype.
-
+  typedef int scx_atomic_t; //!< Atomic counter datatype.
 #else
-#error "Platform not supported"
+  #error "Platform not supported"
 #endif
 
 /*----------------------------------------------------------------------------*/
@@ -113,6 +115,22 @@ __inline static bool scx_atomic_decrement_test(scx_atomic_t* v)
 #endif
 
 #elif defined(linux)
+
+// Use intrinsics for IBM powerPC
+#if defined(ppc)
+
+static __inline__ void scx_atomic_increment(scx_atomic_t* v)
+{
+    ++(*v);
+}
+
+static __inline__ void scx_atomic_decrement_test(scx_atomic_t* v)
+{
+    return (*v).fetch_sub(1) == 1;
+}
+
+#else
+
 static __inline__ void scx_atomic_increment(scx_atomic_t* v)
 {
     __asm__ __volatile__(
@@ -131,6 +149,8 @@ static __inline__ bool scx_atomic_decrement_test(scx_atomic_t* v)
         :"m" (*v) : "memory");
     return c != 0;
 }
+#endif
+
 #elif defined(sun)
 
 // Built in atomic operations are not available at user level on Solaris 8/9, WI7937
