@@ -406,6 +406,10 @@ namespace SCXSystemLib
             :          /* input operands                        */
                 "a" (static_cast< unsigned int >(function))
         );
+#elif defined(ppc)
+	// TODO add support for IBM power PC
+	(void) function;
+	(void) registers;
 #else
         asm
         (
