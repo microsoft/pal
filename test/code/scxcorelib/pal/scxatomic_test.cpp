@@ -131,7 +131,7 @@ public:
         int     nMode = 0;         // atomic
         bool    aWaitRes[c_nThreads];
         
-        scx_atomic_t res = c_nThreads;
+        scx_atomic_t res(c_nThreads);
 
         SCXCoreLib::SCXHandle<SCXCoreLib::SCXThread> aThreads[c_nThreads];
 
