@@ -18,13 +18,19 @@ USING_SOLARIS_11=1
 endif
 endif
 
+# Determine if we support -erroff=arrowrtn2 ... (seems to be in SunStudio 5.13)
+ARROWRTN_SUPPORTED:=$(shell CC -V 2>&1 | grep 5.13 >/dev/null 2>&1 && echo "1" || echo "0")
 
 # Define flags. (These will be submitted to all commands that use the preprocesor)
 DEFINES += -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D_LARGEFILE64_SOURCE=1
 
 # Compiler flags that regulates warning levels
 # Suppresses warnings about extern "C":
+ifeq ($(ARROWRTN_SUPPORTED),1)
 CXX_WARN_FLAGS=-errtags -erroff=badargtype2w,wbadinit,wnoretvalue,truncwarn,arrowrtn2 -xwe +w
+else
+CXX_WARN_FLAGS=-errtags -erroff=badargtype2w,wbadinit,wnoretvalue,truncwarn -xwe +w
+endif
 
 # CXX Compiler flags 
 CXXFLAGS=$(DEFINES) $(CXX_WARN_FLAGS) -KPIC -mt -xspace -xtarget=generic -xarch=generic
