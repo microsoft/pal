@@ -83,6 +83,8 @@ template<> SCXCoreLib::SCXHandle<SCXCoreLib::SCXThreadLockHandle> SCXCoreLib::SC
 
 int B::s_constructed = 0;
 
+#include <scxcorelib/scxsingleton-defs.h>
+
 class SCXSingletonTest : public CPPUNIT_NS::TestFixture
 {
 public:

@@ -45,7 +45,7 @@ namespace SCXCoreLib
 
         In header file, you'll need to include something like:
 
-        template<> SCXHandle<class*> SCXSingleton<class>::s_instance;
+        template<> SCXHandle<class> SCXSingleton<class>::s_instance;
         template<> SCXHandle<SCXThreadLockHandle> SCXSingleton<class>::s_lockHandle;
     */
     template<class T> class SCXSingleton
@@ -58,38 +58,18 @@ namespace SCXCoreLib
             If the instance is not yet created, it first creates it.
 
         */
-        static T& Instance()
-        {
-            if (0 == s_lockHandle.GetData())
-            {
-                throw SCXInternalErrorException(L"Tried to get a singleton instance before static initialization was completed.", SCXSRCLOCATION);
-            }
-
-            SCXThreadLock lock(*s_lockHandle, true);
-
-            if (0 == s_instance.GetData())
-            {
-                s_instance = new T;
-            }
-
-            return *s_instance;
-        }
+        static T& Instance();
 
     protected:
         /** Only instantiated by subclassing. */
-        SCXSingleton(int recursiveLock = 1)
-        {
-            if (recursiveLock == 0)
-            {
-                s_lockHandle = new SCXThreadLockHandle(ThreadLockHandleGet(recursiveLock));
-            }
-        }
-        /** Only instantiated by subclassing. */
-        SCXSingleton(const SCXSingleton&) {}
-        /** Only copied by subclassing. */
-        SCXSingleton& operator=(const SCXSingleton&) { return *this; }
+        SCXSingleton(int recursiveLock = 1);
 
     private:
+        /** Only instantiated by subclassing. */
+        SCXSingleton(const SCXSingleton&);
+        /** Only copied by subclassing. */
+        SCXSingleton& operator=(const SCXSingleton&);
+
         static SCXCoreLib::SCXHandle<T> s_instance; //!< Handle to the singleton instance.
         static SCXCoreLib::SCXHandle< SCXThreadLockHandle > s_lockHandle; //!< Used for locking at creation time.
     };

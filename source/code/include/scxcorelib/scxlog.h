@@ -252,6 +252,8 @@ namespace SCXCoreLib
     template<> SCXHandle<SCXThreadLockHandle> SCXSingleton<SCXLogHandleFactory>::s_lockHandle;
 }
 
+#include <scxcorelib/scxsingleton-defs.h>
+
 /** Log a message with severity. */
 #define SCX_LOG(loghandle, severity, message) {                \
     SCXCoreLib::SCXLogSeverity sev = (severity);               \
