@@ -44,7 +44,7 @@
   typedef volatile int32_t scx_atomic_t; //!< Atomic counter datatype.
 #elif defined(linux)
   #if defined ppc
-    typedef atomic<int> scx_atomic_t; //!< Atomic counter datatype.
+    typedef std::atomic<int> scx_atomic_t; //!< Atomic counter datatype.
   #else
     typedef volatile int scx_atomic_t; //!< Atomic counter datatype.
   #endif
@@ -124,9 +124,9 @@ static __inline__ void scx_atomic_increment(scx_atomic_t* v)
     ++(*v);
 }
 
-static __inline__ void scx_atomic_decrement_test(scx_atomic_t* v)
+static __inline__ bool scx_atomic_decrement_test(scx_atomic_t* v)
 {
-    return (*v).fetch_sub(1) == 1;
+    return v->fetch_sub(1) == 1;
 }
 
 #else
