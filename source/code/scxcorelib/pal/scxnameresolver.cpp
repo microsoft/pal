@@ -800,6 +800,17 @@ namespace SCXCoreLib
             break;
         }
     }
+
+    /** 
+        Get the host name and domain name.
+
+        \return The machine's host name and domain name.
+    */
+    std::wstring GetHostDomainname()
+    {
+        NameResolver mi;
+        return mi.GetHostDomainname();
+    }
 }// end namespace SCXCoreLib
 
 /*--------------------------E-N-D---O-F---F-I-L-E----------------------------*/

@@ -248,6 +248,10 @@ namespace SCXCoreLib
         NameResolver(const NameResolver &);             //!< Intentionally left unimplemented.
         NameResolver & operator=(const NameResolver &); //!< Intentionally left unimplemented.
     };// end class NameResolver
+
+    // Add direct accessor method to eliminate circular linkage issues
+    std::wstring GetHostDomainname();
+
 }// end namespace SCXCoreLib
 
 #endif /* SCXNAMERESOLVER_H */
