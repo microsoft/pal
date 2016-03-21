@@ -1591,8 +1591,13 @@ public:
                 CPPUNIT_ASSERT(disk->GetDiskSize(mbUsed, mbFree));
                 if (L"zfs" != td->m_fs)
                 {
-                    CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(td->m_mbUsed), static_cast<double>(mbUsed), 10); // Other activities on the machine might affect the test.
-                    CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(td->m_mbFree), static_cast<double>(mbFree), 10); // Other activities on the machine might affect the test.
+#if defined(hpux)
+                    const int delta = 2048;
+#else
+                    const int delta = 10;
+#endif
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(td->m_mbUsed), static_cast<double>(mbUsed), delta); // Other activities on the machine might affect the test.
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(td->m_mbFree), static_cast<double>(mbFree), delta); // Other activities on the machine might affect the test.
                 }
 
                 // Block size
