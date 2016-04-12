@@ -89,6 +89,7 @@ GetLinuxInfo() {
         if [ "${Version}" != "" ]; then
             OSAlias="RHEL"
             OSManufacturer="Red Hat, Inc."
+            OSFullName=`cat $ReleaseFile`
         fi
     elif [ "${OSName}" = "SUSE Linux Enterprise Server" ]; then
         # SLES 10 uses "Linux". Need to parse the minor version as SLES 10.0 is not supported, only 10.1 and up
@@ -265,8 +266,10 @@ GetLinuxInfo() {
         Version="$Version.0"
     fi
 
-    # Construct OSFullName string
-    OSFullName="$OSName $Version ($Arch)"
+    if [ -z "$OSFullName" ]; then
+        # Construct OSFullName string
+        OSFullName="$OSName $Version ($Arch)"
+    fi
 }
 
 ## End Linux distro function

@@ -44,6 +44,7 @@ class SCXGetLinuxOS_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestDisableFileDisables );
     CPPUNIT_TEST( TestNoReleaseFile );
     CPPUNIT_TEST( TestPlatform_RHEL_61 );
+    CPPUNIT_TEST( TestPlatform_RHEL_70 );
     CPPUNIT_TEST( TestPlatform_SLES_9_0 );
     CPPUNIT_TEST( TestPlatform_SLES_10 );
     CPPUNIT_TEST( TestPlatform_Oracle_5 );
@@ -228,13 +229,34 @@ public:
         // Verify our data:
         //      OSName=Red Hat Enterprise Linux
         //      OSVersion=6.1
-        //      OSFullName=Red Hat Enterprise Linux 6.1 (x86_64)
+        //      OSFullName=Red Hat Enterprise Linux Server release 6.1 (Santiago)
         //      OSAlias=RHEL
         //      OSManufacturer=Red Hat, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Red Hat Enterprise Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("6.1"), releaseFile["OSVersion"] );
-        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Red Hat Enterprise Linux 6.1") );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Red Hat Enterprise Linux Server release 6.1 (Santiago)") );
+        CPPUNIT_ASSERT_EQUAL( string("RHEL"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("Red Hat, Inc."), releaseFile["OSManufacturer"] );
+    }
+
+    // Platform RHEL version 7.0:
+    void TestPlatform_RHEL_70()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/rhel_7.0", releaseFile );
+
+        // Verify our data:
+        //      OSName=Red Hat Enterprise Linux
+        //      OSVersion=7.0
+        //      OSFullName=Red Hat Enterprise Linux Server release 7.0 (Maipo)
+        //      OSAlias=RHEL
+        //      OSManufacturer=Red Hat, Inc.
+
+        CPPUNIT_ASSERT_EQUAL( string("Red Hat Enterprise Linux"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Red Hat Enterprise Linux Server release 7.0 (Maipo)") );
         CPPUNIT_ASSERT_EQUAL( string("RHEL"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Red Hat, Inc."), releaseFile["OSManufacturer"] );
     }
