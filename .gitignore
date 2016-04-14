@@ -1,8 +1,12 @@
 # git ignore file for pal project
 
-intermediate/
-target/
 build/config.mak
+build/cppunit_result.*
 build/Makefile.version
+build/scxtestrunner.log
+
 installer/InstallBuilder/*.pyc
 installer/InstallBuilder/unittests/staging
+
+intermediate/
+target/
