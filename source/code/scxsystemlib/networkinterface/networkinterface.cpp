@@ -1521,14 +1521,6 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
             return;
         }
 
-        // Reset the driver counters.
-        if (deps->ioctl(s,NDD_CLEAR_STATS,NULL) < 0) 
-        {
-            SCXCoreLib::SCXErrnoException e(L"ioctl(s,NDD_CLEAR_STATS,NULL) failed. errno: ", errno, SCXSRCLOCATION);
-            SCX_LOGERROR(m_log, e.What());
-            return;
-        }
-
         // Populate the ioctl argument accordingly. 
         // The ioctl argument for the stat related commands must be struct nddctl.
         nddctl ioctl_arg;
