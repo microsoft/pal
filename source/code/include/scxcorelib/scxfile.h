@@ -95,7 +95,7 @@ namespace SCXCoreLib {
         static void SeekG(std::wfstream& source, std::wstreampos pos);
 
 #if !defined(DISABLE_WIN_UNSUPPORTED)        
-        static SCXFilePath CreateTempFile(const std::wstring& fileContent);
+        static SCXFilePath CreateTempFile(const std::wstring& fileContent, const std::wstring& tmpDir=L"/tmp/");
 #endif
 
         static SCXStream::NLF GetPreferredNewLine(const SCXFilePath&);

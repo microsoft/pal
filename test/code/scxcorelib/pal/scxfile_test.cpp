@@ -10,6 +10,7 @@
 #include <scxcorelib/scxcmn.h>
 #include <scxcorelib/scxfile.h>
 #include <testutils/scxunit.h>
+#include <testutils/scxtestutils.h>
 #include <scxcorelib/scxfile.h>
 #include <scxcorelib/scxdirectoryinfo.h>
 #include <scxcorelib/scxstream.h>
@@ -53,6 +54,9 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST( TestSeek );
 #if !defined(DISABLE_WIN_UNSUPPORTED)
     CPPUNIT_TEST( TestCreateTempFile );
+    CPPUNIT_TEST( TestCreateTempFileValidDirectory );
+    CPPUNIT_TEST( TestCreateTempFileInvalidDirectory );
+    CPPUNIT_TEST( TestCreateTempFileNonDefaultDirectory );
     CPPUNIT_TEST( TestNonBlockingReadNonExistingFile );
     CPPUNIT_TEST( TestNonBlockingReadFileLarger );
     CPPUNIT_TEST( TestNonBlockingReadFileSmaller );
@@ -620,6 +624,7 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
     void TestCreateTempFile() {
         wstring content(L"This is the file content\non the temp file\n");
         SCXFilePath path = SCXFile::CreateTempFile(content);
+        SelfDeletingFilePath sfdPath(path);
         CPPUNIT_ASSERT(SCXFile::Exists(path));
         SCXCoreLib::SCXHandle<std::wfstream> fileStream = SCXFile::OpenWFstream(path, std::ios::in);
         std::wostringstream compare;
@@ -629,7 +634,47 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
             wcout << L"compare: " << compare.str() << std::endl;
             CPPUNIT_ASSERT(content == compare.str());
         }
-        SCXFile::Delete(path);
+    }
+    
+    void TestCreateTempFileValidDirectory()
+    {
+    	wstring content(L"This is the file content\non the temp file\n");
+    	SCXFilePath path = SCXFile::CreateTempFile(content,L"/tmp/");
+    	SelfDeletingFilePath sfdPath(path);
+    	CPPUNIT_ASSERT(SCXFile::Exists(path));
+    	SCXCoreLib::SCXHandle<std::wfstream> fileStream = SCXFile::OpenWFstream(path, std::ios::in);
+    	std::wostringstream compare;
+    	(*fileStream) >> compare.rdbuf();
+    	if (content != compare.str()) 
+    	{
+    	    wcout << L"content: " << content << std::endl;
+    	    wcout << L"compare: " << compare.str() << std::endl;
+    	    CPPUNIT_ASSERT(content == compare.str());
+    	}
+    }
+    
+    void TestCreateTempFileInvalidDirectory()
+    {
+        wstring content(L"This is the file content\non the temp file\n");
+        SCXUNIT_ASSERT_THROWN_EXCEPTION(SCXFile::CreateTempFile(content,L"/not/valid/directory/"), SCXFilePathNotFoundException, L"/not/valid/directory");
+    }
+    
+    void TestCreateTempFileNonDefaultDirectory()
+    {
+    	wstring content(L"This is the file content\non the temp file\n");
+    	// Creating Temp file in CWD
+    	SCXFilePath path = SCXFile::CreateTempFile(content,L"./");
+    	SelfDeletingFilePath sfdPath(path);
+    	CPPUNIT_ASSERT(SCXFile::Exists(path));
+    	SCXCoreLib::SCXHandle<std::wfstream> fileStream = SCXFile::OpenWFstream(path, std::ios::in);
+    	std::wostringstream compare;
+    	(*fileStream) >> compare.rdbuf();
+    	if (content != compare.str())
+    	{
+    		wcout << L"content: " << content << std::endl;
+    		wcout << L"compare: " << compare.str() << std::endl;
+    		CPPUNIT_ASSERT(content == compare.str());
+    	}
     }
 
     void TestNonBlockingReadOfRandom()
