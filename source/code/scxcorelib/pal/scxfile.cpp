@@ -22,6 +22,8 @@
 #include <sys/stat.h>
 #include <scxcorelib/scxoserror.h>
 #include <scxcorelib/scxexception.h>
+#include <scxcorelib/stringaid.h>
+#include <scxcorelib/scxdirectoryinfo.h>
 
 /** To use API mmap and munmap*/
 #include <sys/mman.h>
@@ -576,7 +578,7 @@ namespace SCXCoreLib {
         \returns    Complete path of newly created file.
 
      */
-    SCXFilePath SCXFile::CreateTempFile(const std::wstring& fileContent) {
+    SCXFilePath SCXFile::CreateTempFile(const std::wstring& fileContent, const std::wstring& tmpDir /* = "/tmp/" */) {
         /**
          * The code below behaves as it does because of limitations in the
          * various temp file functions.
@@ -611,7 +613,11 @@ namespace SCXCoreLib {
         free(fp);
         fp = 0;
 #else
-        pattern = SCXFileSystem::DecodePath("/tmp/");
+        pattern = SCXFileSystem::DecodePath(StrToUTF8(tmpDir));
+        if(!SCXCoreLib::SCXDirectory::Exists(pattern))
+        {
+        	throw SCXCoreLib::SCXFilePathNotFoundException(pattern.GetDirectory(), SCXSRCLOCATION);
+        }
 #endif
 
         pattern.SetFilename(L"scxXXXXXX");
