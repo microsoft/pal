@@ -90,6 +90,7 @@ GetLinuxInfo() {
             OSAlias="RHEL"
             OSManufacturer="Red Hat, Inc."
             OSFullName=`cat $ReleaseFile`
+            OSShortName="RHEL_$Version"
         fi
     elif [ "${OSName}" = "SUSE Linux Enterprise Server" ]; then
         # SLES 10 uses "Linux". Need to parse the minor version as SLES 10.0 is not supported, only 10.1 and up
@@ -106,6 +107,7 @@ GetLinuxInfo() {
         if [ "${Version}" != "" ]; then
             OSAlias="SLES"
             OSManufacturer="SUSE GmbH"
+            OSShortName="SUSE_$Version"
         fi
     elif [ "${OSName}" = "SUSE LINUX Enterprise Server" ]; then
         # SLES 9 uses "LINUX". No need to parse minor version as Agent supports 9.0 and up.
@@ -113,6 +115,7 @@ GetLinuxInfo() {
         if [ "${Version}" != "" ]; then
             OSAlias="SLES"
             OSManufacturer="SUSE GmbH"
+            OSShortName="SUSE_$Version"
         fi
     else
         OSAlias="Universal"
@@ -140,21 +143,41 @@ GetLinuxInfo() {
                 debian)
                     OSManufacturer="Softare in the Public Interest, Inc."
                     OSAlias="UniversalD"
+                    if [ "${Version}" != "" ]; then
+                        OSShortName="Debian_$Version"
+                    else
+                        OSShortName="Debian"
+                    fi
                     ;;
 
                 opensuse)
                     OSManufacturer="SUSE GmbH"
                     OSAlias="UniversalR"
+                    if [ "${Version}" != "" ]; then
+                        OSShortName="SUSE_$Version"
+                    else
+                        OSShortName="SUSE"
+                    fi
                     ;;
 
                 centos)
                     OSManufacturer="Central Logistics GmbH"
                     OSAlias="UniversalR"
+                    if [ "${Version}" != "" ]; then
+                        OSShortName="CentOS_$Version"
+                    else
+                        OSShortName="CentOS"
+                    fi
                     ;;
 
                 ubuntu)
                     OSManufacturer="Canonical Group Limited"
                     OSAlias="UniversalD"
+                    if [ "${Version}" != "" ]; then
+                        OSShortName="Ubuntu_$Version"
+                    else
+                        OSShortName="Ubuntu"
+                    fi
                     ;;
             esac
 
@@ -170,6 +193,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalR"
                 OSManufacturer="ALT Linux Ltd"
                 Version=`grep 'ALT Linux' $ReleaseFile | sed s/.*Linux\ // | sed s/\ \.*//`
+                OSShortName="ALTLinux_$Version"
             fi
 
             # Enterprise Linux Server
@@ -178,6 +202,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalR"
                 OSManufacturer="Oracle Corporation"
                 Version=`grep 'Enterprise Linux Enterprise Linux Server' $ReleaseFile | sed s/.*release\ // | sed s/\ \(.*//`
+                OSShortName="Oracle_$Version"
             fi
 
             # Oracle Enterprise Linux Server
@@ -186,6 +211,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalR"
                 OSManufacturer="Oracle Corporation"
                 Version=`grep 'Oracle Linux Server release' $ReleaseFile | sed s/.*release\ // | sed s/\ \(.*//`
+                OSShortName="Oracle_$Version"
             fi
 
             # NeoKylin Linux Advanced Server
@@ -194,6 +220,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalR"
                 OSManufacturer="China Standard Software Co., Ltd."
                 Version=`grep 'NeoKylin Linux Advanced Server release' $ReleaseFile | sed s/.*release\ // | sed s/\ \(.*//`
+                OSShortName="NeoKylin_$Version"
             fi
 
             # OpenSUSE
@@ -202,6 +229,7 @@ GetLinuxInfo() {
                 OSName="openSUSE"
                 OSAlias="UniversalR"
                 OSManufacturer="SUSE GmbH"
+                OSShortName="OpenSUSE_$Version"
             fi
 
             # Debian
@@ -210,6 +238,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalD"
                 OSManufacturer="Softare in the Public Interest, Inc."
                 Version=`cat ${EtcPath}/debian_version`
+                OSShortName="Debian_$Version"
             fi
 
             # Ubuntu
@@ -218,6 +247,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalD"
                 OSManufacturer="Canonical Group Limited "
                 Version=`grep 'DISTRIB_RELEASE' $ReleaseFile | cut -d'=' -f2`
+                OSShortName="Ubuntu_$Version"
             fi
 
             # Fedora
@@ -226,6 +256,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalR"
                 OSManufacturer="Red Hat, Inc."
                 Version=`grep 'Fedora' $ReleaseFile | sed s/.*release\ // | sed s/\ .*//`
+                OSShortName="Fedora_$Version"
             fi
 
             # CentOS
@@ -234,6 +265,7 @@ GetLinuxInfo() {
                 OSAlias="UniversalR"
                 OSManufacturer="Central Logistics GmbH"
                 Version=`grep 'CentOS' $ReleaseFile | sed s/.*release\ // | sed s/\ .*//`
+                OSShortName="CentOS_$Version"
             fi
 
             # If distro is not known, determine whether RPM or DPKG is installed
@@ -251,6 +283,7 @@ GetLinuxInfo() {
             if [ "$OSName" = "" ]; then
                 OSName="Linux"
                 OSManufacturer="Universal"
+                OSShortName="$OSName"
             fi
 
         else
@@ -259,6 +292,7 @@ GetLinuxInfo() {
             Version=`uname -r`
             OSName="Linux"
             OSManufacturer="Universal"
+            OSShortName="$OSName\_$Version"
         fi
     fi
 
@@ -285,8 +319,8 @@ if [ ! -e $DisableFile ] || [ ! -e $RelFile ]; then
     printf "OSFullName=$OSFullName\n" >>$RelFile
     printf "OSAlias=$OSAlias\n" >>$RelFile
     printf "OSManufacturer=$OSManufacturer\n" >>$RelFile
+    printf "OSShortName=$OSShortName\n" >> $RelFile
 
     # Verify that it's W:R so non-priv'ed users can read
     chmod 644 $RelFile
 fi
-
