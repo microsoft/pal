@@ -166,9 +166,11 @@ class LinuxDebFile:
             return
 
         # Build the package - 'cd' to the directory where we want to store result
-        dpkg_path = 'dpkg'
         if "DPKG_LOCATION" in self.variables:
             dpkg_path = self.variables["DPKG_LOCATION"]
+        # Use the system's version of dpkg-deb if present.
+        if os.path.exists('/usr/bin/dpkg-deb'):
+            dpkg_path = '/usr/bin/dpkg-deb'
         retval = os.system('cd ' + self.targetDir + '; ' + dpkg_path  + ' -b ' + self.stagingDir + ' ' + pkgName)
         if retval != 0:
             print("Error: Failed building DPKG")
