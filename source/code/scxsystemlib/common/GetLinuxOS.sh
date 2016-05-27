@@ -324,3 +324,4 @@ if [ ! -e $DisableFile ] || [ ! -e $RelFile ]; then
     # Verify that it's W:R so non-priv'ed users can read
     chmod 644 $RelFile
 fi
+
