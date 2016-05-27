@@ -100,10 +100,11 @@ public:
         //
         //      OSName=Linux
         //      OSVersion=2.6.32-131.0.15.el6.x86_64
+        //      OSShortName=Linux_2.6.32-131.0.15.el6.x86_64 (x86_64)
         //      OSFullName=Linux 2.6.32-131.0.15.el6.x86_64 (x86_64)
         //      OSAlias=Universal
         //      OSManufacturer=Red Hat, Inc.
-        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(5), relFile.size() );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(6), relFile.size() );
     }
 
     // Helper routine - dump release file map (debug purposes only)
@@ -205,12 +206,15 @@ public:
         // Verify our data:
         //      OSName=Linux
         //      OSVersion=2.6.32-131.0.15.el6.x86_64
+        //      OSShortName=Linux_<version>
         //      OSFullName=Linux 2.6.32-131.0.15.el6.x86_64 (x86_64)
         //      OSAlias=Universal
         //      OSManufacturer="Universal"
 
         CPPUNIT_ASSERT_EQUAL( string("Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string(unameInfo.release), releaseFile["OSVersion"] );
+        string osShortName = string("Linux_") + unameInfo.release;
+        CPPUNIT_ASSERT_EQUAL( osShortName, releaseFile["OSShortName"] );
         string osFullName = string("Linux ") + unameInfo.release;
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find(osFullName) );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSAlias"].find("Universal") );
@@ -229,12 +233,14 @@ public:
         // Verify our data:
         //      OSName=Red Hat Enterprise Linux
         //      OSVersion=6.1
+        //      OSShortName=RHEL_6.1
         //      OSFullName=Red Hat Enterprise Linux Server release 6.1 (Santiago)
         //      OSAlias=RHEL
         //      OSManufacturer=Red Hat, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Red Hat Enterprise Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("6.1"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("RHEL_6.1"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Red Hat Enterprise Linux Server release 6.1 (Santiago)") );
         CPPUNIT_ASSERT_EQUAL( string("RHEL"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Red Hat, Inc."), releaseFile["OSManufacturer"] );
@@ -250,12 +256,14 @@ public:
         // Verify our data:
         //      OSName=Red Hat Enterprise Linux
         //      OSVersion=7.0
+        //      OSShortName=RHEL_7.0
         //      OSFullName=Red Hat Enterprise Linux Server release 7.0 (Maipo)
         //      OSAlias=RHEL
         //      OSManufacturer=Red Hat, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Red Hat Enterprise Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("RHEL_7.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Red Hat Enterprise Linux Server release 7.0 (Maipo)") );
         CPPUNIT_ASSERT_EQUAL( string("RHEL"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Red Hat, Inc."), releaseFile["OSManufacturer"] );
@@ -270,13 +278,15 @@ public:
 
         // Verify our data:
         //      OSName = SUSE LINUX Enterprise Server
-        //      OSVersion = 9
+        //      OSVersion = 9.0
+        //      OSShortName=SUSE_9.0
         //      OSFullName = SUSE LINUX Enterprise Server 9 (x86_64)
         //      OSAlias = SLES
         //      OSManufacturer = SUSE GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("SUSE LINUX Enterprise Server"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("9.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("SUSE_9.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("SUSE LINUX Enterprise Server 9.0") );
         CPPUNIT_ASSERT_EQUAL( string("SLES"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
@@ -292,12 +302,14 @@ public:
         // Verify our data:
         //      OSName=SUSE Linux Enterprise Server
         //      OSVersion=10.1
+        //      OSShortName=SUSE_10.1
         //      OSFullName=SUSE Linux Enterprise Server 10.1 (x86_64)
         //      OSAlias=SLES
         //      OSManufacturer = SUSE GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("SUSE Linux Enterprise Server"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("10.1"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("SUSE_10.1"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("SUSE Linux Enterprise Server 10.1") );
         CPPUNIT_ASSERT_EQUAL( string("SLES"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
@@ -312,13 +324,15 @@ public:
 
         // Verify our data:
         //      OSName = Enterprise Linux Server
-        //      OSVersion = 5
+        //      OSVersion = 5.0
+        //      OSShortName=Oracle_5.0
         //      OSFullName = Enterprise Linux Server 5 (x86_64)
         //      OSAlias = UniversalR
         //      OSManufacturer = Oracle Corporation
 
         CPPUNIT_ASSERT_EQUAL( string("Enterprise Linux Server"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("5.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Oracle_5.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Enterprise Linux Server 5.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Oracle Corporation"), releaseFile["OSManufacturer"] );
@@ -334,12 +348,14 @@ public:
         // Verify our data:
         //      OSName = Oracle Linux Server
         //      OSVersion = 6.0
+        //      OSShortName=Oracle_6.0
         //      OSFullName = Oracle Linux Server 6.0 (x86_64)
         //      OSAlias = UniversalR
         //      OSManufacturer = Oracle Corporation
 
         CPPUNIT_ASSERT_EQUAL( string("Oracle Linux Server"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("6.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Oracle_6.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Oracle Linux Server 6.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Oracle Corporation"), releaseFile["OSManufacturer"] );
@@ -355,12 +371,14 @@ public:
         // Verify our data:
         //      OSName=NeoKylin Linux Server
         //      OSVersion=5.6
+        //      OSShortName=NeoKylin_5.6
         //      OSFullName=NeoKylin Linux Server 5.6 (x86_64)
         //      OSAlias=UniversalR
         //      OSManufacturer = China Standard Software Co., Ltd.
 
         CPPUNIT_ASSERT_EQUAL( string("NeoKylin Linux Server"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("5.6"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("NeoKylin_5.6"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("NeoKylin Linux Server 5.6") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("China Standard Software Co., Ltd."), releaseFile["OSManufacturer"] );
@@ -376,12 +394,14 @@ public:
         // Verify our data:
         //      OSName = Debian
         //      OSVersion = 5.0.10
+        //      OSShortName=Debian_5.0.10
         //      OSFullName = Debian 5.0.10 (x86_64)
         //      OSAlias = UniversalD
         //      OSManufacturer = Software in the Public Interest, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Debian"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("5.0.10"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Debian_5.0.10"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Debian 5.0.10") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalD"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Softare in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
@@ -397,12 +417,14 @@ public:
         // Verify our data:
         //      OSName = Ubuntu
         //      OSVersion = 11.04
+        //      OSShortName=Ubuntu_11.04
         //      OSFullName = Ubuntu 11.04 (x86_64)
         //      OSAlias = UniversalD
         //      OSManufacturer = Canonical Group Limited
 
         CPPUNIT_ASSERT_EQUAL( string("Ubuntu"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("11.04"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Ubuntu_11.04"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Ubuntu 11.04") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalD"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Canonical Group Limited"), releaseFile["OSManufacturer"] );
@@ -417,13 +439,15 @@ public:
 
         // Verify our data:
         //      OSName = CentOS
-        //      OSVersion = 5
+        //      OSVersion = 5.0
+        //      OSShortName=CentOS_5.0
         //      OSFullName = CentOS 5 (x86_64)
         //      OSAlias = UniversalR
         //      OSManufacturer = Central Logistics GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("CentOS"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("5.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("CentOS_5.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS 5.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Central Logistics GmbH"), releaseFile["OSManufacturer"] );
@@ -439,12 +463,14 @@ public:
         // Verify our data:
         //      OSName = CentOS Linux
         //      OSVersion = 7.0
+        //      OSShortName=CentOS_7.0
         //      OSFullName = CentOS Linux 7.0
         //      OSAlias = UniversalR
         //      OSManufacturer = Central Logistics GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("CentOS Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("CentOS_7.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS Linux 7.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Central Logistics GmbH"), releaseFile["OSManufacturer"] );
@@ -460,12 +486,14 @@ public:
         // Verify our data:
         //      OSName = Debian GNU/Linux
         //      OSVersion = 7.0
+        //      OSShortName=Debian_7.0
         //      OSFullName = Debian GNU/Linux 7.0 (wheezy)
         //      OSAlias = UniversalD
         //      OSManufacturer = Softare in the Public Interest, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Debian GNU/Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Debian_7.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Debian") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalD"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Softare in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
@@ -481,12 +509,14 @@ public:
         // Verify our data:
         //      OSName = openSUSE
         //      OSVersion = 11.4
+        //      OSShortName=OpenSUSE_11.4
         //      OSFullName = openSUSE 11.4 (x86_64)
         //      OSAlias = UniversalR
         //      OSManufacturer = SUSE GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("openSUSE"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("11.4"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("OpenSUSE_11.4"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("openSUSE 11.4") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
@@ -502,12 +532,14 @@ public:
         // Verify our data:
         //      OSName = openSUSE
         //      OSVersion = 12.3
+        //      OSShortName=SUSE_12.3
         //      OSFullName = openSUSE 12.3 (x86_64)
         //      OSAlias = UniversalR
         //      OSManufacturer = SUSE GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("openSUSE"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("12.3"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("SUSE_12.3"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("openSUSE 12.3") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("SUSE GmbH"), releaseFile["OSManufacturer"] );
@@ -522,12 +554,14 @@ public:
         // Verify our data:
         //      OSName = ALT Linux
         //      OSVersion = 6.0.0
+        //      OSShortName=ALTLinux_6.0.0
         //      OSFullName = ALT Linux 6.0.0
         //      OSAlias = UniversalR
         //      OSManufacturer = ALT Linux Ltd
 
         CPPUNIT_ASSERT_EQUAL( string("ALT Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("6.0.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("ALTLinux_6.0.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("ALT Linux 6.0.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("ALT Linux Ltd"), releaseFile["OSManufacturer"] );
@@ -542,12 +576,14 @@ public:
         // Verify our data:
         //      OSName = Fedora
         //      OSVersion = 8.0
+        //      OSShortName=Fedora_8.0
         //      OSFullName = Fedora 8.0
         //      OSAlias = UniversalR
         //      OSManufacturer = Red Hat, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Fedora"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("8.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Fedora_8.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Fedora 8.0") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Red Hat, Inc."), releaseFile["OSManufacturer"] );
