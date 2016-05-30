@@ -1451,11 +1451,11 @@ namespace SCXSystemLib
             while (path.GetFilename().length() > 0)
             {
                 physical_dev = RemoveTailNumberOrOther(physical_dev);
-                if (this->FileExists(physical_dev))
+                path = physical_dev;
+                if (this->FileExists(physical_dev) && path.GetFilename().length() > 0)
                 {
                     return physical_dev;
                 }
-                path = physical_dev;
             }
             return logical_dev;
         }

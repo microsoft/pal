@@ -16,6 +16,7 @@
 #include <scxcorelib/scxfilesystem.h>
 #include <scxcorelib/scxfilepath.h>
 #include <scxcorelib/stringaid.h>
+#include <map>
 
 #if defined(linux) &&                                   \
     ! ( defined(PF_DISTRO_SUSE)   && (PF_MAJOR<=9) ) && \
@@ -49,6 +50,8 @@ class SCXLVMUtilsTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( GetDMSlaves_Ignores_Invalid_SlaveEntries );
     CPPUNIT_TEST( GetDMSlaves_Throws_Up );
     CPPUNIT_TEST( GetDMSlaves_Works );
+    CPPUNIT_TEST( GetDMSlaves_SlavesWithDMEntries_TraversesToDevice );
+    CPPUNIT_TEST( GetDMSlaves_SlavesWithCircularLinks_Throws );
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -1035,6 +1038,141 @@ public:
         }
 
         CPPUNIT_ASSERT_EQUAL(((size_t) 3), index);
+    }
+
+    /**
+     * This class mocks SCXLVMUtilsDepends for testing GetDMSlaves.
+     * Given a map M of strings to vectors of strings, this class simulates the following directory structure
+     * for each entry (X, [Y1,Y2,..Yn]) of M:
+     * /sys/block/X
+     * /sys/block/X/dev  <-- contains one line "253:2"
+     * /sys/block/X/slaves
+     * /sys/block/X/slaves/Y1
+     * /sys/block/X/slaves/Y2
+     * ....
+     * /sys/block/X/slaves/Yn
+     */
+    class TestGetDMSlavesSCXLVMUtilDepends
+        : public SCXSystemLib::SCXLVMUtilsDepends
+    {
+    public:
+        std::map< std::wstring, std::vector<std::wstring> > & m_slaves;
+
+        TestGetDMSlavesSCXLVMUtilDepends(std::map< std::wstring, std::vector< std::wstring > > & slaves) : m_slaves(slaves) { }
+
+        virtual std::vector< SCXCoreLib::SCXFilePath > GetFileSystemEntries(
+            const SCXCoreLib::SCXFilePath               & path,
+            const SCXCoreLib::SCXDirectorySearchOptions  options)
+        {
+            // to avoid getting unused variable warning
+            (void) options;
+            std::wstring slavesExt = L"/slaves/";
+            std::wstring pathStr = path.Get().substr(0, path.Get().length() - slavesExt.length());
+            SCXCoreLib::SCXFilePath blockFile = pathStr;
+
+            std::vector< SCXCoreLib::SCXFilePath > result;
+            std::vector<std::wstring> slaveEntries = m_slaves[blockFile.GetFilename()];
+
+            for (std::vector< std::wstring >::const_iterator iter = slaveEntries.begin(); iter != slaveEntries.end(); iter++)
+            {
+                SCXCoreLib::SCXFilePath slavePath(path);
+
+                slavePath.AppendDirectory(*iter);
+                result.push_back(slavePath);
+            }
+
+            return (result);
+        }
+
+
+        virtual void Stat(
+            const SCXCoreLib::SCXFilePath            & path,
+            SCXCoreLib::SCXFileSystem::SCXStatStruct * pStat)
+        {
+            // warnings as errors, so deal with the unused params
+            (void) path;
+            pStat->st_rdev = makedev(253, 2);
+        }
+
+
+        virtual void ReadAllLinesAsUTF8(
+            const SCXCoreLib::SCXFilePath & source,
+            std::vector< std::wstring >   & lines,
+            SCXCoreLib::SCXStream::NLFs   & nlfs)
+        {
+            // warnings as errors, so deal with the unused params
+            (void) source;
+            (void) nlfs;
+
+            lines.clear();
+            lines.push_back(L"253:2");
+        }
+
+        virtual ~TestGetDMSlavesSCXLVMUtilDepends() { }
+    };
+
+    void GetDMSlaves_SlavesWithDMEntries_TraversesToDevice()
+    {
+        /*
+         * Following directory structure is setup here:
+         * /sys/block/dm-1
+         * /sys/block/dm-1/slaves/dm-2
+         * /sys/block/dm-1/slaves/hda1
+         * /sys/block/dm-2/slaves/dm-3
+         * /sys/block/dm-2/slaves/hda2
+         * /sys/block/dm-3/slaves/hda3
+         */
+        std::map< std::wstring, std::vector<std::wstring> > deviceSlaveMap;
+        deviceSlaveMap[L"dm-1"].push_back(L"dm-2");
+        deviceSlaveMap[L"dm-1"].push_back(L"hda1");
+        deviceSlaveMap[L"dm-2"].push_back(L"dm-3");
+        deviceSlaveMap[L"dm-2"].push_back(L"hda2");
+        deviceSlaveMap[L"dm-3"].push_back(L"hda3");
+
+        std::map< std::wstring, std::vector<std::wstring> > expectedSlaveMap;
+        expectedSlaveMap[L"/dev/dm-1"].push_back(L"/dev/hda1");
+        expectedSlaveMap[L"/dev/dm-1"].push_back(L"/dev/hda2");
+        expectedSlaveMap[L"/dev/dm-1"].push_back(L"/dev/hda3");
+
+        expectedSlaveMap[L"/dev/dm-2"].push_back(L"/dev/hda2");
+        expectedSlaveMap[L"/dev/dm-2"].push_back(L"/dev/hda3");
+
+        expectedSlaveMap[L"/dev/dm-3"].push_back(L"/dev/hda3");
+
+        SCXCoreLib::SCXHandle< SCXSystemLib::SCXLVMUtilsDepends > extDepends(new TestGetDMSlavesSCXLVMUtilDepends(deviceSlaveMap));
+        SCXSystemLib::SCXLVMUtils lvmUtils(extDepends);
+
+        for (std::map< std::wstring, std::vector<std::wstring> >::iterator it = expectedSlaveMap.begin(); it != expectedSlaveMap.end(); ++it)
+        {
+            std::vector< std::wstring > result = lvmUtils.GetDMSlaves(it->first);
+            CPPUNIT_ASSERT_EQUAL(result.size(), it->second.size());
+            for(size_t i=0; i < result.size(); i++)
+            {
+               CPPUNIT_ASSERT(it->second[i] == result[i]);
+            }
+        }
+    }
+
+    void GetDMSlaves_SlavesWithCircularLinks_Throws()
+    {
+        /*
+         * The following negative scenario is being setup here:
+         * /sys/block/dm-1
+         * /sys/block/dm-1/slaves/dm-2
+         * /sys/block/dm-2
+         * /sys/block/dm-2/slaves/dm-3
+         * /sys/block/dm-3
+         * /sys/block/dm-3/slaves/dm-1
+         */
+        std::map< std::wstring, std::vector<std::wstring> > deviceSlaveMap;
+
+        deviceSlaveMap[L"dm-1"].push_back(L"dm-2");
+        deviceSlaveMap[L"dm-2"].push_back(L"dm-3");
+        deviceSlaveMap[L"dm-3"].push_back(L"dm-1");
+
+        SCXCoreLib::SCXHandle< SCXSystemLib::SCXLVMUtilsDepends > extDepends(new TestGetDMSlavesSCXLVMUtilDepends(deviceSlaveMap));
+        SCXSystemLib::SCXLVMUtils lvmUtils(extDepends);
+        CPPUNIT_ASSERT_THROW(lvmUtils.GetDMSlaves(L"/dev/dm-1"), SCXSystemLib::SCXBadLVMDeviceException);
     }
 };
 

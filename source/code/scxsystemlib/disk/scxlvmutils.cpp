@@ -16,6 +16,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <stack>
 
 #include <scxsystemlib/scxlvmutils.h>
 
@@ -25,6 +26,7 @@ namespace SCXSystemLib {
     SCXCoreLib::LogSuppressor SCXLVMUtils::m_errorSuppressor(SCXCoreLib::eError, SCXCoreLib::eTrace);
     SCXCoreLib::LogSuppressor SCXLVMUtils::m_warningSuppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
     SCXCoreLib::LogSuppressor SCXLVMUtils::m_infoSuppressor(SCXCoreLib::eInfo, SCXCoreLib::eTrace);
+    const unsigned int maxLoopCount = 1000;
 
     /**
        Checks if the given path is in /dev/mapper.
@@ -204,13 +206,43 @@ namespace SCXSystemLib {
         return result;
     }
 
+    static inline std::wstring GetSysfsPath(const std::wstring& dmDeviceName)
+    {
+        // First look in Sysfs to find out what partitions the dm device
+        // maps onto.  This is done by listing the slaves entries for the
+        // given dm device.
+        //
+        // Note: The entries in slaves are links and it is the link name
+        //       that is important for this, *not* the resolved link name.
+        std::wstringstream sysfsPath;
+        sysfsPath << L"/sys/block/" << dmDeviceName << L"/slaves/";
+        return sysfsPath.str();
+    }
+
+    static inline bool PushIfDMSlave(const SCXCoreLib::SCXFilePath & slave, std::stack<std::wstring> &dmDeviceStack)
+    {
+       if (!slave.Get().empty() && *(slave.Get().rbegin()) == SCXCoreLib::SCXFilePath::GetFolderSeparator())
+       {
+           // A precautionary check - avoid any possible entries in the slaves folder that are not links to  directories
+           SCXCoreLib::SCXFilePath slaveName = slave.Get().substr(0, slave.Get().length() - 1);
+           if(SCXCoreLib::StrIsPrefix(slaveName.GetFilename(), L"dm-"))
+           {
+               // add only those files which have the dm- prefix
+               dmDeviceStack.push(slaveName.GetFilename());
+               return true;
+           }
+       }
+
+       return false;
+    }
+
     /**
        Get the slave devices that contain the given devicemapper (dm) device.
 
        \param[in] dmDevice the path to a dm device.
 
        \return This method will return a vector of paths to the devices that
-               contain the given dm device.  If an error occurs the vecore is
+               contain the given dm device.  If an error occurs the vector is
                empty.
 
        \throws SCXFileSystemException if the slaves associated with this
@@ -225,60 +257,85 @@ namespace SCXSystemLib {
     std::vector< std::wstring > SCXLVMUtils::GetDMSlaves(const std::wstring& dmDevice)
     {
         std::vector< std::wstring > result;
-
         SCXCoreLib::SCXLogHandle log = SCXCoreLib::SCXLogHandleFactory::GetLogHandle(L"scx.core.common.pal.system.disk.scxlvmutils");
         std::wstringstream       out;
 
-        // First look in Sysfs to find out what partitions the dm device
-        // maps onto.  This is done by listing the slaves entries for the
-        // given dm device.
-        //
-        // Note: The entries in slaves are links and it is the link name
-        //       that is important for this, *not* the resolved link name.
-        std::wstringstream sysfsPath;
-
-        sysfsPath << L"/sys/block/" << ((SCXCoreLib::SCXFilePath) dmDevice).GetFilename() << L"/slaves/";
-
+        // At times, the entries in '/sys/block/<dm-device>/slaves/' point to another dm-device.
+        // in which case, we must navigate to the slaves of that dm device.
+        // we use a non-recursive depth-first traversal.
+        std::stack<std::wstring> dmDeviceStack;
+        dmDeviceStack.push(((SCXCoreLib::SCXFilePath) dmDevice).GetFilename());
         std::vector< SCXCoreLib::SCXFilePath > slaves;
-        try
+        unsigned int loopCount = 0;
+
+        while(!dmDeviceStack.empty())
         {
-            slaves = m_extDepends->GetFileSystemEntries(sysfsPath.str());
-        }
-        catch (SCXCoreLib::SCXException & e)
-        {
-#if defined(linux) &&                                          \
-           ( ( defined(PF_DISTRO_SUSE)   && (PF_MAJOR<=9) ) || \
-             ( defined(PF_DISTRO_REDHAT) && (PF_MAJOR<=4) ) )
-            // LVM support on RHEL4 and SLES9 is limited by things like the
-            // distribution update, what packages are installed, and even the
-            // kernel version.  There are too many variables to try to determine
-            // whether or not full LVM support is expected and this is an error
-            // or when LVM support is minimal and this can be ignored.  In most
-            // cases, this can be ignored, and the warning is logged for the
-            // remaining few.
-            out.str(L"");
-            out << L"Support for LVM on "
+            loopCount++;
+            try
+            {
+                std::wstring currentDeviceName = dmDeviceStack.top();
+                dmDeviceStack.pop();
+                std::vector< SCXCoreLib::SCXFilePath > slaveEntries = m_extDepends->GetFileSystemEntries(GetSysfsPath(currentDeviceName));
+                for( std::vector< SCXCoreLib::SCXFilePath >::const_iterator iter = slaveEntries.begin(); iter != slaveEntries.end(); ++iter)
+                {
+                    if(!PushIfDMSlave(*iter, dmDeviceStack))
+                    {
+                        slaves.push_back(*iter);
+                    }
+                }
+                if (loopCount > maxLoopCount)
+                {
+                    // We assume that the links form an acyclic graph.
+                    // But we still need to be wary of infinite loops - perhaps we are on a corrupted file system, or, for some other reason
+                    // we are in a circular graph.
+                    //
+                    // we bail out if the loop count reaches maxLoopCount.
+                    //
+                    // Note: It is assumed that a cycle of links  will be a very rare scenario. Hence, we are using this "low-tech" way of identifying
+                    // cycles instead of relying on more traditional approaches.
+                    // This way the vast majority of positive scenarios will only pay the price of one integer increment and one comparison.
+                    static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTrace);
+                    out.str(L"");
+                    out << L"Exceeded " << maxLoopCount << L" while evaluating device " << dmDevice;
+                    SCX_LOG(log,suppressor.GetSeverity(out.str()), out.str());
+                    slaves.clear();
+                    break;
+                }
+            }
+            catch (SCXCoreLib::SCXException & e)
+            {
+#if defined(linux) &&                                   \
+    ( ( defined(PF_DISTRO_SUSE)   && (PF_MAJOR<=9) ) || \
+      ( defined(PF_DISTRO_REDHAT) && (PF_MAJOR<=4) ) )
+                // LVM support on RHEL4 and SLES9 is limited by things like the
+                // distribution update, what packages are installed, and even the
+                // kernel version.  There are too many variables to try to determine
+                // whether or not full LVM support is expected and this is an error
+                // or when LVM support is minimal and this can be ignored.  In most
+                // cases, this can be ignored, and the warning is logged for the
+                // remaining few.
+                out.str(L"");
+                out << L"Support for LVM on "
 #   if defined(PF_DISTRO_SUSE)
-                << L"SuSE Linux Enterprise Server 9 "
+                    << L"SuSE Linux Enterprise Server 9 "
 #   else
-                << L"Red Hat Enterprise Linux 4 "
+                    << L"Red Hat Enterprise Linux 4 "
 #   endif
-                << L"is limited to logical disk metrics.";
+                    << L"is limited to logical disk metrics.";
 
-            SCX_LOG(log, m_warningSuppressor.GetSeverity(L"SCXLVMUtils::LegacyLvmWarnOneTime"), out.str());
+                SCX_LOG(log, m_warningSuppressor.GetSeverity(L"SCXLVMUtils::LegacyLvmWarnOneTime"), out.str());
 
-            out.str(L"");
-            out << L"Missing LVM support in SysFS; the path " << sysfsPath.str() << L" does not exist.";
-            SCX_LOGHYSTERICAL(log, out.str());
+                out.str(L"");
+                out << L"Missing LVM support in SysFS; the path " << sysfsPath.str() << L" does not exist.";
+                SCX_LOGHYSTERICAL(log, out.str());
 
-            return result;
+                return result;
 #endif
-
-            out.str(L"");
-            out << L"An exception occurred while getting the slave devices for \"" << dmDevice << L"\": " << e.What();
-            SCX_LOG(log, m_errorSuppressor.GetSeverity(out.str()), out.str());
-
-            throw;
+                out.str(L"");
+                out << L"An exception occurred while getting the slave devices for \"" << dmDevice << L"\": " << e.What();
+                SCX_LOG(log, m_errorSuppressor.GetSeverity(out.str()), out.str());
+                throw;
+            }
         }
 
         if (slaves.size() == 0)
