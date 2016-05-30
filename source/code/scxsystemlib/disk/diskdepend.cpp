@@ -663,7 +663,7 @@ namespace SCXSystemLib
             L"dev",
 #endif
 #if defined(linux)
-            L"devtmpfs",
+            L"devtmpfs", L"efivarfs", L"fuse.lxcfs",
 #endif
             L"eventpollfs",
             L"fd", L"ffs", L"fifofs", L"fusectl", L"futexfs",
