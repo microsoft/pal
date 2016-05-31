@@ -11,13 +11,19 @@
 
 */
 /*----------------------------------------------------------------------------*/
-#include <cppunit/extensions/HelperMacros.h>
+
 #include <scxcorelib/scxcmn.h>
 #include <scxcorelib/scxfilesystem.h>
 #include <scxcorelib/scxfilepath.h>
-#include <scxcorelib/scxunit.h>
 #include <scxcorelib/stringaid.h>
+
+#if defined(linux) &&                                   \
+    ! ( defined(PF_DISTRO_SUSE)   && (PF_MAJOR<=9) ) && \
+    ! ( defined(PF_DISTRO_REDHAT) && (PF_MAJOR<=4) )
+
 #include <scxsystemlib/scxlvmutils.h>
+
+#include <testutils/scxunit.h>
 
 
 class SCXLVMUtilsTest : public CPPUNIT_NS::TestFixture
@@ -26,10 +32,6 @@ class SCXLVMUtilsTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE( SCXLVMUtilsTest );
 
     CPPUNIT_TEST( CanDetectDeviceMapperDevices );
-
-#if defined(linux) &&                                   \
-    ! ( defined(PF_DISTRO_SUSE)   && (PF_MAJOR<=9) ) && \
-    ! ( defined(PF_DISTRO_REDHAT) && (PF_MAJOR<=4) )
 
     // The majority of the LVM unit test is ignored on RHEL4 and SLES9
     CPPUNIT_TEST( GetDMDevice_Returns_Empty_String_When_Input_Not_LVM );
@@ -47,8 +49,6 @@ class SCXLVMUtilsTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( GetDMSlaves_Ignores_Invalid_SlaveEntries );
     CPPUNIT_TEST( GetDMSlaves_Throws_Up );
     CPPUNIT_TEST( GetDMSlaves_Works );
-
-#endif
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -231,11 +231,12 @@ public:
         // return with an empty string.
 
         SCXCoreLib::SCXHandle< SCXSystemLib::SCXLVMUtilsDepends > extDepends(new SCXLVMUtilsDependsNotImplemented());
-        SCXSystemLib::SCXLVMUtils                                 lvmUtils(extDepends);
+        SCXSystemLib::SCXLVMUtils lvmUtils(extDepends);
 
         CPPUNIT_ASSERT(lvmUtils.GetDMDevice(L"/dev/hda").empty());
         CPPUNIT_ASSERT(lvmUtils.GetDMDevice(L"/dev/hdb2").empty());
-        CPPUNIT_ASSERT(lvmUtils.GetDMDevice(L"/dev/dm-0").empty());
+        // GetDMDevice() always immediately returns dm-* devices
+        CPPUNIT_ASSERT(!lvmUtils.GetDMDevice(L"/dev/dm-0").empty());
         CPPUNIT_ASSERT(lvmUtils.GetDMDevice(L"/dev/mapper").empty());
         CPPUNIT_ASSERT(lvmUtils.GetDMDevice(L"/proc").empty());
     }
@@ -1038,3 +1039,5 @@ public:
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION( SCXLVMUtilsTest );
+
+#endif // #if defined(linux) && ! SUSE_9 && ! REDHAT_4

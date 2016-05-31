@@ -30,6 +30,7 @@ POSIX_UNITTESTS_SYSTEM_SRCFILES += \
 	$(SYSTEMLIB_UNITTEST_ROOT)/disk/diskrights_test.cpp \
 	$(SYSTEMLIB_UNITTEST_ROOT)/disk/raidpal_test.cpp \
 	$(SYSTEMLIB_UNITTEST_ROOT)/disk/lvmtab_test.cpp \
+	$(SYSTEMLIB_UNITTEST_ROOT)/disk/scxlvmutils_test.cpp \
 	$(SYSTEMLIB_UNITTEST_ROOT)/disk/statisticalphysicaldiskpal_test.cpp \
 	$(SYSTEMLIB_UNITTEST_ROOT)/disk/staticphysicaldiskpal_test.cpp \
 	$(SYSTEMLIB_UNITTEST_ROOT)/disk/staticlogicaldiskpal_test.cpp \
