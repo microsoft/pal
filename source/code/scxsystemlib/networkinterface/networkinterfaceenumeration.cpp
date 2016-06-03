@@ -64,6 +64,8 @@ NetworkInterfaceEnumeration::~NetworkInterfaceEnumeration() {
 /*----------------------------------------------------------------------------*/
 //! Implementation of the Init method of the entity framework.
 void NetworkInterfaceEnumeration::Init() {
+    SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::Init Calling UpdateEnumeration");
+
     UpdateEnumeration();
 }
 
@@ -116,30 +118,39 @@ void NetworkInterfaceEnumeration::UpdateInstances() {
 /*----------------------------------------------------------------------------*/
 //! Make the enumeration correspond to the current state of the system
 void NetworkInterfaceEnumeration::UpdateEnumeration() {
+    SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration entry");
+
+    SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration FindAll");
     vector<NetworkInterfaceInfo> latestInterfaces = NetworkInterfaceInfo::FindAll(m_deps, m_includeNonRunning);
     typedef map<wstring, size_t> IndexByStrMap;
     IndexByStrMap newInterfaceById;
 
     // Prepare an index of new instances by their id
+    SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration Preparing indexes");
     for (size_t nr = 0; nr < latestInterfaces.size(); nr++) {
         newInterfaceById.insert(IndexByStrMap::value_type(NetworkInterfaceInstance(latestInterfaces[nr]).GetId(), nr));
     }    
     
+    SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration Beginning loop");
     for (size_t nr = Size();  nr > 0; nr--) {
+        SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration In loop: find");
         IndexByStrMap::iterator stillExistingInterfacePos = newInterfaceById.find(GetInstance(nr-1)->GetId());
         if (stillExistingInterfacePos != newInterfaceById.end()) {                                    
             // Update instances that still exists
+            SCX_LOGTRACE(m_log, StrAppend(L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration Updating Interface ", GetInstance(nr-1)->GetId()));
             GetInstance(nr-1)->Update(latestInterfaces[stillExistingInterfacePos->second]);
 
             // Remove instances, that are not new, from index of new instances
             newInterfaceById.erase(stillExistingInterfacePos);
         } else { 
             // Remove instances, that no longer exists, from the enumeration
+            SCX_LOGTRACE(m_log, StrAppend(L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration Removing Interface ", GetInstance(nr-1)->GetId()));
             RemoveInstance(Begin() + nr - 1);
         }
     }
     
     // Add new instances to the enumeration
+    SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateEnumeration Adding new instances ");
     for (IndexByStrMap::iterator iter = newInterfaceById.begin(); iter != newInterfaceById.end(); iter++) {
         const NetworkInterfaceInfo &intf = latestInterfaces[iter->second];
         bool knownState = intf.IsKnownIfUp() && intf.IsKnownIfRunning();

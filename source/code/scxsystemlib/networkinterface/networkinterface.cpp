@@ -882,7 +882,10 @@ void NetworkInterfaceInfo::ParseMacAddrAix(SCXCoreLib::SCXHandle<NetworkInterfac
     memset(pMacAddr, '\0', 6);
     bool succ = false;
 
+    SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::ParseMacAddrAix entry");
+
     // First, let's get the size of the results:
+    SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::ParseMacAddrAix getkerninfo KINFO_NDD");
     size = deps->getkerninfo(KINFO_NDD, 0, 0, 0);
     if (size <= 0)
     {
@@ -894,10 +897,12 @@ void NetworkInterfaceInfo::ParseMacAddrAix(SCXCoreLib::SCXHandle<NetworkInterfac
     nddp = new struct kinfo_ndd[nrec];
     NDDMAP::const_iterator pos = m_mapNWAdaptTypeIdToNDDType.end();
 
+    SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::ParseMacAddrAix getkerninfo KINFO_NDD for size");
     if (deps->getkerninfo(KINFO_NDD, (char *)nddp, &size, 0) >= 0)
     {
         // We have successfully retrieved the info
 
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::ParseMacAddrAix Parsing results");
         for (i=0; i<nrec; i++)
         {
             wstring thisName(StrFromUTF8(nddp[i].ndd_name));
@@ -926,6 +931,7 @@ void NetworkInterfaceInfo::ParseMacAddrAix(SCXCoreLib::SCXHandle<NetworkInterfac
 
         if (succ)
         {
+            SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::ParseMacAddrAix Calling FormatMacAddress");
             m_macAddress = FormatMacAddress((unsigned int)(unsigned char)pMacAddr[0],
                                             (unsigned int)(unsigned char)pMacAddr[1],
                                             (unsigned int)(unsigned char)pMacAddr[2],
@@ -946,7 +952,6 @@ void NetworkInterfaceInfo::ParseMacAddrAix(SCXCoreLib::SCXHandle<NetworkInterfac
     }
 
     return;
-
 }
 
 #endif
@@ -1425,6 +1430,8 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
      
     void NetworkInterfaceInfo::Get_NDD_STAT(SCXHandle<NetworkInterfaceDependencies> deps)
     {
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT entry");
+
        /* This function provides the support for those drivers which report 
         * speed related stats as part of configuration parameters.
         * (defined in header files: /usr/include/sys/cdli_*.h) 
@@ -1485,6 +1492,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         struct sockaddr_ndd_8022 sa;
         int s;
 
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT Connecting to socket");
         s = socket(AF_NDD, SOCK_DGRAM, 0);
         if (s < 0)
         {
@@ -1497,6 +1505,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         }
 
         // Close the resource through a helper class, should an exception happens. 
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT Setting up AutoClose");
         AutoClose _fd(m_log, s);
 
         sa.sndd_8022_family = AF_NDD;
@@ -1505,6 +1514,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         sa.sndd_8022_filterlen = sizeof(ns_8022_t);
         strcpy((char *)sa.sndd_8022_nddname, SCXCoreLib::StrToUTF8(m_name).c_str());
 
+        SCX_LOGTRACE(m_log, wstring(L"NetworkInterfaceInfo::Get_NDD_STAT Binding to socket") + m_name);
         if (deps->bind(s, (struct sockaddr *)&sa, sizeof(struct sockaddr_ndd_8022)) < 0) 
         {
             // This is to log file name and line number along with the rest of error message.
@@ -1514,6 +1524,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         }
 
         int on = 1;
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT Setting option SO_REUSEADDR");
         if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
         {
             SCXCoreLib::SCXErrnoException e(L"setsockopt() failed. errno: ", errno, SCXSRCLOCATION);
@@ -1523,12 +1534,14 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
 
         // Populate the ioctl argument accordingly. 
         // The ioctl argument for the stat related commands must be struct nddctl.
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT Populating ioctl");
         nddctl ioctl_arg;
         ioctl_arg.nddctl_buflen = sizeof(ARG);
         ioctl_arg.nddctl_buf = (caddr_t)&arg;
 
         // Issue the ioctl command to get the device extended stats.
         // (http://pic.dhe.ibm.com/infocenter/aix/v6r1/index.jsp?topic=%2Fcom.ibm.aix.kernelext%2Fdoc%2Fkernextc%2Fndd_get_all_stats_devctrlop.htm)
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT Issuing ioctl");
         if (deps->ioctl(s,NDD_GET_ALL_STATS,&ioctl_arg) < 0) 
         {
             SCXCoreLib::SCXErrnoException e(L"ioctl(s,NDD_GET_ALL_STATS,&arg) failed. errno: ", errno, SCXSRCLOCATION);
@@ -1540,6 +1553,8 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         m_maxSpeed = 0;
         unsigned int device_type = arg.kent.ent_gen_stats.device_type;
         scxulong auto_speed = 0; // meida_speed, speed_negotiated, or link_negotiated.
+
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT At device switch");
 
         // Find out which driver we are dealing with. 
         // If supported then retrieve the intended info.
@@ -1684,6 +1699,8 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
                 }
                 break;
         }
+
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::Get_NDD_STAT After device switch");
 
         m_knownAttributesMask |= eAutoSense;
 
@@ -1970,6 +1987,9 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
 //! \returns    Information on the network instances
 std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<NetworkInterfaceDependencies> deps,
                                                                 bool includeNonRunning /*= false*/) {
+    SCXCoreLib::SCXLogHandle m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.networkinterface"));
+
+    SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll entry");
     std::vector<NetworkInterfaceInfo> interfaces;
 #if defined(linux)
     FindAllInFile(interfaces, deps);
@@ -1978,28 +1998,36 @@ std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<Networ
 #elif defined(hpux)
     FindAllInDLPI(interfaces, deps);
 #elif defined(aix)
+    SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Calling FindAllUsingPerfStat");
     FindAllUsingPerfStat(interfaces, deps);
 #else
 #error "Platform not supported"
 #endif
+    SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Getting attributes for instance");
     FileDescriptor fd = socket(AF_INET, SOCK_DGRAM, 0);
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
     for (size_t nr = 0; nr < interfaces.size(); nr++) {
         NetworkInterfaceInfo &instance = interfaces[nr];
         strcpy(ifr.ifr_name, StrToUTF8(instance.m_name).c_str());
+        SCX_LOGTRACE(m_log, wstring(L"NetworkInterfaceInfo::FindAll working on interface ") + instance.m_name);
+
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Attribute SIOCGIFADDR");
         if (deps->ioctl(fd, SIOCGIFADDR, &ifr) >= 0) {
             instance.m_ipAddress = ToString(ifr.ifr_addr);
             instance.m_knownAttributesMask |= eIPAddress;
         }
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Attribute SIOCGIFNETMASK");
         if (deps->ioctl(fd, SIOCGIFNETMASK, &ifr) >= 0) {
             instance.m_netmask = ToString(ifr.ifr_addr);
             instance.m_knownAttributesMask |= eNetmask;
         }
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Attribute SIOCGIFBRDADDR");
         if (deps->ioctl(fd, SIOCGIFBRDADDR, &ifr) >= 0) {
             instance.m_broadcastAddress = ToString(ifr.ifr_addr);
             instance.m_knownAttributesMask |= eBroadcastAddress;
         }
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Attribute SIOCGIFMTU");
         if (deps->ioctl(fd, SIOCGIFMTU, &ifr) >=0)
         {
 #if defined(hpux) && PF_MAJOR == 11 && PF_MINOR <= 23 || defined(sun) && PF_MAJOR == 5 && PF_MINOR <= 10
@@ -2010,6 +2038,7 @@ std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<Networ
 #endif
             instance.m_knownAttributesMask |= eMTU;
         }
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Attribute SIOCGIFFLAGS");
         if (deps->ioctl(fd, SIOCGIFFLAGS, &ifr) >= 0) {
             instance.m_up = (ifr.ifr_flags & IFF_UP) != 0;
             instance.m_running = (ifr.ifr_flags & IFF_RUNNING) != 0;
@@ -2033,6 +2062,7 @@ std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<Networ
         instance.ParseIndex(fd, deps);
 #endif
 
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll ParseIPv6Addr");
         instance.ParseIPv6Addr(deps);
 
 #if defined(sun)
@@ -2041,7 +2071,9 @@ std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<Networ
 #endif
 
 #if defined(aix)
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Get_NDD_STAT");
         instance.Get_NDD_STAT(deps);
+        SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll ParseMacAddrAix");
         instance.ParseMacAddrAix(deps);
 #endif
 
@@ -2057,6 +2089,7 @@ std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<Networ
     }
     close(fd);
 
+    SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Setting up result list");
     std::vector<NetworkInterfaceInfo> resultList;
     for (size_t nr = 0; nr < interfaces.size(); nr++) {
         NetworkInterfaceInfo &instance = interfaces[nr];
@@ -2116,7 +2149,7 @@ NetworkInterfaceInfo::NetworkInterfaceInfo(const wstring &name, unsigned knownAt
           m_deps(deps)
 {
     init();
-    m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"NetworkInterfaceInfo"));
+    m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.networkinterface"));
 }
 
 
@@ -2132,7 +2165,7 @@ NetworkInterfaceInfo::NetworkInterfaceInfo(SCXHandle<NetworkInterfaceDependencie
     m_deps(deps)
 {
     init();
-    m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"NetworkInterfaceInfo"));
+    m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.networkinterface"));
 }
 
 //! init some private members
