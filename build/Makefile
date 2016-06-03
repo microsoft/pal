@@ -7,6 +7,7 @@
 
 # Set up architecture and Build Root Directory
 # PF (i.e. PlatForm) is either linux, solaris
+SHELL=/bin/bash
 PWD:=$(shell pwd)
 SCX_BRD=$(subst /build,,$(PWD))
 PF_POSIX=true
