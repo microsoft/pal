@@ -22,9 +22,7 @@
 
 namespace SCXCoreLib
 {
-    template<> SCXHandle<SCXLogHandleFactory> SCXSingleton<SCXLogHandleFactory>::s_instance (0);
-    template<> SCXHandle<SCXThreadLockHandle> SCXSingleton<SCXLogHandleFactory>::s_lockHandle (
-        new SCXThreadLockHandle(ThreadLockHandleGet (true)) );
+    SCXSingleton_Allocate(SCXLogHandleFactory);
 
 #if !defined(DISABLE_WIN_UNSUPPORTED)  
     /*----------------------------------------------------------------------------*/

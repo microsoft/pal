@@ -75,5 +75,16 @@ namespace SCXCoreLib
     };
 }
 
+// Define some macros to make management of Singletons easier
+
+#define SCXSingleton_Define(SName) \
+    template<> SCXCoreLib::SCXHandle<SName> SCXCoreLib::SCXSingleton<SName>::s_instance; \
+    template<> SCXCoreLib::SCXHandle<SCXCoreLib::SCXThreadLockHandle> SCXCoreLib::SCXSingleton<SName>::s_lockHandle
+
+#define SCXSingleton_Allocate(SName) \
+    template<> SCXCoreLib::SCXHandle<SName> SCXCoreLib::SCXSingleton<SName>::s_instance (0); \
+    template<> SCXCoreLib::SCXHandle<SCXCoreLib::SCXThreadLockHandle> SCXCoreLib::SCXSingleton<SName>::s_lockHandle ( \
+        new SCXCoreLib::SCXThreadLockHandle(SCXCoreLib::ThreadLockHandleGet (true)) )
+
 #endif /* SCXSINGLETON_H */
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/

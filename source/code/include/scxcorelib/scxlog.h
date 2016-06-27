@@ -248,8 +248,7 @@ namespace SCXCoreLib
         SCXHandle<SCXLogConfiguratorIf> m_LogConfigurator; //!< Handle to log configurator.
     };
 
-    template<> SCXHandle<SCXLogHandleFactory> SCXSingleton<SCXLogHandleFactory>::s_instance;
-    template<> SCXHandle<SCXThreadLockHandle> SCXSingleton<SCXLogHandleFactory>::s_lockHandle;
+    SCXSingleton_Define(SCXLogHandleFactory);
 }
 
 #include <scxcorelib/scxsingleton-defs.h>
