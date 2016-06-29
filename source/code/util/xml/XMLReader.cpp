@@ -1,6 +1,6 @@
 //******************************************************************************
 //
-//  Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+//  Copyright (c) Microsoft.  All rights reserved.
 //
 //  File: XMLReader.cpp
 //
@@ -29,24 +29,65 @@ using namespace SCX::Util::Xml;
 **
 **==============================================================================
 */
-static char c_LessThan    = '<';
-static char c_GreaterThan = '>';
-static char c_EqualTo     = '=';
-static char c_Ampersand   = '&';
-static char c_PoundSign   = '#';
-static char c_Colon       = ':';
-static char c_SemiColon   = ';';
-static char c_x           = 'x';
-static char c_NewLine     = '\n';
-static char c_Apos        = '\'';
-static char c_Quote       = '"';
-static char c_Question    = '?';
-static char c_Slash       = '/';
-static char c_Bang        = '!';
-static char c_Dash        = '-';
-static char c_NullChar    = '\0';
+static const Utf8Char u8_LessThan    = '<';
+static const Utf8Char u8_GreaterThan = '>';
+static const Utf8Char u8_EqualTo     = '=';
+static const Utf8Char u8_Ampersand   = '&';
+static const Utf8Char u8_PoundSign   = '#';
+static const Utf8Char u8_Colon       = ':';
+static const Utf8Char u8_SemiColon   = ';';
+static const Utf8Char u8_NewLine     = '\n';
+static const Utf8Char u8_Apos        = '\'';
+static const Utf8Char u8_Quote       = '"';
+static const Utf8Char u8_Question    = '?';
+static const Utf8Char u8_Slash       = '/';
+static const Utf8Char u8_Bang        = '!';
+static const Utf8Char u8_Dash        = '-';
+static const Utf8Char u8_NullChar    = '\0';
+
 static Utf8String c_CDATA("[CDATA[");
 static Utf8String c_DOCTYPE("DOCTYPE");
+
+static const Utf8String open_bracket("<");
+static const Utf8String open_with_slash("</");
+static const Utf8String close_bracket_with_term("/>");
+static const Utf8String close_bracket_with_question("?>");
+static const Utf8String close_bracket(">");
+static const Utf8String u8_space(" ");
+static const Utf8String equals_with_quote("=\"");
+static const Utf8String ending_quote("\"");
+static const Utf8String crlf("\r\n");
+static const Utf8String empty_string("");
+static const Utf8Char single_question('?');
+static const Utf8Char u8_semicolon(';');
+static const Utf8Char u8_a('a');
+static const Utf8Char u8_b('b');
+static const Utf8Char u8_c('c');
+static const Utf8Char u8_d('d');
+static const Utf8Char u8_e('e');
+static const Utf8Char u8_f('f');
+static const Utf8Char u8_g('g');
+static const Utf8Char u8_h('h');
+static const Utf8Char u8_i('i');
+static const Utf8Char u8_j('j');
+static const Utf8Char u8_k('k');
+static const Utf8Char u8_l('l');
+static const Utf8Char u8_m('m');
+static const Utf8Char u8_n('n');
+static const Utf8Char u8_o('o');
+static const Utf8Char u8_p('p');
+static const Utf8Char u8_q('q');
+static const Utf8Char u8_r('r');
+static const Utf8Char u8_s('s');
+static const Utf8Char u8_t('t');
+static const Utf8Char u8_u('u');
+static const Utf8Char u8_v('v');
+static const Utf8Char u8_w('w');
+static const Utf8Char u8_x('x');
+static const Utf8Char u8_y('y');
+static const Utf8Char u8_z('z');
+static const Utf8Char u8_quote('\"');
+static const Utf8Char u8_slash('/');
 
 /*
 **==============================================================================
@@ -221,7 +262,7 @@ void XMLReader::_SkipSpaces(Utf8String& /*unused*/)
     int n = 0;
     while (_IsSpace(*m_CharStartPos))
     { 
-        if (*m_CharStartPos == c_NewLine)
+        if (*m_CharStartPos == u8_NewLine)
             m_Line++; 
         m_CharStartPos++;
         ++m_CharPos;
@@ -257,39 +298,39 @@ void XMLReader::_ToEntityRef(Utf8String& /*unused*/, char& ch)
     Utf8Char secondChar = static_cast<Utf8Char>(*m_CharStartPos++);
     Utf8Char thirdChar  = static_cast<Utf8Char>(*m_CharStartPos++);
     m_CharPos += 3;
-    if (firstChar == 'l' && secondChar == 't' && thirdChar == c_SemiColon)
+    if (firstChar == u8_l && secondChar == u8_t && thirdChar == u8_SemiColon)
     {
-        ch = c_LessThan;
+        ch = u8_LessThan;
         return;
     }
 
-    if (firstChar == 'g' && secondChar == 't' && thirdChar == c_SemiColon)
+    if (firstChar == u8_g && secondChar == u8_t && thirdChar == u8_SemiColon)
     {
-        ch = c_GreaterThan;
+        ch = u8_GreaterThan;
         return;
     }
 
     Utf8Char fourthChar = static_cast<Utf8Char>(*m_CharStartPos++);
     m_CharPos++;
-    if (firstChar == 'a' && secondChar == 'm' && thirdChar == 'p' && fourthChar == c_SemiColon)
+    if (firstChar == u8_a && secondChar == u8_m && thirdChar == u8_p && fourthChar == u8_SemiColon)
     {
-        ch = c_Ampersand;
+        ch = u8_Ampersand;
         return;
     }
 
     Utf8Char fifthChar = static_cast<Utf8Char>(*m_CharStartPos++);
     m_CharPos++;
-    if (firstChar == 'q' && secondChar == 'u' && thirdChar == 'o' && 
-        fourthChar == 't' && fifthChar == c_SemiColon)
+    if (firstChar == u8_q && secondChar == u8_u && thirdChar == u8_o && 
+        fourthChar == u8_t && fifthChar == u8_SemiColon)
     {
-        ch = c_Quote;
+        ch = u8_Quote;
         return;
     }
 
-    if (firstChar == 'a' && secondChar == 'p' && thirdChar == 'o' && 
-        fourthChar == 's' && fifthChar == c_SemiColon)
+    if (firstChar == u8_a && secondChar == u8_p && thirdChar == u8_o && 
+        fourthChar == u8_s && fifthChar == u8_SemiColon)
     {
-        ch = c_Apos;
+        ch = u8_Apos;
         return;
     }
     XML_Raise("bad entity reference");
@@ -315,7 +356,7 @@ void XMLReader::_ToCharRef(Utf8String& /*unused*/, char& ch)
     size_t i = 1;
     m_CharStartPos++;
     m_CharPos++;
-    if (*m_CharStartPos == c_x)
+    if (*m_CharStartPos == u8_x)
     {
         // This is hex
         isHex = true;
@@ -329,7 +370,7 @@ void XMLReader::_ToCharRef(Utf8String& /*unused*/, char& ch)
     // Move the pointer to the next 6 (8-2) characters looking for the end ';'
     for (; i < 8 ; ++i)
     {
-        if (*m_CharStartPos == c_SemiColon)
+        if (*m_CharStartPos == u8_SemiColon)
         {
             foundSemiColon = true;
             break;
@@ -349,7 +390,7 @@ void XMLReader::_ToCharRef(Utf8String& /*unused*/, char& ch)
         }
 
         m_CharStartPos++;
-        m_CharPos++;
+         m_CharPos++;
     }
 
     tempString += '\0';
@@ -406,7 +447,7 @@ void XMLReader::_ToRef(Utf8String& p, char& ch)
      *     &amp;
      *     &lt;
      */
-    if (*m_CharStartPos == c_PoundSign)
+    if (*m_CharStartPos == u8_PoundSign)
     {
         _ToCharRef(p, ch);
     }
@@ -459,7 +500,7 @@ Utf8String XMLReader::_ReduceAttrValue(/*Utf8String& pInOut,*/ Utf8String::Char 
             codePoint = m_CharStartPos->GetCodePoint();
         }
 
-        if (*m_CharStartPos != c_NewLine)
+        if (*m_CharStartPos != u8_NewLine)
         {
             break;
         }
@@ -475,7 +516,7 @@ Utf8String XMLReader::_ReduceAttrValue(/*Utf8String& pInOut,*/ Utf8String::Char 
     // Now that we know where the string end is, we have to run through the string
     // a character at a timne and do string expansion/contraction.
     int n = 0;
-    while (m_CharPos <= m_InternalString.Size() && *m_CharStartPos != '\"')
+    while (m_CharPos <= m_InternalString.Size() && *m_CharStartPos != u8_quote) 
     {
         if (m_CharPos == m_InternalString.Size())
         {
@@ -490,9 +531,9 @@ Utf8String XMLReader::_ReduceAttrValue(/*Utf8String& pInOut,*/ Utf8String::Char 
         }
 
         // If this was a reference, do the replace
-        if (*m_CharStartPos == c_Ampersand)
+        if (*m_CharStartPos == u8_Ampersand)
         {
-            char c = c_NullChar;
+            char c = u8_NullChar;
             
             m_CharStartPos++;
             m_CharPos++;
@@ -502,7 +543,7 @@ Utf8String XMLReader::_ReduceAttrValue(/*Utf8String& pInOut,*/ Utf8String::Char 
             if (m_Status != 0)
             {
                 // Propagate error  by returning NULL
-                return Utf8String("");
+                return empty_string;
             }
 
             // Put the converted character into the output string
@@ -511,7 +552,7 @@ Utf8String XMLReader::_ReduceAttrValue(/*Utf8String& pInOut,*/ Utf8String::Char 
         else
         {
             // Count cones
-            if (*m_CharStartPos == c_NewLine)
+            if (*m_CharStartPos == u8_NewLine)
                 n++;
 
             // No conversion -- add to the output
@@ -552,9 +593,9 @@ Utf8String XMLReader::_ReduceCharData( void )
     size_t index = 0;
     Utf8String end("");
 
-    if (m_InternalString.Size()  < (m_CharPos + 1) || *m_CharStartPos == '\0')
+    if (m_InternalString.Size()  < (m_CharPos + 1) || *m_CharStartPos == u8_NullChar)
     {
-        return  Utf8String("");
+        return  empty_string;
     }
 
     size_t oldStart = m_CharPos;
@@ -579,7 +620,7 @@ Utf8String XMLReader::_ReduceCharData( void )
         }
 
         // If it wasn't a new Line, break
-        if (*m_CharStartPos != c_NewLine)
+        if (*m_CharStartPos != u8_NewLine)
             break;
         
         // Skip over the new line
@@ -601,7 +642,7 @@ Utf8String XMLReader::_ReduceCharData( void )
     }
 
     // Can we return now? 
-    if (*m_CharStartPos == c_LessThan)
+    if (*m_CharStartPos == u8_LessThan)
     {
         m_Line += n;
         return  end;
@@ -612,13 +653,13 @@ Utf8String XMLReader::_ReduceCharData( void )
     index = 0;
 
     // Seek next tag start
-    while (m_CharPos < m_InternalString.Size() && *m_CharStartPos != c_LessThan)
+    while (m_CharPos < m_InternalString.Size() && *m_CharStartPos != u8_LessThan)
     {
         // While we're looking for the next start tag, we'll keep checking the internal string
         // to see if we need to translate any references
-        if (*m_CharStartPos == c_Ampersand)
+        if (*m_CharStartPos == u8_Ampersand)
         {
-            char c = c_NullChar;
+            char c = u8_NullChar;
             Utf8String tmp;
             m_CharStartPos++;
             m_CharPos++;
@@ -649,7 +690,7 @@ Utf8String XMLReader::_ReduceCharData( void )
                     cp = (CodePoint)*m_CharStartPos;
                 }
     
-                if (*m_CharStartPos != c_NewLine)
+                if (*m_CharStartPos != u8_NewLine)
                 {
                     break;
                 }
@@ -663,9 +704,9 @@ Utf8String XMLReader::_ReduceCharData( void )
     }
 
     // Document cannot end with character data
-    if (m_CharPos > m_InternalString.Size() || *m_CharStartPos == '\0')
+    if (m_CharPos > m_InternalString.Size() || *m_CharStartPos == u8_NullChar)
     {
-        return Utf8String("");
+        return empty_string;
     }
 
     m_Line += n;
@@ -723,7 +764,7 @@ Utf8String XMLReader::_TranslateName(Utf8String& name, size_t colonLoc)
     size_t i;
 
     // Temporarily zero-out the ':' character 
-    name[colonLoc] = c_NullChar;
+    name[colonLoc] = u8_NullChar;
 
     // Calculate hash code
     code = _HashCode(name, colonLoc);
@@ -738,12 +779,12 @@ Utf8String XMLReader::_TranslateName(Utf8String& name, size_t colonLoc)
             if (ns->id)
             {
                 name[colonLoc - 1] = ns->id;
-                name[colonLoc] = c_Colon;
+                name[colonLoc] = u8_Colon;
                 return name.Erase(colonLoc);
             }
             else
             {
-                name[colonLoc] = c_Colon;
+                name[colonLoc] = u8_Colon;
                 return name;
             }
         }
@@ -762,19 +803,19 @@ Utf8String XMLReader::_TranslateName(Utf8String& name, size_t colonLoc)
             if (ns->id)
             {
                 name[colonLoc - 1] = ns->id;
-                name[colonLoc] = c_Colon;
+                name[colonLoc] = u8_Colon;
                 return name.Erase(colonLoc);
             }
             else
             {
-                name[colonLoc] = c_Colon;
+                name[colonLoc] = u8_Colon;
                 return name;
             }
         }
     }
 
     // Restore the ':' character
-    name[colonLoc] = c_Colon;
+    name[colonLoc] = u8_Colon;
     return name;
 }
 
@@ -801,7 +842,7 @@ char XMLReader::_FindNameSpaceID(Utf8String uri, size_t uriSize)
     }
 
     // Not found so return null id
-    return c_NullChar;
+    return u8_NullChar;
 }
 
 
@@ -835,7 +876,7 @@ void XMLReader::_ParseAttr(pCXElement& elem)
     m_CharPos++;
     _SkipInner(m_InternalString);
 
-    if (*m_CharStartPos == c_Colon)
+    if (*m_CharStartPos == u8_Colon)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -848,14 +889,14 @@ void XMLReader::_ParseAttr(pCXElement& elem)
     name = m_InternalString.SubStr(startPos, distance);
 
     // If this was a xmlns name, note it for later.
-    colonLoc = name.Find(c_Colon);
+    colonLoc = name.Find(u8_Colon);
 
     // Seek the quote character (position p beyond quote)
     // Skip spaces
     _SkipSpaces(m_InternalString);
 
     // Expect a '=' character
-    if (*m_CharStartPos != c_EqualTo)
+    if (*m_CharStartPos != u8_EqualTo)
     {
         XML_Raise("expected = character");
         return;
@@ -869,7 +910,7 @@ void XMLReader::_ParseAttr(pCXElement& elem)
     // Parse the value
     
     // Expect opening quote
-    if (*m_CharStartPos != c_Quote && *m_CharStartPos != c_Apos)
+    if (*m_CharStartPos != u8_Quote && *m_CharStartPos != u8_Apos)
     {
         XML_Raise("expected opening quote");
         return;
@@ -909,7 +950,7 @@ void XMLReader::_ParseAttr(pCXElement& elem)
     if (nsName.Compare("xmlns"))
     {
         // ATTN: implement default m_NameSpaces
-        if (name[5] != c_Colon)
+        if (name[5] != u8_Colon)
         {
           //XML_Raise("default m_NameSpaces not supported: xmlns");
             return;
@@ -974,7 +1015,7 @@ void XMLReader::_ParseProcessingInstruction(pCXElement& elem)
     // Get tag identifier
     _SkipInner(m_InternalString);
 
-    if (*m_CharStartPos == c_Colon)
+    if (*m_CharStartPos == u8_Colon)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -982,7 +1023,7 @@ void XMLReader::_ParseProcessingInstruction(pCXElement& elem)
     }
 
     // If input exhuasted
-    if (*m_CharStartPos == c_NullChar)
+    if (*m_CharStartPos == u8_NullChar)
     {
         XML_Raise("premature end of input");
         return;
@@ -996,8 +1037,8 @@ void XMLReader::_ParseProcessingInstruction(pCXElement& elem)
 
     // Process attributes
     while (m_InternalString.Size() > m_CharPos && 
-           *m_CharStartPos != '\0' && 
-           *m_CharStartPos != c_Question)
+           *m_CharStartPos != u8_NullChar && 
+           *m_CharStartPos != u8_Question)
     {
         _ParseAttr(elem);
 
@@ -1015,7 +1056,7 @@ void XMLReader::_ParseProcessingInstruction(pCXElement& elem)
     _SkipSpaces(m_InternalString);
 
     // Expect '>'
-    if (*m_CharStartPos != c_GreaterThan)
+    if (*m_CharStartPos != u8_GreaterThan)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1065,7 +1106,7 @@ void XMLReader::_ParseStartTag(pCXElement& elem)
 
     _SkipInner(m_InternalString);
 
-    if (*m_CharStartPos == c_Colon)
+    if (*m_CharStartPos == u8_Colon)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1073,7 +1114,7 @@ void XMLReader::_ParseStartTag(pCXElement& elem)
     }
 
     // If input exhuasted
-    if (*m_CharStartPos == c_NullChar)
+    if (*m_CharStartPos == u8_NullChar)
     {
         XML_Raise("premature end of input");
         return;
@@ -1082,16 +1123,16 @@ void XMLReader::_ParseStartTag(pCXElement& elem)
     unsigned long distance = m_CharPos - startPos;
     name = m_InternalString.SubStr(startPos, distance);
 
-    colonLoc = name.Find(c_Colon);
+    colonLoc = name.Find(u8_Colon);
 
     // Skip spaces
     _SkipSpaces(m_InternalString);
 
     // Process attributes
     while (m_InternalString.Size() > m_CharPos && 
-           *m_CharStartPos != '\0' && 
-           *m_CharStartPos != '/' && 
-           *m_CharStartPos != c_GreaterThan)
+           *m_CharStartPos != u8_NullChar && 
+           *m_CharStartPos != u8_slash && 
+           *m_CharStartPos != u8_GreaterThan)
     {
         _ParseAttr(elem);
 
@@ -1100,7 +1141,7 @@ void XMLReader::_ParseStartTag(pCXElement& elem)
     }
 
     // Check for empty tag
-    if (*m_CharStartPos == '/')
+    if (*m_CharStartPos == u8_slash)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1134,7 +1175,7 @@ void XMLReader::_ParseStartTag(pCXElement& elem)
         _SkipSpaces(m_InternalString);
 
         // Expect '>'
-        if (*m_CharStartPos != c_GreaterThan)
+        if (*m_CharStartPos != u8_GreaterThan)
         {
             m_CharStartPos++;
             m_CharPos++;
@@ -1149,7 +1190,7 @@ void XMLReader::_ParseStartTag(pCXElement& elem)
     }
 
     // Expect '>'
-    if (*m_CharStartPos != c_GreaterThan)
+    if (*m_CharStartPos != u8_GreaterThan)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1221,7 +1262,7 @@ void XMLReader::_ParseEndTag(pCXElement& elem)
 
     _SkipInner(m_InternalString);
 
-    if (*m_CharStartPos == c_Colon)
+    if (*m_CharStartPos == u8_Colon)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1229,7 +1270,7 @@ void XMLReader::_ParseEndTag(pCXElement& elem)
     }
 
     // If input exhuasted
-    if (m_CharPos > m_InternalString.Size() || *m_CharStartPos == '\0')
+    if (m_CharPos > m_InternalString.Size() || *m_CharStartPos == u8_NullChar)
     {
         XML_Raise("premature end of input");
         return;
@@ -1239,13 +1280,13 @@ void XMLReader::_ParseEndTag(pCXElement& elem)
     unsigned long distance = m_CharPos - startPos;
     name = m_InternalString.SubStr(startPos, distance);
 
-    colonLoc = name.Find(c_Colon);
+    colonLoc = name.Find(u8_Colon);
 
     // Skip spaces
     _SkipSpaces(m_InternalString);
 
     // Expect '>'
-    if (*m_CharStartPos != c_GreaterThan)
+    if (*m_CharStartPos != u8_GreaterThan)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1330,13 +1371,13 @@ void XMLReader::_ParseComment(pCXElement& elem)
     size_t startPos = m_CharPos;
     Utf8String start;
 
-    while ((m_InternalString.Size() > m_CharPos) && *m_CharStartPos != '\0')
+    while ((m_InternalString.Size() > m_CharPos) && *m_CharStartPos != u8_NullChar)
     {
         // Check if the next three characters are "-->" (end of comment)
         // (Note: We rely on short-circuiting to not run beyond end of string)
-        if (   *m_CharStartPos == c_Dash
-            && *(m_CharStartPos+1) == c_Dash
-            && *(m_CharStartPos+2) == c_GreaterThan)
+        if (   *m_CharStartPos == u8_Dash
+            && *(m_CharStartPos+1) == u8_Dash
+            && *(m_CharStartPos+2) == u8_GreaterThan)
         {
             // Null-terminate this comment
             size_t distance = m_CharPos - startPos;
@@ -1358,7 +1399,7 @@ void XMLReader::_ParseComment(pCXElement& elem)
 
             return;
         }
-        else if (*m_CharStartPos == c_NewLine)
+        else if (*m_CharStartPos == u8_NewLine)
             m_Line++;
 
         m_CharStartPos++;
@@ -1389,7 +1430,7 @@ void XMLReader::_ParseCDATA(pCXElement& elem)
 
     static Utf8String cdataEnd("]]>");
 
-    while ((m_InternalString.Size() > m_CharPos) && *m_CharStartPos != '\0')
+    while ((m_InternalString.Size() > m_CharPos) && *m_CharStartPos != u8_NullChar)
     {
         if (m_InternalString.Compare(m_CharPos, cdataEnd.Size(), cdataEnd))
         {
@@ -1411,7 +1452,7 @@ void XMLReader::_ParseCDATA(pCXElement& elem)
             return;
 
         } 
-        else if (*m_CharStartPos == c_NewLine)
+        else if (*m_CharStartPos == u8_NewLine)
         {
             m_Line++;
         }
@@ -1445,17 +1486,17 @@ void XMLReader::_ParseDOCTYPE(pCXElement& /*unused*/)
     }
 
     while (m_InternalString.Size() > m_CharPos  && 
-           *m_CharStartPos != '\0' && 
-           *m_CharStartPos != c_GreaterThan)
+           *m_CharStartPos != u8_NullChar && 
+           *m_CharStartPos != u8_GreaterThan)
     {
-        if (*m_CharStartPos == c_NewLine)
+        if (*m_CharStartPos == u8_NewLine)
             m_Line++;
 
         m_CharStartPos++;
         m_CharPos++;
     }
 
-    if (*m_CharStartPos != c_GreaterThan)
+    if (*m_CharStartPos != u8_GreaterThan)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1490,7 +1531,7 @@ int XMLReader::_ParseCharData(pCXElement& elem)
     // Reject input if it does appear inside tags
     if (m_StackSize == 0)
     {
-        if (m_InternalString.Size() >= m_CharPos || *m_CharStartPos == '\0')
+        if (m_InternalString.Size() >= m_CharPos || *m_CharStartPos == u8_NullChar)
         {
             // Proper end of input so set m_Status to zero
             m_Status = 1;
@@ -1504,7 +1545,7 @@ int XMLReader::_ParseCharData(pCXElement& elem)
     // Remove leading spaces
     _SkipSpaces(m_InternalString);
 
-    if (*m_CharStartPos == c_LessThan)
+    if (*m_CharStartPos == u8_LessThan)
     {
         m_CharStartPos++;
         m_CharPos++;
@@ -1526,7 +1567,7 @@ int XMLReader::_ParseCharData(pCXElement& elem)
     }
 
     // Process character data
-    if (*m_CharStartPos != c_LessThan)
+    if (*m_CharStartPos != u8_LessThan)
     {
         XML_Raise("expected opening angle bracket");
         return 0;
@@ -1580,7 +1621,7 @@ void XML_NameSpace::XML_NameSpace_Dump( void )
     strDepth << (int)depth;
     depthStr = strDepth.str();
     SCX_LOGINFO(logHandle, ("depth=") + depthStr);
-    putchar(c_NewLine);
+    putchar(u8_NewLine);
   */
 }
 
@@ -1667,8 +1708,7 @@ int XMLReader::XML_Next(pCXElement& elem)
             _SkipSpaces(m_InternalString);
 
             // Expect '<'
-            // if (*m_CharStartPos != c_LessThan)
-            if (*m_CharStartPos != c_LessThan)
+            if (*m_CharStartPos != u8_LessThan)
             {
                 XML_Raise("expected opening angle bracket");
                 return -1;
@@ -1685,7 +1725,7 @@ int XMLReader::XML_Next(pCXElement& elem)
             _SkipSpaces(m_InternalString);
 
             // Expect one of these
-            if (*m_CharStartPos == c_Slash)
+            if (*m_CharStartPos == u8_Slash)
             {
                 // This was an element end ('/>')
                 _ParseEndTag(elem);
@@ -1697,18 +1737,18 @@ int XMLReader::XML_Next(pCXElement& elem)
                 _ParseStartTag(elem);
                 return m_Status;
             }
-            else if (*m_CharStartPos == c_Question)
+            else if (*m_CharStartPos == u8_Question)
             {
                 // The processing instructions (<?xml...?>)
                 _ParseProcessingInstruction(elem);
                 return m_Status;
             }
-            else if (*m_CharStartPos == c_Bang)
+            else if (*m_CharStartPos == u8_Bang)
             {
                 m_CharStartPos++;
                 m_CharPos++;
 
-                if (*m_CharStartPos == c_Dash && m_InternalString[m_CharPos + 1] == c_Dash)
+                if (*m_CharStartPos == u8_Dash && m_InternalString[m_CharPos + 1] == u8_Dash)
                 {
                     _ParseComment(elem);
                     return m_Status;
@@ -1823,7 +1863,7 @@ int XMLReader::XML_RegisterNameSpace(char id, Utf8String uri)
     // ATTN: we do not check for duplicates
 
     // Reject out of range ids
-    if (id < 'a' || id > 'z')
+    if (id < u8_a || id > u8_z)
         return -1;
 
     // Check for overflow of the array
@@ -1831,7 +1871,7 @@ int XMLReader::XML_RegisterNameSpace(char id, Utf8String uri)
         return -1;
 
     // Reject zero-length URI's
-    if (uri[0] == c_NullChar)
+    if (uri[0] == u8_NullChar)
         return -1;
     
     rns->id = id;
@@ -1865,7 +1905,7 @@ void XMLReader::XML_Dump( void )
         m_NameSpaces[i]->XML_NameSpace_Dump();
     }
 
-    putchar(c_NewLine);
+    putchar(u8_NewLine);
   
 }
 
@@ -1895,14 +1935,18 @@ void XMLReader::XML_PutError( void )
 */
 void XMLReader::XML_Raise(const char* format, ...)
 {
+    int n;
     va_list ap;
+    memset(&ap, 0, sizeof(ap));
+
     m_Status = -1;
-    m_Message[0] = c_NullChar;
+    m_Message[0] = u8_NullChar;
 
     va_start(ap, format);
-    vsnprintf(m_Message, sizeof(m_Message), format, ap);
+    n = vsnprintf(m_Message, sizeof(m_Message), format, ap);
     va_end(ap);
 
     SCX_LOGINFO(m_logHandle, ("XML_Raise called...") + std::string(m_Message));
     SCX_LOGINFO(m_logHandle, m_Message);
+    
 }

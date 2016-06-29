@@ -63,8 +63,10 @@ class SCXThreadTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestThreadBasics );
     CPPUNIT_TEST( TestThreadWait );
     CPPUNIT_TEST( TestThreadTerminate );
+#if !defined (_DEBUG)
     CPPUNIT_TEST( TestThreadBodyCatchesSCXException );
     CPPUNIT_TEST( TestThreadBodyCatchesSTLException );
+#endif
     CPPUNIT_TEST( TestManualStartOK );
     CPPUNIT_TEST( TestStartTwiceFails );
     CPPUNIT_TEST( TestThreadExceptionHaveCorrectThreadID );

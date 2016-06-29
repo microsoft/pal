@@ -155,6 +155,7 @@ namespace SCXCoreLib
                     m_threadBusyCount++;
                     h.Unlock();
 
+#if !defined(_DEBUG)
                     try
                     {
                         task->m_proc( task->m_param );
@@ -169,6 +170,9 @@ namespace SCXCoreLib
                         SCXASSERTFAIL(std::wstring(L"WorkerThreadStartRoutine() Thread threw unhandled exception - ").
                                       append(StrFromUTF8(e2.what())).c_str());
                     }
+#else
+                    task->m_proc( task->m_param );
+#endif
                     /* We would like to catch (...) as well but it seemes we can't since there is a bug
                        in gcc. http://gcc.gnu.org/bugzilla/show_bug.cgi?id=28145 */
 

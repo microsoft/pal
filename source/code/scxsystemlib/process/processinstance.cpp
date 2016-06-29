@@ -1563,7 +1563,28 @@ namespace SCXSystemLib
 #else
 #error Implementation for ProcessInstanc::GetUserName() method not provided.
 #endif
-        pw = getpwuid (startuid);
+        struct passwd pwd;
+        struct passwd *ppwd = NULL;
+        long bufSize = sysconf(_SC_GETPW_R_SIZE_MAX);
+
+        // Sanity check - all platforms have this, but never hurts to be certain
+        if (bufSize < 1024)
+        {
+            bufSize = 1024;
+        }
+
+        std::vector<char> buf(bufSize);
+
+        // Use reentrant form of getpwuid (it's reentrant, and it pacifies purify)
+#if !defined(sun)
+        int rc = 0;
+        rc = getpwuid_r(startuid, &pwd, &buf[0], buf.size(), &ppwd);
+        SCXASSERT( (0 == rc && NULL != ppwd) || (0 != rc && NULL == ppwd) );
+#else
+        ppwd = getpwuid_r(startuid, &pwd, &buf[0], buf.size());
+#endif
+
+        pw = ppwd;
         if (pw)
         {
             username.assign(StrFromUTF8(pw->pw_name));

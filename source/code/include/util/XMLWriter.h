@@ -157,7 +157,7 @@ namespace SCX {
                            \returns     None
                        
                         */
-                        void Save(Utf8String& sOut, bool AddIndentation, std::string& Indentation);
+                        void Save(Utf8String& sOut, bool AddIndentation, Utf8String& Indentation);
 
                         /*----------------------------------------------------------------------------*/
                         /**

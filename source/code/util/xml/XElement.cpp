@@ -422,7 +422,7 @@ void XElement::ToString(Utf8String& xmlString, bool enableLineSeperators)
     
     // Clear the string before passing in, just in case.
     xmlString.Clear();
-    std::string Indentation = "";
+    Utf8String Indentation = "";
     nullElement->Save(xmlString, enableLineSeperators, Indentation);
     
     // delete the XML writer

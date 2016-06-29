@@ -455,7 +455,24 @@ namespace SCXCoreLib
         SCXErrnoException(std::wstring fkncall, int errno_, const SCXCodeLocation& l) 
             : SCXException(l), m_fkncall(fkncall), m_errno(errno_)
         { 
-            m_errtext = SCXCoreLib::strerror(errno_);
+            char buf[80];
+#ifdef WIN32
+            strerror_s(buf, sizeof(buf), errno_);
+            m_errtext = buf;
+#elif (defined(hpux) && (PF_MINOR==23)) || (defined(sun) && (PF_MAJOR==5) && (PF_MINOR<=9))
+            // WI7938
+            m_errtext = strerror(errno_);
+#elif (defined(hpux) && (PF_MINOR>23)) || (defined(sun) && (PF_MAJOR==5) && (PF_MINOR>9)) || (defined(aix)) || (defined(macos))
+            int r = strerror_r(errno_, buf, sizeof(buf));
+            if (0 != r) {
+                snprintf(buf, sizeof(buf), "Unknown error %d", errno_);
+            }
+            m_errtext = buf;
+#else
+            // Do not assign to m_errtext directly to get compiler error when strerror_r is declared to return an int.
+            char* r = strerror_r(errno_, buf, sizeof(buf));
+            m_errtext = r;
+#endif
         };
 
         std::wstring What() const {
