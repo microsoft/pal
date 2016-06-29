@@ -96,7 +96,7 @@ namespace SCXCoreLib
     void SCXUser::SetName()
     {
         struct passwd pwd;
-        struct passwd *ppwd;
+        struct passwd *ppwd = NULL;
         long bufSize = sysconf(_SC_GETPW_R_SIZE_MAX);
 
         // Sanity check - all platforms have this, but never hurts to be certain

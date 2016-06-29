@@ -67,6 +67,7 @@ namespace SCXCoreLib
 
         if (p->body != 0)
         {
+#if !defined(_DEBUG)
              try
              {
                 p->body( p->param );
@@ -81,6 +82,9 @@ namespace SCXCoreLib
                  SCXASSERTFAIL(std::wstring(L"ThreadStartRoutine() Thread threw unhandled exception - ").
                               append(StrFromUTF8(e2.what())).c_str());
              }
+#else
+             p->body( p->param );
+#endif
             /* We would like to catch (...) as well but it seemes we can't since there is a bug
                in gcc. http://gcc.gnu.org/bugzilla/show_bug.cgi?id=28145 */
         }

@@ -1,5 +1,5 @@
 //******************************************************************************
-//  Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+//  Copyright (c) Microsoft.  All rights reserved.
 //  File: XMLWriter.cpp
 //  Implementation of the direct-to-file XML document writer
 //  Declaration  : XMLWriter.h
@@ -12,13 +12,26 @@
 using namespace SCX::Util;
 using namespace SCX::Util::Xml;
 
-static const std::string c_XmlAmp  = "&amp;" ;
-static const std::string c_XmlLT   = "&lt;"  ;
-static const std::string c_XmlGT   = "&gt;"  ;
-static const std::string c_XmlApos = "&apos;";
-static const std::string c_XmlQuot = "&quot;";
-static const std::string c_XmlTab  = "&#";
-static const std::string c_XmlEsc  = "\\\\";
+static const Utf8String c_XmlAmp  = "&amp;" ;
+static const Utf8String c_XmlLT   = "&lt;"  ;
+static const Utf8String c_XmlGT   = "&gt;"  ;
+static const Utf8String c_XmlApos = "&apos;";
+static const Utf8String c_XmlQuot = "&quot;";
+static const Utf8String c_XmlTab  = "&#";
+static const Utf8String c_XmlEsc  = "\\\\";
+
+static const Utf8String open_bracket("<");
+static const Utf8String open_with_slash("</");
+static const Utf8String close_bracket_with_term("/>");
+static const Utf8String close_bracket_with_question("?>");
+static const Utf8String close_bracket(">");
+static const Utf8String u8_space(" ");
+static const Utf8String equals_with_quote("=\"");
+static const Utf8String ending_quote("\"");
+static const Utf8String crlf("\r\n");
+static const Utf8Char single_question('?');
+static const Utf8String four_spaces("    ");
+static const Utf8String empty_string("");
 
 /*
 **==============================================================================
@@ -306,7 +319,7 @@ void CXElement::DisableLineSeparators( void )
 **
 **==============================================================================
 */
-void CXElement::Save(Utf8String& sOut, bool bAddIndentation, std::string& sIndentation)
+void CXElement::Save(Utf8String& sOut, bool bAddIndentation, Utf8String& sIndentation)
 {
     // Output our start tag.
     if (bAddIndentation)
@@ -314,45 +327,45 @@ void CXElement::Save(Utf8String& sOut, bool bAddIndentation, std::string& sInden
         sOut += sIndentation;
     }
 
-    sOut += "<";
+    sOut += open_bracket;
     sOut += m_sName;
 
     // Output all the attributes and close the start tag.
     for (size_t j = m_listAttribute.size();  j > 0;  j--)
     {
-        sOut += Utf8String(" ") + m_listAttribute[j - 1]->m_sName + Utf8String("=\"");
+        sOut += u8_space + m_listAttribute[j - 1]->m_sName + equals_with_quote;
         PutText(sOut, m_listAttribute[j - 1]->m_sValue);
-        sOut += Utf8String("\"");
+        sOut += ending_quote;
     }
 
-    if (m_sName[0] != '?') // XML_INSTRUCTION
+    if (m_sName[0] != single_question) // XML_INSTRUCTION
     {
         // If this was an empty tag (just the name and attributes), and there were no children
         // then just close the tag.
         if (m_sText.Empty() && m_listChild.empty())
         {
-            sOut += "/>";
+            sOut += close_bracket_with_term;
 
             if (m_LineSeparatorsOn)
             {
-                sOut += "\r\n";
+                sOut += crlf;
             }
 
             return;
         }
         else
         {
-            sOut += ">";
+            sOut += close_bracket;
         }
     }
     else
     {
-        sOut += "?>";
+        sOut += close_bracket_with_question;
     }
 
     if (!m_listChild.empty() && m_LineSeparatorsOn)
     {
-        sOut += "\r\n";
+        sOut += crlf;
     }
 
     // Output the text.
@@ -372,12 +385,12 @@ void CXElement::Save(Utf8String& sOut, bool bAddIndentation, std::string& sInden
         pCXElement singleElement = *i;
 
         // Call the child element's save() method.
-        sIndentation += "    ";
+        sIndentation += four_spaces;
         singleElement->Save(sOut, bAddIndentation, sIndentation);
         sIndentation = sIndentation.substr(0, sIndentation.size() - 4);
     }
 
-    if (m_sName[0] != '?') // XML_INSTRUCTION
+    if (m_sName[0] != single_question) // XML_INSTRUCTION
     {
         if (m_sText.Empty() && bAddIndentation)
         {
@@ -385,13 +398,13 @@ void CXElement::Save(Utf8String& sOut, bool bAddIndentation, std::string& sInden
         }
 
         // Output the end tag.
-        sOut += Utf8String("</") + m_sName + Utf8String(">");
+        sOut += open_with_slash + m_sName + close_bracket;
     }
 
     // And close us up
     if (m_LineSeparatorsOn)
     {
-        sOut += "\r\n";
+        sOut += crlf;
     }
 }
 
@@ -430,7 +443,7 @@ const Utf8String CXElement::CXElement_GetAttr(const Utf8String& name)
     }
 
     /* Not found! */
-    return Utf8String();
+    return empty_string;
 }
 
 /*

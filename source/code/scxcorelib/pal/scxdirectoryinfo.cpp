@@ -474,7 +474,14 @@ namespace
             }
 
             // Read a directory entry
-            while ((dentp = readdir(dirp)) != 0) {
+            struct dirent *currentDir = NULL;
+            int len_entry = offsetof(struct dirent, d_name) + PATH_MAX + 1;
+            currentDir = (struct dirent *)malloc(len_entry);
+#if defined(sun)
+            while (NULL != (dentp = readdir_r(dirp, currentDir))) {
+#else
+            while ((0 == readdir_r(dirp, currentDir, &dentp)) && NULL != dentp) {
+#endif
                 bool isdir = false;                         // Is this a directory entry
                 SCXCoreLib::SCXFileSystem::SCXStatStruct* pStat = 0;
                 // Only BSD-based C-libraries have the d_type entry in the DIR structure
@@ -548,6 +555,10 @@ namespace
             }
 
         after:
+            if (currentDir)
+            {
+                free(currentDir);
+            }
             eno = errno;
             errno = 0;
             closedir(dirp);
