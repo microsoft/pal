@@ -1,12 +1,12 @@
 /*--------------------------------------------------------------------------------
     Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-
+    
 */
 /**
-    \file
+    \file        
 
     \brief       Implements the physical disk instance pal for statistical information.
-
+    
     \date        2008-04-28 15:20:00
 
 */
@@ -139,6 +139,14 @@ namespace SCXSystemLib
             m_tBytes.AddSample(m_rBytes[0] + m_wBytes[0]);
             m_tTimes.AddSample(data.time * 1000);
 
+/* XINTFRAC definition now depends on patch level of AIX 6.1 system ... */
+#if PF_MAJOR < 7 && !defined(XINTFRAC)
+
+/* See /usr/include/sys/iplcb.h to explain the below */
+#define XINTFRAC        (static_cast<double>(_system_configuration.Xint)/static_cast<double>(_system_configuration.Xfrac))
+
+#endif
+
 /* hardware ticks per millisecond */
 #define HWTICS2MSECS(x)    ((static_cast<double>(x) * XINTFRAC)/1000000.0)
 
@@ -164,9 +172,9 @@ namespace SCXSystemLib
             return;
         }
         m_timeStamp.AddSample(time(0));
-
+        
         struct pst_diskinfo diski;
-        memset(&diski, 0, sizeof(diski));
+        memset(&diski, 0, sizeof(diski)); 
         if (1 != m_deps->pstat_getdisk(&diski, sizeof(diski), 1, di->m_instance))
         {
             SCX_LOGERROR(m_log, L"pstat_getdisk failed");
@@ -242,7 +250,7 @@ namespace SCXSystemLib
         {
             m_reads.AddSample(m_kstat->GetValue(L"reads"));
             m_writes.AddSample(m_kstat->GetValue(L"writes"));
-            m_transfers.AddSample(m_reads[0] + m_writes[0]);
+            m_transfers.AddSample(m_reads[0] + m_writes[0]); 
             m_rBytes.AddSample(m_kstat->GetValue(L"nread"));
             m_wBytes.AddSample(m_kstat->GetValue(L"nwritten"));
             m_tBytes.AddSample(m_rBytes[0] + m_wBytes[0]);
