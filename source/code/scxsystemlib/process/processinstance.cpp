@@ -1577,6 +1577,9 @@ namespace SCXSystemLib
 
         // Use reentrant form of getpwuid (it's reentrant, and it pacifies purify)
 #if !defined(sun)
+#if defined(linux)
+        __attribute__((__unused__))
+#endif // defined(linux)
         int rc = 0;
         rc = getpwuid_r(startuid, &pwd, &buf[0], buf.size(), &ppwd);
         SCXASSERT( (0 == rc && NULL != ppwd) || (0 != rc && NULL == ppwd) );
