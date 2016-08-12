@@ -1477,7 +1477,8 @@ public:
         // Convert stdout to numeric form
         stringstream ss( output.str() );
         int countPS(0);
-        bool conv_result = (ss >> countPS) != 0;
+        ss >> countPS;
+        bool conv_result = !ss.fail();
         CPPUNIT_ASSERT_EQUAL_MESSAGE( "Failure converting 'ps -ef | wc -l' to numeric form", true, conv_result );
         // Subtract 4 due to overhead from 'ps' command:
         //   The 'ps' command sequence creates three new processes (sh, ps, and wc)

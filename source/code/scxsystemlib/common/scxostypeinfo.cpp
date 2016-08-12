@@ -52,7 +52,7 @@ using namespace SCXCoreLib;
 
 namespace {
 
-#if defined(linux) && !defined(PF_DISTRO_ULINUX)
+#if defined(linux) && (defined(PF_DISTRO_SUSE) || defined(PF_DISTRO_REDHAT))
     /**
        Extracts the distribution specific OS name.
 

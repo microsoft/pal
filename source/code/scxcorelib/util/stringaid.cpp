@@ -409,7 +409,8 @@ namespace SCXCoreLib
         // Note: This line may not indicate an error on some systems,
         // even if the number is negative.  Thus, we always check for
         // a minus sign (below) to guarentee consistent behavior.
-        bool conv_result = (ss >> tmp) != 0;
+        ss >> tmp;
+        bool conv_result = !ss.fail();
 
         wstringstream::pos_type s = ss.tellg();
 
@@ -440,7 +441,8 @@ namespace SCXCoreLib
         double tmp = 0;
         wstringstream ss(str);
 
-        bool conv_result = (ss >> tmp) != 0;
+        ss >> tmp;
+        bool conv_result = !ss.fail();
 
         if (!conv_result) {
             throw SCXCoreLib::SCXNotSupportedException(L"Cannot parse double in: '" + str + L"'", SCXSRCLOCATION);
@@ -462,7 +464,8 @@ namespace SCXCoreLib
         scxlong tmp;
         wstringstream ss(str);
 
-        bool conv_result = (ss >> tmp) != 0;
+        ss >> tmp;
+        bool conv_result = !ss.fail();
 
         if (!conv_result) {
             throw SCXCoreLib::SCXNotSupportedException(L"Cannot parse scxlong in: '" + str + L"'", SCXSRCLOCATION);
@@ -487,7 +490,8 @@ namespace SCXCoreLib
         // Note: This line may not indicate an error on some systems,
         // even if the number is negative.  Thus, we always check for
         // a minus sign (below) to guarentee consistent behavior.
-        bool conv_result = (ss >> tmp) != 0;
+        ss >> tmp;
+        bool conv_result = !ss.fail();
 
         wstringstream::pos_type s = ss.tellg();
 
