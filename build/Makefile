@@ -9,7 +9,7 @@
 # PF (i.e. PlatForm) is either linux, solaris
 SHELL=/bin/bash
 PWD:=$(shell pwd)
-SCX_BRD=$(subst /build,,$(PWD))
+SCX_BRD=$(shell dirname $(PWD))
 PF_POSIX=true
 
 include $(SCX_BRD)/build/config.mak
