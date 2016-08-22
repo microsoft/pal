@@ -163,6 +163,24 @@ case $uname in
 
 esac
 
+##==============================================================================
+##
+## running on Travis?
+##
+##==============================================================================
+
+travis_ci=0
+if [ "$TRAVIS" = "true" ]; then
+    echo "Currently running on Travis for Continuous Integration ..."
+    travis_ci=1
+fi
+
+##==============================================================================
+##
+## handle build settings and write configuration
+##
+##==============================================================================
+
 if [ "$uname" = "Linux" ]; then
     BUILD_CONFIGURATION=${PF}_${PF_DISTRO}_${PF_MAJOR}.${PF_MINOR}_${PF_ARCH}_${PF_WIDTH}_${build_type}
 else
@@ -188,6 +206,7 @@ SCXPAL_TARGET_DIR=`cd ..; pwd -P`/target/$BUILD_CONFIGURATION
 PACKAGE_SUFFIX=$PKG_SUFFIX
 BUILD_RPM=$BUILD_RPM
 BUILD_DPKG=$BUILD_DPKG
+TRAVIS_CI=$travis_ci
 EOF
 
 echo "Configured SCXPAL for ${BUILD_CONFIGURATION}"

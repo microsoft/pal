@@ -26,6 +26,12 @@
 #include <sys/time.h>
 #endif
 
+#if defined(TRAVIS)
+const bool s_fTravis = true;
+#else
+const bool s_fTravis = false;
+#endif
+
 using namespace SCXCoreLib;
 using namespace std;
 
@@ -784,9 +790,7 @@ public:
 #if defined(WIN32)
         SCXUNIT_WARNING(L"No sanity check of localized time on windows (LC_TIME env var unsupported)");
 #else
-        // Travis CI doesn't appear to support the LC_TIME environment variable
-        char *envTravis = getenv("TRAVIS");
-        if (NULL != envTravis && 0 == strncmp(envTravis, "true", 4))
+        if ( s_fTravis )
         {
             SCXUNIT_WARNING(L"Skipping test SCXTimeTest::TestCalendarTimeToLocalizedTime on TRAVIS");
             return;

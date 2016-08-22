@@ -12,6 +12,10 @@
 # Define flags. (These will be submitted to all commands that use the preprocesor)
 DEFINES=-DPF_DISTRO_$(PF_DISTRO) -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D$(ARCH) -DPF_WIDTH=$(PF_WIDTH)
 
+ifeq ($(TRAVIS_CI), 1)
+	DEFINES += -DTRAVIS
+endif
+
 ifeq ($(SCX_STACK_ONLY), true)
 	DEFINES += -DSCX_STACK_ONLY
 endif
