@@ -1,4 +1,4 @@
-# pal [![Build Status](https://travis-ci.org/Microsoft/pal.svg?branch=master)](https://travis-ci.org/Microsoft/pal)
+# pal [![Build Status](https://travis-ci.org/Microsoft/pal.svg?branch=2016-URNext)](https://travis-ci.org/Microsoft/pal)
 
 The PAL is a Platform Abstraction Layer that is used in a variety of
 projects. The PAL allows for easy compatibility between many different
