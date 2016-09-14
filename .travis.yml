@@ -3,6 +3,7 @@ language: c++
 branches:
   only:
   - master
+  - 2016-URNext
 
 dist: trusty
 
