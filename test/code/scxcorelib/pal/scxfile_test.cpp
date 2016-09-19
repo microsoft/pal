@@ -693,7 +693,7 @@ class SCXFileTest : public CPPUNIT_NS::TestFixture {
         size_t bytesRead = SCXFile::ReadAvailableBytes(L"/dev/random", buf, sizeof(buf));
         ss << ", bytes read from SCXFile::ReadAvailableBytes(L\"/dev/random\", buf, sizeof(buf)): "
            << bytesRead;
-        CPPUNIT_ASSERT_MESSAGE(ss.str(), sizeof(buf) > bytesRead);
+        CPPUNIT_ASSERT_MESSAGE(ss.str(), sizeof(buf) >= bytesRead);
 #endif
     }
 
