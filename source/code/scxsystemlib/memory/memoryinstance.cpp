@@ -945,6 +945,9 @@ namespace SCXSystemLib
         scxulong pageSize = m_deps->GetPageSize();
         m_totalPhysicalMemory = m_deps->GetPhysicalPages() * pageSize;      // Resulting units: bytes
         m_availableMemory = m_deps->GetAvailablePhysicalPages() * pageSize; // Resulting units: bytes
+
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Page Size (", pageSize).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Total Physical Memory (", m_totalPhysicalMemory).append(L")"));
         SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Memory Available (", m_availableMemory).append(L")"));
 
         scxulong cacheSize = 0;
@@ -952,16 +955,24 @@ namespace SCXSystemLib
         SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - ZFS Cache Size (", cacheSize).append(L")"));
 
         m_availableMemory += cacheSize;
-        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - New Memory Available (", m_availableMemory).append(L")"));
         m_usedMemory = m_totalPhysicalMemory - m_availableMemory;           // Resulting units: bytes
+
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - New Memory Available (", m_availableMemory).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Used Memory (", m_usedMemory).append(L")"));
 
         scxulong max_pages = 0;
         scxulong reserved_pages = 0;
         m_deps->GetSwapInfo(max_pages, reserved_pages);
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Swap Max Pages (", max_pages).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Swap Reserved Pages (", reserved_pages).append(L")"));
 
         m_totalSwap = max_pages * pageSize;                    // Resulting units: bytes
         m_availableSwap = (max_pages - reserved_pages) * pageSize;  // Resulting units: bytes
         m_usedSwap = reserved_pages * pageSize;                // Resulting units: bytes
+
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Swap Total (", m_totalSwap).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Swap Available (", m_availableSwap).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - Swap Used (", m_usedSwap).append(L")"));
 
 #elif defined(hpux)
 
