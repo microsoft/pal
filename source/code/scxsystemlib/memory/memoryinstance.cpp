@@ -19,6 +19,7 @@
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxmath.h>
 #include <scxsystemlib/memoryinstance.h>
+#include <scxsystemlib/scxsysteminfo.h>
 #include <string>
 #include <sstream>
 
@@ -741,8 +742,29 @@ namespace SCXSystemLib
     bool MemoryInstance::GetCacheSize(scxulong& cacheSize)
     {
 #if defined(sun)
-        scxulong cache_size = 0;
+        SCXSystemLib::SystemInfo si;
+        bool fIsInGlobalZone;
 
+        // According to Oracle SR 3-13482152541, the Solaris ZFS cache lives
+        // in the kernal, on the global zone. If the system has both global
+        // and local zones, then the ZFS cache is in the global zone only,
+        // and is shared among both the global and local zones.
+        //
+        // As a result, from the local zone perspective, the ZFS cache is
+        // essentially "free" (it doesn't come from local zone memory).
+        //
+        // If we support non-global zones, and we're NOT in the global
+        // zone, then just return zero for the cache size.
+        if ( si.GetSUN_IsInGlobalZone(fIsInGlobalZone) )
+        {
+            if ( ! fIsInGlobalZone )
+            {
+                cacheSize = 0;
+                return true;
+            }
+        }
+
+        scxulong cache_size = 0;
         SCXCoreLib::SCXThreadLock lock(m_kstat_lock_handle);
 
         m_kstat->Update();
