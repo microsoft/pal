@@ -567,6 +567,52 @@ namespace SCXCoreLib
 
     /*----------------------------------------------------------------------------*/
     /**
+       Specific errno exception for ERANGE errors (see SCXErrnoException).
+
+       This gives remedial information on how to perhaps solve a system
+       configuration problem
+    */
+    class SCXErrnoERANGE_Exception : public SCXErrnoException {
+    public: 
+        /*----------------------------------------------------------------------------*/
+        /**
+           Ctor
+           \param[in] fkncall Function call for file-related operation
+           \param[in] text    Remedial text that might be helpful to the user
+           \param[in] errno_  System error code with local interpretation
+           \param[in] l       Source code location object
+
+        */
+        SCXErrnoERANGE_Exception(std::wstring fkncall, std::wstring text, int errno_, const SCXCodeLocation& l) 
+            : SCXErrnoException(fkncall, errno_, l), m_fkncall(fkncall), m_recoveryText(text)
+        { };
+
+        std::wstring What() const {
+            std::wostringstream txt;
+            txt << L"Calling " << m_fkncall << L"()"
+                << L" returned an error with errno = " << m_errno << L" (" << m_errtext.c_str() << L"). "
+                << m_recoveryText;
+            return txt.str();
+        }
+
+        /** Returns function call for the file operation falure
+            \returns file-operation in std::wstring encoding
+        */
+        std::wstring GetFnkcall() const { return m_fkncall; }
+
+        /** Returns path for file open failure
+            \returns path text in std::wstring encoding
+        */
+        std::wstring GetRecoveryText() const { return m_recoveryText; }
+    protected:
+        //! Text of file-related function call
+        std::wstring m_fkncall;
+        //! Text describing the significant parameter to the system call
+        std::wstring m_recoveryText;
+    };        
+
+    /*----------------------------------------------------------------------------*/
+    /**
        Exeception for access violations.
 
        Provides a way to report that the program attempted a procedure for which

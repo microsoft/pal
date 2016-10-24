@@ -447,7 +447,7 @@ namespace SCXCoreLib
         }
         else if(ERANGE == rc)
         {
-            throw SCXInternalErrorException(L"Buffer size was too small for the name.", SCXSRCLOCATION);
+            throw SCXErrnoERANGE_Exception(L"gethostbyname_r", L"This is often caused by a corrupted /etc/hosts file. Please check that file for formatting issues.", ERANGE, SCXSRCLOCATION);
         }
         return L"";
     }
