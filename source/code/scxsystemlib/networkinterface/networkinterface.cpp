@@ -605,6 +605,9 @@ std::vector<wstring> NetworkInterfaceInfo::s_validInterfaces;
 void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &interfaces,
                                              SCXHandle<NetworkInterfaceDependencies> deps) {
 
+    SCXCoreLib::SCXLogHandle m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.networkinterface"));
+    SCX_LOGHYSTERICAL(m_log, L"NetworkInterfaceInfo::FindAllUsingKStat entry");
+
     SCXCoreLib::SCXHandle<SCXKstat> kstat = deps->CreateKstat();
 
     for (kstat_t* cur = kstat->ResetInternalIterator(); cur; cur = kstat->AdvanceInternalIterator())
@@ -624,6 +627,14 @@ void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &
             scxulong collisions;
             scxulong lbufs;
             scxulong ifspeed;
+
+            if ( SCXCoreLib::eHysterical >= m_log.GetSeverityThreshold() )
+            {
+                std::wstringstream errMsg;
+                errMsg << L"FindAllUsingKStat: considering " << StrFromUTF8(cur->ks_name)
+                       << L", class: " << StrFromUTF8(cur->ks_class);
+                SCX_LOGHYSTERICAL(m_log, errMsg.str());
+            }
 
             // Skip the loopback interface (WI 463810)
             FileDescriptor fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -654,6 +665,9 @@ void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &
                 if (!hasLbufs && (hasIpackets || hasOpackets || hasIpackets64 || hasOpackets64 || hasRbytes || hasObytes
                             || hasRbytes64 || hasObytes64 || hasIerrors || hasOerrors || hasCollisions))
                 {
+                    SCX_LOGHYSTERICAL(m_log, StrAppend(wstring(L"FindAllUsingKStat: Adding instrance "),
+                                                       StrFromUTF8(cur->ks_name)));
+
                     NetworkInterfaceInfo instance(deps);
                     instance.m_name = StrFromUTF8(cur->ks_name);
 
@@ -666,17 +680,31 @@ void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &
                     instance.m_collisions = ValueOf(hasCollisions, collisions, eCollisions, instance.m_knownAttributesMask);
                     instance.m_speed=ValueOf(hasIfspeed, ifspeed, eSpeed, instance.m_knownAttributesMask);;
 
-#if defined(sun)
                     // Save the kstat criteria values for searching other values
                     instance.m_ks_module=StrFromUTF8(cur->ks_module);
                     instance.m_ks_instance=cur->ks_instance;
-#endif
 
                     interfaces.push_back(instance);
                 }
+                else
+                {
+                    SCX_LOGHYSTERICAL(m_log, StrAppend(
+                                                 StrAppend(wstring(L"FindAllUsingKStat: Disqualified "),
+                                                        StrFromUTF8(cur->ks_name)),
+                                                 L" (no stats)"));
+                }
+            }
+            else
+            {
+                SCX_LOGHYSTERICAL(m_log, StrAppend(
+                                             StrAppend(wstring(L"FindAllUsingKStat: Disqualified "),
+                                                       StrFromUTF8(cur->ks_name)),
+                                             L" (ioctl failed)"));
             }
         }
     }
+
+    SCX_LOGHYSTERICAL(m_log, L"NetworkInterfaceInfo::FindAllUsingKStat exit");
 }
 
 /*----------------------------------------------------------------------------*/
