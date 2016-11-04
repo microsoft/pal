@@ -59,6 +59,7 @@ class SCXStaticLogicalDiskPalTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( SanityTestSameLogicalDisksAsStatisticalDisks );
     SCXUNIT_TEST_ATTRIBUTE(TestSameLogicalDisksAsStatisticalDisks, SLOW);
 #if defined (linux)
+    CPPUNIT_TEST( bug2942598_SanityTestSameLogicalDisksAsStatisticalDisks );
     CPPUNIT_TEST( TestGetHealthStateChanges );
     CPPUNIT_TEST( TestDeviceTypesForLinux );
 #endif
@@ -276,6 +277,41 @@ public:
     }
 
 #if defined (linux)
+
+    void bug2942598_SanityTestSameLogicalDisksAsStatisticalDisks()
+    {
+        // This test needs root access on RHEL4
+#if defined(PF_DISTRO_REDHAT) && (PF_MAJOR==4)
+        if (0 != geteuid())
+        {
+            SCXUNIT_WARNING(L"Platform needs privileges to run SanityTestSameLogicalDisksAsStatisticalDisks test");
+               return;
+        }
+#endif
+        std::wstring mtabFileName=L"./testfiles/bug2942598_mnttab";
+        SCXCoreLib::SCXHandle<DiskDependTest> deps( new DiskDependTest());
+        deps->SetMountTabPath(mtabFileName);
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum = new SCXSystemLib::StaticLogicalDiskEnumeration(deps));
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Init());
+        CPPUNIT_ASSERT_NO_THROW(m_diskEnum->Update(true));
+        SCXSystemLib::StatisticalLogicalDiskEnumeration statisticalDisks(deps);
+        statisticalDisks.Init();
+        statisticalDisks.Update(true);
+
+        CPPUNIT_ASSERT_EQUAL(statisticalDisks.Size(), m_diskEnum->Size());
+
+        for (SCXSystemLib::EntityEnumeration<SCXSystemLib::StatisticalLogicalDiskInstance>::EntityIterator iter = statisticalDisks.Begin(); iter != statisticalDisks.End(); iter++)
+        {
+            std::wstring name;
+            SCXCoreLib::SCXHandle<SCXSystemLib::StatisticalLogicalDiskInstance> di = *iter;
+            CPPUNIT_ASSERT(di->GetDiskName(name));
+            SCXCoreLib::SCXHandle<SCXSystemLib::StaticLogicalDiskInstance> inst = m_diskEnum->GetInstance(name);
+            CPPUNIT_ASSERT(0 != inst);
+        }
+
+        statisticalDisks.CleanUp();
+     }
+
 
     void TestGetHealthStateChanges()
     {
