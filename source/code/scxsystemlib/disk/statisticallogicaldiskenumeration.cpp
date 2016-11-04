@@ -217,6 +217,10 @@ namespace SCXSystemLib
         scxulong total_rPercent = 0;
         scxulong total_wPercent = 0;
         scxulong total_tPercent = 0;
+
+        set<wstring> diskSet;
+        pair<set<wstring>::iterator,bool> Pair;
+
         SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> total = GetTotalInstance();
         if (0 != total)
         {
@@ -229,6 +233,11 @@ namespace SCXSystemLib
         {
             SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = *iter;
             disk->Update();
+
+            Pair = diskSet.insert(disk->m_device);
+            if(Pair.second == false)
+                continue;
+
             if (0 != total)
             {
                 total->m_readsPerSec += disk->m_readsPerSec;
@@ -387,7 +396,7 @@ namespace SCXSystemLib
         {
             if ( ! m_deps->FileSystemIgnored(it->fileSystem) && ! m_deps->DeviceIgnored(it->device))
             {
-                SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = FindDiskByDevice(it->device);
+                SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = GetInstance(it->mountPoint);
                 if (0 == disk)
                 {
                     disk = new StatisticalLogicalDiskInstance(m_deps);
