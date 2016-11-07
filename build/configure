@@ -90,6 +90,11 @@ case $uname in
 	fi
 
         case `uname -m` in
+	    # ARCH is only used for OMS to determine the correct ruby folder
+	    ppc64*)
+		PF_ARCH=ppc
+		ARCH=ppc
+	    ;;
             *64*)
                 PF_ARCH=x64
                 ARCH=x64

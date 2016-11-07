@@ -993,15 +993,20 @@ namespace SCXSystemLib
         
         try
         {
-            std::wstring command = parted_path + L" -l";
+            std::wstring command = parted_path + L" -ls";
             SCX_LOGTRACE(m_log, L"Invoking command : \"" + command + L"\"");
             int ret = m_deps->Run(command, processInput, processOutput, processErr, 15000);
 
             std::string errOut = processErr.str();
+            if (errOut.size())
+            {
+                SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from parted command: ", StrFromUTF8(errOut)));
+            }
+
             partedOutput = processOutput.str();
             SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(partedOutput)));
             
-            success = (ret == 0 && errOut.size() == 0);
+            success = (ret == 0 && partedOutput.size() > 0);
         }
         catch (SCXCoreLib::SCXInternalErrorException &e) 
         {
@@ -1029,11 +1034,11 @@ namespace SCXSystemLib
                 partedOutput = processOutput.str();
                 SCX_LOGTRACE(m_log, StrAppend(L"  Got this output: ", StrFromUTF8(partedOutput)));
 
-                if (errOut.size() > 0)
+                if (errOut.size())
                 {
                     SCX_LOGWARNING(m_log, StrAppend(L"Got this error string from parted command: ", StrFromUTF8(errOut)));
                 }
-                success = (ret == 0 && errOut.size() == 0);
+                success = (ret == 0 && errOut.empty());
             }
             catch (SCXCoreLib::SCXInternalErrorException &e) 
             {
@@ -1049,7 +1054,7 @@ namespace SCXSystemLib
             }
         }
 
-        if (partedOutput.size() == 0)
+        if (partedOutput.empty())
         {
             SCX_LOG(m_log, suppressor.GetSeverity(L"EmptyOutput"), L"Unable to retrieve partition information from OS...");
             return false;

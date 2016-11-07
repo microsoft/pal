@@ -57,7 +57,7 @@ public:
         (void)timeout;
         (void)cwd;
         (void)chrootPath;
-        if (command == L"/usr/sbin/parted -l" || command == L"/sbin/parted -l")
+        if (command == L"/usr/sbin/parted -ls" || command == L"/sbin/parted -ls")
         {
             ifstream parted_file("testfiles/orapdb01_parted_output.txt");
             mystdout << parted_file.rdbuf();

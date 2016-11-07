@@ -239,7 +239,7 @@ namespace SCXSystemLib
         }
 
         wstring  strMachine = StrFromUTF8(uname_buf.machine);
-        if (StrCompare(strMachine, L"x86_64") == 0)
+        if (StrCompare(strMachine, L"x86_64") == 0 || StrCompare(strMachine, L"ppc64le") == 0)
         {
             bitSize = 64;
         }
@@ -357,7 +357,7 @@ namespace SCXSystemLib
 //
 /*----------------------------------------------------------------------------*/
 
-#if defined(linux)
+#if defined(linux) && !defined(ppc)
 
     // this is the 4 1-byte characters "Hv#1" as a 4-byte unsigned little endian integer
 
@@ -545,7 +545,7 @@ namespace SCXSystemLib
 
        TODO: Complete implementation for all platforms.  Until then, just return unknown.
     */
-#if defined(linux)
+#if defined(linux) && !defined(ppc)
     eVmType SystemInfo::DetermineVirtualMachineState()
     {
         // Save the last copy we fetched (shouldn't normally change)
@@ -566,6 +566,12 @@ namespace SCXSystemLib
             default:
                 return eVmUnknown;
         }
+    }
+#elif defined(linux) && defined(ppc)
+    eVmType SystemInfo::DetermineVirtualMachineState()
+    {
+        // Linux is always virtualized on PowerPC
+        return eVmDetected;
     }
 #elif defined(aix)
     eVmType SystemInfo::DetermineVirtualMachineState()

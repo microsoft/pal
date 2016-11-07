@@ -33,6 +33,8 @@ static const size_t cs_bufferSize = (1 << 23); // 2^23 = 8M
 // http://software.intel.com/en-us/articles/itaniumr-processor-family-performance-advantages-register-stack-architecture
 #if defined(hpux) && defined(ia64)
 static const size_t cs_fudgeFactor = (size_t)(cs_bufferSize * 1.1/2.0);
+#elif defined(ppc)
+static const size_t cs_fudgeFactor = (1 << 17); // 2^17 = 128k
 #else
 static const size_t cs_fudgeFactor = (1 << 13); // 2^13 = 8k
 #endif
