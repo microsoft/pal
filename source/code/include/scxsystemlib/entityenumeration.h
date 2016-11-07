@@ -164,7 +164,7 @@ namespace SCXSystemLib
                 m_instances[i]->Update();
                 m_instances[i]->ResetUnexpectedException();
             } catch ( SCXCoreLib::SCXException& e ){
-                static scx_atomic_t s_ExceptionsCounter = 0;
+                static scx_atomic_t s_ExceptionsCounter(0);
 
                 if ( s_ExceptionsCounter < 10 ){
                     scx_atomic_increment( &s_ExceptionsCounter );
@@ -184,7 +184,7 @@ namespace SCXSystemLib
                 m_totalInstance->Update();
                 m_totalInstance->ResetUnexpectedException();
             } catch ( SCXCoreLib::SCXException& e ){
-                static scx_atomic_t s_ExceptionsCounter = 0;
+                static scx_atomic_t s_ExceptionsCounter(0);
 
                 if ( s_ExceptionsCounter < 10 ){
                     scx_atomic_increment( &s_ExceptionsCounter );

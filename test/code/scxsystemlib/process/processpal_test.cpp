@@ -193,8 +193,9 @@ private:
 
     bool VerifyPIDSanity(scxulong pid)
     {
-#if defined(aix)
+#if defined(aix) || defined(ppc)
         // AIX doesn't assign PIDs sequentially so there isn't an obvious range that PIDs fall into
+        (void)pid; 
         return true;
 #elif defined(linux)
         return pid <= 65535;

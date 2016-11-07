@@ -36,7 +36,7 @@ public:
     //! \param[in]  value      Value to be appended
     //! \returns    *this
     template <class T>
-    inline SCXDumpStringBuilder &Scalar(const std::string &name, const T value) {
+    inline SCXDumpStringBuilder &Scalar(const std::string &name, const T &value) {
         m_stream << L" " << name.c_str() << L"=" << value;
         return *this;
     }

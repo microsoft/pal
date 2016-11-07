@@ -103,6 +103,7 @@ public:
 
     LinuxVmType m_MockLinuxVM;      //!< Type of virtual machine to mock
 
+#if !defined(ppc)
     virtual void CallCPUID(
         CpuIdFunction function,
         Registers& registers)
@@ -172,6 +173,8 @@ public:
                 break;
         }
     }
+#endif
+
 #elif defined(aix)
     //
     // Test mock for perfstat_partition_total (AIX detection of virtual machines)
@@ -210,7 +213,9 @@ class SCXSystemInfoTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE( SCXSystemInfoTest  );
     CPPUNIT_TEST( callDumpString );
     CPPUNIT_TEST( TestGetNativeBitSize );
-#if defined(linux)
+#if defined(linux) && defined(ppc)
+    CPPUNIT_TEST( TestVirtualMachine_True );
+#elif defined(linux)
     // Linux-specific tests to verify virtual machine detection
     CPPUNIT_TEST( TestVirtualMachine_Physical );
     CPPUNIT_TEST( TestVirtualMachine_HyperV );
@@ -298,7 +303,7 @@ public:
             {
                 cBitSize = 32;
             }
-            else if (strcmp(buf, "x86_64") == 0)
+            else if (strcmp(buf, "x86_64") == 0 || strcmp(buf, "ppc64le") == 0)
             {
                 cBitSize = 64;
             }
@@ -386,7 +391,13 @@ public:
     }
 #endif // defined(linux) || defined(aix)
 
-#if defined(linux)
+#if defined(linux) && defined(ppc)
+    void TestVirtualMachine_True()
+    {
+        SystemInfo si;
+        CPPUNIT_ASSERT_EQUAL( (int) eVmDetected, (int) GetVMState(si) );
+    }
+#elif defined(linux)
     //
     // Linux-specific tests to verify virtual machine detection
     //

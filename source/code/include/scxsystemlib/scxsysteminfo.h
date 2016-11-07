@@ -89,7 +89,7 @@ namespace SCXSystemLib
         virtual char *getenv(const char *name) const;
         virtual uid_t geteuid() const;
 
-#if defined(linux)
+#if defined(linux) && !defined(ppc)
         virtual void CallCPUID(CpuIdFunction function, Registers& registers);
 
         // These aren't typically overridden, and thus aren't virtual

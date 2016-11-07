@@ -671,6 +671,28 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
             std::vector<std::string> topTokens;
             Tokenize(topOutput, topTokens);
 
+            // We may have "Mem:" or "Mem :", which affects the offset (RH vs. CentOS, strangely)
+            size_t toffset = 0;
+            if ( ":" == topTokens[2] )
+            {
+                toffset++;
+            }
+
+#if defined(ppc)
+            /*
+            ----------------------------------------------------------
+            ----- Output from PowerPC Redhat 7 Linux systems: --------
+            ----------------------------------------------------------
+            KiB Mem :  1716736 total,   400064 free,   276288 used,  1040384 buff/cache
+            KiB Swap:  2097088 total,  2097088 free,        0 used.  1212416 avail Mem
+            */
+            keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2 + toffset]);
+            keyValues["TotalSwap"]       = ToSCXUlong(topTokens[12 + toffset]);
+            keyValues["AvailableMemory"] = ToSCXUlong(topTokens[4 + toffset]);
+            keyValues["UsedMemory"]      = ToSCXUlong(topTokens[6 + toffset]);
+            keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[14 + toffset]);
+            keyValues["UsedSwap"]        = ToSCXUlong(topTokens[16 + toffset]);
+#else
             /*
             ----------------------------------------------------------
             ---------- Output from most Linux systems: ---------------
@@ -687,13 +709,6 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
 
             if ( (topTokens.size() >= 21) && (topTokens[0] == "KiB") )
             {
-                // We may have "Mem:" or "Mem :", which affects the offset (RH vs. CentOS, strangely)
-                size_t toffset = 0;
-                if ( ":" == topTokens[2] )
-                {
-                    toffset++;
-                }
-
                 keyValues["TotalMemory"]     = ToSCXUlong(topTokens[2 + toffset]);
                 keyValues["AvailableMemory"] = ToSCXUlong(topTokens[6 + toffset]);
                 keyValues["UsedMemory"]      = ToSCXUlong(topTokens[4 + toffset]);
@@ -710,7 +725,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
                 keyValues["AvailableSwap"]   = ToSCXUlong(topTokens[14]);
                 keyValues["UsedSwap"]        = ToSCXUlong(topTokens[12]);
             }
-
+#endif
         }
 
         // We did look up the value for UsedMemory/UsedSwap above
