@@ -11,6 +11,8 @@ The PAL has two primary components:
 - [SCXCoreLib](#scxcorelib)
 - [SCXSystemLib](#scxsystemlib)
 
+Testing strategy is discussed [here](#testing-strategy).
+
 ### SCXCoreLib
 
 SCXCoreLib provides portable services for:
@@ -62,6 +64,35 @@ Primary enumeration information is supported for:
 
 This component tends to be highly system specific, and may run on
 fewer systems than [SCXCoreLib](#scxcorelib), above.
+
+### Testing Strategy
+
+The PAL has a fair number of unit tests. Unit tests were written with
+both [dependency injection][], and to a lesser extent, [mocking][] in
+mind. By using dependency injection, we can control system
+dependencies well and specifically test code fragments even if unit
+tests are run on a system without necessary hardware configuration.
+
+Examples for dependency injection include:
+
+- [CPU handling][]: See class CPUPALTestDependencies and how it provides
+special /proc/cpuinfo files for dependency injection purposes, regardless
+of how the physical machine is actually configured.
+- [Disk handling][]: See `bug*` files and how associated code handles those files.
+
+There is also a very simplistic example of [dependency injection][] in
+the bash script [GetLinuxOS.sh][], tested by [getlinuxos_test.cpp][].
+In this example, [GetLinuxOS.sh][] is tested for proper platform handling
+regardless of the actual platform that the test is running on.
+
+[dependency injection]: https://en.wikipedia.org/wiki/Dependency_injection
+[mocking]: https://en.wikipedia.org/wiki/Mock_object
+
+[CPU handling]: https://github.com/Microsoft/pal/tree/master/test/code/scxsystemlib/cpu
+[Disk handling]: https://github.com/Microsoft/pal/tree/master/test/code/scxsystemlib/disk
+
+[GetLinuxOS.sh]: https://github.com/Microsoft/pal/blob/master/source/code/scxsystemlib/common/GetLinuxOS.sh
+[getlinuxos_test.cpp]: https://github.com/Microsoft/pal/blob/master/test/code/scxsystemlib/common/getlinuxos_test.cpp
 
 ### Code of Conduct
 
