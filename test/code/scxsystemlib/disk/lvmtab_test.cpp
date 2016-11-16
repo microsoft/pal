@@ -365,6 +365,7 @@ class LVMtabParser : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( FileToLongFails );
     CPPUNIT_TEST( WI56901_LVM_WithOver127Partitions );
     CPPUNIT_TEST( WI56901_LVM_WithOver127PartitionsNegTests );
+    CPPUNIT_TEST( WI9625246_LVMTAB_WithOver127VGS );
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -419,6 +420,13 @@ public:
         CPPUNIT_ASSERT_THROW(m_lvmTab->GetPart(1, 1), SCXCoreLib::SCXIllegalIndexException<size_t>);
         CPPUNIT_ASSERT_THROW(m_lvmTab->GetPart(2, 0), SCXCoreLib::SCXIllegalIndexException<size_t>);
     }
+
+    void WI9625246_LVMTAB_WithOver127VGS()
+    {
+            CPPUNIT_ASSERT_NO_THROW(m_lvmTab = new SCXSystemLib::SCXLvmTab(L"testfiles/bug9625246.lvmtab"));
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(131), m_lvmTab->GetVGCount());
+    }
+
 
     void FileToShortFails()
     {

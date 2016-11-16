@@ -56,13 +56,13 @@ namespace SCXSystemLib
         file_pos += 7;
         // Read number of VGs.
         fs->seekg(file_pos);
-        char num_vg = 0;
-        fs->read(&num_vg, sizeof(num_vg));
+        unsigned char num_vg = 0;
+        fs->read((char *)&num_vg, sizeof(num_vg));
         SCX_LOGHYSTERICAL(m_log, L"SCXLvmTab:   Read num_vg: " + SCXCoreLib::StrFrom((int) num_vg));
         file_pos += sizeof(num_vg);
         // Skip 4 bytes.
         file_pos += 4;
-        for (char vg_idx=0; vg_idx < num_vg && SCXCoreLib::SCXStream::IsGood(*fs); ++vg_idx)
+        for (unsigned char vg_idx=0; vg_idx < num_vg && SCXCoreLib::SCXStream::IsGood(*fs); ++vg_idx)
         {
             SCXVG vg;
             // Read volume group (1K)
