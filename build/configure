@@ -92,8 +92,11 @@ case $uname in
         case `uname -m` in
 	    # ARCH is only used for OMS to determine the correct ruby folder
 	    ppc64*)
-		PF_ARCH=ppc
-		ARCH=ppc
+                PF_ARCH=ppc
+                ARCH=ppc
+                VERSION=`grep 'Red Hat Enterprise' /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
+                PF_MAJOR=`echo $VERSION | sed s/[.][0-9]*\//`
+                PF_MINOR=`echo $VERSION | sed s/\[0-9]*[.]//`
 	    ;;
             *64*)
                 PF_ARCH=x64
