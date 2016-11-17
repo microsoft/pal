@@ -26,6 +26,7 @@ class LinuxRPMFile:
         scxutil.MkAllDirs(os.path.join(self.intermediateDir, "RPM-packages/RPMS/i486"))
         scxutil.MkAllDirs(os.path.join(self.intermediateDir, "RPM-packages/RPMS/i586"))
         scxutil.MkAllDirs(os.path.join(self.intermediateDir, "RPM-packages/RPMS/i686"))
+        scxutil.MkAllDirs(os.path.join(self.intermediateDir, "RPM-packages/RPMS/ppc64le"))
         scxutil.MkAllDirs(os.path.join(self.intermediateDir, "RPM-packages/RPMS/noarch"))
         scxutil.MkAllDirs(os.path.join(self.intermediateDir, "RPM-packages/SOURCES"))
         scxutil.MkAllDirs(os.path.join(self.intermediateDir, "RPM-packages/SPECS"))
@@ -133,7 +134,8 @@ class LinuxRPMFile:
 
         specfile.close()
 
-
+        if self.variables['PFDISTRO'] == 'ULINUX' and self.variables['PFARCH'] == 'ppc':
+            self.variables['PFDISTRO']='REDHAT'
     def StageAndProperlyNameRPM(self):
         if 'OUTPUTFILE' in self.variables:
             rpmNewFileName = self.variables['OUTPUTFILE'] + '.rpm'
