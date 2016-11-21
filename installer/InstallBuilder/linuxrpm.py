@@ -134,8 +134,6 @@ class LinuxRPMFile:
 
         specfile.close()
 
-        if self.variables['PFDISTRO'] == 'ULINUX' and self.variables['PFARCH'] == 'ppc':
-            self.variables['PFDISTRO']='REDHAT'
     def StageAndProperlyNameRPM(self):
         if 'OUTPUTFILE' in self.variables:
             rpmNewFileName = self.variables['OUTPUTFILE'] + '.rpm'
