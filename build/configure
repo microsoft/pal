@@ -170,6 +170,36 @@ case $uname in
         PF_WIDTH=32
     ;;
 
+    Darwin)
+        PF=Darwin
+        PF_DISTRO=MACOS
+        VERSION_STRING=`defaults read loginwindow SystemVersionStampAsString`
+        PF_MAJOR=`echo $VERSION_STRING | cut -f1 -d.`
+        PF_MINOR=`echo $VERSION_STRING | cut -f2 -d.`
+
+        case `uname -m` in
+            *64*)
+                PF_ARCH=x64
+                ARCH=x64
+                PF_WIDTH=64
+            ;;
+            *86*)
+                PF_ARCH=x86
+                ARCH=ia32
+                PF_WIDTH=32
+            ;;
+            *athlon*)
+                PF_ARCH=x86
+                ARCH=ia32
+                PF_WIDTH=32
+            ;;
+            *)
+                PF_ARCH=UNKNOWN
+                ARCH=UNKNOWN
+            ;;
+        esac
+    ;;
+
 esac
 
 ##==============================================================================
