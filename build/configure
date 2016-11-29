@@ -38,6 +38,13 @@ do
       BUILD_DPKG=1
     ;;
 
+    --enable-system-build)
+      if [ `uname` = "Linux" ]; then
+          BUILD_RPM=1
+          BUILD_DPKG=1
+      fi
+    ;;
+
     *)
       echo "configure: invalid option '$opt'"
       echo "Try configure --help' for more information."
@@ -66,6 +73,7 @@ OPTIONS:
     --enable-bullseye           Enables the use of code coverage tools (Bullseye).
     --enable-debug              Perform a debug build.
     --enable-ulinux             Specifies platform as ULINUX (Linux only).
+    --enable-system-build       Build for distribution release
 
 EOF
     exit 0
