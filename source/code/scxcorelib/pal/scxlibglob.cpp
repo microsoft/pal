@@ -22,12 +22,12 @@ namespace SCXCoreLib
         // if directory paths are non-existant, provide default system library paths
         if (paths.size() == 0)
         {
-            m_paths.push_back(L"/lib");
-            m_paths.push_back(L"/usr/lib");
 #if PF_WIDTH == 64
             m_paths.push_back(L"/lib64");
             m_paths.push_back(L"/usr/lib64");
 #endif          
+            m_paths.push_back(L"/lib");
+            m_paths.push_back(L"/usr/lib");
         }
     }
     
