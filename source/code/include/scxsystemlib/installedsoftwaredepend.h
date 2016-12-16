@@ -25,11 +25,6 @@ Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for li
 #if defined(linux)
 #include <scxcorelib/scxglob.h>
 #include <dlfcn.h>
-extern "C" { 
-#include <rpm/rpmcli.h> 
-#include <rpm/rpmds.h> 
-#include <rpm/rpmts.h> 
-}
 
 #endif
 
@@ -154,36 +149,6 @@ namespace SCXSystemLib
         };
     };
 
-    /*
-      Acts as a container for all of the symbols loaded from the rpm dynamic library
-     */
-    struct rpmAPI 
-    {
-        LibHandle m_handle;  //!< contains the LibHandle for the rpm library
-        struct poptOption * m_rpmQueryPoptTable; //!< contains the loaded symbol rpmQueryPoptTable
-        struct poptOption * m_rpmQVSourcePoptTable; //!< contains the loaded symbol rpmQVSourcePoptTable
-        struct rpmQVKArguments_s * m_rpmQVKArgs; //!< contains the loaded symbol rpmQVKArgs
-        poptContext (*mf_rpmcliInit)(int argc, char *const argv[], struct poptOption * optionsTable); //!< contains the loaded function symbol rpmcliInit
-        rpmts (*mf_rpmtsCreate)(void); //!< contains the loaded function symbol rpmtsCreate
-        poptContext (*mf_rpmcliFini)(poptContext optCon); //!< contains the loaded function symbol rpmcliFini
-        int (*mf_rpmcliQuery)(rpmts ts, QVA_t qva, const char ** argv); //!< contains the loaded function symbol rpmcliQuery
-        rpmts (*mf_rpmtsFree)(rpmts ts); //!< contains the loaded function symbol rpmtsFree
-    };
-
-    /*
-      Acts as a container for all of the symbols loaded from the popt dynamic library
-     */
-    struct poptAPI
-    {
-        LibHandle m_handle; //!< contains the LibHandle for the popt library
-        struct poptOption * m_poptAliasOptions; //!< contains the loaded symbol poptAliasOptions
-        struct poptOption * m_poptHelpOptions; //!< contains the loaded symbol poptHelpOptions
-        const char ** (*mf_poptGetArgs)(poptContext con); //!< contains the loaded function symbol poptGetArgs
-    };
-
-    static rpmAPI gs_rpm;   //!< A global static variable containing the dynamically opened rpm library symbols
-    static poptAPI gs_popt; //!< A global static variable containing the dynamically opened popt library symbols
-
 #endif
          
     class InstalledSoftwareDependencies
@@ -216,7 +181,7 @@ namespace SCXSystemLib
         /*----------------------------------------------------------------------------*/
         /**
         Get All installed software Ids,
-        on linux, id will be display name since it's unique and we can get it from RPM API
+        on linux, id will be display name since it's unique and we can get it from RPM cli
         on solaris, id will be the name of folder where pkginfo stored.
         */
         virtual void GetInstalledSoftwareIds(std::vector<std::wstring>& ids);
@@ -225,9 +190,9 @@ namespace SCXSystemLib
     public:
         /*----------------------------------------------------------------------------*/
         /**
-        pass "-qi softwareName" params to RPM API and retrun the raw data about the software.
+        pass "-qi softwareName" params to RPM cli and retrun the raw data about the software.
         \param softwareName : the productName or displayName of softwareName
-        \param contents : Software information date retured by RPM API
+        \param contents : Software information date retured by RPM cli
         */
         virtual void GetSoftwareInfoRawData(const std::wstring& softwareName, std::vector<std::wstring>& contents);
 #endif
@@ -379,25 +344,16 @@ namespace SCXSystemLib
 
 #if defined(linux)
     private:
+
         /*----------------------------------------------------------------------------*/
         /**
-        Call RPM Query API
+        Call RPM cli using popen, and get the result
         \param argc : count of arguments of argv.
         \param argv : points to all arguments
-        \returns     the result if the rpm command runs sucessfully,when invoking RPM API fails, it is errno. of failures ,otherwise 0.
-        \throws SCXInternalErrorException if querying RPM fails
+        \param result : RPM query result
+        \throws SCXErrnoException if popen or pclose fails
         */
-        int InvokeRPMQuery(int argc, char * argv[]);
-        /*----------------------------------------------------------------------------*/
-        /**
-        Call RPM Query API, and get the result
-        \param argc : count of arguments of argv.
-        \param argv : points to all arguments
-        \param tempFileName : temporay file that the query result is saved to. 
-        \param result : RPM API query result
-        \throws SCXInternalErrorException if freopen stdout fails
-        */
-        void GetRPMQueryResult(int argc, char * argv[], const std::wstring& tempFileName, std::vector<std::wstring>& result);
+        void GetRPMQueryResult(int argc, char * argv[], std::vector<std::wstring>& result);
 
 #if defined(linux) && defined(PF_DISTRO_ULINUX)
         // helper struct used with GetDPKGTotal helper function
