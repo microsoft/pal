@@ -36,6 +36,12 @@ Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for li
 #include <scxcorelib/logsuppressor.h>
 #endif
 
+
+#if defined(linux)
+#define MAGIC_RPM_SEP "_/=/_"
+#endif
+
+
 using namespace std;
 using namespace SCXCoreLib;
 
@@ -70,28 +76,6 @@ namespace SCXSystemLib
     {
     }
 
-
-#if defined(linux) && defined(PF_DISTRO_ULINUX)
-    /**
-       This is a helper function to make the symbol lookup process simpler.
-       \param handle : the LibHandle for the library to do the lookup on
-       \param symbol : the symbol to look up
-       \param errorMessage : the output error message if there is one
-    */
-    static void * GetSymbolSimple(LibHandle& handle, string symbol, string& errorMessage)
-    {
-        void * retval = handle.GetSymbol(symbol.c_str());
-        if (retval == NULL)
-        {
-            // unable to find the symbol
-            errorMessage = " unable to find symbol: " + symbol + " :: " + errorMessage + string(handle.GetError());
-            return NULL;
-        }
-        
-        return retval;
-    }
-#endif
-
     /*----------------------------------------------------------------------------*/
     /**
     Init running context. 
@@ -102,88 +86,6 @@ namespace SCXSystemLib
         // The librpm functions and the container for the dynamic library symbol handles are not thread safe.
         SCXThreadLock rpmLock(ThreadLockHandleGet(L"RPMLock"));
         
-        // dlopen libraries
-        static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
-        
-        if (!gs_popt.m_handle.IsOpen())
-        {
-            SCXLibGlob poptDL(L"libpopt[^a-zA-Z]*so*");
-            vector<SCXFilePath> poptPaths = poptDL.Get();
-            
-            for (vector<SCXFilePath>::iterator it = poptPaths.begin(); it != poptPaths.end(); it++)
-            {
-                wstring wlibname = it->Get();
-                string libname = StrToUTF8(wlibname);
-                gs_popt.m_handle.Open(libname.c_str());
-                if (!gs_popt.m_handle.IsOpen())
-                {
-                    SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(wlibname));
-                    SCX_LOG(m_log, severity,  "Unable to open popt library: " + libname + " :: " + string(gs_popt.m_handle.GetError()));
-                    continue;
-                }
-                
-                // dynamically load the symbols that we need from this library
-                string errorMessage;
-                if ( !(gs_popt.m_poptAliasOptions = (struct poptOption *)GetSymbolSimple(gs_popt.m_handle, "poptAliasOptions", errorMessage)) ||
-                     !(gs_popt.m_poptHelpOptions = (struct poptOption *)GetSymbolSimple(gs_popt.m_handle, "poptHelpOptions", errorMessage)) ||
-                     !(gs_popt.mf_poptGetArgs = __extension__(const char ** (*)(poptContext con))GetSymbolSimple(gs_popt.m_handle, "poptGetArgs", errorMessage))
-                    )
-                {
-                    SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(wlibname));
-                    SCX_LOG(m_log, severity,  "In library: " + libname + errorMessage);
-                    if(gs_popt.m_handle.Close())
-                    {
-                        SCX_LOGERROR(m_log, "Unable to close detected popt library: " + libname);
-                    }
-                    continue;
-                }
-                
-                break;
-            }
-        }
-
-        if (gs_popt.m_handle.IsOpen() && !gs_rpm.m_handle.IsOpen())
-        {
-            SCXLibGlob rpmDL(L"librpm[^a-zA-Z]*so*");
-            vector<SCXFilePath> rpmPaths = rpmDL.Get();
-            
-            for (vector<SCXFilePath>::iterator it = rpmPaths.begin(); it != rpmPaths.end(); it++)
-            {
-                wstring wlibname = it->Get();
-                string libname = StrToUTF8(wlibname);
-                gs_rpm.m_handle.Open(libname.c_str());
-                if (!gs_rpm.m_handle.IsOpen())
-                {
-                    SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(wlibname));
-                    SCX_LOG(m_log, severity,  "Unable to open rpm library: " + libname + " :: " + string(gs_rpm.m_handle.GetError()));
-                    continue;
-                }
-                
-                // dynamically load the symbols we need from the rpm library and check if any errors            
-                string errorMessage;
-                if ( !(gs_rpm.m_rpmQueryPoptTable = (struct poptOption *)GetSymbolSimple(gs_rpm.m_handle, "rpmQueryPoptTable", errorMessage)) ||
-                     !(gs_rpm.m_rpmQVSourcePoptTable = (struct poptOption *)GetSymbolSimple(gs_rpm.m_handle, "rpmQVSourcePoptTable", errorMessage)) ||
-                     !(gs_rpm.m_rpmQVKArgs = (struct rpmQVKArguments_s *)GetSymbolSimple(gs_rpm.m_handle, "rpmQVKArgs", errorMessage)) ||
-                     !(gs_rpm.mf_rpmcliInit = __extension__(poptContext (*)(int argc, char *const argv[], struct poptOption * optionsTable))GetSymbolSimple(gs_rpm.m_handle, "rpmcliInit", errorMessage)) ||
-                     !(gs_rpm.mf_rpmtsCreate = __extension__(rpmts (*)(void))GetSymbolSimple(gs_rpm.m_handle, "rpmtsCreate", errorMessage)) ||
-                     !(gs_rpm.mf_rpmcliFini = __extension__(poptContext (*)(poptContext optCon))GetSymbolSimple(gs_rpm.m_handle, "rpmcliFini", errorMessage)) ||
-                     !(gs_rpm.mf_rpmcliQuery = __extension__(int (*)(rpmts ts, QVA_t qva, const char ** argv))GetSymbolSimple(gs_rpm.m_handle, "rpmcliQuery", errorMessage)) ||
-                     !(gs_rpm.mf_rpmtsFree = __extension__(rpmts (*)(rpmts ts))GetSymbolSimple(gs_rpm.m_handle, "rpmtsFree", errorMessage)) 
-                    )
-                {
-                    SCXCoreLib::SCXLogSeverity severity(suppressor.GetSeverity(wlibname));
-                    SCX_LOG(m_log, severity,  "In library: " + libname + errorMessage);
-                    if (gs_rpm.m_handle.Close())
-                    {
-                        SCX_LOGERROR(m_log, "Unable to close detected rpm library: " + libname);
-                    }
-                    continue;
-                }
-                
-                break;
-            }
-        }
-
         /**
            A dpkg status file will have entries similar to this:
 
@@ -372,7 +274,7 @@ Homepage: http://nfs.sourceforge.net/
     /*----------------------------------------------------------------------------*/
     /**
     Get All installed software Ids,
-    on linux, id will be display name since it's unique and we can get it from RPM API
+    on linux, id will be display name since it's unique and we can get it from RPM cli
     on solaris, id will be the name of folder where pkginfo stored.
     /param ids : contains all ids which identiry each software package.
     */
@@ -385,7 +287,7 @@ Homepage: http://nfs.sourceforge.net/
         char * argv[] = {const_cast<char*>(rpmCommandName.c_str()),
             const_cast<char*>(rpmCommandType.c_str())};
 
-        GetRPMQueryResult(argc, argv, L"rpmoutput", ids);
+        GetRPMQueryResult(argc, argv, ids);
 #if defined(PF_DISTRO_ULINUX)
         GetDPKGList(ids);
 #endif
@@ -425,212 +327,70 @@ Homepage: http://nfs.sourceforge.net/
 #if defined(linux)
     /*----------------------------------------------------------------------------*/
     /**
-    Call RPM Query API
+    Call RPM cli using popen, and get the result
     \param argc : count of arguments of argv.
     \param argv : points to all arguments
-    \returns     the result if the rpm command runs sucessfully,when invoking RPM API fails, it is errno. of failures ,otherwise 0.
-    \throws SCXInternalErrorException if querying RPM fails
+    \param result : RPM query result
+    \throws SCXErrnoException if popen or pclose fails
     */
-    int InstalledSoftwareDependencies::InvokeRPMQuery(int argc, char * argv[])
-    {
-#if defined(PF_DISTRO_ULINUX)
-        // The librpm functions and the container for the dynamic library symbol handles are not thread safe.
-        SCXThreadLock rpmLock(ThreadLockHandleGet(L"RPMLock"));
-        if (!gs_rpm.m_handle.IsOpen())
-        {
-            return -1;
-        }
-        if (!gs_popt.m_handle.IsOpen())
-        {
-            return -1;
-        }
-
-        struct poptOption optionsTable[] =
-        {
-            { NULL, '\0', POPT_ARG_INCLUDE_TABLE, gs_rpm.m_rpmQueryPoptTable, 0, "Query options (with -q or --query):", NULL },
-            { NULL, '\0', POPT_ARG_INCLUDE_TABLE, gs_rpm.m_rpmQVSourcePoptTable, 0, "Query/Verify options:", NULL },
-            { NULL, '\0', POPT_ARG_INCLUDE_TABLE, gs_popt.m_poptAliasOptions, 0, "Options implemented via popt alias/exec:", NULL },
-            { NULL, '\0', POPT_ARG_INCLUDE_TABLE, gs_popt.m_poptHelpOptions, 0, "Help options:", NULL },
-            POPT_TABLEEND
-        };
-
-        int errorCode = 0;
-        poptContext context = NULL;
-        rpmts ts = NULL;
-
-        //m_rpmQVKArgs is a global variable, it will be changed when invoking rpmcliQuery,
-        //and the change will invalidate next time's invoking, so we need to keep a copy of it before invoking.
-        struct rpmQVKArguments_s tempRpmQVKArgs;
-        memcpy(&tempRpmQVKArgs, gs_rpm.m_rpmQVKArgs, sizeof(struct rpmQVKArguments_s));
-        QVA_t qva = gs_rpm.m_rpmQVKArgs;
-        context = gs_rpm.mf_rpmcliInit(argc, argv, optionsTable);
-        if (context == NULL)
-        {
-            throw SCXInternalErrorException(L"rpmcliInit failed", SCXSRCLOCATION);
-        }
-
-        ts = gs_rpm.mf_rpmtsCreate();
-        if (ts == NULL)
-        {
-            (void)gs_rpm.mf_rpmcliFini(context);
-            throw SCXInternalErrorException(L"rpmtsCreate failed", SCXSRCLOCATION);
-        }
-
-        // 0 on success, else number of failures
-        const char ** poptArgs = gs_popt.mf_poptGetArgs(context);
-        errorCode = gs_rpm.mf_rpmcliQuery(ts, qva, poptArgs);
-
-        if (errorCode != 0)
-        {
-            (void)gs_rpm.mf_rpmtsFree(ts);
-            (void)gs_rpm.mf_rpmcliFini(context);
-            memcpy(gs_rpm.m_rpmQVKArgs, &tempRpmQVKArgs, sizeof (struct rpmQVKArguments_s));    // restore global QVK arguments
-            
-            // If the query failed, this can occur when a package is not found (which can happen if both dpkg and rpm are installed on
-            // the same machine), so do not throw an exception in this case.
-            //throw SCXInternalErrorException(UnexpectedErrno(L"rpmcliQuery failed", errorCode), SCXSRCLOCATION);
-            return errorCode;
-        }
-
-        ts = gs_rpm.mf_rpmtsFree(ts);
-
-        context = gs_rpm.mf_rpmcliFini(context);
-
-        //recover rpmQVKArgs data after invoking rpmcliQuery;
-        memcpy(gs_rpm.m_rpmQVKArgs, &tempRpmQVKArgs, sizeof (struct rpmQVKArguments_s));
-        return errorCode;
-
-#else // REDHAT or SUSE
-        // The librpm functions and the container for the dynamic library symbol handles are not thread safe.
-        SCXThreadLock rpmLock(ThreadLockHandleGet(L"RPMLock"));
-        struct poptOption optionsTable[] = 
-        { 
-            { NULL, '\0', POPT_ARG_INCLUDE_TABLE, rpmQueryPoptTable, 0, "Query options (with -q or --query):", NULL },
-            { NULL, '\0', POPT_ARG_INCLUDE_TABLE, rpmQVSourcePoptTable, 0, "Query/Verify options:", NULL }, 
-            POPT_AUTOALIAS 
-            POPT_AUTOHELP 
-            POPT_TABLEEND 
-        };
-
-        int errorCode = 0;
-        poptContext context = NULL;
-        rpmts ts = NULL;
-
-        //rpmQVKArgs is a global variable, it will be changed when invoking rpmcliQuery, 
-        //and the change will invalidate next time's invoking, so we need to keep a copy of it before invoking. 
-        struct rpmQVKArguments_s tempRpmQVKArgs;
-        memcpy(&tempRpmQVKArgs, &rpmQVKArgs, sizeof(struct rpmQVKArguments_s));
-        QVA_t qva = &rpmQVKArgs;
-
-        context = rpmcliInit(argc, argv, optionsTable);
-        if (context == NULL)
-        {
-            throw SCXInternalErrorException(L"rpmcliInit failed", SCXSRCLOCATION);
-        }
-
-        ts = rpmtsCreate();
-        if (ts == NULL)
-        {
-            (void)rpmcliFini(context);
-            throw SCXInternalErrorException(L"rpmtsCreate failed", SCXSRCLOCATION);
-        }
-
-        //0 on success, else number of failures 
-        //in redhat 4 or 5 and SuSE 9, 10, and 11 x86, the RPM version is 4.4.2,
-        //  prototype: int rpmcliQuery (rpmts ts, QVA_t qva,const char** argv)
-        //in redhat 6 and SuSE 11 ia64, the RPM version is 4.8,
-        //  prototype: int rpmcliQuery(rpmts ts, QVA_t qva, ARGV_const_t argv)
-        const char ** poptArgs = poptGetArgs(context);
-#if (defined(PF_DISTRO_REDHAT) && PF_MAJOR < 6) || (defined(PF_DISTRO_SUSE) && PF_MAJOR < 12)
-        errorCode = rpmcliQuery(ts, qva, poptArgs);
-#else
-        errorCode = rpmcliQuery(ts, qva, const_cast<ARGV_const_t>(poptArgs));
-#endif
-        if (errorCode != 0)
-        {
-            (void)rpmtsFree(ts);
-            (void)rpmcliFini(context);
-            memcpy(&rpmQVKArgs, &tempRpmQVKArgs, sizeof (struct rpmQVKArguments_s));    // restore global QVK arguments
-            throw SCXInternalErrorException(UnexpectedErrno(L"rpmcliQuery failed", errorCode), SCXSRCLOCATION);
-        }
-
-        ts = rpmtsFree(ts);
-
-        context = rpmcliFini(context);
-
-        //recover rpmQVKArgs data after invoking rpmcliQuery;
-        memcpy(&rpmQVKArgs, &tempRpmQVKArgs, sizeof (struct rpmQVKArguments_s));
-
-        return errorCode;
-#endif
-    }
-
-    /*----------------------------------------------------------------------------*/
-    /**
-    Call RPM Query API, and get the result
-    \param argc : count of arguments of argv.
-    \param argv : points to all arguments
-    \param tempFileName : temporay file that the query result is saved to. 
-    \param result : RPM API query result
-    \throws SCXInternalErrorException if freopen stdout fails
-    */
-    void InstalledSoftwareDependencies::GetRPMQueryResult(int argc, char * argv[], const wstring& tempFileName, std::vector<wstring>& result)
+    void InstalledSoftwareDependencies::GetRPMQueryResult(int argc, char * argv[], std::vector<wstring>& result)
     {
         // We need to redirect stdout to a file so we can capture the result of InvokeRPMQuery() call.
-        
-        // Flush stdout.
-        if (fflush(stdout) != 0)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"fflush(stdout) failed", errno), SCXSRCLOCATION);
-        }
-        // Make a copy of original stdout destination.
-        int oldStdOutFD = dup(1);
-        if (oldStdOutFD == -1)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"dup(1) failed", errno), SCXSRCLOCATION);
-        }
-        // Open new stdout destination.
-        int fileFD = open(SCXCoreLib::StrToUTF8(tempFileName).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRUSR | S_IWUSR);
-        if (fileFD == -1)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"open(" + tempFileName + L") failed", errno), SCXSRCLOCATION);
-        }
-        // Redirect stdout to the new destination.
-        if (dup2(fileFD, 1) == -1)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"dup2(fileFD, 1) failed", errno), SCXSRCLOCATION);
-        }
-
-        InvokeRPMQuery(argc, argv);
-
-        // Flush new stdout.
-        if (fflush(stdout) != 0)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"fflush(stdout) failed", errno), SCXSRCLOCATION);
-        }
-        // Restore stdout to the original destination.
-        if (dup2(oldStdOutFD, 1) == -1)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"dup2(oldStdOutFD, 1) failed", errno), SCXSRCLOCATION);
-        }
-        // Close new stdout destination, not needed anymore.
-        if (close(fileFD) != 0)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"close(fileFD) failed", errno), SCXSRCLOCATION);
-        }
-        // Close copy of the original stdout destination.
-        if (close(oldStdOutFD) != 0)
-        {
-            throw SCXInternalErrorException(UnexpectedErrno(L"close(oldStdOutFD) failed", errno), SCXSRCLOCATION);
-        }
-
-        SCXCoreLib::SCXHandle<std::wfstream> fs(SCXCoreLib::SCXFile::OpenWFstream(tempFileName, std::ios::in));
-        fs.SetOwner();
-        SCXStream::NLFs nlfs;
-        SCXCoreLib::SCXStream::ReadAllLines(*fs, result, nlfs);
-        fs->close();
+	FILE * fp;
+	
+	const int BUFFER_BLOCK_SIZE = 2048;
+	char contentBlock[BUFFER_BLOCK_SIZE];
+	char * content = NULL;
+	size_t totalBytesRead = 0;
+	size_t bytesRead = 0;
+	size_t currentBytePointer = 0;
+	int errorCode;
+	std::string systemString = "/bin/rpm ";
+	for (int i = 0; i < argc; ++i)
+	{
+	    systemString += std::string(argv[i]) + std::string(" ");
+	}
+	
+	fp = popen(systemString.c_str(), "r");
+	if (fp == NULL)
+	{
+	    throw SCXCoreLib::SCXErrnoException(L"GetRPMQueryResult popen", errno, SCXSRCLOCATION);
+	}
+	
+	while ( (bytesRead = fread(contentBlock, 1, BUFFER_BLOCK_SIZE, fp)) != 0)
+	{
+	    totalBytesRead += bytesRead;
+	    content = (char*)realloc(content, totalBytesRead + 1);
+	    memcpy((void*) (content + currentBytePointer), (void*)contentBlock, bytesRead);
+	    currentBytePointer += bytesRead;
+	}
+	
+	if (content == NULL)
+	{
+	    return;
+	}
+	
+	if (totalBytesRead == 0)
+	{
+	    free(content);
+	    pclose(fp);
+	    return;
+	}
+	
+	content[totalBytesRead] = '\0';
+	std::wstring wcontent = StrFrom(content);
+	StrReplaceAll(wcontent, StrFrom(MAGIC_RPM_SEP), L"\n");
+	StrTokenize(wcontent, result, L"\n");
+	
+	free(content);
+	errorCode = pclose(fp);
+	
+	if (errorCode == -1)
+	{
+	    throw SCXCoreLib::SCXErrnoException(L"GetRPMQueryResult pclose", errno, SCXSRCLOCATION);
+	}
     }
-
+    
 #if defined(PF_DISTRO_ULINUX)
     void InstalledSoftwareDependencies::GetDPKGInfo(const wstring & searchedPackage, vector<wstring>& result)
     {
@@ -660,37 +420,24 @@ Homepage: http://nfs.sourceforge.net/
 
     /*----------------------------------------------------------------------------*/
     /**
-    pass "-qi softwareName" params to RPM API and retrun the raw data about the software.
+    pass "-qi softwareName" params to RPM cli and retrun the raw data about the software.
     \param softwareName : the productName or displayName of softwareName
-    \param contents : Software information date retured by RPM API
+    \param contents : Software information date retured by RPM cli
     */
     void InstalledSoftwareDependencies::GetSoftwareInfoRawData(const wstring& softwareName, std::vector<wstring>& contents)
     {
         const std::string rpmCommandName = "";
         const std::string rpmCommandType = "-q";
-        const std::string rpmQueryFormat = "--qf=Name:%{Name}\n\
-Version:%{Version}\n\
-Vendor:%{Vendor}\n\
-Release:%{Release}\n\
-BuildTime:%{BuildTime}\n\
-InstallTime:%{InstallTime}\n\
-BuildHost:%{BuildHost}\n\
-Group:%{Group}\n\
-SourceRPM:%{SourceRPM}\n\
-License:%{License}\n\
-Packager:%{Packager}\n\
-URL:%{URL}\n\
-Summary:%{Summary}\n\
-";
+        const std::string rpmQueryFormat = "--qf=Name:%{Name}" MAGIC_RPM_SEP "Version:%{Version}" MAGIC_RPM_SEP "Vendor:%{Vendor}" MAGIC_RPM_SEP "Release:%{Release}" MAGIC_RPM_SEP "BuildTime:%{BuildTime}" MAGIC_RPM_SEP "InstallTime:%{InstallTime}" MAGIC_RPM_SEP "BuildHost:%{BuildHost}" MAGIC_RPM_SEP "Group:%{Group}" MAGIC_RPM_SEP "SourceRPM:%{SourceRPM}" MAGIC_RPM_SEP "License:%{License}" MAGIC_RPM_SEP "Packager:%{Packager}" MAGIC_RPM_SEP "URL:%{URL}" MAGIC_RPM_SEP "Summary:%{Summary}" MAGIC_RPM_SEP;
 
         int argc = 4;
-        std::string nSoftwareName = SCXCoreLib::StrToUTF8(softwareName);
+        std::string nSoftwareName = SCXCoreLib::StrToUTF8(StrTrim(softwareName));
         char * argv[] = {const_cast<char*>(rpmCommandName.c_str()),
             const_cast<char*>(rpmCommandType.c_str()),
             const_cast<char*>(rpmQueryFormat.c_str()),
             const_cast<char*>(nSoftwareName.c_str())};
 
-        GetRPMQueryResult(argc, argv, L"rpmpackageoutput", contents);
+        GetRPMQueryResult(argc, argv, contents);
 
 #if defined(PF_DISTRO_ULINUX)
         // is it ok to make an assumption that RPM and DPKGs are mutually exclusive on the same machine? 
