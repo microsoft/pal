@@ -10,7 +10,7 @@
 #--------------------------------------------------------------------------------
 
 include $(SCX_BRD)/build/Makefile.gcc3
-CXX_WARN_FLAGS+=-Wstrict-null-sentinel -Wmissing-include-dirs -Winit-self -Wextra 
+CXX_WARN_FLAGS+=-Wstrict-null-sentinel -Wmissing-include-dirs -Winit-self -Wextra
 
 ifeq ($(PF_DISTRO)$(PF_MAJOR),SUSE11)
     CXX_WARN_FLAGS+=-Wno-ignored-qualifiers 
