@@ -339,9 +339,12 @@ Homepage: http://nfs.sourceforge.net/
 	std::wstring rpmPath = L"/bin/rpm";
 	std::wstringstream commandToRun;
 
+	static LogSuppressor warningSuppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
+	static LogSuppressor infoSuppressor(SCXCoreLib::eInfo, SCXCoreLib::eTrace);
+
 	if (!SCXFile::Exists(SCXFilePath(rpmPath)))
 	{
-	    SCX_LOGINFO(m_log, L"No rpm executable at /bin/rpm, therefore skipping rpm package enumeration.");
+	    SCX_LOG(m_log, infoSuppressor.GetSeverity(L"/bin/rpm lookup"), L"No rpm executable at /bin/rpm, therefore skipping rpm package enumeration.");
 	    return;
 	}
 
@@ -355,7 +358,13 @@ Homepage: http://nfs.sourceforge.net/
 	std::istringstream input;
 	std::ostringstream output;
 	std::ostringstream error;
-	SCXCoreLib::SCXProcess::Run(commandToRun.str(), input, output, error);
+	int returnCode = SCXCoreLib::SCXProcess::Run(commandToRun.str(), input, output, error);
+
+	if (returnCode != 0)
+	{
+	    SCX_LOG(m_log, warningSuppressor.GetSeverity(commandToRun.str()), std::wstring(L"RPM command returned nonzero value.  Return value: ") + StrFrom(returnCode) + std::wstring(L", exact command ran: ") + commandToRun.str());
+	    return;
+	}
 
 	std::wstring wcontent = StrFrom(output.str().c_str());
 	StrReplaceAll(wcontent, StrFrom(MAGIC_RPM_SEP), L"\n");
