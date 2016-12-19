@@ -336,59 +336,31 @@ Homepage: http://nfs.sourceforge.net/
     void InstalledSoftwareDependencies::GetRPMQueryResult(int argc, char * argv[], std::vector<wstring>& result)
     {
         // We need to redirect stdout to a file so we can capture the result of InvokeRPMQuery() call.
-	FILE * fp;
-	
-	const int BUFFER_BLOCK_SIZE = 2048;
-	char contentBlock[BUFFER_BLOCK_SIZE];
-	char * content = NULL;
-	size_t totalBytesRead = 0;
-	size_t bytesRead = 0;
-	size_t currentBytePointer = 0;
-	int errorCode;
-	std::string systemString = "/bin/rpm ";
+	std::wstring rpmPath = L"/bin/rpm";
+	std::wstringstream commandToRun;
+
+	if (!SCXFile::Exists(SCXFilePath(rpmPath)))
+	{
+	    SCX_LOGINFO(m_log, L"No rpm executable at /bin/rpm, therefore skipping rpm package enumeration.");
+	    return;
+	}
+
+	commandToRun << rpmPath;
 	for (int i = 0; i < argc; ++i)
 	{
-	    systemString += std::string(argv[i]) + std::string(" ");
+	    commandToRun << L" ";
+	    commandToRun << StrFrom(argv[i]);
 	}
 	
-	fp = popen(systemString.c_str(), "r");
-	if (fp == NULL)
-	{
-	    throw SCXCoreLib::SCXErrnoException(L"GetRPMQueryResult popen", errno, SCXSRCLOCATION);
-	}
-	
-	while ( (bytesRead = fread(contentBlock, 1, BUFFER_BLOCK_SIZE, fp)) != 0)
-	{
-	    totalBytesRead += bytesRead;
-	    content = (char*)realloc(content, totalBytesRead + 1);
-	    memcpy((void*) (content + currentBytePointer), (void*)contentBlock, bytesRead);
-	    currentBytePointer += bytesRead;
-	}
-	
-	if (content == NULL)
-	{
-	    return;
-	}
-	
-	if (totalBytesRead == 0)
-	{
-	    free(content);
-	    pclose(fp);
-	    return;
-	}
-	
-	content[totalBytesRead] = '\0';
-	std::wstring wcontent = StrFrom(content);
+	std::istringstream input;
+	std::ostringstream output;
+	std::ostringstream error;
+	SCXCoreLib::SCXProcess::Run(commandToRun.str(), input, output, error);
+
+	std::wstring wcontent = StrFrom(output.str().c_str());
 	StrReplaceAll(wcontent, StrFrom(MAGIC_RPM_SEP), L"\n");
 	StrTokenize(wcontent, result, L"\n");
 	
-	free(content);
-	errorCode = pclose(fp);
-	
-	if (errorCode == -1)
-	{
-	    throw SCXCoreLib::SCXErrnoException(L"GetRPMQueryResult pclose", errno, SCXSRCLOCATION);
-	}
     }
     
 #if defined(PF_DISTRO_ULINUX)
