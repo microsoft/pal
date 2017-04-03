@@ -220,6 +220,7 @@ namespace SCXSystemLib
 
         set<wstring> diskSet;
         pair<set<wstring>::iterator,bool> Pair;
+        bool excludeDeviceFreeSpace=false;
 
         SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> total = GetTotalInstance();
         if (0 != total)
@@ -233,6 +234,45 @@ namespace SCXSystemLib
         {
             SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = *iter;
             disk->Update();
+
+            /***
+            * Fix for Bug10019956:
+            *
+            *   Suppose /etc/mnttab file has following content. (On Solaris /etc/mnttab files is parsed to get the mounted device names)
+            *    ----------------------------------------------------------------------------------------------------------------------------------
+            *    [Mounted Device]                [Mount point]   [FS Type]     [Attributes]
+            *    ----------------------------------------------------------------------------------------------------------------------------------
+            *    rpool/ROOT/s10s_u11wos_24a      /               zfs                                                          dev=4010002        0
+            *    rpool/export                    /export         zfs     rw,devices,setuid,nonbmand,exec,rstchown,xattr,atime,dev=4010003        1490816764
+            *    rpool/export/home               /export/home    zfs     rw,devices,setuid,nonbmand,exec,rstchown,xattr,atime,dev=4010004        1490816764
+            *    rpool                           /rpool          zfs     rw,devices,setuid,nonbmand,exec,rstchown,xattr,atime,dev=4010005        1490816764
+            *    rpool/fs1                       /rpool/fs1      zfs     rw,devices,setuid,nonbmand,exec,rstchown,xattr,atime,dev=4010006        1491216737
+            *    ----------------------------------------------------------------------------------------------------------------------------------
+            *
+            *    Output of df -h(It shows the available free space for each FS in 4th column)
+            *    -----------------------------------------------------------------------
+            *    Filesystem                      size   used  avail capacity  Mounted on
+            *    ------------------------------------------------------------------------
+            *    rpool/ROOT/s10s_u11wos_24a      98G   7.4G    81G     9%    /
+            *    rpool/export                    98G    32K    81G     1%    /export
+            *    rpool/export/home               98G   7.4G    81G     9%    /export/home
+            *    rpool                           98G   107K    81G     1%    /rpool
+            *    rpool/fs1                       98G    98M    81G     1%    /rpool/fs1
+                -------------------------------------------------------------------------
+            *
+            *    Here all zfs partitions are on zpool designated as "rpool".
+            *
+            *    All mounted devices are of 'zfs' type.
+            *    In this exampe all but 'rpool' mounted device name has pattern "/".
+            *    Hence 'rpool' is the name of the zpool and free space in it should be considered for free space calculation.
+            ***/
+#if defined(sun)
+            if (excludeDeviceFreeSpace)
+                excludeDeviceFreeSpace = false;
+
+            if(disk->m_fsType == L"zfs" && (disk->m_device).find(L"/") != wstring::npos)
+                excludeDeviceFreeSpace=true;
+#endif
 
             Pair = diskSet.insert(disk->m_device);
             if(Pair.second == false)
@@ -252,7 +292,7 @@ namespace SCXSystemLib
                 total->m_runTime += disk->m_runTime;
                 total->m_waitTime += disk->m_waitTime;
                 total->m_mbUsed += disk->m_mbUsed;
-                total->m_mbFree += disk->m_mbFree;
+                total->m_mbFree += excludeDeviceFreeSpace?0:disk->m_mbFree;
                 total_reads += disk->m_reads.GetDelta(MAX_DISKINSTANCE_DATASAMPER_SAMPLES);
                 total_writes += disk->m_writes.GetDelta(MAX_DISKINSTANCE_DATASAMPER_SAMPLES);
 #if defined (hpux)
