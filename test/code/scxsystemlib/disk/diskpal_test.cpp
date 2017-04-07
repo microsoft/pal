@@ -2165,6 +2165,7 @@ public:
         double secondsPerTransfer[3] = {0,0,0};
         scxulong mbUsed = 0;
         scxulong mbFree = 0;
+        bool excludeDeviceFreeSpace=false;
 #if defined(sun)
         scxulong tPercentage = 0;
 #endif
@@ -2176,7 +2177,19 @@ public:
             CPPUNIT_ASSERT(0 != disk);
             CPPUNIT_ASSERT(disk->GetDiskSize(mbu, mbf));
             mbUsed += mbu;
-            mbFree += mbf;
+#if defined(sun)
+           if (excludeDeviceFreeSpace)
+               excludeDeviceFreeSpace = false;
+           wstring m_name;
+           wstring m_fsType;
+           if(disk->GetFSType(m_fsType))
+           {
+               std:wstring mountDev=disk->DumpString();
+               if (m_fsType == L"zfs" && mountDev.find(L"/") != wstring::npos)
+                       excludeDeviceFreeSpace=true;
+            }
+#endif
+           mbFree += excludeDeviceFreeSpace?0:mbf;
 #if defined(aix)
             CPPUNIT_ASSERT( ! disk->GetReadsPerSecond(rps));
             CPPUNIT_ASSERT( ! disk->GetWritesPerSecond(wps));

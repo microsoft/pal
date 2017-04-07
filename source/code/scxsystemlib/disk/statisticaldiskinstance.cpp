@@ -595,5 +595,18 @@ namespace SCXSystemLib
         return -1;
     }
 
+    /*-------------------------------------------------------------------------------*/
+    /**
+       Retrieve the disk file system type.
+
+       \param        - output parameter where the file system type of the disk is stored.
+       \returns     true if value was set, otherwise false.
+    */
+    bool StatisticalDiskInstance::GetFSType(std::wstring& fsType) const
+    {
+        fsType = m_fsType;
+        return true;
+    }
+
 }
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/

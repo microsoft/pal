@@ -63,7 +63,7 @@ namespace SCXSystemLib
         virtual bool GetDiskSize(scxulong& mbUsed, scxulong& mbFree) const;
         virtual bool GetInodeUsage(scxulong& inodesTotal, scxulong& inodesFree) const;
         virtual bool GetBlockSize(scxulong& blockSize) const;
-        
+        virtual bool GetFSType(std::wstring& fsType) const;
         virtual bool GetHealthState(bool& healthy) const;
         
         virtual const std::wstring DumpString() const;
