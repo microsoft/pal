@@ -52,6 +52,7 @@
 #include <sys/cdli_entuser.phxent.h> // For phxent_all_stats_t Must be included after goent.h
 #include <sys/cdli_entuser.ment.h> // For ment_all_stats_t
 #include <sys/cdli_entuser.hea.h> // For hea_all_stats_t
+#include <sys/cdli_entuser.lncent.h> // For lncent_all_stats_t
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -1514,6 +1515,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
             goent_all_stats_t goent;
             ment_all_stats_t ment;
             hea_all_stats_t hea;
+            lncent_all_stats_t lncent;
         } arg; // Used for ioctl argument. 
 
         // First, we need to connect to the adapter in question.
@@ -1671,6 +1673,13 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
                     auto_speed = MEDIA_1000_FULL;
                 }
                 set_speed(arg.ment.ment_stats.speed_selected, auto_speed);
+                break;
+
+                // lncent 
+            case ENT_LNC_TYPE:
+            case ENT_LNC_VF:
+                //Support for Lancer drivers
+                m_maxSpeed = SPEED_10000; // This is 10 Gigabit Ethernet PCI adapter.
                 break;
 
             default:
