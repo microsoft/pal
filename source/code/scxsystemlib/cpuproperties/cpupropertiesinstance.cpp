@@ -528,10 +528,12 @@ namespace SCXSystemLib
         }
 
 #elif defined(aix)
+        SCX_LOGINFO(m_log, wstring(L"Calling FillAttributes")); 
         if (!FillAttributes())
         {
             SCX_LOGERROR(m_log, L"FillAttributes failed.");
         }
+        SCX_LOGINFO(m_log, wstring(L"After FillAttributes")); 
 #elif defined(hpux)
         m_processorAttr.cpuKey = GetId();
         m_processorAttr.processorId = m_processorAttr.cpuKey;
@@ -612,16 +614,21 @@ namespace SCXSystemLib
         MODEL_MAP_CIT cit;
 
         wstringstream ssId(L"CPU ");
+        SCX_LOGINFO(m_log, L"Begin FillAttributes");
         ssId << GetId();
+        SCX_LOGINFO(m_log, L"GetId successful");
 
         m_processorAttr.cpuKey = ssId.str();
         m_processorAttr.processorId = ssId.str();
         m_processorAttr.deviceID = ssId.str();
 
+        SCX_LOGINFO(m_log, L"Set m_processorAttr cpuKey, processorId, deviceId");
         cit = SysConfigModelImplLookup.find(_system_configuration.model_impl);
+        SCX_LOGINFO(m_log, L"Called find on _system_configuration.model_impl");
         if (cit != SysConfigModelImplLookup.end())
         {
             m_processorAttr.stepping = cit->second;
+            SCX_LOGINFO(m_log, L"Set m_processorAttr stepping");
         }
         else
         {
@@ -629,9 +636,11 @@ namespace SCXSystemLib
         }
 
         cit = SysConfigImplLookup.find(_system_configuration.implementation);
+        SCX_LOGINFO(m_log, L"Called find on _system_configuration.implementation");
         if (cit != SysConfigImplLookup.end())
         {
             m_processorAttr.name = cit->second;
+            SCX_LOGINFO(m_log, L"Set m_processorAttr name");
         }
         else
         {
@@ -639,16 +648,18 @@ namespace SCXSystemLib
         }
 
         cit = SysConfigVersionLookup.find(_system_configuration.version);
+        SCX_LOGINFO(m_log, L"Called find on _system_configuration.version");
         if (cit != SysConfigImplLookup.end())
         {
             m_processorAttr.version = cit->second;
+            SCX_LOGINFO(m_log, L"Set m_processorAttr version");
         }
         else
         {
             SCX_LOGERROR(m_log, L"FillAttributes failed to find version name from code " + StrFrom(_system_configuration.version));
         }
 
-
+        SCX_LOGINFO(m_log, L"Finish FillAttibutes");
         return fRet;
     }
 
