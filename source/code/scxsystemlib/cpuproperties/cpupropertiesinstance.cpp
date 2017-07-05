@@ -321,8 +321,9 @@ namespace SCXSystemLib
      */
     void CpuPropertiesInstance::Update()
     {
-#if defined(linux) 
         SCX_LOGTRACE(m_log, wstring(L"CpuPropertiesInstance update with cpuinfo"));
+#if defined(linux) 
+
 #elif (defined(sun)) 
         //
         //Go to first kstat
