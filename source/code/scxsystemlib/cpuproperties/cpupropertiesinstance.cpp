@@ -227,7 +227,8 @@ namespace SCXSystemLib
         \param[in]      cpuTotal - Processor speed, core count, logical processor count.
         \param[in]     partTotal - 64 bit, hyperthreading properties.
     */          
-    CpuPropertiesInstance::CpuPropertiesInstance(const perfstat_cpu_total_t & cpuTotal, const perfstat_partition_total_t & partTotal) // must be declared in its containing class definition.
+    CpuPropertiesInstance::CpuPropertiesInstance(const perfstat_cpu_total_t & cpuTotal, const perfstat_partition_total_t & partTotal) :
+        m_log(SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.cpuproperties.cpupropertiesinstance")))
     {
         SCX_LOGTRACE(m_log, L"Enter CpuPropertiesInstance() constructor");
         m_processorAttr.is64Bit = (bool)(partTotal.type.b.kernel_is_64);
@@ -262,7 +263,8 @@ namespace SCXSystemLib
         \param[in]      cpuId - Processor mark id
         \param[in]      CpuPropertiesPALDependencies - Dependencies to get data
     */
-    CpuPropertiesInstance::CpuPropertiesInstance(const wstring& socketId, const pst_processor& cpu, const pst_dynamic& psd)
+    CpuPropertiesInstance::CpuPropertiesInstance(const wstring& socketId, const pst_processor& cpu, const pst_dynamic& psd) :
+        m_log(SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.cpuproperties.cpupropertiesinstance")))
     {
         m_processorAttr.is64Bit = true; // Both supported processors, Itanium and PA_RISC, are 64 bit.
         m_socketId = socketId;
