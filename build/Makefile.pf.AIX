@@ -19,7 +19,7 @@ C_WARN_FLAGS=-qformat -qhalt=w -qflag=w:w -qsuppress=1540-2864
 # Common compiler flags (sent to compile command and link commands)
 # (-qthreaded is implied by using the _r version of xlc++)
 #64bit: COMMONFLAGS=-q64 -qlanglvl=strict98 -qrtti -qpic
-COMMONFLAGS=-q32 -qlanglvl=strict98 -qrtti -qpic -qextchk
+COMMONFLAGS=-q32 -qlanglvl=strict98 -qrtti -qpic -qextchk -qlanglvl=anonstruct
 
 # CXX Compiler flags 
 CXXFLAGS=$(COMMONFLAGS) -qlonglong $(DEFINES) $(CXX_WARN_FLAGS)
