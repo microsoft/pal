@@ -652,7 +652,7 @@ namespace SCXSystemLib
 
         cit = SysConfigVersionLookup.find(_system_configuration.version);
         SCX_LOGINFO(m_log, L"Called find on _system_configuration.version");
-        if (cit != SysConfigImplLookup.end())
+        if (cit != SysConfigVersionLookup.end())
         {
 	    SCX_LOGINFO(m_log, L"Found version.");
 	    SCX_LOGINFO(m_log, std::wstring(L"cit->second = ") + cit->second);
