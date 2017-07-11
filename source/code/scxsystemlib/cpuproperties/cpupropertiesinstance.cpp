@@ -654,12 +654,14 @@ namespace SCXSystemLib
         SCX_LOGINFO(m_log, L"Called find on _system_configuration.version");
         if (cit != SysConfigImplLookup.end())
         {
+	    SCX_LOGINFO(m_log, L"Found version.");
+	    SCX_LOGINFO(m_log, std::wstring(L"cit->second = ") + cit->second);
             m_processorAttr.version = cit->second;
             SCX_LOGINFO(m_log, L"Set m_processorAttr version");
         }
         else
         {
-            SCX_LOGERROR(m_log, L"FillAttributes failed to find version name from code " + StrFrom(_system_configuration.version));
+            SCX_LOGERROR(m_log, L"FillAttributes failed to find version name from code");
         }
 
         SCX_LOGINFO(m_log, L"Finish FillAttibutes");
