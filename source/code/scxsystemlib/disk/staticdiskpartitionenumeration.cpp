@@ -478,7 +478,9 @@ namespace SCXSystemLib
     void StaticDiskPartitionEnumeration::ProcessOneDiskPartition(const std::vector<char> &mountPoints, int mountPointCnt,
                                                                  const char* partitionName, scxlong partitionSize, unsigned int &partitionIndex)
     {
+	SCX_LOGERROR(m_log, "Here 1");
         SCXCoreLib::SCXHandle<SCXodm> odm_deps = m_deps->CreateOdm();
+	SCX_LOGERROR(m_log, "Here 2");
         std::string partition_name = partitionName;
 
         struct CuAt ret_data_at;
@@ -486,19 +488,28 @@ namespace SCXSystemLib
         std::string criteria_at = "name=";
         criteria_at += partition_name;
         // Find disk partition instance or create one.
+	SCX_LOGERROR(m_log, "Here 3");
         SCXCoreLib::SCXHandle<StaticDiskPartitionInstance> partition_instance =
         GetInstance(StrFromUTF8(partition_name));
+	SCX_LOGERROR(m_log, "Here 4");
         if (NULL == partition_instance)
         {
+	    SCX_LOGERROR(m_log, "Here 5");
             partition_instance = new StaticDiskPartitionInstance();
+	    SCX_LOGERROR(m_log, "Here 6");
             partition_instance->SetId(StrFromUTF8(partition_name));
+	    SCX_LOGERROR(m_log, "Here 7");
+
 
             std::string type;
             // Get first attribute of the partition.
             memset(&ret_data_at, 0, sizeof(ret_data_at));
+	    SCX_LOGERROR(m_log, "Here 8");
             ret_at = odm_deps->Get(CuAt_CLASS, (char*)criteria_at.c_str(), &ret_data_at, SCXodm::eGetFirst);
+	    SCX_LOGERROR(m_log, "Here 9");
             while(ret_at != NULL)
             {
+		SCX_LOGERROR(m_log, "Here 10");
                 std::string attribute = ret_data_at.attribute;
                 if(attribute == "type")
                 {
@@ -507,10 +518,13 @@ namespace SCXSystemLib
 
                 // Get next attribute of the partition.
                 memset(&ret_data_at, 0, sizeof(ret_data_at));
+		SCX_LOGERROR(m_log, "Here 11");
                 ret_at = odm_deps->Get(CuAt_CLASS, NULL, &ret_data_at, SCXodm::eGetNext);
+		SCX_LOGERROR(m_log, "Here 12");
             }
 
             // Find the mount point for this partition.
+	    SCX_LOGERROR(m_log, "Here 13");
             const struct vmount *vmp = reinterpret_cast<const struct vmount *>(&mountPoints[0]);
             int i;
             for(i = 0; i < mountPointCnt; i++)
@@ -545,6 +559,7 @@ namespace SCXSystemLib
                 // Get next mount point.
                 vmp = reinterpret_cast<const struct vmount *>(reinterpret_cast<const char*>(vmp) + vmp->vmt_length);
             }
+	    SCX_LOGERROR(m_log, "Here 14");
 
             partition_instance->m_deviceID = StrFromUTF8(partition_name);
             partition_instance->m_index = partitionIndex;
@@ -557,10 +572,12 @@ namespace SCXSystemLib
             {
                 partition_instance->m_bootPartition = true;
             }
-
+	    SCX_LOGERROR(m_log, "Here 15");
             AddInstance(partition_instance);
+	    SCX_LOGERROR(m_log, "Here 16");
         }
         partitionIndex++;
+	SCX_LOGERROR(m_log, "Here 17");
     }
 #endif
 
