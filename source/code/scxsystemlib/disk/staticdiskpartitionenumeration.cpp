@@ -505,6 +505,7 @@ namespace SCXSystemLib
             // Get first attribute of the partition.
             memset(&ret_data_at, 0, sizeof(ret_data_at));
 	    SCX_LOGERROR(m_log, "Here 8");
+	    SCX_LOGERROR(m_log, (char*)criteria_at.c_str());
             ret_at = odm_deps->Get(CuAt_CLASS, (char*)criteria_at.c_str(), &ret_data_at, SCXodm::eGetFirst);
 	    SCX_LOGERROR(m_log, "Here 9");
             while(ret_at != NULL)
