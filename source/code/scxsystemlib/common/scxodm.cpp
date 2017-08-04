@@ -57,6 +57,7 @@ namespace SCXSystemLib
         SCXASSERT( ! m_fInitialized );
 
         m_lock.Lock();
+        (void)setenv("ODMDIR", "/etc/objrepos", 1);
         int status = odm_initialize();
         if ( 0 != status )
         {
