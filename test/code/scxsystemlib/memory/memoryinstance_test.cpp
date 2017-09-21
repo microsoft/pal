@@ -493,6 +493,76 @@ public:
 };
 #endif  //defined(linux)
 
+#if defined(linux)
+class TestMemAvailableMemoryDependencies : public MemoryDependencies
+{
+
+public:
+    TestMemAvailableMemoryDependencies() {}
+
+    virtual ~TestMemAvailableMemoryDependencies() {}
+
+    std::vector<wstring> GetMemInfoLines()
+    {
+        std::vector<wstring> meminfo;
+
+        /*
+          We are interested in the following fields:
+
+          MemTotal
+          MemAvailable
+        */
+
+        meminfo.push_back(L"MemTotal:        3522864 kB");
+        meminfo.push_back(L"MemFree:          175844 kB");
+        meminfo.push_back(L"MemAvailable:    2813432 kB");
+        meminfo.push_back(L"Buffers:              36 kB");
+        meminfo.push_back(L"Cached:           289148 kB");
+        meminfo.push_back(L"SwapCached:          332 kB");
+        meminfo.push_back(L"Active:           234424 kB");
+        meminfo.push_back(L"Inactive:         250828 kB");
+        meminfo.push_back(L"Active(anon):      94120 kB");
+        meminfo.push_back(L"Inactive(anon):   203372 kB");
+        meminfo.push_back(L"Active(file):     140304 kB");
+        meminfo.push_back(L"Inactive(file):    47456 kB");
+        meminfo.push_back(L"Unevictable:           0 kB");
+        meminfo.push_back(L"Mlocked:               0 kB");
+        meminfo.push_back(L"SwapTotal:       6655996 kB");
+        meminfo.push_back(L"SwapFree:        6638924 kB");
+        meminfo.push_back(L"Dirty:                 8 kB");
+        meminfo.push_back(L"Writeback:             0 kB");
+        meminfo.push_back(L"AnonPages:        195772 kB");
+        meminfo.push_back(L"Mapped:            28868 kB");
+        meminfo.push_back(L"Shmem:            101424 kB");
+        meminfo.push_back(L"Slab:            2765564 kB");
+        meminfo.push_back(L"SReclaimable:    2745856 kB");
+        meminfo.push_back(L"SUnreclaim:        19708 kB");
+        meminfo.push_back(L"KernelStack:        4224 kB");
+        meminfo.push_back(L"PageTables:         6588 kB");
+        meminfo.push_back(L"NFS_Unstable:          0 kB");
+        meminfo.push_back(L"Bounce:                0 kB");
+        meminfo.push_back(L"WritebackTmp:          0 kB");
+        meminfo.push_back(L"CommitLimit:     8417428 kB");
+        meminfo.push_back(L"Committed_AS:    1004816 kB");
+        meminfo.push_back(L"VmallocTotal:   34359738367 kB");
+        meminfo.push_back(L"VmallocUsed:       67624 kB");
+        meminfo.push_back(L"VmallocChunk:   34359663604 kB");
+        meminfo.push_back(L"HardwareCorrupted:     0 kB");
+        meminfo.push_back(L"AnonHugePages:     75776 kB");
+        meminfo.push_back(L"HugePages_Total:       0");
+        meminfo.push_back(L"HugePages_Free:        0");
+        meminfo.push_back(L"HugePages_Rsvd:        0");
+        meminfo.push_back(L"HugePages_Surp:        0");
+        meminfo.push_back(L"Hugepagesize:       2048 kB");
+        meminfo.push_back(L"DirectMap4k:       94144 kB");
+        meminfo.push_back(L"DirectMap2M:     3575808 kB");
+
+        return meminfo;
+    }
+
+};
+#endif  //defined(linux)
+
 class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE( MemoryInstance_Test  );
@@ -500,6 +570,7 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testAllMembers );
     CPPUNIT_TEST( testAllMembersDepInj );
     CPPUNIT_TEST( testAvailablemem_wi11691 );
+    CPPUNIT_TEST( testMemAvailable );
     SCXUNIT_TEST_ATTRIBUTE( testAllMembers, SLOW);
     CPPUNIT_TEST_SUITE_END();
 
@@ -647,6 +718,32 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
 
         CPPUNIT_ASSERT( availableMemory/(1024*1024) == ( c_free + c_buffer + c_cached ));
         CPPUNIT_ASSERT( usedMemory/(1024*1024) == ( c_totalMemory - (c_free + c_buffer + c_cached) ));
+
+        memInstance->VerifyMeminfoFileReadProperly();
+#endif
+    }
+
+    void testMemAvailable()
+    {
+#if defined(linux)
+        // available memory on linux platforms with Kernel 3.14+ should Taken from MemAvailable
+
+        const scxulong c_totalMemory = 3522864;
+        const scxulong c_memAvail = 2813432;
+
+
+        SCXCoreLib::SCXHandle<TestableMemoryInstance> memInstance( new TestableMemoryInstance(SCXCoreLib::SCXHandle<MemoryDependencies>(new TestMemAvailableMemoryDependencies())));
+
+        memInstance->Update();
+
+        scxulong availableMemory = 0;
+        scxulong usedMemory = 0;
+
+        memInstance->GetAvailableMemory(availableMemory);
+        memInstance->GetUsedMemory(usedMemory);
+
+        CPPUNIT_ASSERT( availableMemory/1024 == ( c_memAvail ));
+        CPPUNIT_ASSERT( usedMemory/1024 == ( c_totalMemory - (c_memAvail) ));
 
         memInstance->VerifyMeminfoFileReadProperly();
 #endif

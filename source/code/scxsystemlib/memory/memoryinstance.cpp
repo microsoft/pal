@@ -854,9 +854,57 @@ namespace SCXSystemLib
           SwapTotal
           SwapFree
     */
+	
+	/**
+	    The 3.14+ linux kernel has MemAvailable: which gives more appropirate value for available memory. We will be getting the available memory from MemAvailable: (if present) instead of MemFree + Buffers + Cached
+	    MemTotal:        3522864 kB
+	    MemFree:          175844 kB
+	    MemAvailable:    2813432 kB
+	    Buffers:              36 kB
+	    Cached:           289148 kB
+	    SwapCached:          332 kB
+	    Active:           234424 kB
+	    Inactive:         250828 kB
+	    Active(anon):      94120 kB
+	    Inactive(anon):   203372 kB
+	    Active(file):     140304 kB
+	    Inactive(file):    47456 kB
+	    Unevictable:           0 kB
+	    Mlocked:               0 kB
+	    SwapTotal:       6655996 kB
+	    SwapFree:        6638924 kB
+	    Dirty:                 8 kB
+	    Writeback:             0 kB
+	    AnonPages:        195772 kB
+	    Mapped:            28868 kB
+	    Shmem:            101424 kB
+	    Slab:            2765564 kB
+	    SReclaimable:    2745856 kB
+	    SUnreclaim:        19708 kB
+	    KernelStack:        4224 kB
+	    PageTables:         6588 kB
+	    NFS_Unstable:          0 kB
+	    Bounce:                0 kB
+	    WritebackTmp:          0 kB
+	    CommitLimit:     8417428 kB
+	    Committed_AS:    1004816 kB
+	    VmallocTotal:   34359738367 kB
+	    VmallocUsed:       67624 kB
+	    VmallocChunk:   34359663604 kB
+	    HardwareCorrupted:     0 kB
+	    AnonHugePages:     75776 kB
+	    HugePages_Total:       0
+	    HugePages_Free:        0
+	    HugePages_Rsvd:        0
+	    HugePages_Surp:        0
+	    Hugepagesize:       2048 kB
+	    DirectMap4k:       94144 kB
+	    DirectMap2M:     3575808 kB
+
+	*/
         std::vector<std::wstring> lines = m_deps->GetMemInfoLines();
 
-        scxulong buffers = 0, cached = 0; // KB
+        scxulong buffers = 0, cached = 0, reportedAvailableMemory = 0; // KB
 
         for (size_t i = 0; i < lines.size(); i++)
         {
@@ -879,6 +927,19 @@ namespace SCXSystemLib
                     catch (const SCXNotSupportedException& e)
                     {
                         SCX_LOGWARNING(m_log, std::wstring(L"Could not read m_totalPhysicalMemory from :").append(line).append(L" - ").append(e.What()));
+                    }
+                }
+                if (L"MemAvailable:" == tokens[0])
+                {
+                    try
+                    {
+                        reportedAvailableMemory = StrToULong(tokens[1]) * 1024;  // Resulting units: bytes
+                        m_foundAvailMem = true;
+                        SCX_LOGHYSTERICAL(m_log, StrAppend(L"    availableMemory = ", m_availableMemory));
+                    }
+                    catch (const SCXNotSupportedException& e)
+                    {
+                        SCX_LOGWARNING(m_log, std::wstring(L"Could not read m_availableMemory from: ").append(line).append(L" - ").append(e.What()));
                     }
                 }
                 if (L"MemFree:" == tokens[0])
@@ -948,10 +1009,15 @@ namespace SCXSystemLib
         }
 
         // perform some adjustments and calculations. Resulting units: bytes.
-        m_availableMemory += buffers + cached;
+        if (reportedAvailableMemory)
+        {
+            m_availableMemory = reportedAvailableMemory;
+        } else {
+            m_availableMemory += buffers + cached;
+        }
         m_usedMemory = m_totalPhysicalMemory - m_availableMemory;
         m_usedSwap = m_totalSwap - m_availableSwap;
-        
+
         // This is "weak" in that it can easily be missed; we verify this in unit tests too now
         SCXASSERT(m_foundTotalPhysMem && "MemTotal not found");
         SCXASSERT(m_foundAvailMem && "MemFree not found");
