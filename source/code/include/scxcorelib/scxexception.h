@@ -672,6 +672,44 @@ namespace SCXCoreLib
         std::wstring   m_Reason;
     };        
 
+    /*----------------------------------------------------------------------------*/
+    /**
+       Specific errno exception for username related errors (see SCXErrnoException).
+    */
+    class SCXErrnoUserException : public SCXErrnoException {
+    public:
+        /*----------------------------------------------------------------------------*/
+        /**
+           Ctor
+           \param[in] fkncall Function call for user-related operation
+           \param[in] user    username parameter causing internal error
+           \param[in] errno_  System error code with local interpretation
+           \param[in] l       Source code location object
+
+        */
+        SCXErrnoUserException(std::wstring fkncall, std::wstring user, int errno_, const SCXCodeLocation& l)
+            : SCXErrnoException(fkncall, errno_, l), m_fkncall(fkncall), m_user(user)
+        { };
+
+        std::wstring What() const {
+            std::wostringstream txt;
+            txt << L"Calling " << m_fkncall << "() with user name parameter\"" << m_user
+                << "\", returned an error with errno = " << m_errno << L" (" << m_errtext.c_str() << L")";
+            return txt.str();
+        }
+
+        /** Returns function call for the user operation falure
+            \returns user-operation in std::wstring encoding
+        */
+        std::wstring GetFnkcall() const { return m_fkncall; }
+
+        std::wstring GetUser() const { return m_user; }
+    protected:
+        //! Text of user-related function call
+        std::wstring m_fkncall;
+        std::wstring m_user;
+    };
+
 }
 
 #endif /* SCXEXCEPTION_H */
