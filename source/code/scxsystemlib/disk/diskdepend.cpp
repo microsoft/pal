@@ -681,7 +681,7 @@ namespace SCXSystemLib
             L"tmpfs",
             L"udfs", L"usbfs",
 #if defined(linux)
-            L"udev",
+            L"udev", L"tracefs",
 #endif
             L"vmblock", L"vmhgfs", L"vmware-hgfs",
 #if ! defined(sun)

@@ -1167,7 +1167,7 @@ public:
             L"vmblock",     L"vmhgfs",      L"rpc_pipefs",  L"nfs",         L"usbfs",
             L"subfs",   L"fusectl",
 #if defined(linux)
-            L"udev", L"devtmpfs",
+            L"udev", L"devtmpfs", L"tracefs",
 #endif
             L"nfs",     L"DevFS",   L"autofs",
             L"cachefs", L"ffs", L"lofs",    L"nfs3",    L"procfs",
@@ -1289,7 +1289,7 @@ public:
             L"tmpfs",
             L"udfs", L"usbfs",
 #if defined(linux)
-            L"udev",
+            L"udev", L"tracefs",
 #endif
             L"vmblock", L"vmhgfs", L"vmware-hgfs",
 #if ! defined(sun)
