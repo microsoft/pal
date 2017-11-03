@@ -307,7 +307,7 @@ class DataFileParser:
             section_rex = re.compile(r"%s_*(\d*)" % name)
             m = section_rex.match(section)
             if m != None:
-		sectionPriority = m.group(1)
+                sectionPriority = m.group(1)
                 if sectionPriority == "":
                     sectionPriority = "0"
                 orderedSectionList.append( (int(sectionPriority), section) )

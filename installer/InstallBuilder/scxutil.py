@@ -18,15 +18,15 @@ def CopyPattern(srcDir, pattern, dstDir):
         srcname = os.path.join(srcDir, name)
         dstname = os.path.join(dstDir, name)
         if os.path.islink(srcname):
-            print "Symbolic link: " + srcname + " -> " + dstname
+            print("Symbolic link: " + srcname + " -> " + dstname)
             self.copy(srcname, dstname)
         elif os.path.isfile(srcname):
-            print "Regular file:  " + srcname + " -> " + dstname
+            print("Regular file:  " + srcname + " -> " + dstname)
             self.copy(srcname, dstname)
         elif os.path.isdir(srcname):
-            print "Directory:     " + srcname + " Ignored"
+            print("Directory:     " + srcname + " Ignored")
         else:
-            print "Unknown:       " + srcname + " Ignored"
+            print("Unknown:       " + srcname + " Ignored")
 
 
 ##
