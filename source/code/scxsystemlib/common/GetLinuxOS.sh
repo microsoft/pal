@@ -141,7 +141,7 @@ GetLinuxInfo() {
             [ -z "$ID" ] && ID="linux"
             case $ID in
                 debian)
-                    OSManufacturer="Softare in the Public Interest, Inc."
+                    OSManufacturer="Software in the Public Interest, Inc."
                     OSAlias="UniversalD"
                     if [ "${Version}" != "" ]; then
                         OSShortName="Debian_"
@@ -236,7 +236,7 @@ GetLinuxInfo() {
             if [ "$ReleaseFile" = "${EtcPath}/debian_version" ]; then
                 OSName="Debian"
                 OSAlias="UniversalD"
-                OSManufacturer="Softare in the Public Interest, Inc."
+                OSManufacturer="Software in the Public Interest, Inc."
                 Version=`cat ${EtcPath}/debian_version`
                 OSShortName="Debian_"
             fi
