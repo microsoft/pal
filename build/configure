@@ -36,6 +36,9 @@ do
       fi
       BUILD_RPM=1
       BUILD_DPKG=1
+
+      ULINUX=1
+      PF_DISTRO=ULINUX
     ;;
 
     --enable-system-build)
@@ -82,13 +85,10 @@ fi
 uname=`uname`
 case $uname in
     Linux)
-	ULINUX=1
-
         PF=Linux
 	PF_MAJOR=1
 	PF_MINOR=0
         PKG_SUFFIX=rpm
-	PF_DISTRO=ULINUX
 
 	if [ -e /usr/bin/dpkg ]; then
 	    BUILD_DPKG=1
