@@ -99,7 +99,7 @@ case $uname in
 
 	# Set PF_DISTRO appropriately if we're NOT on ULINUX
 	# This is necessary to support "local" builds (without various SSL flavors)
-	if [ $ULINUX -ne 1 ]; then
+	if [ "$ULINUX" != "1" ]; then
             if [ -e /etc/SuSE-release ]; then
 		CHECK_SUSE=1
             fi
