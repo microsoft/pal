@@ -404,7 +404,7 @@ public:
         CPPUNIT_ASSERT_EQUAL( string("Debian_5.0.10"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Debian 5.0.10") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalD"), releaseFile["OSAlias"] );
-        CPPUNIT_ASSERT_EQUAL( string("Softare in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
+        CPPUNIT_ASSERT_EQUAL( string("Software in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
     }
 
     // Platform Ubuntu 11:
@@ -489,14 +489,14 @@ public:
         //      OSShortName=Debian_7.0
         //      OSFullName = Debian GNU/Linux 7.0 (wheezy)
         //      OSAlias = UniversalD
-        //      OSManufacturer = Softare in the Public Interest, Inc.
+        //      OSManufacturer = Software in the Public Interest, Inc.
 
         CPPUNIT_ASSERT_EQUAL( string("Debian GNU/Linux"), releaseFile["OSName"] );
         CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
         CPPUNIT_ASSERT_EQUAL( string("Debian_7.0"), releaseFile["OSShortName"] );
         CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Debian") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalD"), releaseFile["OSAlias"] );
-        CPPUNIT_ASSERT_EQUAL( string("Softare in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
+        CPPUNIT_ASSERT_EQUAL( string("Software in the Public Interest, Inc."), releaseFile["OSManufacturer"] );
     }
 
     // Platform openSUSE 11.4:
