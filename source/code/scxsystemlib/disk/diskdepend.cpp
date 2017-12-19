@@ -558,6 +558,17 @@ namespace SCXSystemLib
                     continue;
                 }
 #if defined(linux)
+                // WI 53975427:
+                //
+                // The fix here is meant to exclude pseudo file system in file system enumeration.
+                // It can also be fixed by adding these FS in IGFS. But the problem with this approacch is that every time new pseudo FS get introduced we need to make changes in IGFS
+                // and need to have subsequent release to fix the issue.
+                // The fix here is based on fundamental property of pseudo FS that it is not associated with any block device, hence not associated with any path.
+
+                if (parts[0].find(L"/") == std::wstring::npos)
+                {
+                    continue;
+                }
                 // WI 574703:
                 //
                 // On Debian 7 systems, the system disk may come in with a device like:

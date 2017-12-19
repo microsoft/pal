@@ -666,7 +666,8 @@ public:
               "/dev/xvdb3 /mnt/host ext4 rw 0 0\n"
               "/dev/cdrom /mnt/cdrom iso9660 rw 0 0\n"
               "/dev/dvdrom /mnt/dvdrom ufs rw 0 0\n"
-              "none /proc/fs binfmt_misc rw 0 0\n",
+              "none /proc/fs binfmt_misc rw 0 0\n"
+              "overlay /overlay overlayFS rw 0 0\n",
               fp);
         fclose(fp);
 
@@ -682,6 +683,11 @@ public:
           {
             SCXCoreLib::SCXHandle<SCXSystemLib::StaticLogicalDiskInstance> di(*it);
             CPPUNIT_ASSERT(di != NULL);
+
+            //Enumeration should not have Pseudo devices
+            std::wstring value;
+            di->GetDeviceName(value);
+            CPPUNIT_ASSERT(value.find(L"/") != std::wstring::npos);
 
             scxulong blockSizeExpected = 2048;
             scxulong blockSize = 0;
