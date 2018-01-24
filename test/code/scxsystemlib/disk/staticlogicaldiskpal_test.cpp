@@ -45,7 +45,8 @@ static LogicalDeviceAttr LogicalDeviceTable[] =
      { L"/dev/unknown",  L"/mnt/unknown", L"ext4",    0 },
      { L"/dev/xvdb3",    L"/mnt/host",    L"ext4",    3 },
      { L"/dev/cdrom",    L"/mnt/cdrom",   L"iso9660", 5 },
-     { L"/dev/dvdrom",   L"/mnt/dvdrom",  L"ufs",     5 }
+     { L"/dev/dvdrom",   L"/mnt/dvdrom",  L"ufs",     5 },
+     { L"pseudo",     L"/mnt/dvdrom",  L"pseudo"      1 }
 };
 
 #endif
