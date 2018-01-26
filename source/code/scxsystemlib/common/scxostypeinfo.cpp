@@ -117,7 +117,7 @@ namespace SCXSystemLib
 
     const wstring SCXOSTypeInfoDependencies::getConfigPath() const
     {
-        return L"/etc/opt/microsoft/scx/conf/scxconfig.conf";
+        return SCXSystemLib::SCXProductDependencies::OSTypeInfo_GetConfigPath();
     }
 #endif // defined(PF_DISTRO_ULINUX)
 
