@@ -86,6 +86,16 @@ namespace SCXSystemLib
              if they match exactly any element in this set.
         */
         void Disk_IgnoredFileSystems_NoLinkToPhysical( std::set<std::wstring> &igfs );
+        
+        /*----------------------------------------------------------------------------*/
+        /**
+            The developer must implement this function to modify the OS 
+            type configuration on ULINUX platforms. This function will be called 
+            by SCXSystemLib::SCXOSTypeInfoDependencies.getConfigPath().
+           
+           \returns a wstring containing a path to the OS type configuration file.
+        */      
+        std::wstring OSTypeInfo_GetConfigPath();
     }
 }
 
