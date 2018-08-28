@@ -243,7 +243,7 @@ namespace SCXSystemLib
                     // Get filesystem info.
                     struct statvfs64 stat;
                     memset(&stat, 0, sizeof(stat));
-                    if (m_deps->statvfs64(SCXCoreLib::StrToUTF8(it->mountPoint).c_str(), &stat) == 0)
+                    if (m_deps->statvfs(SCXCoreLib::StrToUTF8(it->mountPoint).c_str(), &stat) == 0)
                     {
                         partit->m_blockSize = stat.f_frsize;
                         partit->m_numberOfBlocks = stat.f_blocks;
@@ -380,7 +380,7 @@ namespace SCXSystemLib
                     // We have a mount point for this logical volume. Get info about the file system.
                     struct statvfs64 stat;
                     memset(&stat, 0, sizeof(stat));
-                    int r = m_deps->statvfs64(StrToUTF8(logVol[i].mntDir).c_str(), &stat);
+                    int r = m_deps->statvfs(StrToUTF8(logVol[i].mntDir).c_str(), &stat);
                     if(r != 0)
                     {
                         wstring msg = L"statvfs() failed for mountpoint \"" + logVol[i].mntDir + L"\".";
@@ -524,7 +524,7 @@ namespace SCXSystemLib
                         // We have found our mount point. Get info about the file system.
                         struct statvfs64 stat;
                         memset(&stat, 0, sizeof(stat));
-                        int r = m_deps->statvfs64(reinterpret_cast<const char*>(vmp) + vmp->vmt_data[VMT_STUB].vmt_off,
+                        int r = m_deps->statvfs(reinterpret_cast<const char*>(vmp) + vmp->vmt_data[VMT_STUB].vmt_off,
                                                   &stat);
                         if(r != 0)
                         {

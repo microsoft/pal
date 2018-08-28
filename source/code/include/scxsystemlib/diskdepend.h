@@ -566,18 +566,6 @@ namespace SCXSystemLib
         */
         virtual int lvm_querylv(struct lv_id *lvId, struct querylv **queryLV, char *pvName) = 0;
 #endif /* aix */
-#if defined(aix) || defined(hpux) || defined(sun)
-
-        /** 
-            Wrapper for the system call statvfs64.
-
-            \param path Path to file to check.
-            \param buf statvfs64 structure to fill with result.
-            \returns zero on success, otherwise -1.
-        */
-        virtual int statvfs64(const char* path, struct statvfs64* buf) = 0;
-
-#endif
 
         /**
            Wrapper for SCXProcess::Run()
@@ -824,17 +812,6 @@ namespace SCXSystemLib
         }
 
 #endif /* aix */
-#if defined(aix) || defined(hpux) || defined(sun)
-
-        /**
-           \copydoc SCXSystemLib::DiskDepend::statvfs64
-        */
-        virtual int statvfs64(const char* path, struct statvfs64* buf)
-        {
-            return ::statvfs64(path, buf);
-        }
-
-#endif
 
         /**
            \copydoc SCXSystemLib::DiskDepend::Run

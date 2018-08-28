@@ -19,7 +19,7 @@ C_WARN_FLAGS=-qformat -qhalt=w -qflag=w:w -qsuppress=1540-2864
 # Common compiler flags (sent to compile command and link commands)
 # (-qthreaded is implied by using the _r version of xlc++)
 #64bit: COMMONFLAGS=-q64 -qlanglvl=strict98 -qrtti -qpic
-COMMONFLAGS=-q32 -qlanglvl=strict98 -qrtti -qpic -qextchk -qlanglvl=anonstruct
+COMMONFLAGS=-q64 -qlanglvl=strict98 -qrtti -qpic -qextchk -qlanglvl=anonstruct
 
 # CXX Compiler flags 
 CXXFLAGS=$(COMMONFLAGS) -qlonglong $(DEFINES) $(CXX_WARN_FLAGS)
@@ -59,7 +59,7 @@ LINK=$(CXX) $(COMMONFLAGS) -L$(TARGET_DIR)
 
 # Link command for static libraries (archives)
 #64bit: LINK_STATLIB=ar -rc -X 64
-LINK_STATLIB=ar -rc -X 32
+LINK_STATLIB=ar -rc -X 64 
 
 # Link a dynamic lib ("create a shared library that uses runtime linking")
 LINK_DYNLIB = $(CXX) -G $(COMMONFLAGS) -L$(TARGET_DIR) -bernotok -bnolibpath
@@ -89,7 +89,7 @@ PF_KIT_FILE_SUFFIX=tar
 #--------------------------------------------------------------------------------
 
 # Path to where the CPPUNIT libraries are checked in 
-CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/aix/$(ARCH)/cppunit_32bit
+CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/aix/$(ARCH)/cppunit_64bit
 #64bit: CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/aix/$(ARCH)/cppunit_64bit
 
 #--------------------------------------------------------------------------------

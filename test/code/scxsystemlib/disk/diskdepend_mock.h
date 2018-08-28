@@ -956,13 +956,9 @@ const char* mountPoint1_devName = "rpool/export";
             // Return number of mount points.
             return 3;
         }
-        virtual int statvfs64(const char* path, struct statvfs64* buf)
-        {
-            return statvfs64test(path, buf);
-        }
         virtual int statvfs(const char* path, SCXSystemLib::SCXStatVfs* buf)
         {
-            return statvfs64(path, buf);
+            return statvfs64test(path, buf);
         }
         virtual const SCXCoreLib::SCXHandle<SCXSystemLib::SCXodm> CreateOdm(void) const
         {
@@ -971,7 +967,7 @@ const char* mountPoint1_devName = "rpool/export";
         virtual int lvm_queryvgs(struct queryvgs **queryVGS, mid_t kmid)
         {
             CPPUNIT_ASSERT(queryVGS != NULL);
-            CPPUNIT_ASSERT_EQUAL(static_cast<void*>(NULL), kmid);
+            CPPUNIT_ASSERT_EQUAL(static_cast<intptr_t>(NULL), (unsigned int)kmid);
             *queryVGS = &volumeGroups;
             return 0;
         }
@@ -1150,17 +1146,13 @@ const char* mountPoint1_devName = "rpool/export";
             }
             return 1;
         }
-        virtual int statvfs64(const char* path, struct statvfs64* buf)
+        virtual int statvfs(const char* path, SCXSystemLib::SCXStatVfs* buf)
         {
             if (instrumentTest)
             {
-                std::cout<<"statvfs64test() "<<path<<" enter/exit?"<<endl;
+               std::cout<<"statvfs64() "<<path<<" enter/exit?"<<endl;
             }
             return statvfs64test(path, buf);
-        }
-        virtual int statvfs(const char* path, SCXSystemLib::SCXStatVfs* buf)
-        {
-            return statvfs64(path, buf);
         }
         virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
                 unsigned timeout, const SCXCoreLib::SCXFilePath& cwd, const SCXCoreLib::SCXFilePath& chrootPath )
@@ -1318,21 +1310,13 @@ const char* mountPoint1_devName = "rpool/export";
     class DiskPartLogVolDiskDependTest : public SCXSystemLib::DiskDependDefault
     {
     protected:
-        virtual int statvfs64(const char* path, struct statvfs64* buf)
-        {
-            if (instrumentTest)
-            {
-                std::cout<<"statvfs64test() "<<path<<" enter/exit?"<<endl;
-            }
-            return statvfs64test(path, buf);
-        }
         virtual int statvfs(const char* path, SCXSystemLib::SCXStatVfs* buf)
         {
             if (instrumentTest)
             {
                 std::cout<<"statvfs64() "<<path<<" enter/exit?"<<endl;
             }
-            return statvfs64(path, buf);
+            return statvfs64test(path, buf);
         }
 
         virtual void RefreshMNTTab()
