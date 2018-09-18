@@ -274,6 +274,17 @@ namespace SCXSystemLib
                 excludeDeviceFreeSpace=true;
 #endif
 
+            /***
+            * The fix here is meant to exclude pseudo file system in file system enumeration.
+            * It can also be fixed by adding these FS in IGFS. But the problem with this approacch is that every time new pseudo FS get introduced we need to make changes in IGFS
+            * and need to have subsequent release to fix the issue.
+            * The fix here is based on fundamental property of pseudo FS that it is not associated with any block device, hence not associated with any path.
+            ***/
+#if defined(linux)
+            if((disk->m_device).find(L"/") == wstring::npos)
+                 continue;
+#endif
+
             Pair = diskSet.insert(disk->m_device);
             if(Pair.second == false)
                 continue;
