@@ -445,12 +445,12 @@ class DataFileParser:
             if not ifstack.IsCodePathActive():
                 continue
 
-            line_literal = self.ReplaceVariables(line_literal)
             if section in FILE_SECTIONS:
                 tokens = line_literal.split(";")
                 newtokens = []
                 for token in tokens:
-                    newtokens.append(token.strip())
+                    newtoken = self.ReplaceVariables(token.strip())
+                    newtokens.append(newtoken)
                 
                 if section == "Files":
                     newsection.append(FileEntry(newtokens, line))
@@ -461,6 +461,7 @@ class DataFileParser:
                 else:
                     error("Failing to parse line type in '" + section + "'.", line)
             else:
+                line_literal = self.ReplaceVariables(line_literal)
                 newsection.append(line_literal)
                 
         if not ifstack.Empty():
