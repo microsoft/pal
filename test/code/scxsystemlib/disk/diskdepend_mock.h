@@ -971,7 +971,7 @@ const char* mountPoint1_devName = "rpool/export";
         virtual int lvm_queryvgs(struct queryvgs **queryVGS, mid_t kmid)
         {
             CPPUNIT_ASSERT(queryVGS != NULL);
-            CPPUNIT_ASSERT_EQUAL(static_cast<void*>(NULL), kmid);
+            CPPUNIT_ASSERT_EQUAL(static_cast<intptr_t>(NULL), (unsigned int)kmid);
             *queryVGS = &volumeGroups;
             return 0;
         }

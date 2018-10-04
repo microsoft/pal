@@ -180,7 +180,7 @@ namespace SCXSystemLib
         {
             throw SCXCoreLib::SCXInvalidArgumentException(L"mode", L"out of range", SCXSRCLOCATION);
         }
-        if ((int) pData == -1)
+        if (reinterpret_cast<intptr_t>(pData) == -1)
         {
             throw SCXodmException(L"odm_get_first/odm_get_next failed", odmerrno, SCXSRCLOCATION);
         }

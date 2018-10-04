@@ -183,7 +183,7 @@ case $uname in
         PF_MINOR=`uname -r`
         PF_ARCH=ppc
         ARCH=ppc
-        PF_WIDTH=32
+        PF_WIDTH=64
     ;;
 
     Darwin)
