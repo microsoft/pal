@@ -1150,17 +1150,13 @@ const char* mountPoint1_devName = "rpool/export";
             }
             return 1;
         }
-        virtual int statvfs64(const char* path, struct statvfs64* buf)
+        virtual int statvfs(const char* path, struct statvfs64* buf)
         {
             if (instrumentTest)
             {
-                std::cout<<"statvfs64test() "<<path<<" enter/exit?"<<endl;
+                std::cout<<"statvfs64() "<<path<<" enter/exit?"<<endl;
             }
             return statvfs64test(path, buf);
-        }
-        virtual int statvfs(const char* path, SCXSystemLib::SCXStatVfs* buf)
-        {
-            return statvfs64(path, buf);
         }
         virtual int Run(const std::wstring &command, std::istream &mystdin, std::ostream &mystdout, std::ostream &mystderr,
                 unsigned timeout, const SCXCoreLib::SCXFilePath& cwd, const SCXCoreLib::SCXFilePath& chrootPath )

@@ -166,14 +166,9 @@ case $uname in
         uname_r=`uname -r`
         PF_MAJOR=`echo $uname_r | awk -F. '{print $2}'`
         PF_MINOR=`echo $uname_r | awk -F. '{print $3}'`
-        if [ `uname -m` = "ia64" ]; then
-            PF_ARCH=ia64
-            ARCH=ia64
-        else
-            PF_ARCH=pa-risc
-            ARCH=hppa
-        fi
-        PF_WIDTH=32
+        PF_ARCH=ia64
+        ARCH=ia64
+        PF_WIDTH=64
     ;;
 
     AIX)

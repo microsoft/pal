@@ -380,7 +380,7 @@ namespace SCXSystemLib
                     // We have a mount point for this logical volume. Get info about the file system.
                     struct statvfs64 stat;
                     memset(&stat, 0, sizeof(stat));
-                    int r = m_deps->statvfs64(StrToUTF8(logVol[i].mntDir).c_str(), &stat);
+                    int r = m_deps->statvfs(StrToUTF8(logVol[i].mntDir).c_str(), &stat);
                     if(r != 0)
                     {
                         wstring msg = L"statvfs() failed for mountpoint \"" + logVol[i].mntDir + L"\".";
