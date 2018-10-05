@@ -566,7 +566,7 @@ namespace SCXSystemLib
         */
         virtual int lvm_querylv(struct lv_id *lvId, struct querylv **queryLV, char *pvName) = 0;
 #endif /* aix */
-#if defined(aix) || defined(hpux) || defined(sun)
+#if defined(aix) || defined(sun)
 
         /** 
             Wrapper for the system call statvfs64.
@@ -824,7 +824,7 @@ namespace SCXSystemLib
         }
 
 #endif /* aix */
-#if defined(aix) || defined(hpux) || defined(sun)
+#if defined(aix) || defined(sun)
 
         /**
            \copydoc SCXSystemLib::DiskDepend::statvfs64

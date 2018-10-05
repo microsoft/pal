@@ -324,7 +324,7 @@ int SCXdlpi::getstats(int fd, mib_ifEntry & iStats, unsigned int & collisions)
     
     // This is slightly ugly, but it's the way that it's implemented on HPUX 11 machines.
     // go to the end of the mib_ifEntry, and that is where the mib_Dot3StatsEntry begins
-    mib_Dot3StatsEntry * dot3stats = (mib_Dot3StatsEntry *) ( ((int)stats) + sizeof(mib_ifEntry) );
+    mib_Dot3StatsEntry * dot3stats = (mib_Dot3StatsEntry *) (reinterpret_cast<intptr_t>(stats) + sizeof(mib_ifEntry) );
     collisions = dot3stats->dot3StatsLateCollisions + 
                  dot3stats->dot3StatsExcessiveCollisions +
                  dot3stats->dot3StatsExcessCollisions;

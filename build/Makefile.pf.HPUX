@@ -30,7 +30,7 @@ CXX_WARN_FLAGS=+W2236,2111,2815
 # The following flags get set:
 # -D__hpux -D__ia64=1 -D_BIG_ENDIAN=1 -D__STDCPP__
 # -D__HP_aCC=version-string -D_HP_NAMESPACE_STD
-COMMONFLAGS=+DD32 -AA -mt +Z
+COMMONFLAGS=+DD64 -AA -mt +Z
 
 # Use "warnings as errors", if available
 ifeq ($(ARCH),ia64)
@@ -126,7 +126,7 @@ endif
 #--------------------------------------------------------------------------------
 
 # Path to where the CPPUNIT libraries are checked in 
-CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/hpuxacc/$(ARCH)/cppunit_32bit
+CPPUNIT_LIB_PATH=$(SCX_SHARED_TST_EXT_LIB_DIR)/hpuxacc/$(ARCH)/cppunit
 
 #--------------------------------------------------------------------------------
 # Link switches for this platform, per target

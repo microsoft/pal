@@ -634,7 +634,7 @@ public:
         
         // read primitive and set it to the curREQ
         // return either error or not, depending on test data
-        u_long primitive = *(u_long*)ctlptr->buf;
+        u_long primitive = *(uint32_t*)ctlptr->buf;
         
         if (primitive ==  DL_HP_PPA_REQ)
         {
@@ -768,7 +768,7 @@ public:
             statACK->dl_stat_offset = sizeof(dl_get_statistics_ack_t);
             
             mib_ifEntry * stats = (mib_ifEntry *)(statACK->dl_stat_offset + ctlptr->buf);
-            mib_Dot3StatsEntry * dot3stats = (mib_Dot3StatsEntry *)( ((int)stats) + sizeof(mib_ifEntry) );
+            mib_Dot3StatsEntry * dot3stats = (mib_Dot3StatsEntry *)(reinterpret_cast<intptr_t>(stats) + sizeof(mib_ifEntry) );
             
             // get the statistics for the currently attached PPA
             *stats = statsMap[curPPA];
@@ -1973,7 +1973,7 @@ public:
             std::vector<string> tokens;
             int loc1 = 0;
             int loc2 = 0;
-            while (loc2 != string::npos)
+            while ((long)loc2 != string::npos)
             {            
                 loc1 = curline.find_first_not_of(" \t", loc2);
                 loc2 = curline.find_first_of(" \t", loc1);
