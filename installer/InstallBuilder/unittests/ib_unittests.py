@@ -252,7 +252,7 @@ if Variables["PF"] == "Linux":
         PACKAGE_TYPE = "RPM"
     elif (Variables["PFDISTRO"] == "ULINUX" and Variables["PF_DISTRO_ULINUX_KIT"] == "D"):
         PACKAGE_TYPE = "DPKG"
-    elif (Variables["PFDISTRO"] == "REDHAT" and Variables["PFARCH"] == "ppc"):
+    elif ((Variables["PFDISTRO"] == "REDHAT" or Variables["PFDISTRO"] == "SUSE") and Variables["PFARCH"] == "ppc"):
         PACKAGE_TYPE = "RPM"
     else:
         error("Invalid Platform")
