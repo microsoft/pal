@@ -103,7 +103,7 @@ UNITTEST_EXTRA_INCLUDES=-I$(SCX_SHARED_TEST_ROOT)/include -I$(SCX_SRC_ROOT) -I$(
 # No operation, i.e. suppressing a command
 NOOP=@echo Step suppressed 
 
-# Command for making dependecies
+# Command for making dependencies
 MKDEP=CC -xM1
 
 #--------------------------------------------------------------------------------
