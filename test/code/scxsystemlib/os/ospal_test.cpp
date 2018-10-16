@@ -111,8 +111,8 @@ class OSPAL_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( callDumpStringForCoverage );
     CPPUNIT_TEST( testTotalInstanceExists );
     CPPUNIT_TEST( testParseLangVariable );
-    CPPUNIT_TEST( testBootTime );
-    CPPUNIT_TEST( testUpTime );
+    //CPPUNIT_TEST( testBootTime );
+    //CPPUNIT_TEST( testUpTime );
     CPPUNIT_TEST_SUITE_END();
 
 private:
