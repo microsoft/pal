@@ -53,6 +53,7 @@
 #include <sys/cdli_entuser.ment.h> // For ment_all_stats_t
 #include <sys/cdli_entuser.hea.h> // For hea_all_stats_t
 #include <sys/cdli_entuser.lncent.h> // For lncent_all_stats_t
+#include <sys/cdli_entuser.shient.h> // For shient_all_stats_t
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -1516,6 +1517,7 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
             ment_all_stats_t ment;
             hea_all_stats_t hea;
             lncent_all_stats_t lncent;
+            shient_all_stats_t shient;
         } arg; // Used for ioctl argument. 
 
         // First, we need to connect to the adapter in question.
