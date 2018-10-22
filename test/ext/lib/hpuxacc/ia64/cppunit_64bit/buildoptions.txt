@@ -1,0 +1,13 @@
+cppunit was built the following way from the cppunit-1.12.0 source.
+Note that we built it without any gnu-tools visible in the path. It was neccessary
+to get a linkable libcppunit.a.
+
+./configure CXX=aCC CXXFLAGS="+DD64 -mt -AA -Ag++" --prefix=/suitable/install/dir/
+make
+make check
+make install
+
+Then the contents of "/suitable/install/dir/lib/" was copied here and pruned somewhat.
+
+We had to remove the symlinks because they don't work well with tfs/teamprise.
+If you need the dynamic library you should run the restore_links.sh from this dir.
