@@ -167,10 +167,10 @@ static LocaleInfo LocaleInfoTable[] =
 
     // Chinese
     { "zh", "CN", 0x0804,  86, 65001 }, // Chinese (simplified)-PRC
-    { "zh", "TW", 0x0404, 886, 65001 }, // Chinese (traditional)-Taiwan
+    { "zh", "TW", 0x0404, 886, 65001 }, // Taiwan
     { "zh", "SG", 0x1004,  65, 65001 }, // Chinese (simplified)-Singapore
-    { "zh", "HK", 0x0C04, 852, 65001 }, // Chinese (traditional)-Hong Kong
-    { "zh", "MO", 0x1404, 853, 65001 }, // Chinese (traditional)-Macau
+    { "zh", "HK", 0x0C04, 852, 65001 }, // Chinese (traditional)-Hong Kong SAR
+    { "zh", "MO", 0x1404, 853, 65001 }, // Macao SAR
 
     // Italian
     { "it", "IT", 0x0010,  39, 28591 }, // Italian-Italy
@@ -234,7 +234,7 @@ static LocaleInfo LocaleInfoTable[] =
     { "sr", "RS", 0x081A, 381, 65001 }, // Serbian-Serbia (Latin alphabet)
     { "sk", "SK", 0x041B, 421, 28591 }, // Slovak default to Slovakia
     { "sq", "AL", 0x041C, 355, 65001 }, // Albanian-Albania
-    { "mk", "MK", 0x042F, 389, 65001 }, // Macedonian-Macedonia
+    { "mk", "MK", 0x042F, 389, 65001 }, // Macedonia, FYRO
     { "be", "BY", 0x0423, 375, 65001 }, // Belarusian-Belarus
     { "sl", "SI", 0x0424, 386, 65001 }, // Slovenian-Sloveniua
     { "et", "EE", 0x0425, 372, 65001 }, // Estonian-Estonia
@@ -470,8 +470,8 @@ static CodePageInfo CodePageInfoTable[] =
     { "EUCGB",      20936 },    // Simplified Chinese Extended Unix Code
     { "CNS11643",   20936 },    // Simplified Chinese
     { "BIG5",         950 },    // Traditional Chinese Big-5
-    { "BIG5HK",       950 },    // Traditional Chinese Big-5 as used in Hong Kong
-    { "BIG5+HKSCS",   950 }     // Traditional Chinese Big-5 as used in Hong Kong
+    { "BIG5HK",       950 },    // Traditional Chinese Big-5 as used in Hong Kong SAR
+    { "BIG5+HKSCS",   950 }     // Traditional Chinese Big-5 as used in Hong Kong SAR
 
     // if support is needed for reporting Mac code pages, add names and values for code pages 100xx here
 

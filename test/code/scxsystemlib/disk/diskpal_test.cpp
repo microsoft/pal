@@ -1754,14 +1754,14 @@ public:
 
                 // Disk operations/second
                 double rTime, wTime, tTime, rTest, wTest, tTest, qLength;
-                scxulong rOps, wOps, rOpsT, wOpsT;
+                scxulong rOps, wrOps, rOpsT, wrOpsT;
                 rOps = td_post->read.num - td_pre->read.num;
-                wOps = td_post->write.num - td_pre->write.num;
+                wrOps = td_post->write.num - td_pre->write.num;
                 rOpsT = td_post->read.ms - td_pre->read.ms;
-                wOpsT = td_post->write.ms - td_pre->write.ms;
+                wrOpsT = td_post->write.ms - td_pre->write.ms;
                 rTest = rOps?(static_cast<double>(rOpsT)/static_cast<double>(rOps)/1000.0):0;
-                wTest = wOps?(static_cast<double>(wOpsT)/static_cast<double>(wOps)/1000.0):0;
-                tTest = (rOps||wOps)?((static_cast<double>(rOpsT+wOpsT))/(static_cast<double>(rOps+wOps))/1000.0):0;
+                wTest = wrOps?(static_cast<double>(wrOpsT)/static_cast<double>(wrOps)/1000.0):0;
+                tTest = (rOps||wrOps)?((static_cast<double>(rOpsT+wrOpsT))/(static_cast<double>(rOps+wrOps))/1000.0):0;
 
                 CPPUNIT_ASSERT(disk->GetDiskQueueLength(qLength));
 
@@ -1943,14 +1943,14 @@ public:
 #if defined(linux)
                 CPPUNIT_ASSERT( ! disk->GetIOTimesTotal(tTime));
 #elif defined(sun) || defined(hpux)
-                scxulong rOps, wOps, rOpsT, wOpsT;
+                scxulong rOps, wrOps, rOpsT, wrOpsT;
                 rOps = td_post->read.num - td_pre->read.num;
-                wOps = td_post->write.num - td_pre->write.num;
+                wrOps = td_post->write.num - td_pre->write.num;
                 rOpsT = td_post->read.ms - td_pre->read.ms;
-                wOpsT = td_post->write.ms - td_pre->write.ms;
+                wrOpsT = td_post->write.ms - td_pre->write.ms;
 
                 double tTest;
-                tTest = (rOps||wOps)?((static_cast<double>(rOpsT+wOpsT))/(static_cast<double>(rOps+wOps))/1000.0):0;
+                tTest = (rOps||wrOps)?((static_cast<double>(rOpsT+wrOpsT))/(static_cast<double>(rOps+wrOps))/1000.0):0;
 
                 CPPUNIT_ASSERT(disk->GetIOTimesTotal(tTime));
                 CPPUNIT_ASSERT_EQUAL(tTest,tTime);
