@@ -61,7 +61,7 @@ extern "C" int getprocs64 (void *procsinfo, int sizproc, void *fdsinfo, int sizf
 
 #include <procinfo.h>
 
-extern "C" int getargs(struct procentry64*, int, char*, int);
+// extern "C" int getargs(struct procentry64*, int, char*, int);
 
 #endif // defined(aix)
 
