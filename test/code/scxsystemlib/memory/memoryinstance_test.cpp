@@ -682,7 +682,11 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
         SCXUNIT_ASSERT_BOTH_AT_OR_BOTH_ABOVE(availableMemory/1024, keyValuesAfter["AvailableMemory"], 0);
         SCXUNIT_ASSERT_BOTH_AT_OR_BOTH_ABOVE(usedMemory/1024,      keyValuesAfter["UsedMemory"], 0);
         SCXUNIT_ASSERT_BOTH_AT_OR_BOTH_ABOVE(availableSwap/1024,   keyValuesAfter["AvailableSwap"], 0);
+#if defined(aix)
+        SCXUNIT_ASSERT_BOTH_AT_OR_BOTH_ABOVE(keyValuesAfter["UsedSwap"]?usedSwap/1024:(usedSwap*100)/totalSwap,  keyValuesAfter["UsedSwap"]?keyValuesAfter["UsedSwap"]:keyValuesAfter["UsedSwapPercentage"], 0);
+#else
         SCXUNIT_ASSERT_BOTH_AT_OR_BOTH_ABOVE(usedSwap/1024,        keyValuesAfter["UsedSwap"], 0);
+#endif
         CPPUNIT_ASSERT(keyValuesBefore["PageReads"] <= totalPageReads);
         CPPUNIT_ASSERT(totalPageReads <= keyValuesAfter["PageReads"]);
         CPPUNIT_ASSERT(keyValuesBefore["PageWrites"] <= totalPageWrites);
@@ -886,7 +890,8 @@ class MemoryInstance_Test : public CPPUNIT_NS::TestFixture
                     keyValues["TotalSwap"] = ToSCXUlong(tokens[0]) * 1024;
                     scxulong p = ToSCXUlong(tokens[1]);
                     keyValues["UsedSwap"] = keyValues["TotalSwap"] * p / 100;
-                }
+                    keyValues["UsedSwapPercentage"] = p;
+		}
             }
             pclose(file);
 
