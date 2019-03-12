@@ -221,6 +221,12 @@ exit 0
             
     print("PASS")
 
+# This test validates that we can build a package with a filename with spaces
+def Test_FilenameWithSpace():
+    print("TEST: " + inspect.currentframe().f_code.co_name)
+    RunInstallBuilder("base_dummy.data filename_with_space.data")
+
+    print("PASS")
 
 # MAIN
 Variables = dict()
@@ -270,3 +276,4 @@ Test_IncludeCommand()
 Test_SectionsInNumericOrder()
 Test_VariableOverride()
 Test_LargeConditionalPath()
+Test_FilenameWithSpace()

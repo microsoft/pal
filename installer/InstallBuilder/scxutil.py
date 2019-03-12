@@ -82,7 +82,7 @@ def Touch(path):
 def ChOwn(path,uid,gid):
     # Must use 'os.system' rather than os.chown because 'root' will be passed
     # (and we use 'sudo' to allow things like uid=root)
-    retval = os.system('sudo chown %s:%s %s' % (uid,gid,path))
+    retval = os.system('sudo chown %s:%s "%s"' % (uid,gid,path))
     if retval != 0:
         print("Unable to chown %s." % path)
         exit(1)
@@ -94,7 +94,7 @@ def ChOwn(path,uid,gid):
 #
 def ChMod(path,mode):
     # Muse use 'os.system' rather than os.chmod because we may need 'sudo' ...
-    retval = os.system('sudo chmod %s %s' % (mode, path))
+    retval = os.system('sudo chmod %s "%s"' % (mode, path))
     if retval != 0:
         print("Unable to chmod %s." % path)
         exit(1)
