@@ -79,6 +79,9 @@ namespace SCXSystemLib {
         }
 #if defined(linux)
         virtual SCXCoreLib::SCXFilePath GetDynamicInfoFile() const;
+#if !defined(ppc)
+        virtual  SCXCoreLib::SCXFilePath GetVirtualInterfaceDirectory() const;
+#endif
         /*----------------------------------------------------------------------------*/
         /**
             Creates linked list of structures describing the network interfaces.
