@@ -254,7 +254,7 @@ namespace SCXSystemLib {
          };
 
         static std::vector<NetworkInterfaceInfo> FindAll(SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps,
-                                                         bool includeNonRunning = false);
+                                                         bool includeNonRunning = false, std::wstring interface = L"");
 
         /* The speed values: 10Mb, 100Mb, gigabit, 10Gb. */
         enum 
@@ -510,16 +510,16 @@ namespace SCXSystemLib {
     private: 
 #if defined(aix)
         static void FindAllUsingPerfStat(std::vector<NetworkInterfaceInfo> &interfaces,
-                                         SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps);
+                                         SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps, std::wstring interface = L"");
 #endif
 #if defined(hpux)
         static void FindAllInDLPI(std::vector<NetworkInterfaceInfo> &interfaces,
-                                  SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps); 
+                                  SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps, std::wstring interface = L""); 
 #endif
 
 #if defined(sun)
         static void FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &interfaces,
-                                      SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps);
+                                      SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps, std::wstring interface = L"");
 
         /*----------------------------------------------------------------------------*/
         /**
@@ -539,7 +539,7 @@ namespace SCXSystemLib {
 
 #if defined(linux) 
         static void FindAllInFile(std::vector<NetworkInterfaceInfo> &interfaces,
-                                  SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps);
+                                  SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps, std::wstring interface = L"");
 #endif
 
 #if defined(aix)
