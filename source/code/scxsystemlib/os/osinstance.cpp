@@ -130,6 +130,33 @@ struct LocaleInfo
     unsigned short DefaultCodePage;     // default Windows code page
 };
 
+struct utmpx32bits
+{
+    char ut_user[24] ;              /* User login name */
+    char ut_id[4] ;                 /* /etc/lines id(usually line #) */
+    char ut_line[12] ;              /* device name (console, lnxx) */
+    pid_t ut_pid ;                  /* process id */
+    short ut_type ;                 /* type of entry */
+    struct __exit_status
+    {
+        short __e_termination ;
+        short __e_exit ;
+    }
+    ut_exit;
+
+    unsigned short ut_reserved1 ;   /* Reserved for future use */
+    struct
+    {
+        int tv_sec;
+        int tv_usec;
+    } ut_tv;           /* time entry was made */
+
+    char ut_host[64] ;              /* host name, if remote;
+                                           NOT SUPPORTED */
+    uint32_t ut_addr ;              /* Internet addr of host, if remote */
+    char ut_reserved2[12] ; /* Reserved for future use */
+};
+
 static LocaleInfo LocaleInfoTable[] =
 {
     // English
@@ -791,8 +818,8 @@ namespace SCXSystemLib
         m_system_boot_isValid = false;
 
         int fd;
-        struct utmpx record;
-        int reclen = sizeof(struct utmpx);
+        struct utmpx32bits record;
+        int reclen = sizeof(struct utmpx32bits);
 
         fd = open(UTMPX_FILE, O_RDONLY);
         if (fd == -1){
