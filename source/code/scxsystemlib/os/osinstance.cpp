@@ -130,6 +130,7 @@ struct LocaleInfo
     unsigned short DefaultCodePage;     // default Windows code page
 };
 
+#if defined(hpux)
 struct utmpx32bits
 {
     char ut_user[24] ;              /* User login name */
@@ -156,6 +157,7 @@ struct utmpx32bits
     uint32_t ut_addr ;              /* Internet addr of host, if remote */
     char ut_reserved2[12] ; /* Reserved for future use */
 };
+#endif
 
 static LocaleInfo LocaleInfoTable[] =
 {
@@ -818,8 +820,13 @@ namespace SCXSystemLib
         m_system_boot_isValid = false;
 
         int fd;
+#if defined(hpux)
         struct utmpx32bits record;
         int reclen = sizeof(struct utmpx32bits);
+#else
+        struct utmpx record;
+        int reclen = sizeof(struct utmpx);
+#endif
 
         fd = open(UTMPX_FILE, O_RDONLY);
         if (fd == -1){
