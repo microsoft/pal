@@ -213,6 +213,7 @@ template<class T> void EnumInstances(TestableContext &context, std::wstring errM
     mi::Module Module;
     T agent(&Module);
     agent.EnumerateInstances(context, NULL, context.GetPropertySet(), keysOnly, filter);
+    context.WaitForResult();
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, MI_RESULT_OK, context.GetResult() );
 }
 
@@ -279,6 +280,7 @@ template<class T, class TN> MI_Result GetInstance(
     mi::Module Module;
     T agent(&Module);
     agent.GetInstance(context, NULL, instanceName, context.GetPropertySet());
+    context.WaitForResult();
     if (context.GetResult() != MI_RESULT_OK)
     {
         return context.GetResult();
@@ -410,6 +412,7 @@ template<class T, class TN> MI_Result VerifyGetInstanceByCompleteKeySuccess(
     TestableContext originalContext;
     EnumInstances<T>(originalContext, CALL_LOCATION(errMsg), false, filter);
     const std::vector<TestableInstance> &originalInstances = originalContext.GetInstances();
+    originalContext.WaitForResult();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, originalInstances.size() != 0);
     const TestableInstance &originalInstance = originalInstances[0];
 
@@ -523,6 +526,7 @@ template<class T> void StandardTestEnumerateKeysOnly(const std::vector<std::wstr
 {
     EnumInstances<T>(context, CALL_LOCATION(errMsg), true, filter);// Third parameter is true to get keys only.
     const std::vector<TestableInstance> &instances = context.GetInstances();
+    context.WaitForResult();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());// We should always receive at least one instance.
     for (size_t i = 0; i < instances.size(); i++)
     {
@@ -553,6 +557,7 @@ template<class T> void StandardTestCheckKeyValues(const std::vector<std::wstring
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, keyNames.size(), keyValues.size());
     EnumInstances<T>(context, CALL_LOCATION(errMsg), true);// Second parameter is true to get keys only.
     const std::vector<TestableInstance> &instances = context.GetInstances();
+    context.WaitForResult();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());// We should always receive at least one instance.
 
     // First check if keys in keyNames have expected keyValues.
@@ -591,6 +596,7 @@ template<class T> MI_Result EnumerateInstancesResult(TestableContext &context, s
     mi::Module Module;
     T agent(&Module);
     agent.EnumerateInstances(context, NULL, context.GetPropertySet(), keysOnly, filter);
+    context.WaitForResult();
     return context.GetResult();
 }
 
@@ -607,6 +613,7 @@ template<class T> void StandardTestEnumerateInstances(const std::vector<std::wst
 {
     EnumInstances<T>(context, CALL_LOCATION(errMsg), false, filter);
     const std::vector<TestableInstance> &instances = context.GetInstances();
+    context.WaitForResult();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());// We should always receive at least one instance.
     for (size_t i = 0; i < instances.size(); i++)
     {
@@ -636,6 +643,7 @@ template<class T, class TN> void StandardTestGetInstance(TestableContext &contex
     TestableContext originalContext;
     EnumInstances<T>(originalContext, CALL_LOCATION(errMsg), true, filter);
     const std::vector<TestableInstance> &instances = originalContext.GetInstances();
+    context.WaitForResult();
     CPPUNIT_ASSERT_MESSAGE(ERROR_MESSAGE, 1 <= instances.size());
     CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, numberOfKeys, instances[0].GetNumberOfKeys());
 
