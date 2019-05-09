@@ -23,7 +23,7 @@ steps:
 - script: |
     date
     
-    git clone --recursive 'https://github.com/Microsoft/pal.git' ../pal
+    git clone --recursive 'https://github.com/Microsoft/pal.git' pal
 
     cd build
     ./configure
