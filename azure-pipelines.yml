@@ -25,6 +25,6 @@ steps:
     
     git clone --recursive 'https://github.com/Microsoft/pal.git' pal
 
-    cd build
+    cd pal/build
     ./configure
     make all test
