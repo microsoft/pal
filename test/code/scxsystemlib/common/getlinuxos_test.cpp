@@ -462,16 +462,16 @@ public:
 
         // Verify our data:
         //      OSName = CentOS Linux
-        //      OSVersion = 7.0
-        //      OSShortName=CentOS_7.0
-        //      OSFullName = CentOS Linux 7.0
+        //      OSVersion = 7.1.1503
+        //      OSShortName=CentOS_7.1.1503
+        //      OSFullName = CentOS Linux 7.1.1503
         //      OSAlias = UniversalR
         //      OSManufacturer = Central Logistics GmbH
 
         CPPUNIT_ASSERT_EQUAL( string("CentOS Linux"), releaseFile["OSName"] );
-        CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
-        CPPUNIT_ASSERT_EQUAL( string("CentOS_7.0"), releaseFile["OSShortName"] );
-        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS Linux 7.0") );
+        CPPUNIT_ASSERT_EQUAL( string("7.1.1503"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("CentOS_7.1.1503"), releaseFile["OSShortName"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("CentOS Linux 7.1.1503") );
         CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
         CPPUNIT_ASSERT_EQUAL( string("Central Logistics GmbH"), releaseFile["OSManufacturer"] );
     }

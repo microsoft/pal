@@ -74,7 +74,7 @@ GetLinuxInfo() {
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
     # Try SLES
-    TestFile="${EtcPath}/SUSE-release"
+    TestFile="${EtcPath}/SuSE-release"
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
 
@@ -125,15 +125,15 @@ GetLinuxInfo() {
         # Do we have the (newer) os-release standard file?
         # If so, that trumps everything else
         if [ -e "${EtcPath}/os-release" ]; then
-            ReleaseFile="${EtcPath}/os-release"
+            OSReleaseFile="${EtcPath}/os-release"
             GetKitType
 
             # The os-release files contain TAG=VALUE pairs; just read it in
-            . "$ReleaseFile"
+            . "$OSReleaseFile"
 
             # Some fields are optional, for details see the WWW site:
             #   http://www.freedesktop.org/software/systemd/man/os-release.html
-            [ ! -z "$NAME" ] && OSName="$NAME"
+            [ ! -z "$NAME" ] && OptionalOSName="$NAME"
             [ ! -z "$VERSION_ID" ] && Version="$VERSION_ID"
 
             # Set the manufacturer if we know this ID
@@ -180,92 +180,92 @@ GetLinuxInfo() {
                     fi
                     ;;
             esac
-
-        elif [ ! -z $ReleaseFile ]; then
-            # Set OSName to release file contents for evaluation.  If parsing logic is not known, Release File contents will be used as OSName.
-            OSName=`sed '/^$/d' ${ReleaseFile} | head -1`
+        fi
+        if [ ! -z $ReleaseFile ]; then
+            # Set DefaultOSName to release file contents for evaluation.  If parsing logic is not known, Release File contents will be used as OSName.
+            DefaultOSName=`sed '/^$/d' ${ReleaseFile} | head -1`
 
             # Try known cases for OSName/Version
 
             # ALT Linux
-            if [ `echo $OSName | grep "ALT Linux" | wc -l` -gt 0 ]; then
-                OSName="ALT Linux"
-                OSAlias="UniversalR"
-                OSManufacturer="ALT Linux Ltd"
+            if [ `echo $DefaultOSName | grep "ALT Linux" | wc -l` -gt 0 ]; then
+                [ -z "$OptionalOSName" ] && OSName="ALT Linux"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalR"
+                [ -z "$OSManufacturer" ] && OSManufacturer="ALT Linux Ltd"
                 Version=`grep 'ALT Linux' $ReleaseFile | sed s/.*Linux\ // | sed s/\ \.*//`
-                OSShortName="ALTLinux_"
+                [ -z "$OSShortName" ] && OSShortName="ALTLinux_"
             fi
 
             # Enterprise Linux Server
-            if [ `echo $OSName | grep "Enterprise Linux Enterprise Linux Server" | wc -l` -gt 0 ]; then
-                OSName="Enterprise Linux Server"
-                OSAlias="UniversalR"
-                OSManufacturer="Oracle Corporation"
+            if [ `echo $DefaultOSName | grep "Enterprise Linux Enterprise Linux Server" | wc -l` -gt 0 ]; then
+                [ -z "$OptionalOSName" ] && OSName="Enterprise Linux Server"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalR"
+                [ -z "$OSManufacturer" ] && OSManufacturer="Oracle Corporation"
                 Version=`grep 'Enterprise Linux Enterprise Linux Server' $ReleaseFile | sed s/.*release\ // | sed s/\ \(.*//`
-                OSShortName="Oracle_"
+                [ -z "$OSShortName" ] && OSShortName="Oracle_"
             fi
 
             # Oracle Enterprise Linux Server
-            if [ `echo $OSName | grep "Oracle Linux Server" | wc -l` -gt 0 ]; then
-                OSName="Oracle Linux Server"
-                OSAlias="UniversalR"
-                OSManufacturer="Oracle Corporation"
+            if [ `echo $DefaultOSName | grep "Oracle Linux Server" | wc -l` -gt 0 ]; then
+                [ -z "$OptionalOSName" ] && OSName="Oracle Linux Server"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalR"
+                [ -z "$OSManufacturer" ] && OSManufacturer="Oracle Corporation"
                 Version=`grep 'Oracle Linux Server release' $ReleaseFile | sed s/.*release\ // | sed s/\ \(.*//`
-                OSShortName="Oracle_"
+                [ -z "$OSShortName" ] && OSShortName="Oracle_"
             fi
 
             # NeoKylin Linux Advanced Server
-            if [ `echo $OSName | grep "NeoKylin Linux Advanced Server" | wc -l` -gt 0 ]; then
-                OSName="NeoKylin Linux Server"
-                OSAlias="UniversalR"
-                OSManufacturer="China Standard Software Co., Ltd."
+            if [ `echo $DefaultOSName | grep "NeoKylin Linux Advanced Server" | wc -l` -gt 0 ]; then
+                [ -z "$OptionalOSName" ] && OSName="NeoKylin Linux Server"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalR"
+                [ -z "$OSManufacturer" ] && OSManufacturer="China Standard Software Co., Ltd."
                 Version=`grep 'NeoKylin Linux Advanced Server release' $ReleaseFile | sed s/.*release\ // | sed s/\ \(.*//`
-                OSShortName="NeoKylin_"
+                [ -z "$OSShortName" ] && OSShortName="NeoKylin_"
             fi
 
             # OpenSUSE
-            if [ `echo $OSName | grep -i "openSUSE" | wc -l` -gt 0 ]; then
-                Version=`echo $OSName | awk '{print $2}'`
-                OSName="openSUSE"
-                OSAlias="UniversalR"
-                OSManufacturer="SUSE GmbH"
-                OSShortName="OpenSUSE_"
+            if [ `echo $DefaultOSName | grep -i "openSUSE" | wc -l` -gt 0 ]; then
+                Version=`echo $DefaultOSName | awk '{print $2}'`
+                [ -z "$OptionalOSName" ] && OSName="openSUSE"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalR"
+                [ -z "$OSManufacturer" ] && OSManufacturer="SUSE GmbH"
+                [ -z "$OSShortName" ] && OSShortName="OpenSUSE_"
             fi
 
             # Debian
             if [ "$ReleaseFile" = "${EtcPath}/debian_version" ]; then
-                OSName="Debian"
-                OSAlias="UniversalD"
-                OSManufacturer="Software in the Public Interest, Inc."
+                [ -z "$OptionalOSName" ] && OSName="Debian"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalD"
+                [ -z "$OSManufacturer" ] && OSManufacturer="Software in the Public Interest, Inc."
                 Version=`cat ${EtcPath}/debian_version`
-                OSShortName="Debian_"
+                [ -z "$OSShortName" ] && OSShortName="Debian_"
             fi
 
             # Ubuntu
-            if [ `echo $OSName | grep "Ubuntu" | wc -l` -gt 0 ]; then
-                OSName="Ubuntu"
-                OSAlias="UniversalD"
-                OSManufacturer="Canonical Group Limited "
+            if [ `echo $DefaultOSName | grep "Ubuntu" | wc -l` -gt 0 ]; then
+                [ -z "$OptionalOSName" ] && OSName="Ubuntu"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalD"
+                [ -z "$OSManufacturer" ] && OSManufacturer="Canonical Group Limited "
                 Version=`grep 'DISTRIB_RELEASE' $ReleaseFile | cut -d'=' -f2`
-                OSShortName="Ubuntu_"
+                [ -z "$OSShortName" ] && OSShortName="Ubuntu_"
             fi
 
             # Fedora
-            if [ `echo $OSName | grep "Fedora" | wc -l` -gt 0 ]; then
-                OSName="Fedora"
-                OSAlias="UniversalR"
-                OSManufacturer="Red Hat, Inc."
+            if [ `echo $DefaultOSName | grep "Fedora" | wc -l` -gt 0 ]; then
+                [ -z "$OptionalOSName" ] && OSName="Fedora"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalR"
+                [ -z "$OSManufacturer" ] && OSManufacturer="Red Hat, Inc."
                 Version=`grep 'Fedora' $ReleaseFile | sed s/.*release\ // | sed s/\ .*//`
-                OSShortName="Fedora_"
+                [ -z "$OSShortName" ] && OSShortName="Fedora_"
             fi
 
             # CentOS
-            if [ `echo $OSName | grep "CentOS" | wc -l` -gt 0 ]; then
-                OSName="CentOS"
-                OSAlias="UniversalR"
-                OSManufacturer="Central Logistics GmbH"
+            if [ `echo $DefaultOSName | grep "CentOS" | wc -l` -gt 0 ]; then
+                [ -z "$OptionalOSName" ] && OSName="CentOS"
+                [ -z "$OSAlias" -o "$OSAlias"="Universal" ] && OSAlias="UniversalR"
+                [ -z "$OSManufacturer" ] && OSManufacturer="Central Logistics GmbH"
                 Version=`grep 'CentOS' $ReleaseFile | sed s/.*release\ // | sed s/\ .*//`
-                OSShortName="CentOS_"
+                [ -z "$OSShortName" ] && OSShortName="CentOS_"
             fi
 
             # If distro is not known, determine whether RPM or DPKG is installed
@@ -279,8 +279,11 @@ GetLinuxInfo() {
                 Version=`uname -r`
             fi
 
-            # If OSName is null, something went wrong in release file parsing, reset to Linux
-            if [ "$OSName" = "" ]; then
+            # If OptionalOSName is not null, and OSName still not get or it is "Linux", then we need to set OptionalOSName as OSName
+            # else if OSName is null, something went wrong in release file parsing, reset to Linux
+            if [ ! -z "$OptionalOSName" ] && [ "$OSName" = "" -o "$OSName" = "Linux" ]; then
+                OSName="$OptionalOSName";
+            elif [ "$OSName" = "" ]; then
                 OSName="Linux"
                 OSManufacturer="Universal"
                 OSShortName="$OSName"
