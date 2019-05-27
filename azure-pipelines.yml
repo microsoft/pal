@@ -1,0 +1,30 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+trigger:
+  - master
+  - 2016-URNext
+
+# The PAL unit tests have a dependency on the PST timezone
+variables:
+  TZ: ':/usr/share/zoneinfo/America/Los_Angeles'
+
+steps:
+- script: |
+    sudo apt-get install pkg-config
+    sudo apt-get install libpam0g-dev
+    sudo apt-get install librpm-dev
+    sudo apt-get install libssl-dev
+    sudo apt-get install libcurl4-openssl-dev
+    sudo apt-get install rpm
+    sudo apt-get install time
+
+- script: |
+    date
+    
+    git clone --recursive 'https://github.com/Microsoft/pal.git' pal
+
+    cd pal/build
+    ./configure
+    make all test
