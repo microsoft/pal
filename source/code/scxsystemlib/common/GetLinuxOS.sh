@@ -74,7 +74,7 @@ GetLinuxInfo() {
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
     # Try SLES
-    TestFile="${EtcPath}/SUSE-release"
+    TestFile="${EtcPath}/SuSE-release"
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
 
@@ -122,9 +122,11 @@ GetLinuxInfo() {
         OSName="Linux"
         Version=`uname -r | cut -d. -f1,2`
 
+        # check CentOS
+        [ ! -z $ReleaseFile ] && [ $(echo $(sed '/^$/d' ${ReleaseFile} | head -1) | grep "CentOS" | wc -l) -gt 0 ] && isCentOS=1
         # Do we have the (newer) os-release standard file?
         # If so, that trumps everything else
-        if [ -e "${EtcPath}/os-release" ]; then
+        if [ -e "${EtcPath}/os-release" -a -z "$isCentOS" ]; then
             ReleaseFile="${EtcPath}/os-release"
             GetKitType
 
