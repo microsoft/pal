@@ -1532,6 +1532,13 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
             ment_all_stats_t ment;
             hea_all_stats_t hea;
             lncent_all_stats_t lncent;
+            /*
+             * IBM APAR: APAR IJ15829
+             * Case Details: https://www.ibm.com/mysupport/s/case/5000z00001J44vnAAB/ioctl-fails-on-aix-machine-with-shient-driver
+             * Adding a dummy variable to increase the size of the union to 50kb as suggested by IBM for work around.
+             * This includes additional allocation for the "hw_stats_size" struct which is not exposed to the outside world.
+             */
+            unsigned char buffer[50000];
         } arg; // Used for ioctl argument. 
 
         // First, we need to connect to the adapter in question.
@@ -1584,6 +1591,10 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
         nddctl ioctl_arg;
         ioctl_arg.nddctl_buflen = sizeof(ARG);
         ioctl_arg.nddctl_buf = (caddr_t)&arg;
+        std::wstringstream buflen_str;
+        buflen_str.str(L"");
+        buflen_str << L"NetworkInterfaceInfo::Get_NDD_STAT ioctl buflen " <<  ioctl_arg.nddctl_buflen;
+        SCX_LOGTRACE(m_log, buflen_str.str());
 
         // Issue the ioctl command to get the device extended stats.
         // (http://pic.dhe.ibm.com/infocenter/aix/v6r1/index.jsp?topic=%2Fcom.ibm.aix.kernelext%2Fdoc%2Fkernextc%2Fndd_get_all_stats_devctrlop.htm)
