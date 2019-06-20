@@ -76,6 +76,9 @@ extern "C" int getkerninfo(int, char *, int *, int32long64_t);
 #include <linux/if_arp.h>
 #include <linux/sockios.h>
 #include <linux/types.h>
+#if !defined(ppc)
+#include <scxsystemlib/scxsysteminfo.h>
+#endif
 /* some platforms do not define u32 u16 u8, but <linux/ethtool.h> use these
    types, so define here for compatible */
 #if !defined(u64)
@@ -802,7 +805,7 @@ void NetworkInterfaceInfo::FindAllInFile(std::vector<NetworkInterfaceInfo> &inte
         infostream.exceptions(std::ios::failbit | std::ios::badbit);
         wstring interface_name = ReadInterfaceName(infostream);
 #if !defined(ppc)
-        if(isFileExist(StrToUTF8(deps->GetVirtualInterfaceDirectory())+StrToUTF8(interface_name))) continue;
+        if(SystemInfo::getScxConfMapValueofKey("enumvif") == "false" && isFileExist(StrToUTF8(deps->GetVirtualInterfaceDirectory())+StrToUTF8(interface_name))) continue;
 #endif
         // Skip the loopback interface (WI 463810)
         FileDescriptor fd = socket(AF_INET, SOCK_DGRAM, 0);

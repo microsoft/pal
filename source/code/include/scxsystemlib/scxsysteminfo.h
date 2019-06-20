@@ -12,7 +12,6 @@
 /*----------------------------------------------------------------------------*/
 #ifndef SYSTEMINFO_H
 #define SYSTEMINFO_H
-
 #include <scxcorelib/scxlog.h>
 #include <string>
 
@@ -140,6 +139,13 @@ namespace SCXSystemLib
 #if defined(sun)
         bool GetSUN_IsInGlobalZone(bool& isInGlobalZone) const;
 #endif
+#if defined(linux)
+#if !defined(ppc)
+        static std::string getScxConfMapValueofKey(std::string key);
+        static std::string GetEnumConfigPath();
+        static std::wstring init_scx_Conf_Map();
+#endif
+#endif
 
     protected:
         virtual void Update();
@@ -167,6 +173,10 @@ namespace SCXSystemLib
 #if defined(linux)
     private:
         LinuxVmType m_linuxVmType;
+#if !defined(ppc)
+        static std::map<std::string, std::string> conf_map_init();
+        static std::map<std::string, std::string> scxConfMap;
+#endif
 #endif
     };
 }
