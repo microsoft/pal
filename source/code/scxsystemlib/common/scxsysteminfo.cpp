@@ -188,6 +188,12 @@ namespace SCXSystemLib
             return scxConfMap.find(key) != scxConfMap.end()?scxConfMap[key]:"";
         }
 
+        void SystemInfo::setScxConfMapValueofKey(std::string key, std::string value)
+        {
+            if( scxConfMap.find(key) != scxConfMap.end()  && (value=="true" || value=="false") )
+               scxConfMap[key]= value;
+        }
+
         std::string SystemInfo::GetEnumConfigPath()
         {
             return "/etc/opt/microsoft/scx/conf/scxenum.conf";

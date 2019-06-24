@@ -142,6 +142,7 @@ namespace SCXSystemLib
 #if defined(linux)
 #if !defined(ppc)
         static std::string getScxConfMapValueofKey(std::string key);
+        static void setScxConfMapValueofKey(std::string key, std::string value);
         static std::string GetEnumConfigPath();
         static std::wstring init_scx_Conf_Map();
 #endif
