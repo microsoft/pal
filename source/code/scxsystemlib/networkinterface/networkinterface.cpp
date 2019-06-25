@@ -608,7 +608,7 @@ std::vector<wstring> NetworkInterfaceInfo::s_validInterfaces;
 //! \param[in]     deps             Dependencies to rely on
 //! \throws        SCXErrnoException   KStat problems
 void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &interfaces,
-                                             SCXHandle<NetworkInterfaceDependencies> deps) {
+                                             SCXHandle<NetworkInterfaceDependencies> deps, wstring interface) {
 
     SCXCoreLib::SCXLogHandle m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.networkinterface"));
     SCX_LOGHYSTERICAL(m_log, L"NetworkInterfaceInfo::FindAllUsingKStat entry");
@@ -617,6 +617,7 @@ void NetworkInterfaceInfo::FindAllUsingKStat(std::vector<NetworkInterfaceInfo> &
 
     for (kstat_t* cur = kstat->ResetInternalIterator(); cur; cur = kstat->AdvanceInternalIterator())
     {
+        if (interface != L"" && StrFromUTF8(cur->ks_name) != interface ) continue;
         if (strcmp(cur->ks_class, "net") == 0 && cur->ks_type == KSTAT_TYPE_NAMED )
         {
             scxulong ipackets;
@@ -796,7 +797,7 @@ static bool isFileExist(const string FileName)
 //! \param[in]     deps                Dependencies to rely on
 //! \throws        SCXErrnoException   KStat problems
 void NetworkInterfaceInfo::FindAllInFile(std::vector<NetworkInterfaceInfo> &interfaces,
-                                         SCXHandle<NetworkInterfaceDependencies> deps) {
+                                         SCXHandle<NetworkInterfaceDependencies> deps, wstring interface) {
     std::vector<wstring> lines;
     SCXStream::NLFs foundNlfs;
     SCXFile::ReadAllLines(deps->GetDynamicInfoFile(), lines, foundNlfs);
@@ -804,6 +805,9 @@ void NetworkInterfaceInfo::FindAllInFile(std::vector<NetworkInterfaceInfo> &inte
         wistringstream infostream(lines[nr]);
         infostream.exceptions(std::ios::failbit | std::ios::badbit);
         wstring interface_name = ReadInterfaceName(infostream);
+
+        if (interface != L"" && interface_name != interface ) continue;
+
 #if !defined(ppc)
         if(SystemInfo::getScxConfMapValueofKey("enumvif") == "false" && isFileExist(StrToUTF8(deps->GetVirtualInterfaceDirectory())+StrToUTF8(interface_name))) continue;
 #endif
@@ -858,7 +862,7 @@ void NetworkInterfaceInfo::FindAllInFile(std::vector<NetworkInterfaceInfo> &inte
 //! \param[in]     deps             Dependencies to rely on
 //! \throws        SCXErrnoException   perfstat problems
 void NetworkInterfaceInfo::FindAllUsingPerfStat(std::vector<NetworkInterfaceInfo> &interfaces,
-                                             SCXHandle<NetworkInterfaceDependencies> deps) {
+                                             SCXHandle<NetworkInterfaceDependencies> deps, wstring interface) {
 
     perfstat_id_t first;
     int structsAvailable = deps->perfstat_netinterface(NULL, NULL, sizeof(perfstat_netinterface_t), 0);
@@ -874,6 +878,7 @@ void NetworkInterfaceInfo::FindAllUsingPerfStat(std::vector<NetworkInterfaceInfo
     }
 
     for (int nr = 0; nr < structsReturned; nr++) {
+        if (interface != L"" && StrFromUTF8(statp[nr].name) != interface ) continue;
         // Currently there is no way to return type of network, our current CIM-model supports ethernet
         if (statp[nr].type == IFT_ETHER) {
             NetworkInterfaceInfo instance(deps);
@@ -1004,13 +1009,14 @@ void NetworkInterfaceInfo::ParseMacAddrAix(SCXCoreLib::SCXHandle<NetworkInterfac
 //! \param[out]    interfaces          To be populated
 //! \param[in]     deps                Dependencies to rely on
 void NetworkInterfaceInfo::FindAllInDLPI(std::vector<NetworkInterfaceInfo> &interfaces,
-                         SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps) {
+                         SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> deps, wstring interface) {
 
     SCXdlpi dlpi_instance(deps);
     std::vector<DLPIStatsEntry> statsVector = dlpi_instance.GetAllLANStats();
     
     for (std::vector<DLPIStatsEntry>::iterator i = statsVector.begin(); i != statsVector.end(); i++) {
-        
+        if (interface != L"" && StrFromUTF8(i->name) != interface ) continue;
+
         string namePPA;
         std::stringstream ppaStream;
         ppaStream << i->name << i->ppa;
@@ -2044,20 +2050,20 @@ static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eError, SCXCoreLib::eTra
 //! \param[in]  includeNonRunning    If false find only interfaces that are up and running
 //! \returns    Information on the network instances
 std::vector<NetworkInterfaceInfo> NetworkInterfaceInfo::FindAll(SCXHandle<NetworkInterfaceDependencies> deps,
-                                                                bool includeNonRunning /*= false*/) {
+                                                                bool includeNonRunning /*= false*/, wstring interface) {
     SCXCoreLib::SCXLogHandle m_log = SCXLogHandleFactory::GetLogHandle(wstring(L"scx.core.common.pal.system.networkinterface"));
 
     SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll entry");
     std::vector<NetworkInterfaceInfo> interfaces;
 #if defined(linux)
-    FindAllInFile(interfaces, deps);
+    FindAllInFile(interfaces, deps, interface);
 #elif defined(sun)
-    FindAllUsingKStat(interfaces, deps);
+    FindAllUsingKStat(interfaces, deps, interface);
 #elif defined(hpux)
-    FindAllInDLPI(interfaces, deps);
+    FindAllInDLPI(interfaces, deps, interface);
 #elif defined(aix)
     SCX_LOGTRACE(m_log, L"NetworkInterfaceInfo::FindAll Calling FindAllUsingPerfStat");
-    FindAllUsingPerfStat(interfaces, deps);
+    FindAllUsingPerfStat(interfaces, deps, interface);
 #else
 #error "Platform not supported"
 #endif

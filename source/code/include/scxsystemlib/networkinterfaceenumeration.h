@@ -36,9 +36,11 @@ namespace SCXSystemLib
         virtual ~NetworkInterfaceEnumeration();
         virtual void Init();
         virtual void Update(bool updateInstances=true);
+        void UpdateSpecific(wstring interface=L"");
     protected:
         virtual void UpdateInstances();
         virtual void UpdateEnumeration();
+        virtual void UpdateSpecificEnumeration(wstring interface=L"");
     private:
         SCXCoreLib::SCXLogHandle m_log;         //!< Log handle.
         SCXCoreLib::SCXHandle<NetworkInterfaceDependencies> m_deps; //!< Dependencies to rely on

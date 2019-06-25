@@ -90,6 +90,11 @@ void NetworkInterfaceEnumeration::Update(bool updateInstances) {
     
 }
 
+
+void NetworkInterfaceEnumeration::UpdateSpecific(wstring interface) {
+    UpdateSpecificEnumeration(interface);
+}
+
 /*----------------------------------------------------------------------------*/
 //! Run the Update() method on all instances in the colletion, including the
 //! Total instance if any.
@@ -163,6 +168,17 @@ void NetworkInterfaceEnumeration::UpdateEnumeration() {
     }
 }
 
+/*----------------------------------------------------------------------------*/
+//! Make the enumeration correspond to the current state of the system
+void NetworkInterfaceEnumeration::UpdateSpecificEnumeration(wstring interface) {
+    SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateSpecificEnumerationentry");
+
+    SCX_LOGTRACE(m_log, StrAppend(L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateSpecificEnumeration Find: ", interface));
+
+    vector<NetworkInterfaceInfo> latestInterface = NetworkInterfaceInfo::FindAll(m_deps, m_includeNonRunning, interface);
+
+    NetworkInterfaceInstance(latestInterface[0]).Update(latestInterface[0]);
+    }
 }
 
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/
