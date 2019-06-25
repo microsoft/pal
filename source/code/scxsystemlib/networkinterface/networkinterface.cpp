@@ -76,6 +76,9 @@ extern "C" int getkerninfo(int, char *, int *, int32long64_t);
 #include <linux/if_arp.h>
 #include <linux/sockios.h>
 #include <linux/types.h>
+#if !defined(ppc)
+#include <scxsystemlib/scxsysteminfo.h>
+#endif
 /* some platforms do not define u32 u16 u8, but <linux/ethtool.h> use these
    types, so define here for compatible */
 #if !defined(u64)
@@ -782,6 +785,12 @@ void NetworkInterfaceInfo::ParseMacAddr(int fd, SCXCoreLib::SCXHandle<NetworkInt
 #endif //sun
 
 #if defined(linux)
+#if !defined(ppc)
+static bool isFileExist(const string FileName)
+{
+    return access(FileName.c_str(),0)==0;
+}
+#endif
 /*----------------------------------------------------------------------------*/
 //! Find all network interfaces using the KStat API
 //! \param[out]    interfaces          To be populated
@@ -799,6 +808,9 @@ void NetworkInterfaceInfo::FindAllInFile(std::vector<NetworkInterfaceInfo> &inte
 
         if (interface != L"" && interface_name != interface ) continue;
 
+#if !defined(ppc)
+        if(SystemInfo::getScxConfMapValueofKey("enumvif") == "false" && isFileExist(StrToUTF8(deps->GetVirtualInterfaceDirectory())+StrToUTF8(interface_name))) continue;
+#endif
         // Skip the loopback interface (WI 463810)
         FileDescriptor fd = socket(AF_INET, SOCK_DGRAM, 0);
         struct ifreq ifr;
@@ -1076,6 +1088,14 @@ SCXCoreLib::SCXHandle<SCXKstat> NetworkInterfaceDependencies::CreateKstat()
 SCXCoreLib::SCXFilePath NetworkInterfaceDependencies::GetDynamicInfoFile() const {
     return L"/proc/net/dev";
 }
+#if !defined(ppc)
+/*----------------------------------------------------------------------------*/
+//! Retrieves the name of the directory containing virtual network interfaces
+//! \returns    Path to file
+SCXCoreLib::SCXFilePath NetworkInterfaceDependencies::GetVirtualInterfaceDirectory() const {
+    return L"/sys/devices/virtual/net/";
+}
+#endif
 
 #endif
 

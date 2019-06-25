@@ -25,6 +25,15 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 
+#if defined(linux)
+#if !defined(ppc)
+#include <fstream>
+#include <map>
+#include <cctype>
+#include <algorithm>
+#endif
+#endif
+
 #if defined(aix)
   #include <libperfstat.h>
   #if PF_MAJOR >= 6
@@ -96,6 +105,13 @@ namespace SCXSystemLib
     {
         m_log = SCXLogHandleFactory::GetLogHandle(moduleIdentifier);
         SCX_LOGTRACE(m_log, L"SystemInfo constructor");
+#if defined(linux)
+#if !defined(ppc)
+        wstring logMessage=init_scx_Conf_Map();
+        SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"init_scx_Conf_Map() function returns message: ", logMessage));
+        SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"scxConfMap has key value pair: enumvif - ", StrFromUTF8(scxConfMap["enumvif"])));
+#endif
+#endif
         Update();
     }
 
@@ -156,6 +172,73 @@ namespace SCXSystemLib
 #endif // defined(sun)
     }
 
+#if defined(linux)
+#if !defined(ppc)
+        std::map<std::string, std::string> SystemInfo::conf_map_init()
+        {
+            map<std::string,std::string> tempConfMap;
+            tempConfMap["enumvif"]= "false";
+            return tempConfMap;
+        }
+
+        std::map<std::string,std::string> SystemInfo::scxConfMap=conf_map_init();
+
+        std::string SystemInfo::getScxConfMapValueofKey(std::string key)
+        {
+            return scxConfMap.find(key) != scxConfMap.end()?scxConfMap[key]:"";
+        }
+
+        void SystemInfo::setScxConfMapValueofKey(std::string key, std::string value)
+        {
+            if( scxConfMap.find(key) != scxConfMap.end()  && (value=="true" || value=="false") )
+               scxConfMap[key]= value;
+        }
+
+        std::string SystemInfo::GetEnumConfigPath()
+        {
+            return "/etc/opt/microsoft/scx/conf/scxenum.conf";
+        }
+
+        std::wstring SystemInfo::init_scx_Conf_Map()
+        {
+             std::string enumConfigPath=GetEnumConfigPath();
+             if(access(enumConfigPath.c_str(),0) == 0)
+             {
+                  ifstream ifs(enumConfigPath.c_str());
+                  std::string line="";
+                  while(getline(ifs,line))
+                  {
+                      std::remove(line.begin(), line.end(), ' ');
+                      size_t pos=line.find("#");
+
+                      if(line == "" || pos == 0) continue;
+
+                      if(pos != string::npos)
+                          line=line.substr(0, pos);
+
+
+                      std::stringstream ss(line);
+                      std::string key,value;
+                      getline(ss,key,'=');
+
+                      getline(ss,value);
+
+
+                      transform(key.begin(),key.end(),key.begin(),::tolower);
+
+                      transform(value.begin(),value.end(),value.begin(),::tolower);
+
+
+                      if(scxConfMap.find(key) != scxConfMap.end() && (value =="true" || value=="false")){
+                          scxConfMap[key]=value;
+                          return SCXCoreLib::StrAppend(SCXCoreLib::StrAppend(SCXCoreLib::StrAppend(SCXCoreLib::StrAppend(L"scxConfMap populated Successfully with pair [ ",StrFromUTF8(key)),L" - "),StrFromUTF8(value)),L"]");
+                      }
+                  }
+             }
+             return L"SCX Enum Config file does not exist or corrupted. VIF enumeration disabled.";
+        }
+#endif
+#endif
 
     /*----------------------------------------------------------------------------*/
     /**

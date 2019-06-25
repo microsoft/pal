@@ -1241,6 +1241,12 @@ public:
 #if defined(linux) || defined(sun) || defined(aix)
         SCXHandle<MyNetworkInterfaceDependencies> deps = SetupBehavioralTestDependency(true);
 
+#if defined(linux)
+#if !defined(ppc)
+        SystemInfo::setScxConfMapValueofKey("enumvif", "true");
+#endif
+#endif
+
         std::vector<NetworkInterfaceInfo> interfaces = NetworkInterfaceInfo::FindAll(deps);
         if(instrumentTests)
         {
