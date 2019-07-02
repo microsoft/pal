@@ -103,7 +103,7 @@ namespace SCXSystemLib
        Searching for "/dev/sda" or "sda" will return the same instance.
 
     */
-    SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> StatisticalPhysicalDiskEnumeration::FindDiskByDevice(const std::wstring& device, bool includeSamplerDevice /*= false*/)
+    SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> StatisticalPhysicalDiskEnumeration::FindDiskByDevice(const std::wstring& device, bool includeSamplerDevice /*= false*/, size_t *pos)
     {
         if ((0 != GetTotalInstance()) && (GetTotalInstance()->m_device == device))
         {
@@ -116,6 +116,7 @@ namespace SCXSystemLib
             SCXCoreLib::SCXFilePath path(disk->m_device);
             if ((disk->m_device == device) || (path.GetFilename() == device))
             {
+                if (pos) *pos = iter - Begin();
                 return disk;
             }
             if (includeSamplerDevice)
@@ -125,6 +126,7 @@ namespace SCXSystemLib
                     path.Set(disk->m_samplerDevices[i]);
                     if ((disk->m_samplerDevices[i] == device) || (path.GetFilename() == device))
                     {
+                        if (pos) *pos = i;
                         return disk;
                     }
                 }
@@ -189,11 +191,28 @@ namespace SCXSystemLib
     void StatisticalPhysicalDiskEnumeration::Update(bool updateInstances)
     {
         SCXCoreLib::SCXThreadLock lock(m_lock);
-        FindPhysicalDisks();
+        FindPhysicalDisks(updateInstances);
         if (updateInstances)
         {
             UpdateInstances();
         }
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
+       Update the enumeration potentially discovering new instances.
+
+       \param       updateInstances If true, update state of all instances in collection.
+       \param       device
+       \param(out)         pos of device instance in Vector of instances
+       \throws      SCXInternalErrorException If object is of unknown disk enumeration type.
+
+    */
+
+    void StatisticalPhysicalDiskEnumeration::UpdateSpecific(bool updateInstances, std::wstring device, size_t *pos)
+    {
+        SCXCoreLib::SCXThreadLock lock(m_lock);
+        FindPhysicalDisks(updateInstances, device, pos);
     }
 
     /*----------------------------------------------------------------------------*/
@@ -398,15 +417,21 @@ namespace SCXSystemLib
 
        TODO: Document how disks are enumerated on AIX.
     */
-    void StatisticalPhysicalDiskEnumeration::FindPhysicalDisks()
+    void StatisticalPhysicalDiskEnumeration::FindPhysicalDisks(bool updateInstances, std::wstring device, size_t *pos)
     {
         for (EntityIterator iter=Begin(); iter!=End(); iter++)
         {
             SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> disk = *iter;
+            if ( device != L"" && disk->m_device != device ) continue;
             disk->m_online = false;
+            if ( device != L"" ) break;
         }
 
-        m_deps->RefreshMNTTab();
+        RefreshMNTTabParam *param = NULL;
+        if ( device != L"" ) param = new RefreshMNTTabParam(RefreshMNTTabParam::DEVICE, device);
+        m_deps->RefreshMNTTab(param);
+        if ( param ) free(param);
+
         for (std::vector<MntTabEntry>::const_iterator it = m_deps->GetMNTTab().begin(); 
              it != m_deps->GetMNTTab().end(); it++)
         {
@@ -427,6 +452,7 @@ namespace SCXSystemLib
                 for (std::map<std::wstring, std::wstring>::const_iterator dev_it = devices.begin();
                      dev_it != devices.end(); dev_it++)
                 {
+                    if( device != L"" && dev_it->second != device ) continue;
                     SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> disk = AddDiskInstance(dev_it->first, dev_it->second);
 #if defined(hpux)
                     if (0 != disk)
@@ -443,12 +469,18 @@ namespace SCXSystemLib
                         m_deps->AddDeviceInstance(disk->m_device, L"", diskInfoIndex, m_pathToRdev.find(disk->m_device)->second);
                     }
 #endif
+                    if ( device != L"" ) {
+                       SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> diskinstance = GetInstance(device, pos);
+                       if (updateInstances)
+                       	   diskinstance->Update();
+                       break;
+                    }
                 }
             }
         }
 
 #if defined(sun)
-        this->UpdateSolarisHelper();
+        this->UpdateSolarisHelper(device, pos);
 #endif
 
     }
@@ -460,7 +492,7 @@ namespace SCXSystemLib
        MNTTAB on this platform, this it is necessary to perform some additional
        searching of the file system.
     */
-    void StatisticalPhysicalDiskEnumeration::UpdateSolarisHelper()
+    void StatisticalPhysicalDiskEnumeration::UpdateSolarisHelper(std::wstring device, size_t *pos)
     {
         // workaround for unknown FS/devices
         // try to get a list of disks from /dev/dsk
@@ -473,6 +505,8 @@ namespace SCXSystemLib
         for ( unsigned int i = 0; i < disk_infos.size(); i++ ){
             std::wstring dev_name = disk_infos[i]->GetFullPath().GetFilename();
 
+            if ( device != L"" && dev_name != device) continue;
+
             dev_name = dev_name.substr(0,dev_name.find_last_not_of(L"0123456789"));
 
             if ( found_devices.find( dev_name ) != found_devices.end() )
@@ -481,7 +515,7 @@ namespace SCXSystemLib
             found_devices[dev_name] = 0;
 
             try {
-                SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> disk = FindDiskByDevice(dev_name);
+                SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> disk = FindDiskByDevice(dev_name, false, pos);
 
                 if ( disk == 0 ){
                     disk = new StatisticalPhysicalDiskInstance(m_deps);
@@ -501,6 +535,7 @@ namespace SCXSystemLib
                     }
                     
                     AddInstance(disk);
+                    if ( device != L"" && pos ) *pos = Size()-1;
                 } else {
                     if ( !disk->m_online ){
                         // verify if dsik is online
@@ -522,6 +557,8 @@ namespace SCXSystemLib
                 //std::wcout << L"excp in dsk update: " << e.What() << endl << e.Where() << endl;
                 // ignore errors, since disk may not be accessible and it's fine
             }
+
+            if ( device != L"") break;
         }
     }
 #endif

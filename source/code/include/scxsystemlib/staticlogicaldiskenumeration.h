@@ -48,6 +48,7 @@ namespace SCXSystemLib
 
         virtual void Init();
         virtual void Update(bool updateInstances=true);
+        void UpdateSpecific(bool updateInstances=true, std::wstring mountPoint=L"", size_t *pos=NULL);
         virtual void CleanUp();
 
         /**

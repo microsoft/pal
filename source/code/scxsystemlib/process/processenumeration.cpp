@@ -161,7 +161,7 @@ namespace SCXSystemLib
        map of current process instances and adds them to the instance list that's
        inherited from entity enumeration. 
     */ 
-    void ProcessEnumeration::Update(bool updateInstances)
+    void ProcessEnumeration::Update(bool)
     {
         // Inhibit data sampler from running for the duration of this function
         SCX_LOGHYSTERICAL(m_log, L"Update - Aquire lock ");
@@ -170,7 +170,19 @@ namespace SCXSystemLib
 
         // std::cout << "ProcessEnumeration::Update()" << std::endl;
 
-        UpdateNoLock(lock, updateInstances);
+        UpdateNoLock();
+    }
+
+    void ProcessEnumeration::UpdateSpecific(scxpid_t Handle)
+    {
+        // Inhibit data sampler from running for the duration of this function
+        SCX_LOGHYSTERICAL(m_log, L"Update - Aquire lock ");
+        SCXCoreLib::SCXThreadLock lock(m_lock);
+        SCX_LOGHYSTERICAL(m_log, L"Update - Lock aquired, get data ");
+
+        // std::cout << "ProcessEnumeration::Update()" << std::endl;
+
+        UpdateNoLock(Handle);
     }
  
     /**
@@ -190,7 +202,7 @@ namespace SCXSystemLib
        member function GetLockHandle() and creating the lock with SCXThreadLock.
        The lock must be supplied as "proof" that the lock was taken.
     */ 
-    void ProcessEnumeration::UpdateNoLock(SCXCoreLib::SCXThreadLock&, bool)
+    void ProcessEnumeration::UpdateNoLock(scxpid_t Handle)
     {
         Clear();                // Only removes pointers to instances from vector
 
@@ -199,14 +211,19 @@ namespace SCXSystemLib
          * Add (a pointer to) each one to the vector of instances
          * But first compute the time-dependent values.
          */
-        SCX_LOGTRACE(m_log, StrAppend(L"Update(): Number of live processes : ",m_procs.size()));
 
         ProcMap::iterator pi;
         for (pi = m_procs.begin(); pi != m_procs.end(); ++pi) {
             SCXCoreLib::SCXHandle<ProcessInstance> p = pi->second;
+            if ( Handle != (scxpid_t)-1 ) {
+                scxpid_t pid = 0;
+                p->GetPID(pid);
+                if ( Handle != pid )continue;
+            }
             p->UpdateTimedValues();
             AddInstance(p);
             SCX_LOGHYSTERICAL(m_log, StrAppend(L"Adding live pid: ", p->DumpString()));
+            if ( Handle != (scxpid_t)-1 ) break;
         }
     }
 

@@ -430,7 +430,7 @@ namespace SCXSystemLib
         {}
 
     protected:
-        virtual void UpdateSolarisHelper()
+        virtual void UpdateSolarisHelper(std::wstring, size_t *)
         {
             // Purposely does nothing. The parent function reads the local file system
             // to determine possible devices. In a unit-test scenario, it is not
@@ -446,7 +446,7 @@ namespace SCXSystemLib
         {}
 
     protected:
-        virtual void UpdateSolarisHelper()
+        virtual void UpdateSolarisHelper(std::wstring, size_t *)
         {
             // Purposely does nothing. The parent function reads the local file system
             // to determine possible devices. In a unit-test scenario, it is not
@@ -1331,7 +1331,7 @@ const char* mountPoint1_devName = "rpool/export";
             return statvfs64(path, buf);
         }
 
-        virtual void RefreshMNTTab()
+        virtual void RefreshMNTTab(SCXSystemLib::RefreshMNTTabParam*)
         {
             if (instrumentTest)
             {
@@ -1371,7 +1371,7 @@ namespace
     class PhysicalDiskSimulationDepend : public SCXSystemLib::DiskDependDefault
     {
         // This method defines mount points for the simulated physical disks.
-        virtual void RefreshMNTTab()
+        virtual void RefreshMNTTab(SCXSystemLib::RefreshMNTTabParam*)
         {
             m_MntTab.clear();
             SCXSystemLib::MntTabEntry mte;

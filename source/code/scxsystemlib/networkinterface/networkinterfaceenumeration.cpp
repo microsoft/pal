@@ -91,8 +91,8 @@ void NetworkInterfaceEnumeration::Update(bool updateInstances) {
 }
 
 
-void NetworkInterfaceEnumeration::UpdateSpecific(wstring interface) {
-    UpdateSpecificEnumeration(interface);
+void NetworkInterfaceEnumeration::UpdateSpecific(wstring interface, size_t *pos) {
+    UpdateSpecificEnumeration(interface, pos);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -169,15 +169,16 @@ void NetworkInterfaceEnumeration::UpdateEnumeration() {
 }
 
 /*----------------------------------------------------------------------------*/
-//! Make the enumeration correspond to the current state of the system
-void NetworkInterfaceEnumeration::UpdateSpecificEnumeration(wstring interface) {
+//! Make the enumeration correspond to the interface passed
+void NetworkInterfaceEnumeration::UpdateSpecificEnumeration(wstring interface, size_t *pos) {
     SCX_LOGTRACE(m_log, L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateSpecificEnumerationentry");
 
     SCX_LOGTRACE(m_log, StrAppend(L"SCXSystemLib::NetworkInterfaceEnumeration::UpdateSpecificEnumeration Find: ", interface));
 
     vector<NetworkInterfaceInfo> latestInterface = NetworkInterfaceInfo::FindAll(m_deps, m_includeNonRunning, interface);
 
-    NetworkInterfaceInstance(latestInterface[0]).Update(latestInterface[0]);
+    if ( latestInterface.size() >= 1 )
+        GetInstance(NetworkInterfaceInstance(latestInterface[0]).GetId(), pos)->Update(latestInterface[0]);
     }
 }
 

@@ -29,6 +29,7 @@
 #elif defined(sun)
 #include <scxsystemlib/scxkstat.h>
 #endif
+#include <sstream>
 
 namespace SCXSystemLib
 {
@@ -191,12 +192,19 @@ namespace SCXSystemLib
     void StatisticalLogicalDiskEnumeration::Update(bool updateInstances)
     {
         SCXCoreLib::SCXThreadLock lock(m_lock);
+
         FindLogicalDisks();
 
         if (updateInstances)
         {
             UpdateInstances();
         }
+    }
+
+    void StatisticalLogicalDiskEnumeration::UpdateSpecific(std::wstring mountPoint, size_t *pos)
+    {
+        SCXCoreLib::SCXThreadLock lock(m_lock);
+        FindLogicalDisks(mountPoint, pos);
     }
 
     /*----------------------------------------------------------------------------*/
@@ -420,23 +428,30 @@ namespace SCXSystemLib
        will be marked as offline.
 
     */
-    void StatisticalLogicalDiskEnumeration::FindLogicalDisks()
+    void StatisticalLogicalDiskEnumeration::FindLogicalDisks(std::wstring mountPoint, size_t *pos)
     {
-        SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Size of enumeration: ", this->Size()));
+        if ( mountPoint == L"") SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Size of enumeration: ", this->Size()));
         for (EntityIterator iter=Begin(); iter!=End(); ++iter)
         {
             SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = *iter;
+            if ( mountPoint != L"" && disk->m_mountPoint != mountPoint) continue;
             SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Device being set to OFFLINE, disk: ", disk->m_mountPoint));
             disk->m_online = false;
+            if ( mountPoint != L"" ) break;
         }
 
-        m_deps->RefreshMNTTab();
+        RefreshMNTTabParam *param = NULL;
+
+	if ( mountPoint != L"" ) param = new RefreshMNTTabParam(RefreshMNTTabParam::MOUNTPOINT, mountPoint);
+        m_deps->RefreshMNTTab(param);
+        if ( param ) free(param);
         for (std::vector<MntTabEntry>::const_iterator it = m_deps->GetMNTTab().begin();
              it != m_deps->GetMNTTab().end(); ++it)
         {
+          if ( mountPoint != L"" && it->mountPoint != mountPoint ) continue;
             if ( ! m_deps->FileSystemIgnored(it->fileSystem) && ! m_deps->DeviceIgnored(it->device))
             {
-                SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = GetInstance(it->mountPoint);
+                SCXCoreLib::SCXHandle<StatisticalLogicalDiskInstance> disk = GetInstance(it->mountPoint,pos);
                 if (0 == disk)
                 {
                     disk = new StatisticalLogicalDiskInstance(m_deps);
@@ -485,10 +500,12 @@ namespace SCXSystemLib
 
                     m_deps->AddDeviceInstance(disk->m_device, L"", disk->FindLVInfoByID(m_pathToRdev.find(disk->m_device)->second), m_pathToRdev.find(disk->m_device)->second);
 #endif
+                   if (pos) *pos = Size()-1;
                 }
                 SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Device being set to ONLINE, disk: ", disk->m_mountPoint));
                 disk->m_online = true;
             }
+            if ( mountPoint != L"" ) break; 
         }
     }
 

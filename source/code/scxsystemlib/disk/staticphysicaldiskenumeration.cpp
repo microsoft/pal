@@ -17,6 +17,7 @@
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxdirectoryinfo.h>
 
+#include <sstream>
 namespace SCXSystemLib
 {
     /*----------------------------------------------------------------------------*/
@@ -75,10 +76,27 @@ namespace SCXSystemLib
     */
     void StaticPhysicalDiskEnumeration::Update(bool updateInstances/*=true*/)
     {
+        FindPhysicalDisks();
+        if (updateInstances)
+        {
+            UpdateInstances();
+        }
+    }
+
+    void StaticPhysicalDiskEnumeration::UpdateSpecific(std::wstring device, size_t *pos)
+    {
+        FindPhysicalDisks(device, pos);
+    }
+
+    void StaticPhysicalDiskEnumeration::FindPhysicalDisks(std::wstring device, size_t *pos)
+    {
+        bool deviceFound=false;
         for (EntityIterator iter=Begin(); iter!=End(); iter++)
         {
             SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = *iter;
+            if ( device != L"" && disk->m_device != device ) continue;
             disk->m_online = false;
+            if ( device != L"" ) break;
         }
 
 #if defined(linux)
@@ -119,7 +137,15 @@ namespace SCXSystemLib
         }
 #endif
 
-        m_deps->RefreshMNTTab();
+        RefreshMNTTabParam *param = NULL;
+        if ( device != L"" ) param = new RefreshMNTTabParam(RefreshMNTTabParam::DEVICE, device);
+        m_deps->RefreshMNTTab(param);
+        if ( param ) free(param);
+
+#if defined(aix) || defined(hpux)
+        std::map<std::wstring, std::wstring> devices = m_deps->GetPhysicalDevices(L"");
+#endif
+
         for (std::vector<MntTabEntry>::const_iterator it = m_deps->GetMNTTab().begin(); 
              it != m_deps->GetMNTTab().end(); it++)
         {
@@ -144,6 +170,7 @@ namespace SCXSystemLib
                  ! m_deps->DeviceIgnored(it->device) &&
                  m_deps->LinkToPhysicalExists(it->fileSystem, it->device, it->mountPoint) )
             {
+#if defined(linux) || defined(sun)
                 std::map<std::wstring, std::wstring> devices = m_deps->GetPhysicalDevices(it->device);
                 if (devices.size() == 0)
                 {
@@ -154,21 +181,30 @@ namespace SCXSystemLib
                     SCX_LOG(m_log, suppressor.GetSeverity(out.str()), out.str());
                     continue;
                 }
+#endif
                 for (std::map<std::wstring, std::wstring>::const_iterator dev_it = devices.begin();
                      dev_it != devices.end(); dev_it++)
                 {
-                    SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = AddDiskInstance(dev_it->first, dev_it->second);
+                    if( device != L"" && dev_it->first != device ) continue;
+
+                    SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = AddDiskInstance(dev_it->first, dev_it->second
+#if defined(linux) 
+, false
+#endif 
+, pos);
+
+                    
+                    if ( device != L"" ) {
+                       deviceFound=true;
+                       break;
+                     }
                 }
             }
         }
 #if defined(sun)
-        this->UpdateSolarisHelper();
+        if ( !deviceFound )
+            this->UpdateSolarisHelper(device, pos);
 #endif
-
-        if (updateInstances)
-        {
-            UpdateInstances();
-        }
     }
 
 #if defined(sun)
@@ -178,7 +214,7 @@ namespace SCXSystemLib
        MNTTAB on this platform, this it is necessary to perform some additional
        searching of the file system.
     */
-    void StaticPhysicalDiskEnumeration::UpdateSolarisHelper()
+    void StaticPhysicalDiskEnumeration::UpdateSolarisHelper(std::wstring device, size_t *pos)
     {
         // workaround for unknown FS/devices
         // try to get a list of disks from /dev/dsk
@@ -189,6 +225,8 @@ namespace SCXSystemLib
         for ( unsigned int i = 0; i < disk_infos.size(); i++ ){
             std::wstring dev_name = disk_infos[i]->GetFullPath().GetFilename();
 
+            if ( device != L"" && dev_name != device) continue;
+
             dev_name = dev_name.substr(0,dev_name.find_last_not_of(L"0123456789"));
 
             if ( found_devices.find( dev_name ) != found_devices.end() )
@@ -197,7 +235,7 @@ namespace SCXSystemLib
             found_devices[dev_name] = 0;
 
             try {
-                SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = GetInstance(dev_name);
+                SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = GetInstance(dev_name, pos);
 
                 if ( disk == 0 ){
                     disk = new StaticPhysicalDiskInstance(m_deps);
@@ -208,6 +246,7 @@ namespace SCXSystemLib
                     // we will skip it (no call to AddInstance)
                     disk->Update();
                     AddInstance(disk);
+                    if ( device != L"" && pos ) *pos = Size()-1;
                    
                 } else {
                     disk->Update(); // check if disk is still 'alive'
@@ -219,6 +258,7 @@ namespace SCXSystemLib
                 //std::wcout << L"excp in dsk update: " << e.What() << endl << e.Where() << endl;
                 // ignore errors, since disk may not be accessible and it's fine
             }
+            if ( device != L"" ) break;
         }
     }
 #endif
@@ -239,9 +279,10 @@ namespace SCXSystemLib
 #if defined(linux)
         , bool cdDrive
 #endif
+        , size_t *pos
         )
     {
-        SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = GetInstance(name);
+        SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = GetInstance(name, pos);
         if (0 == disk)
         {
             disk = new StaticPhysicalDiskInstance(m_deps);
@@ -252,10 +293,10 @@ namespace SCXSystemLib
             disk->m_cdDrive = cdDrive;
 #endif
             AddInstance(disk);
-            return disk;
+            if ( pos ) *pos=Size()-1;
         }
         disk->m_online = true;
-        return SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance>(0);
+        return disk;
     }
     
 } /* namespace SCXSystemLib */

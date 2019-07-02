@@ -36,10 +36,12 @@ ance>
         virtual void Init();
         virtual void Update(bool updateInstances=true);
         virtual void CleanUp();
+        void UpdateSpecific(std::wstring device=L"", size_t *pos=NULL);
+        void FindPhysicalDisks(std::wstring device=L"", size_t *pos=NULL);
 
 #if defined (sun)
     protected:
-        virtual void UpdateSolarisHelper();
+        virtual void UpdateSolarisHelper(std::wstring device=L"", size_t *pos=NULL);
 #endif
 
     private:
@@ -50,6 +52,7 @@ ance>
 #if defined(linux)
             , bool cdDrive = false
 #endif
+            , size_t *pos = NULL
             );
 
         SCXCoreLib::SCXHandle<DiskDepend> m_deps; //!< Disk dependency object used for dependency injection.

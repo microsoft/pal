@@ -159,6 +159,21 @@ namespace SCXSystemLib
         std::wstring    devAttribute; //!< Device attribute value (or empty if no such attribute).
     };
 
+    class RefreshMNTTabParam{
+         public:
+             enum reqType { DEVICE, MOUNTPOINT, NOPARAM};
+             RefreshMNTTabParam():type(NOPARAM), value(L""){};
+             RefreshMNTTabParam( reqType Type, std::wstring Value ):type(Type), value(Value){};
+             reqType getType() { return type; }
+             void setType(reqType Type) { type = Type; }
+             std::wstring getValue() { return value; }
+             void setValue(std::wstring Value) { value = Value; }
+         private:
+             reqType type;
+             std::wstring value;
+    };
+
+
     /*----------------------------------------------------------------------------*/
     /**
        Define the interface for disk dependencies.    
@@ -232,7 +247,7 @@ namespace SCXSystemLib
         /**
            Refresh the mount tab state.
         */ 
-        virtual void RefreshMNTTab() = 0;
+        virtual void RefreshMNTTab(RefreshMNTTabParam *param=NULL)= 0;
 
 #if defined(sun)
         /**
@@ -609,6 +624,7 @@ namespace SCXSystemLib
     };
 
     /*----------------------------------------------------------------------------*/
+    enum reqType { DEVICE, MOUNTPOINT, NOPARAM};
     /**
        Implement default behaviour for DiskDepend.
     */
@@ -629,7 +645,7 @@ namespace SCXSystemLib
         virtual void GetFilesInDirectory(const std::wstring& path, std::vector<SCXCoreLib::SCXFilePath>& files);
         virtual const SCXLvmTab& GetLVMTab();
         virtual const std::vector<MntTabEntry>& GetMNTTab();
-        virtual void RefreshMNTTab();
+        virtual void RefreshMNTTab(RefreshMNTTabParam *Param=NULL);
 #if defined(sun)
         virtual void SetDevTabPath(const std::wstring& newValue); 
         virtual const SCXCoreLib::SCXFilePath& LocateDevTab();
