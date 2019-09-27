@@ -489,6 +489,7 @@ namespace SCXSystemLib
     */
     void DiskDependDefault::RefreshMNTTab()
     {
+        bool isTestEnv = FileExists(L"/etc/opt/omi/conf/SCX_TESTRUN_ACTIVE");
         static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
         SCX_LOGTRACE(m_log, L"RefreshMNTTab: mnttab file being read");
         if (0 < m_MntTab.size())
@@ -547,7 +548,7 @@ namespace SCXSystemLib
             if (line.find(L"loop=") != std::wstring::npos || line.find(L"/dev/loop") != std::wstring::npos)
             {
                 // for Linux, ignore files mounted as devices using the loopback driver
-                continue;
+                if (!isTestEnv) continue;
             }
 #endif
             SCXCoreLib::StrTokenize(line, parts, L" \n\t");
