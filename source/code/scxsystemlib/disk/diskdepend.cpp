@@ -490,7 +490,6 @@ namespace SCXSystemLib
     */
     void DiskDependDefault::RefreshMNTTab(RefreshMNTTabParam *param)
     {
-        bool isTestEnv = FileExists(L"/etc/opt/omi/conf/SCX_TESTRUN_ACTIVE");
         static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
         bool isTestEnv = FileExists(L"/etc/opt/omi/conf/SCX_TESTRUN_ACTIVE");
         SCX_LOGTRACE(m_log, L"RefreshMNTTab: mnttab file being read");
