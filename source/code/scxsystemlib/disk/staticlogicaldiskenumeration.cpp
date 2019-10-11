@@ -109,6 +109,65 @@ namespace SCXSystemLib
         }
     }
 
+    /*----------------------------------------------------------------------------*/
+    /**
+       Update the enumeration for specific instance.
+
+       \param updateInstances If true (default) all instances will be updated.
+                              Otherwise only the content of teh enumeration will be updated.
+
+    */
+
+    void StaticLogicalDiskEnumeration::UpdateSpecific(bool updateInstances/*=true*/, std::wstring mountPoint, size_t *pos)
+    {
+        SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Size of enumeration: ", this->Size()));
+        for (EntityIterator iter=Begin(); iter!=End(); ++iter)
+        {
+            SCXCoreLib::SCXHandle<StaticLogicalDiskInstance> disk = *iter;
+            if ( mountPoint != L"" && disk->m_mountPoint != mountPoint) continue;
+            SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Device being set to OFFLINE, disk: ", disk->m_mountPoint));
+            disk->m_online = false;
+            if ( mountPoint != L"" ) break;
+        }
+
+        RefreshMNTTabParam *param = NULL;
+        
+        if ( mountPoint != L"" ) param = new RefreshMNTTabParam(RefreshMNTTabParam::MOUNTPOINT, mountPoint);
+
+        m_deps->RefreshMNTTab(param);
+        if ( param ) free(param);
+
+        for (std::vector<MntTabEntry>::const_iterator it = m_deps->GetMNTTab().begin();
+             it != m_deps->GetMNTTab().end(); ++it)
+        {
+            if ( mountPoint != L"" && it->mountPoint != mountPoint ) continue;
+            if ( ! m_deps->FileSystemIgnored(it->fileSystem) && ! m_deps->DeviceIgnored(it->device))
+            {
+                SCXCoreLib::SCXHandle<StaticLogicalDiskInstance> disk = GetInstance(it->mountPoint, pos);
+                if (0 == disk)
+                {
+                    disk = new StaticLogicalDiskInstance(m_deps);
+                    disk->m_device = it->device;
+                    disk->m_mountPoint = it->mountPoint;
+                    disk->SetId(disk->m_mountPoint);
+                    disk->m_fileSystemType = it->fileSystem;
+                    disk->m_diskRemovability = GetDiskRemovability(it->device);
+                    AddInstance(disk);
+                    if (pos) *pos = Size()-1; 
+                }
+                SCX_LOGTRACE(m_log, SCXCoreLib::StrAppend(L"Device being set to ONLINE, disk: ", disk->m_mountPoint));
+                disk->m_online = true;
+            }
+            if ( mountPoint != L"" ) break;
+        }
+
+        if (mountPoint == L"" && updateInstances)
+        {
+            UpdateInstances();
+        }
+    }
+
+
 
      /*----------------------------------------------------------------------------*/
      /**

@@ -75,7 +75,7 @@ namespace SCXSystemLib
         EntityIterator Begin();
         EntityIterator End();
         SCXCoreLib::SCXHandle<Inst> GetTotalInstance() const;
-        SCXCoreLib::SCXHandle<Inst> GetInstance(const EntityInstanceId& id) const;
+        SCXCoreLib::SCXHandle<Inst> GetInstance(const EntityInstanceId& id, size_t *pos=NULL) const;
         SCXCoreLib::SCXHandle<Inst> GetInstance(size_t pos) const;
         SCXCoreLib::SCXHandle<Inst> operator[](size_t pos) const;
 
@@ -250,12 +250,14 @@ namespace SCXSystemLib
 
     */
     template<class Inst>
-    SCXCoreLib::SCXHandle<Inst> EntityEnumeration<Inst>::GetInstance(const EntityInstanceId& id) const
+    SCXCoreLib::SCXHandle<Inst> EntityEnumeration<Inst>::GetInstance(const EntityInstanceId& id, size_t *pos) const
     {
         for (size_t i=0; i<Size(); i++)
         {
             if (m_instances[i]->GetId() == id)
             {
+                if ( pos !=NULL )
+                    *pos = i;
                 return m_instances[i];
             }
         }

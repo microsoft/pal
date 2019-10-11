@@ -51,6 +51,7 @@ namespace SCXSystemLib
         
         virtual const std::wstring DumpString() const;
 
+        void UpdateSpecific(std::wstring mountPoint=L"", size_t *pos=NULL);
         static void DiskSampler(SCXCoreLib::SCXThreadParamHandle& param);
     private:
         SCXCoreLib::SCXLogHandle m_log;         //!< Log handle
@@ -59,7 +60,7 @@ namespace SCXSystemLib
         SCXCoreLib::SCXThreadLockHandle m_lock; //!< Handles locking in the disk enumeration.
         std::map<std::wstring,scxulong> m_pathToRdev; //!< Cache for path to rdev values.
 
-        void FindLogicalDisks();
+        void FindLogicalDisks(std::wstring mountPoint=L"", size_t *pos=NULL);
         
         void UpdatePathToRdev(const std::wstring& dir);
     };

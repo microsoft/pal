@@ -37,7 +37,7 @@ namespace SCXSystemLib
         StatisticalPhysicalDiskEnumeration(SCXCoreLib::SCXHandle<DiskDepend> deps);
         virtual ~StatisticalPhysicalDiskEnumeration();
 
-        SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> FindDiskByDevice(const std::wstring& device, bool includeSamplerDevice = false);
+        SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> FindDiskByDevice(const std::wstring& device, bool includeSamplerDevice = false, size_t *pos=NULL);
 
         virtual void Init();
         virtual void CleanUp();
@@ -52,10 +52,11 @@ namespace SCXSystemLib
         virtual const std::wstring DumpString() const;
 
         static void DiskSampler(SCXCoreLib::SCXThreadParamHandle& param);
+        void UpdateSpecific(bool updateInstances, std::wstring mountPoint, size_t *pos);
 
 #if defined (sun)
     protected:
-        virtual void UpdateSolarisHelper();
+        virtual void UpdateSolarisHelper(std::wstring device = L"", size_t *pos=NULL);
 #endif
 
     private:
@@ -65,7 +66,7 @@ namespace SCXSystemLib
         SCXCoreLib::SCXThreadLockHandle m_lock; //!< Handles locking in the disk enumeration.
         std::map<std::wstring,scxulong> m_pathToRdev; //!< Cache for path to rdev values.
 
-        void FindPhysicalDisks();
+        void FindPhysicalDisks(bool, std::wstring device = L"", size_t *pos=NULL);
         
         void UpdatePathToRdev(const std::wstring& dir);
         SCXCoreLib::SCXHandle<StatisticalPhysicalDiskInstance> AddDiskInstance(const std::wstring& name, const std::wstring& device);

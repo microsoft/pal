@@ -20,6 +20,7 @@
 #include <scxsystemlib/diskdepend.h>
 #include <scxsystemlib/scxsysteminfo.h>
 #include <scxsystemlib/scxproductdependencies.h>
+#include <stdlib.h>
 
 #if defined(aix)
 #include <sys/vmount.h>
@@ -487,10 +488,11 @@ namespace SCXSystemLib
 
        \note Not thread safe.
     */
-    void DiskDependDefault::RefreshMNTTab()
+    void DiskDependDefault::RefreshMNTTab(RefreshMNTTabParam *param)
     {
         bool isTestEnv = FileExists(L"/etc/opt/omi/conf/SCX_TESTRUN_ACTIVE");
         static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eWarning, SCXCoreLib::eTrace);
+        bool isTestEnv = FileExists(L"/etc/opt/omi/conf/SCX_TESTRUN_ACTIVE");
         SCX_LOGTRACE(m_log, L"RefreshMNTTab: mnttab file being read");
         if (0 < m_MntTab.size())
         {
@@ -523,10 +525,29 @@ namespace SCXSystemLib
                     std::string device(p + vmt->vmt_data[VMT_OBJECT].vmt_off);
                     std::string mountPoint(p + vmt->vmt_data[VMT_STUB].vmt_off);
 
+                    if ( param != NULL  && param->getValue() != L"" )
+                    {
+                        bool isContinue=false;
+                        switch ( param->getType() ) {
+                           case MOUNTPOINT:
+                              if ( SCXCoreLib::StrFromUTF8(mountPoint) != param->getValue() ) isContinue=true;
+                                break;
+                           case DEVICE:
+                              if ( SCXCoreLib::StrFromUTF8(device) != param->getValue() ) isContinue=true;
+                                break;
+                           case NOPARAM:
+                                break;
+                        }
+
+                        if(isContinue) continue;
+	            }
+
                     entry.device = SCXCoreLib::StrFromUTF8(device);
                     entry.mountPoint = SCXCoreLib::StrFromUTF8(mountPoint);
                     entry.fileSystem = m_fsMap.find(fs)->second;
                     m_MntTab.push_back(entry);
+
+                    if ( param != NULL ) break;
                 }
                 p += vmt->vmt_length;
             }
@@ -614,6 +635,23 @@ namespace SCXSystemLib
                     }
                 }
 #endif
+               if ( param != NULL && param->getValue() != L"" )
+               {
+                   bool isContinue=false;
+                   switch ( param->getType() ) {
+                       case MOUNTPOINT:
+                            if ( parts[1] != param->getValue() ) isContinue=true;
+                            break;
+                       case DEVICE:
+                            if ( parts[0].find(param->getValue()) == std::wstring::npos ) isContinue=true;
+                            break;
+                       case NOPARAM:
+                            break;
+                   }
+
+                   if(isContinue) continue;
+                }
+
                 MntTabEntry entry;
                 entry.device = parts[0];
                 entry.mountPoint = parts[1];
@@ -634,6 +672,9 @@ namespace SCXSystemLib
                              + L"', filesysstem '" + entry.fileSystem + L"'" );
 
                 m_MntTab.push_back(entry);
+
+                if ( param != NULL ) break;
+
             }
         }
         fs->close();
@@ -897,6 +938,7 @@ namespace SCXSystemLib
             if (1 == r && 0 != strncmp(data.name, "cd", 2)) // TODO: better way to exclude CD/DVD!
             {
                 name = SCXCoreLib::StrFromUTF8(data.name);
+
                 devices[name] = L"/dev/" + name;
             }
             // TODO: Error handling?
@@ -955,7 +997,6 @@ namespace SCXSystemLib
             // Try to convert the potential LVM device path into its matching
             // device mapper (dm) device path.
             std::wstring dmDevice = lvmUtils.GetDMDevice(device);
-
             if (dmDevice.empty())
             {
                 // device is a normal partition device path
@@ -972,8 +1013,8 @@ namespace SCXSystemLib
                 if (slaves.size() == 0)
                 {
                     // this condition can only be reached on RHEL4/SLES9 systems
-                    static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eInfo, SCXCoreLib::eHysterical);
                     std::wstringstream               out;
+                    static SCXCoreLib::LogSuppressor suppressor(SCXCoreLib::eInfo, SCXCoreLib::eHysterical);
 
                     out << L"Because of limited support for LVM on "
 #   if defined(PF_DISTRO_SUSE)
@@ -998,6 +1039,7 @@ namespace SCXSystemLib
                             path = GuessPhysicalFromLogicalDevice(*iter);
                         }
                         name = path.GetFilename();
+                        
                         devices[name] = path.Get();
                     }
                 }

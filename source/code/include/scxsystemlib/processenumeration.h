@@ -69,13 +69,14 @@ namespace SCXSystemLib
         ProcessEnumeration();
         ~ProcessEnumeration();
         virtual void Init();
-        virtual void Update(bool updateInstances=true);
+        virtual void Update(bool instance=true);
+        void UpdateSpecific(scxpid_t PID=(scxpid_t)-1);
         virtual void CleanUp();
 
         size_t Size() const;
 
         const SCXCoreLib::SCXThreadLockHandle& GetLockHandle() const;
-        void UpdateNoLock(SCXCoreLib::SCXThreadLock& lck, bool updateInstances=true);
+        void UpdateNoLock(scxpid_t PID=(scxpid_t)-1);
 
         /* This one is public for testing purposes */
         void SampleData();
