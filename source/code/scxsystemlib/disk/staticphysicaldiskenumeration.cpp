@@ -91,6 +91,7 @@ namespace SCXSystemLib
     void StaticPhysicalDiskEnumeration::FindPhysicalDisks(std::wstring device, size_t *pos)
     {
         bool deviceFound=false;
+        deviceFound=deviceFound;  //Dummy Entry to fix build issue "variable ‘deviceFound’ set but not used" on redhat ppc
         for (EntityIterator iter=Begin(); iter!=End(); iter++)
         {
             SCXCoreLib::SCXHandle<StaticPhysicalDiskInstance> disk = *iter;
