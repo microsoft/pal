@@ -101,6 +101,8 @@ namespace SCXSystemLib
         ~CPUEnumeration();
         virtual void Init();
         virtual void Update(bool updateInstances=true);
+        virtual void UpdateCollection();
+        virtual void UpdateSpecific(wstring procName=L"", size_t *pos=NULL);
         virtual void CleanUp();
         void SampleData();
 
