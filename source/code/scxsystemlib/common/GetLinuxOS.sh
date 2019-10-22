@@ -94,7 +94,8 @@ GetLinuxInfo() {
         fi
     elif [ "${OSName}" = "SUSE Linux Enterprise Server" ]; then
         # SLES 10 uses "Linux". Need to parse the minor version as SLES 10.0 is not supported, only 10.1 and up
-        Version=`grep 'SUSE Linux Enterprise Server' $ReleaseFile | sed s/.*Server\ // | sed s/\ \(.*//`
+        # SLES 15 uses /etc/os-release as $ReleaseFile. It contains all information inside "" so Version appears like 15". Need to parse the Version to remove "
+        Version=`grep 'SUSE Linux Enterprise Server' $ReleaseFile | sed 's/.*Server\ \| (.*\|\"//g'`
         # Discovery Wizard wants "10.X" not "10 SPX"
         if [ `echo ${Version} | grep 'SP' | wc -l` -eq 1 ]; then
             Version=`echo ${Version} | awk '{print $1"."$2}'| sed s/SP//`
