@@ -216,7 +216,7 @@ namespace SCXSystemLib
 
         m_timeStamp.AddSample(time(0));
 
-        if (parts.size() == eNumberOfDiskColumns)
+        if (parts.size() >= eNumberOfDiskColumns) // > condition for handling additional fields in kernel 4.18+ and 5.5+
         {
             // this looks like a diskstats entry for a disk-type device
             try
