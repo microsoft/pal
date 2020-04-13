@@ -204,7 +204,7 @@ namespace SCXSystemLib
         // "(" and last ")" to handle processes that contain "(" or ")" bytes.
         const char* procStart = strchr(buffer, '(');
         const char* procEnd = strrchr(buffer, ')');
-        if (NULL == procStart || NULL == procEnd || procStart > procEnd || (procEnd - procStart) > 28)
+        if (NULL == procStart || NULL == procEnd || procStart > procEnd || (procEnd - procStart) > 56)
         {
             wostringstream errtxt;
             errtxt << L"Unexpected error parsing " << StrFromUTF8(filename) << L", file contents: " << StrFromUTF8(buffer);
