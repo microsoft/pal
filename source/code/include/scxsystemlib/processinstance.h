@@ -65,7 +65,7 @@ namespace SCXSystemLib
 
     struct LinuxProcStat {
         int processId;                           //!< %d  1
-        char command[30];                        //!< %s
+        char command[58];                        //!< %s
         char state;             //!< %c
         int parentProcessId;                     //!< %d
         int processGroupId;                      //!< %d  5
