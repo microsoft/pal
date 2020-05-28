@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include <sys/stat.h>
 #include <scxcorelib/scxoserror.h>
@@ -628,7 +629,15 @@ namespace SCXCoreLib {
         strcpy(&buf[0], patternString.c_str());
 
         mode_t oldUmask = umask(077);
+
+        const char* slowEnvVar = getenv("SLOWCOUNT");
+        int slowCount = slowEnvVar?atoi(slowEnvVar):0;
+
         int fileDescriptor = mkstemp(&buf[0]);
+
+        if ( slowCount !=0 && slowCount<300 )
+            sleep(slowCount);
+
         umask(oldUmask);
 
         if (fileDescriptor == -1) {
