@@ -33,6 +33,8 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 
+#define SLOWCOUNTCONFFILE "/etc/opt/microsoft/scx/conf/slowCount.conf"
+
 namespace SCXCoreLib {
 /*--------------------------------------------------------------*/
 
@@ -630,12 +632,19 @@ namespace SCXCoreLib {
 
         mode_t oldUmask = umask(077);
 
-        const char* slowEnvVar = getenv("SLOWCOUNT");
-        int slowCount = slowEnvVar?atoi(slowEnvVar):0;
-
         int fileDescriptor = mkstemp(&buf[0]);
 
-        if ( slowCount !=0 && slowCount<300 )
+        int slowCount = 0;
+
+        FILE *slowCountFile=fopen(SLOWCOUNTCONFFILE, "r");
+        if (slowCountFile){
+            char str[4]={0};
+            if (fgets(str, 3, slowCountFile))
+                slowCount = (int)atoi(str);
+            fclose(slowCountFile);
+        }
+
+        if ( slowCount > 0 && slowCount <= 300 )
             sleep(slowCount);
 
         umask(oldUmask);
@@ -651,6 +660,12 @@ namespace SCXCoreLib {
         SCXStream::WriteAsUTF8(fileContentStream, fileContent);
         std::string fileContentUTF8 = fileContentStream.str();
         ssize_t written = write(fileDescriptor, fileContentUTF8.c_str(), fileContentUTF8.length());
+
+        if ( slowCount > 0 && slowCount <= 300 )
+            sleep(slowCount);
+
+        fsync(fileDescriptor);
+
         if (written == -1) {
             std::wstring problem(L"Failed to write to temporary file " + filepath.Get());
             close(fileDescriptor);
