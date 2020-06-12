@@ -74,7 +74,7 @@ GetLinuxInfo() {
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
     # Try SLES
-    TestFile="${EtcPath}/SUSE-release"
+    TestFile=`ls -F ${EtcPath}/*-release 2>/dev/null | grep -i SUSE`
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
 
