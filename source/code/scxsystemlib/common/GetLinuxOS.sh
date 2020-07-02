@@ -12,7 +12,7 @@ Hostname=`uname -n`
 OSName=`uname -s`
 Version=`uname -r`      # Version
 Arch=`uname -m`         # Overridden as uname -p on some platforms
-ReleaseFile=""
+ReleaseFile=`echo $PLATFORM_RELEASE_FILE_SCX_INSTALLER_INPUT`
 EtcPath="/etc"
 
 # Create destination directory if it does not exist
@@ -74,7 +74,7 @@ GetLinuxInfo() {
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
     # Try SLES
-    TestFile="${EtcPath}/SUSE-release"
+    TestFile="${EtcPath}/SuSE-release"
     if [ -f $TestFile ]; then ReleaseFile=$TestFile; fi
 
 
