@@ -21,6 +21,7 @@
 #include <fstream>
 #include <vector>
 #include <scxcorelib/scxfilesystem.h>
+#include <pthread.h>
 
 namespace SCXCoreLib {
 
@@ -109,6 +110,10 @@ namespace SCXCoreLib {
     private:
         /// Prevents the class from beeing instantiated as well as inherited from
         SCXFile();
+#if !defined(DISABLE_WIN_UNSUPPORTED)
+        static pthread_mutex_t scxTempFileCountLock;
+        static int scxTempFileCount;
+#endif
     };
 
     

@@ -32,6 +32,12 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 
+#if !defined(DISABLE_WIN_UNSUPPORTED)
+#include <sstream>
+#define SCXTEMPPREFIXCOUNT 10000;
+#define SCRIPTCONTROLLOGFILE "/var/opt/microsoft/scx/log/scriptcontrollog"
+#endif
+
 namespace SCXCoreLib {
 /*--------------------------------------------------------------*/
 
@@ -570,6 +576,10 @@ namespace SCXCoreLib {
 
 
 #if !defined(DISABLE_WIN_UNSUPPORTED)
+
+    pthread_mutex_t SCXFile::scxTempFileCountLock=PTHREAD_MUTEX_INITIALIZER;
+    int SCXFile::scxTempFileCount=0;
+
     /*--------------------------------------------------------------*/
     /**
         Creates a temp file and writes to it
@@ -578,6 +588,7 @@ namespace SCXCoreLib {
         \returns    Complete path of newly created file.
 
      */
+
     SCXFilePath SCXFile::CreateTempFile(const std::wstring& fileContent, const std::wstring& tmpDir /* = "/tmp/" */) {
         /**
          * The code below behaves as it does because of limitations in the
@@ -620,7 +631,18 @@ namespace SCXCoreLib {
         }
 #endif
 
-        pattern.SetFilename(L"scxXXXXXX");
+        std::stringstream ss;
+
+        pthread_mutex_lock(&scxTempFileCountLock);
+        ss<<scxTempFileCount;
+        scxTempFileCount=(scxTempFileCount+1)%SCXTEMPPREFIXCOUNT;
+        pthread_mutex_unlock(&scxTempFileCountLock);
+
+        std::string tempfileNamePrefix;
+        ss>>tempfileNamePrefix;
+        tempfileNamePrefix="scx"+tempfileNamePrefix+"XXXXXX";
+
+        pattern.SetFilename(StrFromUTF8(tempfileNamePrefix));
         std::string patternString = SCXFileSystem::EncodePath(pattern);
         std::vector<char> buf;
 
@@ -637,6 +659,15 @@ namespace SCXCoreLib {
         }
 
         SCXFilePath filepath = SCXFileSystem::DecodePath(&buf[0]);
+
+        if ( access(SCRIPTCONTROLLOGFILE, W_OK) != -1 ) {
+           FILE *fptr = fopen(SCRIPTCONTROLLOGFILE,"a");
+           if( fptr != NULL ) {
+               std::string tempFileName = StrToUTF8(filepath.Get());
+               fprintf(fptr, "%s temporary file created.\n",tempFileName.c_str());
+               fclose(fptr);
+           }
+        }
 
         std::ostringstream fileContentStream;
         SCXStream::WriteAsUTF8(fileContentStream, fileContent);
