@@ -375,9 +375,21 @@ namespace SCXSystemLib
         SCXCoreLib::SCXHandle<std::wfstream> fsDiskStats(SCXCoreLib::SCXFile::OpenWFstream(LocateProcDiskStats(), std::ios::in));
         fsDiskStats.SetOwner();
         std::wstring line;
-        while ( ! fsDiskStats->eof() && fsDiskStats->is_open() )
+        int counter = 0;
+        while ( fsDiskStats->good() && fsDiskStats->is_open() )
         {
             getline( *fsDiskStats, line );
+            if ( line.size() )
+                counter = 0;
+            else
+                ++counter;
+
+            if ( counter >= 10 )
+            {
+                SCX_LOGERROR(m_log, L"Error while refreshing diskstats with errno = " + SCXCoreLib::StrFrom(errno));
+                break;
+            }
+
             std::vector<std::wstring> parts;
             SCXCoreLib::StrTokenize(line, parts, L" \n\t");
             if (parts.size() < 3)
