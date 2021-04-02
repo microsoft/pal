@@ -65,6 +65,8 @@ if retval != 0:
     sys.stderr.write("Error: Unable to create staging directory %s" % stagingDir)
     exit(1)
 
+scxutil.MkAllDirs(targetDir)
+
 for d in Directories:
     scxutil.MkAllDirs(stagingDir + d.stagedLocation)
     pass
