@@ -361,6 +361,56 @@ public:
         CPPUNIT_ASSERT_EQUAL( string("Oracle Corporation"), releaseFile["OSManufacturer"] );
     }
 
+    // Platform Oracle Enterprise Linux 7:
+    void TestPlatform_Oracle_7()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/oracle_7", releaseFile );
+
+        // Verify our data:
+        //      OSName=Oracle Linux Server
+        //      OSVersion=7.0
+        //      OSFullName=Oracle Linux Server 7.0 (x86_64)
+        //      OSAlias=UniversalR
+        //      OSManufacturer=Oracle Corporation
+        //      OSShortName=Oracle_7.0
+
+        CPPUNIT_ASSERT_EQUAL( string("Oracle Linux Server"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("7.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Oracle_7.0"), releaseFile["OSShortName"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Oracle Linux Server 7.0") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("Oracle Corporation"), releaseFile["OSManufacturer"] );
+    }
+
+
+
+    // Platform Oracle Enterprise Linux 8:
+    void TestPlatform_Oracle_8()
+    {
+        SelfDeletingFilePath delReleaseFile( s_wsReleaseFile );
+        map<string,string> releaseFile;
+        ExecuteScript( L"./testfiles/platforms/oracle_8", releaseFile );
+
+        // Verify our data:
+        //      OSName=Oracle Linux Server
+        //      OSVersion=8.0
+        //      OSFullName=Oracle Linux Server 8.0 (x86_64)
+        //      OSAlias=UniversalR
+        //      OSManufacturer=Oracle Corporation
+        //      OSShortName=Oracle_8.0
+
+        CPPUNIT_ASSERT_EQUAL( string("Oracle Linux Server"), releaseFile["OSName"] );
+        CPPUNIT_ASSERT_EQUAL( string("8.0"), releaseFile["OSVersion"] );
+        CPPUNIT_ASSERT_EQUAL( string("Oracle_8.0"), releaseFile["OSShortName"] );
+        CPPUNIT_ASSERT_EQUAL( static_cast<size_t>(0), releaseFile["OSFullName"].find("Oracle Linux Server 8.0") );
+        CPPUNIT_ASSERT_EQUAL( string("UniversalR"), releaseFile["OSAlias"] );
+        CPPUNIT_ASSERT_EQUAL( string("Oracle Corporation"), releaseFile["OSManufacturer"] );
+    }
+
+
+
     // Platform NeoKylin version 5.6:
     void TestPlatform_NeoKylin()
     {
