@@ -49,6 +49,8 @@ class SCXGetLinuxOS_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestPlatform_SLES_10 );
     CPPUNIT_TEST( TestPlatform_Oracle_5 );
     CPPUNIT_TEST( TestPlatform_Oracle_6 );
+    CPPUNIT_TEST( TestPlatform_Oracle_7 );
+    CPPUNIT_TEST( TestPlatform_Oracle_8 );
     CPPUNIT_TEST( TestPlatform_NeoKylin );
     CPPUNIT_TEST( TestPlatform_Debian_5_0_10 );
     CPPUNIT_TEST( TestPlatform_Ubuntu_11 );
