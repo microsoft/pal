@@ -180,6 +180,16 @@ GetLinuxInfo() {
                         OSShortName="Ubuntu"
                     fi
                     ;;
+
+                ol)
+                    OSManufacturer="Oracle Corporation"
+                    OSAlias="UniversalR"
+                    if [ "${Version}" != "" ]; then
+                        OSShortName="Oracle_"
+                    else
+                        OSShortName="Oracle"
+                    fi
+                    ;;
             esac
 
         elif [ ! -z $ReleaseFile ]; then
