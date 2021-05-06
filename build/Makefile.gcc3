@@ -53,9 +53,9 @@ ifeq ($(PF_DISTRO),REDHAT)
 	endif
 endif
 
-# CXX Debug flags for debug builds
+# CXX flags
+CXXFLAGS += -ggdb
 ifeq ($(BUILD_TYPE),Debug)
-	CXXFLAGS += -ggdb 
 	DEFINES += -D_DEBUG
 else
 	DEFINES += -DNDEBUG
