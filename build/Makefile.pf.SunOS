@@ -68,7 +68,7 @@ ifeq ($(ARCH),sparc)
 	LDFLAGS_COMMON += -xcheck=%all
 endif
 else
-	CXXFLAGS += -xO1
+	CXXFLAGS += -g -xO1
 	DEFINES += -DNDEBUG
 	LDFLAGS_COMMON += -xldscope=hidden
 ifeq ($(ARCH),sparc)

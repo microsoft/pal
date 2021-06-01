@@ -31,7 +31,7 @@ ifeq ($(BUILD_TYPE),Debug)
 # 	COMMONFLAGS += -qheapdebug     Currently disabled, see WI11161
 	DEFINES += -D_DEBUG
 else
-	COMMONFLAGS += -O2 -qcompact
+	COMMONFLAGS += -g -O2 -qcompact
 	DEFINES += -DNDEBUG
 endif
 
