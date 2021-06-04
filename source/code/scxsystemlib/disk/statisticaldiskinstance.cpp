@@ -103,6 +103,7 @@ namespace SCXSystemLib
         m_secPerTransfer = 0;
         m_mbUsed = 0;
         m_mbFree = 0;
+        m_mbTotal = 0;
         m_inodesTotal = 0;
         m_inodesFree = 0;
         m_blockSize = 0;
@@ -136,6 +137,7 @@ namespace SCXSystemLib
 
         m_mbFree = 0;
         m_mbUsed = 0;
+        m_mbTotal = 0;
         m_inodesTotal = 0;
         m_inodesFree = 0;
         m_readsPerSec = m_reads.GetAverageDelta(MAX_DISKINSTANCE_DATASAMPER_SAMPLES) / DISK_SECONDS_PER_SAMPLE;
@@ -223,7 +225,8 @@ namespace SCXSystemLib
                 // when using system commands.
                 m_mbFree = static_cast<scxulong>(ceil(SCXCoreLib::BytesToMegaBytes(static_cast<double>(s_vfs.f_bavail)*static_cast<double>(s_vfs.f_frsize))));
                 m_mbUsed = static_cast<scxulong>(ceil(SCXCoreLib::BytesToMegaBytes((static_cast<double>(s_vfs.f_blocks)-
-                                                                                    static_cast<double>(s_vfs.f_bavail))*static_cast<double>(s_vfs.f_frsize))));
+                                                                                    static_cast<double>(s_vfs.f_bfree))*static_cast<double>(s_vfs.f_frsize))));
+                m_mbTotal = static_cast<scxulong>(ceil(SCXCoreLib::BytesToMegaBytes(static_cast<double>(s_vfs.f_blocks)*static_cast<double>(s_vfs.f_frsize))));
                 m_blockSize = s_vfs.f_bsize;
 
                 // Grab the inode information while we have it
@@ -488,10 +491,11 @@ namespace SCXSystemLib
     \param       mbFree - output parameter where MBs free on disk is stored.
     \returns     true if value was set, otherwise false.
 */
-    bool StatisticalDiskInstance::GetDiskSize(scxulong& mbUsed, scxulong& mbFree) const
+    bool StatisticalDiskInstance::GetDiskSize(scxulong& mbUsed, scxulong& mbFree, scxulong& mbTotal) const
     {
         mbUsed = m_mbUsed;
         mbFree = m_mbFree; 
+        mbTotal = m_mbTotal; 
         return true;
     }
 

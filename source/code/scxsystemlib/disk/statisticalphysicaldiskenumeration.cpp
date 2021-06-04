@@ -259,6 +259,7 @@ namespace SCXSystemLib
                 total->m_waitTime += disk->m_waitTime;
                 total->m_mbUsed += disk->m_mbUsed;
                 total->m_mbFree += disk->m_mbFree;
+                total->m_mbTotal += disk->m_mbTotal;
                 total_reads += disk->m_reads.GetDelta(MAX_DISKINSTANCE_DATASAMPER_SAMPLES);
                 total_writes += disk->m_writes.GetDelta(MAX_DISKINSTANCE_DATASAMPER_SAMPLES);
 #if defined (hpux)

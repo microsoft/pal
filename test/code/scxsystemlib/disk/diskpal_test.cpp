@@ -756,12 +756,12 @@ loop1      0      0       0       0      0      0       0       0      0      0
                         disk->m_fs = parts[1];
                         disk->m_mountPoint = parts[6];
                         disk->m_name = disk->m_mountPoint;
-                        disk->m_mbUsed = SCXCoreLib::StrToULong(parts[2]) - SCXCoreLib::StrToULong(parts[4]);
+                        disk->m_mbUsed = SCXCoreLib::StrToULong(parts[3]);
                         disk->m_mbFree = SCXCoreLib::StrToULong(parts[4]);
 #elif defined(aix) || defined(hpux) || defined (sun)
                         disk->m_mountPoint = parts[5];
                         disk->m_name = disk->m_mountPoint;
-                        disk->m_mbUsed = SCXCoreLib::StrToULong(parts[1]) - SCXCoreLib::StrToULong(parts[3]);
+                        disk->m_mbUsed = SCXCoreLib::StrToULong(parts[2]);
                         disk->m_mbFree = SCXCoreLib::StrToULong(parts[3]);
                         disk->m_mbUsed = static_cast<scxulong>(ceil(disk->m_mbUsed/1024.0));
                         disk->m_mbFree = static_cast<scxulong>(ceil(disk->m_mbFree/1024.0));
@@ -1542,8 +1542,8 @@ public:
                 CPPUNIT_ASSERT_MESSAGE(StrToUTF8(GetExpectFoundPhysical(disks)), 0 != disk);
 
                 // Disk size
-                scxulong mbFree, mbUsed;
-                CPPUNIT_ASSERT( ! disk->GetDiskSize(mbUsed, mbFree));
+                scxulong mbFree, mbUsed, mbTotal;
+                CPPUNIT_ASSERT( ! disk->GetDiskSize(mbUsed, mbFree, mbTotal));
 
                 // Block size
                 scxulong blocksize;
@@ -1587,8 +1587,8 @@ public:
                 CPPUNIT_ASSERT(0 != disk);
 
                 // Disk size
-                scxulong mbFree, mbUsed;
-                CPPUNIT_ASSERT(disk->GetDiskSize(mbUsed, mbFree));
+                scxulong mbFree, mbUsed, mbTotal;
+                CPPUNIT_ASSERT(disk->GetDiskSize(mbUsed, mbFree, mbTotal));
                 if (L"zfs" != td->m_fs)
                 {
 #if defined(hpux)
@@ -2171,11 +2171,11 @@ public:
 #endif
         for (SCXSystemLib::EntityEnumeration<SCXSystemLib::StatisticalLogicalDiskInstance>::EntityIterator iter = m_diskEnumLogical->Begin(); iter != m_diskEnumLogical->End(); iter++)
         {
-            scxulong rps, wps, tps, rbps, wbps, tbps, mbu, mbf;
+            scxulong rps, wps, tps, rbps, wbps, tbps, mbu, mbf, mbt;
             double spr, spw, spt;
             SCXCoreLib::SCXHandle<SCXSystemLib::StatisticalLogicalDiskInstance> disk = *iter;
             CPPUNIT_ASSERT(0 != disk);
-            CPPUNIT_ASSERT(disk->GetDiskSize(mbu, mbf));
+            CPPUNIT_ASSERT(disk->GetDiskSize(mbu, mbf, mbt));
             mbUsed += mbu;
 #if defined(sun)
            if (excludeDeviceFreeSpace)
@@ -2259,7 +2259,7 @@ public:
             secondsPerTransfer[AVG_VALUE] = secondsPerTransfer[AVG_VALUE] / static_cast<double>(m_diskEnumLogical->Size());
         }
         SCXCoreLib::SCXHandle<SCXSystemLib::StatisticalLogicalDiskInstance> total = m_diskEnumLogical->GetTotalInstance();
-        scxulong rps, wps, tps, rbps, wbps, tbps, mbu, mbf;
+        scxulong rps, wps, tps, rbps, wbps, tbps, mbu, mbf, mbt;
         double spr, spw, spt;
         CPPUNIT_ASSERT(0 != total);
 #if defined(aix)
@@ -2288,7 +2288,7 @@ public:
         CPPUNIT_ASSERT_EQUAL(rBytesPerSecond, rbps);
         CPPUNIT_ASSERT_EQUAL(wBytesPerSecond, wbps);
         CPPUNIT_ASSERT_EQUAL(tBytesPerSecond, tbps);
-        CPPUNIT_ASSERT(total->GetDiskSize(mbu, mbf));
+        CPPUNIT_ASSERT(total->GetDiskSize(mbu, mbf, mbt));
         CPPUNIT_ASSERT_EQUAL(mbUsed, mbu);
         CPPUNIT_ASSERT_EQUAL(mbFree, mbf);
 #if defined(aix) || defined(linux)
