@@ -60,7 +60,7 @@ namespace SCXSystemLib
         virtual bool GetIOTimes(double& read, double& write) const;
         virtual bool GetIOTimesTotal(double& total) const;
         virtual bool GetDiskQueueLength(double& value) const;
-        virtual bool GetDiskSize(scxulong& mbUsed, scxulong& mbFree) const;
+        virtual bool GetDiskSize(scxulong& mbUsed, scxulong& mbFree, scxulong& mbTotal) const;
         virtual bool GetInodeUsage(scxulong& inodesTotal, scxulong& inodesFree) const;
         virtual bool GetBlockSize(scxulong& blockSize) const;
         virtual bool GetFSType(std::wstring& fsType) const;
@@ -127,6 +127,7 @@ namespace SCXSystemLib
         double m_secPerTransfer;   //!< Seconds per transfer
         scxulong m_mbUsed;         //!< MB used
         scxulong m_mbFree;         //!< MB free
+        scxulong m_mbTotal;        //!< MB Total
         scxulong m_blockSize;      //!< Disk block size
         double m_qLength;          //!< Average disk queue length
         scxulong m_inodesTotal;    //!< Total inodes

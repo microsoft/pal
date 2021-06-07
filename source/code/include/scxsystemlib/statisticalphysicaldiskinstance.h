@@ -35,7 +35,7 @@ namespace SCXSystemLib
         virtual bool GetReadsPerSecond(scxulong& value) const;
         virtual bool GetWritesPerSecond(scxulong& value) const;
         virtual bool GetBytesPerSecond(scxulong& read, scxulong& write) const;
-        virtual bool GetDiskSize(scxulong& mbUsed, scxulong& mbFree) const;
+        virtual bool GetDiskSize(scxulong& mbUsed, scxulong& mbFree, scxulong& mbTotal) const;
         virtual bool GetBlockSize(scxulong& blockSize) const;
 
         virtual void Sample();

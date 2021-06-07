@@ -84,9 +84,9 @@ namespace SCXSystemLib
 /**
    \copydoc SCXSystemLib::StatisticalDiskInstance::GetDiskSize
 */
-    bool StatisticalPhysicalDiskInstance::GetDiskSize(scxulong& mbUsed, scxulong& mbFree) const
+    bool StatisticalPhysicalDiskInstance::GetDiskSize(scxulong& mbUsed, scxulong& mbFree, scxulong& mbTotal) const
     {
-        mbUsed = mbFree = 0;
+        mbUsed = mbFree = mbTotal = 0;
         return false;
     }
 
