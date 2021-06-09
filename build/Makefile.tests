@@ -29,6 +29,12 @@ else
 	PROFILING=
 endif
 
+# change build folder name for scxcore
+ifeq ($(ISSCX_SYMBOL),true)
+	INT_INCLUDE_DIR:=$(INTERMEDIATE_DIR)_$(WITH_SYMBOLS)/include
+	INTERMEDIATE_DIR:=$(INTERMEDIATE_DIR)_$(WITH_SYMBOLS)
+	TARGET_DIR:=$(TARGET_DIR)_$(WITH_SYMBOLS)
+endif
 
 #--------------------------------------------------------------------------------
 # Support for BullseyeCoverage from Bullseye Testing Technology
