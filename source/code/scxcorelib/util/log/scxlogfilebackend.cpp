@@ -121,12 +121,15 @@ namespace SCXCoreLib
      */
     void SCXLogFileBackend::HandleLogRotate()
     {
-        m_LogFileRunningNumber++;
-        m_FileStream->close();
-        m_FileStream = 0;
-        SCXLogItem item(L"scx.core.providers", eInfo, L"Log rotation complete", 
-                        SCXSRCLOCATION, SCXThread::GetCurrentThreadID());
-        DoLogItem(item);
+        if (m_FileStream != 0 &&  m_FileStream->is_open())
+        {
+            m_LogFileRunningNumber++;
+            m_FileStream->close();
+            m_FileStream = 0;
+            SCXLogItem item(L"scx.core.providers", eInfo, L"Log rotation complete", 
+                    SCXSRCLOCATION, SCXThread::GetCurrentThreadID());
+            DoLogItem(item);
+        }
     }
 
     /*----------------------------------------------------------------------------*/
