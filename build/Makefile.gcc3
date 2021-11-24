@@ -10,7 +10,7 @@
 #--------------------------------------------------------------------------------
 
 # Define flags. (These will be submitted to all commands that use the preprocesor)
-DEFINES=-DPF_DISTRO_$(PF_DISTRO) -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D$(ARCH) -DPF_WIDTH=$(PF_WIDTH)
+DEFINES=-fcommon -DPF_DISTRO_$(PF_DISTRO) -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D$(ARCH) -DPF_WIDTH=$(PF_WIDTH)
 
 ifeq ($(TRAVIS_CI), 1)
 	DEFINES += -DTRAVIS
@@ -21,8 +21,8 @@ ifeq ($(SCX_STACK_ONLY), true)
 endif
 
 # Compiler flags that reglulates warning levels
-CXX_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wconversion  -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror 
-C_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror 
+CXX_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wconversion  -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls 
+C_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls 
 
 # Compiler code-generation options
 CXX_CGEN_FLAGS=-fPIC 
