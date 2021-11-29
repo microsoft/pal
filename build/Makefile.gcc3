@@ -10,7 +10,7 @@
 #--------------------------------------------------------------------------------
 
 # Define flags. (These will be submitted to all commands that use the preprocesor)
-DEFINES=-fcommon -DPF_DISTRO_$(PF_DISTRO) -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D$(ARCH) -DPF_WIDTH=$(PF_WIDTH)
+DEFINES=-DPF_DISTRO_$(PF_DISTRO) -DPF_MAJOR=$(PF_MAJOR) -DPF_MINOR=$(PF_MINOR) -D$(ARCH) -DPF_WIDTH=$(PF_WIDTH)
 
 ifeq ($(TRAVIS_CI), 1)
 	DEFINES += -DTRAVIS
