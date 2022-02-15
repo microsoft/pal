@@ -234,7 +234,7 @@ static LocaleInfo LocaleInfoTable[] =
     { "sr", "RS", 0x081A, 381, 65001 }, // Serbian-Serbia (Latin alphabet)
     { "sk", "SK", 0x041B, 421, 28591 }, // Slovak default to Slovakia
     { "sq", "AL", 0x041C, 355, 65001 }, // Albanian-Albania
-    { "mk", "MK", 0x042F, 389, 65001 }, // Macedonia, FYRO
+    { "mk", "MK", 0x042F, 389, 65001 }, // North Macedonia
     { "be", "BY", 0x0423, 375, 65001 }, // Belarusian-Belarus
     { "sl", "SI", 0x0424, 386, 65001 }, // Slovenian-Sloveniua
     { "et", "EE", 0x0425, 372, 65001 }, // Estonian-Estonia
@@ -355,7 +355,7 @@ static unsigned int GetWindowsLocaleCode(
     char isoCountryCode1,
     char isoCountryCode2)
 {
-    // search the language and locale table for a match with the language and country passed in
+    // search the language and locale table for a match with the language and country/region passed in
     for (size_t i = 0; i < sizeof LocaleInfoTable / sizeof (LocaleInfo); i++)
     {
         if (LocaleInfoTable[i].Iso639LanguageCode[0] == isoLangCode1 &&
@@ -382,7 +382,7 @@ static unsigned int GetCountryCode(
     char isoLangCode1,
     char isoLangCode2)
 {
-    // search the locale table for a match with the country passed in
+    // search the locale table for a match with the country/region passed in
     for (size_t i = 0; i < sizeof LocaleInfoTable / sizeof (LocaleInfo); i++)
     {
         if (LocaleInfoTable[i].Iso3166CountryCode[0] == isoCountryCode1 &&
@@ -392,7 +392,7 @@ static unsigned int GetCountryCode(
         }
     }
 
-    // if the country wasn't there, return the default country for the language
+    // if the country/region wasn't there, return the default country/region for the language
     return GetDefaultCountryCode(isoLangCode1, isoLangCode2);
 }
 
@@ -531,7 +531,7 @@ namespace SCXSystemLib
     const wchar_t *OSInstance::moduleIdentifier = L"scx.core.common.pal.system.os.osinstance";
 
     /*
-     Get the language, country and code page information from the Unix/Linux LANG variable.
+     Get the language, country/region and code page information from the Unix/Linux LANG variable.
      The LANG variable is supposed to be of one of the forms:
 
       la

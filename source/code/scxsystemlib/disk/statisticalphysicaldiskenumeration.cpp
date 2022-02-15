@@ -394,7 +394,7 @@ namespace SCXSystemLib
        1-to-1 relationship and the <id> is equal to the device minor ID that both
        device entries have in common.  Discovery of the physical device(s) that
        contain the LVM partition is done by mapping the LVM device to the dm device,
-       then looking at the dm devices slave entries in Sysfs, and then finally
+       then looking at the dm devices child entries in Sysfs, and then finally
        performing the same conversion from a logical Linux partition name to a
        physical drive name that is done for all other partitions.
 
