@@ -174,10 +174,27 @@ namespace SCXSystemLib
             if (errno == ESRCH) {
               // Race condition. This is ok.
               return false;
+            } else if (errno == EBADF) {
+                int retryCount = 5;
+ 
+                while (retryCount-- > 0 && errno == EBADF)
+                {
+                    nscanned = (int) fread(&buffer[0], 1, sizeof(buffer), filePointer);
+                    SCXCoreLib::SCXThread::Sleep(100);
+                }
+ 
+                if (errno == ESRCH) {
+                    // Race condition. This is ok.
+                    return false;
+                }
             }
-            int eno = errno;
-            throw SCXErrnoException(L"fread", eno, SCXSRCLOCATION);
+ 
+            if (ferror(filePointer)) {
+                int eno = errno;
+                throw SCXErrnoException(L"fread", eno, SCXSRCLOCATION);
+            }
         }
+
 
         // Less than 32 bytes read; that's not possible unless something is really wrong
         if (nscanned < 32) {
