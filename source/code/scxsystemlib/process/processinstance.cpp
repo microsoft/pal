@@ -180,7 +180,7 @@ namespace SCXSystemLib
                 while (retryCount-- > 0 && errno == EBADF)
                 {
                     nscanned = (int) fread(&buffer[0], 1, sizeof(buffer), filePointer);
-                    SCXCoreLib::SCXThread::Sleep(100);
+                    SCXCoreLib::SCXThread::Sleep(500);
                 }
  
                 if (errno == ESRCH) {
