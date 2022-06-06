@@ -646,6 +646,10 @@ namespace SCXCoreLib {
     //! \param[in]  target      Stream to be written to
     //! \param[in]  content     Content to be written
     //! \throws     SCXLineStreamContentWriteException      Content was not written completely
+    void SCXStream::WriteAsUTF8(std::ostream& target, const wchar_t content) {
+        std::ostream oldtarget;
+        SCXStream::WriteAsUTF8(oldtarget,target,content);
+    }
     void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const wchar_t content) {
 
         if (!SCXCoreLib::SCXLocaleContext::UseIconv())
@@ -710,7 +714,12 @@ namespace SCXCoreLib {
     //! \param[in]  target      Stream to be written to
     //! \param[in]  content     Content to be written
     //! \throws     SCXLineStreamContentWriteException      Content was not written completely
+    void SCXStream::WriteAsUTF8(std::ostream& target, const wchar_t content) {
+        WriteAsUTF8Basic(target, content);
+    }
+
     void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const wchar_t content) {
+        oldtarget.put('#');
         WriteAsUTF8Basic(target, content);
     }
 

@@ -44,6 +44,7 @@ namespace SCXCoreLib
     }
 
     std::wstring StrFromUTF8(const std::string& str);
+    std::string StrToUTF8(const std::wstring& str);
     std::string StrToUTF8(const std::wstring& str, std::string* logstr);
 
     std::wstring DumpString(const std::exception &e);
