@@ -646,7 +646,7 @@ namespace SCXCoreLib {
     //! \param[in]  target      Stream to be written to
     //! \param[in]  content     Content to be written
     //! \throws     SCXLineStreamContentWriteException      Content was not written completely
-    void SCXStream::WriteAsUTF8(std::ostream& target, const wchar_t content) {
+    void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const wchar_t content) {
 
         if (!SCXCoreLib::SCXLocaleContext::UseIconv())
         {
@@ -695,6 +695,7 @@ namespace SCXCoreLib {
         for (size_t i=0; i<BUFSIZE-outl; i++)
         {
             target.put(buf[i]);
+            oldtarget.put(buf2[i]);
             if (!target.good()) {
                 throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
             }
@@ -709,7 +710,7 @@ namespace SCXCoreLib {
     //! \param[in]  target      Stream to be written to
     //! \param[in]  content     Content to be written
     //! \throws     SCXLineStreamContentWriteException      Content was not written completely
-    void SCXStream::WriteAsUTF8(std::ostream& target, const wchar_t content) {
+    void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const wchar_t content) {
         WriteAsUTF8Basic(target, content);
     }
 
@@ -763,10 +764,10 @@ namespace SCXCoreLib {
     //! \param[in]  target      Stream to be written to
     //! \param[in]  content     Content to be written
     //! \throws     SCXLineStreamContentWriteException      Content was not written completely
-    void SCXStream::WriteAsUTF8(std::ostream& target, const std::wstring& content) {
+    void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const std::wstring& content) {
         std::wstring::size_type contentLength = content.length();
         for (std::wstring::size_type charNr = 0; charNr < contentLength; charNr++) {
-            WriteAsUTF8(target, content.at(charNr));
+            WriteAsUTF8(oldtarget,target, content.at(charNr));
         }
     }
 

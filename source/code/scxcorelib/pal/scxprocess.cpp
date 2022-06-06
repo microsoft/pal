@@ -393,9 +393,12 @@ namespace SCXCoreLib
             m_timeoutOverhead(0)
     {
         // Convert arguments to types expected by the system function for running processes
+        std::string logstr="";
         for (std::vector<char *>::size_type i = 0; i < myargv.size(); i++)
         {
-            m_cargv.push_back(strdup(StrToUTF8(myargv[i]).c_str()));
+            std::string tmplogstr;
+            m_cargv.push_back(strdup(StrToUTF8(myargv[i],&tmplogstr).c_str()));
+            logstr+=tmplogstr;
         }
         m_cargv.push_back(0);
 
@@ -496,7 +499,7 @@ namespace SCXCoreLib
             }
 
             execvp(m_cargv[0], &m_cargv[0]);                // Replace the child process image
-            snprintf(error_msg, sizeof(error_msg), "Failed to start child process '%s' errno=%d  ", m_cargv[0], errno);
+            snprintf(error_msg, sizeof(error_msg), "Failed to start child process '%s' errno=%d  ,logstr=%s", m_cargv[0], errno,logstr.c_str());
             DoWrite(STDERR_FILENO, error_msg, strlen(error_msg));
             CloseAndDie();                                  // Failed to load correct process.
         }

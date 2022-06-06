@@ -62,7 +62,7 @@ namespace SCXCoreLib {
         static void Write(std::wostream& target, const std::wstring& content);
         static void WriteNewLine(std::wostream& target, const NLF nlf);
         static void WriteAsUTF8(std::ostream& target, const wchar_t content);
-        static void WriteAsUTF8(std::ostream& target, const std::wstring& content);
+        static void WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const std::wstring& content);
         static void WriteAsUTF8(std::ostream& target, const std::string& content);
         static void WriteNewLineAsUTF8(std::ostream& target, const NLF nlf);
         template <typename charT> static bool IsGood(std::basic_istream<charT>& source); /* Defined below */

@@ -105,10 +105,12 @@ namespace SCXCoreLib
 
        \returns      String with UTF-8 representation of \a str.
     */
-    string StrToUTF8(const wstring& str)
+    string StrToUTF8(const wstring& str,std::string* logstr)
     {
+        ostringstream oldtarget;
         ostringstream utf8target;
-        SCXStream::WriteAsUTF8(utf8target, str);
+        SCXStream::WriteAsUTF8(oldtarget,utf8target, str);
+        logstr = oldtarget.str();
         return utf8target.str();
     }
 
