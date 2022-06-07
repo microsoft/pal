@@ -27,6 +27,7 @@
 
 #if defined(sun)
 
+#include <sstream>
 #include <iconv.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -647,7 +648,7 @@ namespace SCXCoreLib {
     //! \param[in]  content     Content to be written
     //! \throws     SCXLineStreamContentWriteException      Content was not written completely
     void SCXStream::WriteAsUTF8(std::ostream& target, const wchar_t content) {
-        std::ostream oldtarget;
+        std::ostringstream oldtarget;
         SCXStream::WriteAsUTF8(oldtarget,target,content);
     }
     void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const wchar_t content) {
