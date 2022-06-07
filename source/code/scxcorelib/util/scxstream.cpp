@@ -774,6 +774,12 @@ namespace SCXCoreLib {
     //! \param[in]  target      Stream to be written to
     //! \param[in]  content     Content to be written
     //! \throws     SCXLineStreamContentWriteException      Content was not written completely
+    void SCXStream::WriteAsUTF8(std::ostream& target, const std::wstring& content) {
+        std::wstring::size_type contentLength = content.length();
+        for (std::wstring::size_type charNr = 0; charNr < contentLength; charNr++) {
+            WriteAsUTF8(target, content.at(charNr));
+        }
+    }
     void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const std::wstring& content) {
         std::wstring::size_type contentLength = content.length();
         for (std::wstring::size_type charNr = 0; charNr < contentLength; charNr++) {
