@@ -679,6 +679,11 @@ namespace SCXCoreLib {
             throw SCXErrnoException(L"wcrtomb call to convert from wchar_t failed", errno, SCXSRCLOCATION);
         }
 
+        for (size_t i=0; i<BUFSIZE-1&&buf2[i]!='\0'; i++)
+        {
+            oldtarget.put(buf2[i]);
+        }
+        
 #if CPP_ICONV_CONST_CHARPTR
         const char* inp = &buf2[0];
 #else
@@ -700,7 +705,6 @@ namespace SCXCoreLib {
         for (size_t i=0; i<BUFSIZE-outl; i++)
         {
             target.put(buf[i]);
-            oldtarget.put(buf2[i]);
             if (!target.good()) {
                 throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
             }
