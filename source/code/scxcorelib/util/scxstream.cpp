@@ -652,7 +652,7 @@ namespace SCXCoreLib {
         SCXStream::WriteAsUTF8(oldtarget,target,content);
     }
     void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const wchar_t content) {
-
+        oldtarget.put('C');
         if (!SCXCoreLib::SCXLocaleContext::UseIconv())
         {
             WriteAsUTF8Basic(target, content);
@@ -667,6 +667,7 @@ namespace SCXCoreLib {
         {
             throw SCXInternalErrorException(L"Failed to get iconv for to UTF-8 conversion", SCXSRCLOCATION);
         }
+        oldtarget.put('D');
 
         char buf2[BUFSIZE];
 
@@ -694,7 +695,7 @@ namespace SCXCoreLib {
         char buf[BUFSIZE];
         char *outp = &buf[0];
         size_t outl = BUFSIZE;
-    
+        oldtarget.put('E');
         res = iconv(ic, &inp, &inl, &outp, &outl); 
 
         if (res == (size_t)-1)
@@ -709,6 +710,7 @@ namespace SCXCoreLib {
                 throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
             }
         }
+        oldtarget.put('F');
     }
 
 #else
@@ -786,6 +788,7 @@ namespace SCXCoreLib {
     }
     void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const std::wstring& content) {
         std::wstring::size_type contentLength = content.length();
+        oldtarget.put('B');
         for (std::wstring::size_type charNr = 0; charNr < contentLength; charNr++) {
             WriteAsUTF8(oldtarget,target, content.at(charNr));
         }
