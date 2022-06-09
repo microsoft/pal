@@ -115,6 +115,7 @@ namespace SCXCoreLib
     {
         ostringstream oldtarget;
         ostringstream utf8target;
+        oldtarget.put('A');
         SCXStream::WriteAsUTF8(oldtarget,utf8target, str);
         *logstr = oldtarget.str();
         return utf8target.str();
