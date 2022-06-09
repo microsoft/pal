@@ -26,7 +26,7 @@
 
 
 #if defined(sun)
-
+#include <string>
 #include <sstream>
 #include <iconv.h>
 #include <stdlib.h>
@@ -695,13 +695,13 @@ namespace SCXCoreLib {
         char buf[BUFSIZE];
         char *outp = &buf[0];
         size_t outl = BUFSIZE;
-        for(char& c : std::to_string(inl)) {
-            oldtarget.put(c);
+        for(char* it = std::to_string(inl); *it; ++it) {
+            oldtarget.put(*it);
         }
         oldtarget.put('E');
         res = iconv(ic, &inp, &inl, &outp, &outl);
-        for(char& c2 : std::to_string(outl)) {
-            oldtarget.put(c2);
+        for(char* it2 = std::to_string(outl); *it2; ++it2) {
+            oldtarget.put(*it2);
         }
         if (res == (size_t)-1)
         {
