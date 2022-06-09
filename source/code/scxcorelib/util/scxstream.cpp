@@ -26,7 +26,6 @@
 
 
 #if defined(sun)
-#include <string>
 #include <sstream>
 #include <iconv.h>
 #include <stdlib.h>
@@ -651,6 +650,10 @@ namespace SCXCoreLib {
         std::ostringstream oldtarget;
         SCXStream::WriteAsUTF8(oldtarget,target,content);
     }
+    void itoa(int i, char *str, int n)
+    {
+        sprintf(str, "%d", i);
+    }
     void SCXStream::WriteAsUTF8(std::ostream& oldtarget,std::ostream& target, const wchar_t content) {
         oldtarget.put('C');
         if (!SCXCoreLib::SCXLocaleContext::UseIconv())
@@ -695,13 +698,17 @@ namespace SCXCoreLib {
         char buf[BUFSIZE];
         char *outp = &buf[0];
         size_t outl = BUFSIZE;
-        for(char* it = std::to_string(inl); *it; ++it) {
-            oldtarget.put(*it);
+        char buffer[BUFSIZE];
+        itoa(inl,buffer,10);
+        for(size_t i=0; i<BUFSIZE-1 && buffer[i]!='\0'; i++) {
+            oldtarget.put(buffer[i]);
         }
         oldtarget.put('E');
         res = iconv(ic, &inp, &inl, &outp, &outl);
-        for(char* it2 = std::to_string(outl); *it2; ++it2) {
-            oldtarget.put(*it2);
+        char buffer2[BUFSIZE];
+        itoa(outl,buffer2,10);
+        for(size_t i=0; i<BUFSIZE-1 && buffer2[i]!='\0'; i++) {
+            oldtarget.put(buffer2[i]);
         }
         if (res == (size_t)-1)
         {
