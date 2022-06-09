@@ -695,22 +695,28 @@ namespace SCXCoreLib {
         char buf[BUFSIZE];
         char *outp = &buf[0];
         size_t outl = BUFSIZE;
+        for(char& c : std::to_string(inl)) {
+            oldtarget.put(c);
+        }
         oldtarget.put('E');
-        res = iconv(ic, &inp, &inl, &outp, &outl); 
-
+        res = iconv(ic, &inp, &inl, &outp, &outl);
+        for(char& c2 : std::to_string(outl)) {
+            oldtarget.put(c2);
+        }
         if (res == (size_t)-1)
         {
             throw SCXErrnoException(L"iconv call to convert to UTF-8 failed", errno, SCXSRCLOCATION);
         }
-
+        oldtarget.put('F');
         for (size_t i=0; i<BUFSIZE-outl; i++)
         {
+            oldtarget.put(buf[i]);
             target.put(buf[i]);
             if (!target.good()) {
                 throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
             }
         }
-        oldtarget.put('F');
+        oldtarget.put('G');
     }
 
 #else
