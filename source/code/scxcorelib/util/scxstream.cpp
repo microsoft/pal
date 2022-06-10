@@ -26,6 +26,7 @@
 
 
 #if defined(sun)
+#include <langinfo.h>
 #include <sstream>
 #include <iconv.h>
 #include <stdlib.h>
@@ -664,9 +665,11 @@ namespace SCXCoreLib {
 
         static const unsigned int BUFSIZE = 10;
 
-        iconv_t ic = SCXCoreLib::SCXLocaleContext::GetToUTF8iconv();
-
-        if (ic == NULL)
+        //iconv_t ic = SCXCoreLib::SCXLocaleContext::GetToUTF8iconv();
+        std::string code(nl_langinfo(CODESET));
+        iconv_t ic = iconv_open("UTF-8", code.c_str());
+        //if (ic == NULL)
+        if (ic == (iconv_t)-1)
         {
             throw SCXInternalErrorException(L"Failed to get iconv for to UTF-8 conversion", SCXSRCLOCATION);
         }
@@ -680,6 +683,7 @@ namespace SCXCoreLib {
 
         if (res == (size_t)-1)
         {
+            iconv_close(ic);
             throw SCXErrnoException(L"wcrtomb call to convert from wchar_t failed", errno, SCXSRCLOCATION);
         }
 
@@ -714,6 +718,7 @@ namespace SCXCoreLib {
         }
         if (res == (size_t)-1)
         {
+            iconv_close(ic);
             throw SCXErrnoException(L"iconv call to convert to UTF-8 failed", errno, SCXSRCLOCATION);
         }
         // No converted char, use original char.
@@ -724,6 +729,7 @@ namespace SCXCoreLib {
                     oldtarget.put(buf2[i]);
                     target.put(buf2[i]);
                     if (!target.good()) {
+                        iconv_close(ic);
                         throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
                     }
                 }
@@ -737,10 +743,15 @@ namespace SCXCoreLib {
                     oldtarget.put(buf[i]);
                     target.put(buf[i]);
                     if (!target.good()) {
+                        iconv_close(ic);
                         throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
                     }
                 }
                 oldtarget.put('G');
+        }
+        if (iconv_close(ic) != 0)
+        {
+          throw SCXErrnoException(L"iconv_close failed", errno, SCXSRCLOCATION);
         }
     }
 
