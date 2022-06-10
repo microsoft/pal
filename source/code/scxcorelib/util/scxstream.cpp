@@ -687,6 +687,8 @@ namespace SCXCoreLib {
         {
             oldtarget.put(buf2[i]);
         }
+        // Fill \0 for string terminal.
+        buf2[res]='\0';
         
 #if CPP_ICONV_CONST_CHARPTR
         const char* inp = &buf2[0];
@@ -714,16 +716,32 @@ namespace SCXCoreLib {
         {
             throw SCXErrnoException(L"iconv call to convert to UTF-8 failed", errno, SCXSRCLOCATION);
         }
-        oldtarget.put('F');
-        for (size_t i=0; i<BUFSIZE-outl; i++)
+        // No converted char, use original char.
+        if(outl==BUFSIZE)
         {
-            oldtarget.put(buf[i]);
-            target.put(buf[i]);
-            if (!target.good()) {
-                throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
-            }
+                oldtarget.put('X');
+                for(size_t i=0; i<BUFSIZE-1 && buf2[i]!='\0'; i++) {
+                    oldtarget.put(buf2[i]);
+                    target.put(buf2[i]);
+                    if (!target.good()) {
+                        throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
+                    }
+                }
+                oldtarget.put('Y');
         }
-        oldtarget.put('G');
+        else
+        {
+                oldtarget.put('F');
+                for (size_t i=0; i<BUFSIZE-outl; i++)
+                {
+                    oldtarget.put(buf[i]);
+                    target.put(buf[i]);
+                    if (!target.good()) {
+                        throw SCXLineStreamContentWriteException(SCXSRCLOCATION);
+                    }
+                }
+                oldtarget.put('G');
+        }
     }
 
 #else
