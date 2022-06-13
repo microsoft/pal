@@ -1,6 +1,7 @@
 #!/bin/bash
 
 build_type="Release"
+enable_security_hardening=0
 
 for opt
 do
@@ -38,6 +39,10 @@ do
       BUILD_DPKG=1
     ;;
 
+    --enable-security-hardening)
+      enable_security_hardening=1
+    ;;
+
     --enable-system-build)
       if [ `uname` = "Linux" ]; then
           BUILD_RPM=1
@@ -73,6 +78,7 @@ OPTIONS:
     --enable-bullseye           Enables the use of code coverage tools (Bullseye).
     --enable-debug              Perform a debug build.
     --enable-ulinux             Specifies platform as ULINUX (Linux only).
+    --enable-security-hardening Enable security flags for compiling.
     --enable-system-build       Build for distribution release
 
 EOF
@@ -254,6 +260,7 @@ BUILD_CONFIGURATION=$BUILD_CONFIGURATION
 SCXPAL_INTERMEDIATE_DIR=`cd ..; pwd -P`/intermediate/$BUILD_CONFIGURATION
 SCXPAL_TARGET_DIR=`cd ..; pwd -P`/target/$BUILD_CONFIGURATION
 PACKAGE_SUFFIX=$PKG_SUFFIX
+ENABLE_SECURITY_HARDENING=$enable_security_hardening
 BUILD_RPM=$BUILD_RPM
 BUILD_DPKG=$BUILD_DPKG
 TRAVIS_CI=$travis_ci

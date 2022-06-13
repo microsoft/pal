@@ -21,8 +21,8 @@ ifeq ($(SCX_STACK_ONLY), true)
 endif
 
 # Compiler flags that reglulates warning levels
-CXX_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wconversion  -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror 
-C_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror 
+CXX_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wconversion  -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls 
+C_WARN_FLAGS=-Wall -pedantic  -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-qual -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls 
 
 # Compiler code-generation options
 CXX_CGEN_FLAGS=-fPIC 
