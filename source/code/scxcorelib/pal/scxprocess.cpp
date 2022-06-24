@@ -815,7 +815,8 @@ namespace SCXCoreLib
                 std::wstring elevatedCommand = ConstructShellCommandWithElevation(command, L"sudo");
 
                 // best effort to try to kill this using "kill" command with SUDO elevation
-                // we might want to do some error handling here as well ...
+                // we don't need any error handling here because this will throw an exception if something happens
+                // and that will get logged in scx log and this it a best effort in trying to kill the process
                 SCXCoreLib::SCXProcess::Run(SplitCommand(elevatedCommand), processInput, processOutput, processError, 5000);
             }
             else
