@@ -23,6 +23,7 @@
 #include <scxcorelib/scxmath.h>
 #include <scxcorelib/scxthread.h>
 #include <scxcorelib/scxexception.h>
+#include <scxsystemlib/scxsysteminfo.h>
 
 #include <iostream>
 #include <stdio.h>
@@ -798,8 +799,50 @@ namespace SCXCoreLib
     {
         if (killpg(m_pid, SIGKILL) < 0 && errno != ESRCH)
         {
-            throw SCXInternalErrorException(UnexpectedErrno(L"Unable to kill child process group", errno), SCXSRCLOCATION);
+            // EPERM because the child omiagent process is not running as root (sudo)
+            // and thus will not have priviledges to send signals to this root (sudo) process
+            if (errno == EPERM)
+            {
+                std::istringstream processInput;
+                std::ostringstream processOutput;
+                std::ostringstream processError;
+
+                wchar_t procId[10];
+                swprintf(procId, 10, L"%d", m_pid);
+
+                std::wstring command(L"kill -9 ");
+                command += procId;
+                std::wstring elevatedCommand = ConstructShellCommandWithElevation(command, L"sudo");
+
+                // best effort to try to kill this using "kill" command with SUDO elevation
+                // we might want to do some error handling here as well ...
+                SCXCoreLib::SCXProcess::Run(SplitCommand(elevatedCommand), processInput, processOutput, processError, 5000);
+            }
+            else
+            {
+                throw SCXInternalErrorException(UnexpectedErrno(L"Unable to kill child process group", errno), SCXSRCLOCATION);
+            }
         }
+    }
+
+    /**********************************************************************************/
+    //! Construct shell command with elevation
+    std::wstring SCXProcess::ConstructShellCommandWithElevation(const std::wstring &command,
+                                                                   const std::wstring &elevationtype)
+    {
+        SCXSystemLib::SystemInfo si;
+
+        std::wstring newCommand(si.GetShellCommand(command));
+
+        // Only when current user is not priviledged and elevation type is sudo
+        // the command need to be elevated.
+        // Force a shell command so we get a shell (even if already elevated)
+        if (elevationtype == L"sudo")
+        {
+            newCommand = si.GetElevatedCommand(newCommand);
+        }
+
+        return newCommand;
     }
 
     /**********************************************************************************/

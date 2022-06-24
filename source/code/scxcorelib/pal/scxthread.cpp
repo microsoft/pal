@@ -16,6 +16,7 @@
 #include <scxcorelib/scxthread.h>
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxstream.h>
+#include <scxcorelib/scxlog.h>
 #include <sstream>
 #if defined(WIN32)
 #elif defined(SCX_UNIX)
@@ -62,12 +63,12 @@ namespace SCXCoreLib
     void* _InternalThreadStartRoutine(void* param)
 #endif
     {
+        int retCode = 0;
         ThreadStartParams* p = static_cast<ThreadStartParams*>(param);
         SCXASSERT(p != 0);
 
         if (p->body != 0)
         {
-#if !defined(_DEBUG)
              try
              {
                 p->body( p->param );
@@ -76,20 +77,35 @@ namespace SCXCoreLib
              {
                  SCXASSERTFAIL(std::wstring(L"ThreadStartRoutine() Thread threw unhandled exception - ").
                               append(e1.What()).append(L" - ").append(e1.Where()).c_str());
+
+                 // We don't want to have the log variable as a member variable,
+                 // because we don't want to open a new handle on every new thread, but rather only on exception
+                 SCXCoreLib::SCXLogHandle log = SCXLogHandleFactory::GetLogHandle(std::wstring(L"scx.core.common.pal.process"));
+                 SCX_LOGERROR(log, e1.What());
+
+                 retCode = -1;
              }
              catch (const std::exception& e2)
              {
                  SCXASSERTFAIL(std::wstring(L"ThreadStartRoutine() Thread threw unhandled exception - ").
                               append(StrFromUTF8(e2.what())).c_str());
+
+                 // We don't want to have the log variable as a member variable,
+                 // because we don't want to open a new handle on every new thread, but rather only on exception
+                 SCXCoreLib::SCXLogHandle log = SCXLogHandleFactory::GetLogHandle(std::wstring(L"scx.core.common.pal.process"));
+                 SCX_LOGERROR(log, e2.what());
+
+                 retCode = -1;
              }
-#else
-             p->body( p->param );
-#endif
-            /* We would like to catch (...) as well but it seemes we can't since there is a bug
-               in gcc. http://gcc.gnu.org/bugzilla/show_bug.cgi?id=28145 */
         }
+
         delete p;
-        return 0;
+
+#if defined(WIN32)
+        return reinterpret_cast<DWORD>(retCode);
+#elif defined(SCX_UNIX)
+        return reinterpret_cast<void*>(retCode);
+#endif
     }
 }
 
