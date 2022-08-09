@@ -209,7 +209,7 @@ namespace SCXSystemLib {
     static inline std::wstring GetSysfsPath(const std::wstring& dmDeviceName)
     {
         // First look in Sysfs to find out what partitions the dm device
-        // maps onto.  This is done by listing the slaves entries for the
+        // maps onto.  This is done by listing the child entries for the
         // given dm device.
         //
         // Note: The entries in slaves are links and it is the link name
@@ -219,16 +219,16 @@ namespace SCXSystemLib {
         return sysfsPath.str();
     }
 
-    static inline bool PushIfDMSlave(const SCXCoreLib::SCXFilePath & slave, std::stack<std::wstring> &dmDeviceStack)
+    static inline bool PushIfDMSlave(const SCXCoreLib::SCXFilePath & child, std::stack<std::wstring> &dmDeviceStack)
     {
-       if (!slave.Get().empty() && *(slave.Get().rbegin()) == SCXCoreLib::SCXFilePath::GetFolderSeparator())
+       if (!child.Get().empty() && *(child.Get().rbegin()) == SCXCoreLib::SCXFilePath::GetFolderSeparator())
        {
            // A precautionary check - avoid any possible entries in the slaves folder that are not links to  directories
-           SCXCoreLib::SCXFilePath slaveName = slave.Get().substr(0, slave.Get().length() - 1);
-           if(SCXCoreLib::StrIsPrefix(slaveName.GetFilename(), L"dm-"))
+           SCXCoreLib::SCXFilePath childName = child.Get().substr(0, child.Get().length() - 1);
+           if(SCXCoreLib::StrIsPrefix(childName.GetFilename(), L"dm-"))
            {
                // add only those files which have the dm- prefix
-               dmDeviceStack.push(slaveName.GetFilename());
+               dmDeviceStack.push(childName.GetFilename());
                return true;
            }
        }
@@ -237,7 +237,7 @@ namespace SCXSystemLib {
     }
 
     /**
-       Get the slave devices that contain the given devicemapper (dm) device.
+       Get the child devices that contain the given devicemapper (dm) device.
 
        \param[in] dmDevice the path to a dm device.
 
@@ -265,7 +265,7 @@ namespace SCXSystemLib {
         // we use a non-recursive depth-first traversal.
         std::stack<std::wstring> dmDeviceStack;
         dmDeviceStack.push(((SCXCoreLib::SCXFilePath) dmDevice).GetFilename());
-        std::vector< SCXCoreLib::SCXFilePath > slaves;
+        std::vector< SCXCoreLib::SCXFilePath > children;
         unsigned int loopCount = 0;
 
         while(!dmDeviceStack.empty())
@@ -275,12 +275,12 @@ namespace SCXSystemLib {
             {
                 std::wstring currentDeviceName = dmDeviceStack.top();
                 dmDeviceStack.pop();
-                std::vector< SCXCoreLib::SCXFilePath > slaveEntries = m_extDepends->GetFileSystemEntries(GetSysfsPath(currentDeviceName));
-                for( std::vector< SCXCoreLib::SCXFilePath >::const_iterator iter = slaveEntries.begin(); iter != slaveEntries.end(); ++iter)
+                std::vector< SCXCoreLib::SCXFilePath > childEntries = m_extDepends->GetFileSystemEntries(GetSysfsPath(currentDeviceName));
+                for( std::vector< SCXCoreLib::SCXFilePath >::const_iterator iter = childEntries.begin(); iter != childEntries.end(); ++iter)
                 {
                     if(!PushIfDMSlave(*iter, dmDeviceStack))
                     {
-                        slaves.push_back(*iter);
+                        children.push_back(*iter);
                     }
                 }
                 if (loopCount > maxLoopCount)
@@ -298,7 +298,7 @@ namespace SCXSystemLib {
                     out.str(L"");
                     out << L"Exceeded " << maxLoopCount << L" while evaluating device " << dmDevice;
                     SCX_LOG(log,suppressor.GetSeverity(out.str()), out.str());
-                    slaves.clear();
+                    children.clear();
                     break;
                 }
             }
@@ -332,13 +332,13 @@ namespace SCXSystemLib {
                 return result;
 #endif
                 out.str(L"");
-                out << L"An exception occurred while getting the slave devices for \"" << dmDevice << L"\": " << e.What();
+                out << L"An exception occurred while getting the child devices for \"" << dmDevice << L"\": " << e.What();
                 SCX_LOG(log, m_errorSuppressor.GetSeverity(out.str()), out.str());
                 throw;
             }
         }
 
-        if (slaves.size() == 0)
+        if (children.size() == 0)
         {
 #if defined(linux) &&                                          \
            ( ( defined(PF_DISTRO_SUSE)   && (PF_MAJOR<=9) ) || \
@@ -370,15 +370,15 @@ namespace SCXSystemLib {
 
             out.str(L"");
 
-            out << L"There are no slave entries for the device \"" << dmDevice  << L"\"";
+            out << L"There are no child entries for the device \"" << dmDevice  << L"\"";
             SCX_LOG(log, m_errorSuppressor.GetSeverity(out.str()), out.str());
 
             throw SCXBadLVMDeviceException(dmDevice, out.str(), SCXSRCLOCATION);
         }
 
-        // Each slave entry should be the name of a block device in /dev.
-        for (std::vector< SCXCoreLib::SCXFilePath >::const_iterator iter = slaves.begin();
-             iter != slaves.end(); iter++)
+        // Each child entry should be the name of a block device in /dev.
+        for (std::vector< SCXCoreLib::SCXFilePath >::const_iterator iter = children.begin();
+             iter != children.end(); iter++)
         {
             std::wstring dirpath    = iter->GetDirectory();
             size_t       dirPathLen = dirpath.length();
@@ -389,7 +389,7 @@ namespace SCXSystemLib {
             {
                 out.str(L"");
 
-                out << L"The slave device entry \"" << dirpath << L"\" could not be parsed and will be ignored";
+                out << L"The child device entry \"" << dirpath << L"\" could not be parsed and will be ignored";
                 SCX_LOG(log, m_warningSuppressor.GetSeverity(dirpath), out.str());
                 continue;
             }

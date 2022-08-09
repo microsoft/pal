@@ -1020,8 +1020,8 @@ namespace SCXSystemLib
                 // device was an LVM device path and dmDevice is the path to
                 // the same device using the device mapper name.  The dm device
                 // is located on one or more normal devices, known as slaves.
-                std::vector< std::wstring > slaves = lvmUtils.GetDMSlaves(dmDevice);
-                if (slaves.size() == 0)
+                std::vector< std::wstring > children = lvmUtils.GetDMSlaves(dmDevice);
+                if (children.size() == 0)
                 {
                     // this condition can only be reached on RHEL4/SLES9 systems
                     std::wstringstream               out;
@@ -1038,8 +1038,8 @@ namespace SCXSystemLib
                 }
                 else
                 {
-                    for (std::vector< std::wstring >::const_iterator iter = slaves.begin();
-                         iter != slaves.end(); iter++)
+                    for (std::vector< std::wstring >::const_iterator iter = children.begin();
+                         iter != children.end(); iter++)
                     {
                         if ((*iter).empty() || !isdigit((int)(*iter)[(*iter).size() - 1]))
                         {
