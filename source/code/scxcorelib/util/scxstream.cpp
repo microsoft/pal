@@ -27,6 +27,7 @@
 
 #if defined(sun)
 
+#include <scxcorelib/scxthreadlock.h>
 #include <iconv.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -655,7 +656,7 @@ namespace SCXCoreLib {
         }
 
         static const unsigned int BUFSIZE = 10;
-
+        SCXCoreLib::SCXThreadLock lock(SCXCoreLib::ThreadLockHandleGet(L"IconvLock"));
         iconv_t ic = SCXCoreLib::SCXLocaleContext::GetToUTF8iconv();
 
         if (ic == NULL)
