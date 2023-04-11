@@ -244,7 +244,7 @@ static LocaleInfo LocaleInfoTable[] =
 
     // Middle Eastern languages
     { "he", "IL", 0x040D, 972, 65001 }, // Hebrew-Israel
-    { "tr", "TR", 0x041F,  90, 65001 }, // Turkish-Turkey
+    { "tr", "TR", 0x041F,  90, 65001 }, // Turkish
 
     // Other Asian languages
     { "th", "TH", 0x041E, 668, 65001 }, // Thai-Thailand
