@@ -379,10 +379,7 @@ namespace SCXSystemLib
         while ( fsDiskStats->good() && fsDiskStats->is_open() )
         {
             getline( *fsDiskStats, line );
-            if ( line.size() )
-                counter = 0;
-            else
-                ++counter;
+            counter = line.size() ? 0 : counter + 1;
 
             if ( counter >= 10 )
             {
@@ -571,11 +568,18 @@ namespace SCXSystemLib
         SCXCoreLib::SCXHandle<std::wfstream> fs(SCXCoreLib::SCXFile::OpenWFstream(
                                                     LocateMountTab(), std::ios::in));
         fs.SetOwner();
-        while ( ! fs->eof() && fs->is_open() )
+        int counter = 0;
+        while ( fs->good() && fs->is_open() )
         {
             std::wstring line;
             std::vector<std::wstring> parts;
             getline( *fs, line );
+            counter = line.size() ? 0 : counter + 1;
+            if ( counter >= 10 )
+            {
+                SCX_LOGERROR(m_log, L"Error while refreshing MNTTab with errno = " + SCXCoreLib::StrFrom(errno));
+                break;
+            }
 #if defined (linux)
             if (line.find(L"loop=") != std::wstring::npos || line.find(L"/dev/loop") != std::wstring::npos)
             {
@@ -1838,11 +1842,19 @@ namespace SCXSystemLib
         SCXCoreLib::SCXHandle<std::wfstream> fs(SCXCoreLib::SCXFile::OpenWFstream(
                                                     LocateMountTab(), std::ios::in));
         fs.SetOwner();
-        while ( ! fs->eof() && fs->is_open() )
+        int counter = 0;
+        while ( fs->good() && fs->is_open() )
         {
             std::wstring line;
             std::vector<std::wstring> parts;
             getline( *fs, line );
+            counter = line.size() ? 0 : counter + 1;
+            if ( counter >= 10 )
+            {
+                SCX_LOGERROR(m_log, L"Error while reading MNTTab with errno = " + SCXCoreLib::StrFrom(errno));
+                break;
+            }
+
             SCXCoreLib::StrTokenize(line, parts, L" \n\t");
             if (parts.size() > 3)
             {
