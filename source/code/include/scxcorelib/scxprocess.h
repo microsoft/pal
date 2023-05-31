@@ -132,6 +132,7 @@ namespace SCXCoreLib
         int m_stdinCharCount;                 //!< Number of buffered stdin characters
         SCXProcessId m_pid;                   //!< Pid (process ID) of process
         int m_processExitCode;                //!< The process exit code
+        bool m_isSudoCmd;                     //!< If sudo command
         bool m_waitCompleted;                 //!< Indicates if the process has been waited for.
         bool m_stdinActive;                   //!< The child process may read from its stdin
         bool m_stdoutActive;                  //!< The child process may write to its stdout
