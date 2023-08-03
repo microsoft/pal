@@ -17,14 +17,18 @@
 #include <sys/time.h>
 #endif
 #include <scxcorelib/scxcmn.h>
+#include <scxcorelib/scxlog.h>
 #include <scxcorelib/scxprocess.h>
 #include <scxcorelib/scxoserror.h>
 #include <scxcorelib/stringaid.h>
 #include <scxcorelib/scxmath.h>
 #include <scxcorelib/scxthread.h>
 #include <scxcorelib/scxexception.h>
+#include <scxsystemlib/scxsysteminfo.h>
 
+#include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 #include <vector>
 #include <stdio.h>
@@ -398,6 +402,10 @@ namespace SCXCoreLib
             m_cargv.push_back(strdup(StrToUTF8(myargv[i]).c_str()));
         }
         m_cargv.push_back(0);
+
+        // Check if it is a sudo command
+        std::string cmdPath(m_cargv[0]);
+        m_isSudoCmd = cmdPath.size()>=4 && cmdPath.substr(cmdPath.size()-4, 4) == "sudo";
 
         // Create pipes for communicating with the child process
         if ( -1 == pipe(m_inForChild) ) {
@@ -796,7 +804,26 @@ namespace SCXCoreLib
     //! Terminate the process
     void SCXProcess::Kill()
     {
-        if (killpg(m_pid, SIGKILL) < 0 && errno != ESRCH)
+        if(m_isSudoCmd)
+        {
+            // If it is a sudo command we should kill it with sudo.
+            std::wostringstream command;
+            command << L"kill -SIGKILL -" << m_pid;
+            SCXSystemLib::SystemInfo si;
+            std::wstring elevatedCommand = si.GetElevatedCommand(command.str());
+            // Execute sudo kill command.
+            int retValue = system(StrToUTF8(elevatedCommand).c_str());
+            // Log retValue and errno
+            SCXCoreLib::SCXLogHandle log = SCXLogHandleFactory::GetLogHandle(std::wstring(L"scx.core.common.pal.process"));
+            std::wostringstream logBuf;
+            logBuf << L"sudo kill child process group system call return:" << retValue << L" , errno: " << errno;
+            SCX_LOGINFO(log, logBuf.str());
+            if (retValue == -1 || WEXITSTATUS(retValue) != 0)
+            {
+                SCX_LOGERROR(log, UnexpectedErrno(L"Unable to sudo kill child process group", errno));
+            }
+        }
+        else if (killpg(m_pid, SIGKILL) < 0 && errno != ESRCH)
         {
             throw SCXInternalErrorException(UnexpectedErrno(L"Unable to kill child process group", errno), SCXSRCLOCATION);
         }
