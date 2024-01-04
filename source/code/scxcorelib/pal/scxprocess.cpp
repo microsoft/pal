@@ -24,7 +24,6 @@
 #include <scxcorelib/scxmath.h>
 #include <scxcorelib/scxthread.h>
 #include <scxcorelib/scxexception.h>
-#include <scxsystemlib/scxsysteminfo.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -807,10 +806,12 @@ namespace SCXCoreLib
         if(m_isSudoCmd)
         {
             // If it is a sudo command we should kill it with sudo.
+            const std::wstring s_defaultSudoPath = L"/etc/opt/microsoft/scx/conf/sudodir/sudo";
             std::wostringstream command;
             command << L"kill -SIGKILL -" << m_pid;
-            SCXSystemLib::SystemInfo si;
-            std::wstring elevatedCommand = si.GetElevatedCommand(command.str());
+            std::wstring elevatedCommand = s_defaultSudoPath;
+            elevatedCommand.append(L" ");
+            elevatedCommand.append(command.str());
             // Execute sudo kill command.
             int retValue = system(StrToUTF8(elevatedCommand).c_str());
             // Log retValue and errno
