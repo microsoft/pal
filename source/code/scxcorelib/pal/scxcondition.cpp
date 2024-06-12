@@ -84,6 +84,17 @@ namespace SCXCoreLib
     SCXCondition::~SCXCondition()
     {
 #if defined(SCX_UNIX)
+#if __GNUC__ >= 6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wc++11-compat"
+#endif        
+
+        // BUG ALERT!!!!
+        // Destructors are noexcept by default in C++11. Throwing an exception from a destructor or constructor
+        // is always poor practice because it leaves the object in an undefrined state, neither constructed or destructed.
+        // In this case, the best case would be a memory leak. The gcc 6 and after will treat this as an error and it will
+        // always abort the program.
+
         int err;
         if (0 != (err = pthread_cond_destroy(&m_cond)))
         {
@@ -94,6 +105,9 @@ namespace SCXCoreLib
         {
             throw SCXErrnoException(L"pthread_mutex_destroy() function call failed", err, SCXSRCLOCATION);
         }
+#if __GNUC__ >= 6
+#pragma GCC diagnostic pop
+#endif        
 #elif defined(WIN32)
                 DeleteCriticalSection(&m_lock);
 
