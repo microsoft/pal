@@ -87,7 +87,7 @@ class LinuxDebFile:
 
         for l in self.sections["Links"]:
             filePath = self.stagingDir + l.stagedLocation
-            retval = os.system('sudo chown --no-dereference %s:%s %s' \
+            retval = os.system('sudo chown --no-dereference %s:%s "%s"' \
                           % (l.owner, l.group, filePath))
             if retval != 0:
                 print("Error: Unable to chown " + l.stagedLocation)
