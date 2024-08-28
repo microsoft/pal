@@ -183,9 +183,12 @@ namespace SCXSystemLib
     class SCXKstat
     {
     private:
-        kstat_ctl_t* m_ChainControlStructure;  //!< Pointer to kstat chain.
+        static kstat_ctl_t* m_ChainControlStructure;  //!< Pointer to kstat chain.
         kstat_t*     m_KstatPointer;           //!< Pointer to retrieved kstat.
+        static int m_InstanceCount;
 
+        void InitInstance();
+        void ReleaseInstance();
         bool TryGetStatisticFromNamed(const std::wstring& statistic, scxulong& value) const;
         bool TryGetStatisticFromIO(const std::wstring& statistic, scxulong& value) const;
 
@@ -196,8 +199,7 @@ namespace SCXSystemLib
         /** Test constructor - used during tests for dependency injection
          */
         SCXKstat(SCXCoreLib::SCXHandle<SCXKstatDependencies> deps)
-            : m_ChainControlStructure(0),
-              m_KstatPointer(0),
+            : m_KstatPointer(0),
               m_deps(deps)
         { }
 
