@@ -29,6 +29,10 @@ using namespace SCXCoreLib;
 
 namespace SCXSystemLib
 {
+    // Sets static members for the SCXKstat class.
+    kstat_ctl_t* SCXKstat::m_ChainControlStructure = NULL;
+    int SCXKstat::m_InstanceCount = 0;
+
     /*----------------------------------------------------------------------------*/
     /**
         Constructor
@@ -39,8 +43,7 @@ namespace SCXSystemLib
     
     */
     SCXKstat::SCXKstat()
-        : m_ChainControlStructure(0),
-          m_KstatPointer(0),
+        : m_KstatPointer(0),
           m_deps(0)
     {
         m_deps = new SCXKstatDependencies();
@@ -51,7 +54,13 @@ namespace SCXSystemLib
 
     void SCXKstat::Init()
     {
-        if (NULL == m_ChainControlStructure)
+        InitInstance();
+    }
+
+    void SCXKstat::InitInstance()
+    {
+        SCXCoreLib::SCXThreadLock lock(SCXCoreLib::ThreadLockHandleGet(L"SCXKstatInstanceLocker"));
+        if (++m_InstanceCount == 1 && m_ChainControlStructure == NULL)
         {
             m_ChainControlStructure = m_deps->Open();
             if (0 == m_ChainControlStructure)
@@ -59,6 +68,25 @@ namespace SCXSystemLib
                 SCXASSERT( ! "kstat_open() failed");
                 throw SCXKstatErrorException(L"kstat_open() failed", errno, SCXSRCLOCATION);
             }
+        }
+        else if(m_InstanceCount < 0)
+        {
+            throw SCXKstatErrorException(L"InitInstance(): m_InstanceCount must not be less than 0!", errno, SCXSRCLOCATION);
+        }
+    }
+
+    void SCXKstat::ReleaseInstance()
+    {
+        SCXCoreLib::SCXThreadLock lock(SCXCoreLib::ThreadLockHandleGet(L"SCXKstatInstanceLocker"));
+        if(--m_InstanceCount == 0 && m_ChainControlStructure != NULL)
+        {
+            // Frees all items associated with m_ChainControlStructure. Including m_KstatPointer.
+            m_deps->Close(m_ChainControlStructure);
+            m_ChainControlStructure = NULL;
+        }
+        else if(m_InstanceCount < 0)
+        {
+            throw SCXKstatErrorException(L"ReleaseInstance(): m_InstanceCount must not be less than 0!", errno, SCXSRCLOCATION);
         }
     }
 
@@ -71,11 +99,7 @@ namespace SCXSystemLib
     */
     SCXKstat::~SCXKstat()
     {
-        // Frees all items associated with m_ChainControlStructure. Including m_KstatPointer.
-        if (m_ChainControlStructure != 0) 
-        {
-            m_deps->Close(m_ChainControlStructure);
-        }
+        ReleaseInstance();
     }
 
     /*----------------------------------------------------------------------------*/
