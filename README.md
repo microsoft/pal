@@ -1,3 +1,16 @@
+## ⚠️ Deprecation & Archiving Notice ⚠️  
+
+ Thank you for your support and contributions to **pal**.  
+
+ This repository is now **deprecated** and will be **archived soon**.  
+
+ - **No further development, maintenance, or updates** will be provided.  
+ - **Bug fixes, security patches, and feature enhancements** are no longer planned.  
+ - After archiving, this repository will remain **available in read-only mode** for reference.  
+
+ For any questions, please refer to the existing documentation or community discussions.  
+
+ ---
 # pal [![Build Status](https://travis-ci.org/Microsoft/pal.svg?branch=master)](https://travis-ci.org/Microsoft/pal)
 
 The PAL is a Platform Abstraction Layer that is used in a variety of
