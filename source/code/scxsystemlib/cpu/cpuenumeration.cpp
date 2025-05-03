@@ -641,10 +641,7 @@ namespace SCXSystemLib
 
     /*----------------------------------------------------------------------------*/
     /**
-     Update all CPU data
-
-     \param[in]     updateInstances  true to update the instance information; false
-                    to leave the present values
+     Update CPU collection 
 
      This is done collectively for all instances by using a platform dependent
      mechanism. The following platforms use the specified mechanisms:
@@ -657,7 +654,7 @@ namespace SCXSystemLib
      Last in this file there is an example of a Linux /proc/stat file
 
     */
-    void CPUEnumeration::Update(bool updateInstances)
+    void CPUEnumeration::UpdateCollection()
     {
         SCXCoreLib::SCXThreadLock lock(m_lock);
 
@@ -687,26 +684,26 @@ namespace SCXSystemLib
         size_t count = ProcessorCountLogical(m_deps);
 #endif // defined(hpux)
 
-        SCX_LOGTRACE(m_log, StrAppend(StrAppend(L"CPUEnumeration Update() - ", updateInstances).append(L" - "), count));
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - count = ", count));
 
 #if defined(linux) || defined(WIN32)
 
         // add cpus if needed
-        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - begin Add loop for Linux CPU enumeration.  (size = ", Size()).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - begin Add loop for Linux CPU enumeration.  (size = ", Size()).append(L")"));
         for (size_t i=Size(); i<count; i++)
         {
-            SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - Adding CPU ", i));
+            SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - Adding CPU ", i));
             AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(static_cast<unsigned int>(i), m_sampleSize)));
         }
-        SCX_LOGTRACE(m_log, L"CPUEnumeration Update() - end Add loop for Linux CPU enumeration.");
+        SCX_LOGTRACE(m_log, L"CPUEnumeration UpdateCollection() - end Add loop for Linux CPU enumeration.");
 
         // remove cpus if needed
-        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - begin Remove outer loop for Linux CPU enumeration.  (size = ", Size()).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - begin Remove outer loop for Linux CPU enumeration.  (size = ", Size()).append(L")"));
         while (count < Size())
         {
             bool found = false;
 
-            SCX_LOGTRACE(m_log, L"CPUEnumeration Update() - begin Remove inner loop for Linux CPU enumeration.");
+            SCX_LOGTRACE(m_log, L"CPUEnumeration UpdateCollection() - begin Remove inner loop for Linux CPU enumeration.");
             for (EntityIterator iter = Begin(); !found && iter != End(); iter++)
             {
                 SCXCoreLib::SCXHandle<CPUInstance> inst = *iter;
@@ -714,24 +711,24 @@ namespace SCXSystemLib
                 if (inst->GetProcNumber() == Size()-1)
                 {
                     found = true;
-                    SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - Removing CPU ", inst->GetProcNumber()));
+                    SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - Removing CPU ", inst->GetProcNumber()));
                     RemoveInstance(iter);
                 }
             }
-            SCX_LOGTRACE(m_log, L"CPUEnumeration Update() - end Remove inner loop for Linux CPU enumeration.");
+            SCX_LOGTRACE(m_log, L"CPUEnumeration UpdateCollection() - end Remove inner loop for Linux CPU enumeration.");
 
             if (!found)
             {
                 throw SCXInternalErrorException(L"CPU with expected Proc Number not found in internal list",
-                                                SCXSRCLOCATION);
+                        SCXSRCLOCATION);
             }
         }
-        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - end Remove outer loop for Linux CPU enumeration.  (size = ", Size()).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - end Remove outer loop for Linux CPU enumeration.  (size = ", Size()).append(L")"));
 
 #elif defined(sun) || defined(hpux)
 
         // Remove CPUs no longer available and enabled
-        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - begin Remove outer loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - begin Remove outer loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
         EntityIterator iter = Begin();
         while (iter != End())
         {
@@ -739,118 +736,165 @@ namespace SCXSystemLib
 
             if (IsCPUEnabled(inst->GetProcNumber()))
             {
-                SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration Update() - Keeping CPU", inst->GetProcNumber()));
+                SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - Keeping CPU", inst->GetProcNumber()));
                 ++iter;
             }
             else
             {
                 // This will advance iter to next item after removal
-                SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration Update() - Removing CPU", inst->GetProcNumber()));
+                SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - Removing CPU", inst->GetProcNumber()));
                 iter = RemoveInstance(iter);
             }
         }
-        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - end Remove outer loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - end Remove outer loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
 
         // add cpus if needed
-        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - begin Add loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - begin Add loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
 #if defined(hpux)
         size_t ix = 0; // index used to get the logical id of a cpu
         for (size_t i = 0; i = static_cast<size_t>(psp[ix].psp_logical_id), ix < max_cpus; ix++)
         {
 #elif defined(sun)
-        // Enumerate all possible CPUs allowed by the system and add any new instances that
-        // are enabled.
-        size_t num_cpu_avail = 0;
+            // Enumerate all possible CPUs allowed by the system and add any new instances that
+            // are enabled.
+            size_t num_cpu_avail = 0;
 
-        // Refresh the Kstat chain - adding/removing instances
-        m_kstatHandle->Update();
+            // Refresh the Kstat chain - adding/removing instances
+            m_kstatHandle->Update();
 
-        for (kstat_t* cur = m_kstatHandle->ResetInternalIterator(); cur; cur = m_kstatHandle->AdvanceInternalIterator())
-        {
-            if (strcmp(cur->ks_module, "cpu_info") != 0 || cur->ks_type != KSTAT_TYPE_NAMED )
-                continue;
-
-            // Look up instance ID for consistency with existing code
-            size_t i = cur->ks_instance;
-
-            // a given processor ID is assigned by the OS as "available" if it has a status
-            // that is != -1
-            SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration::Update() - calling p_online(", i).append(L", P_STATUS)"));
-            int status = m_deps->p_online(i, P_STATUS);
-
-            SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration::Update() - p_online status: ", status));
-            if (-1 == status)
+            for (kstat_t* cur = m_kstatHandle->ResetInternalIterator(); cur; cur = m_kstatHandle->AdvanceInternalIterator())
             {
-                if (EINVAL == errno)
-                {
-                    // not currently assigned, so ignore it
+                if (strcmp(cur->ks_module, "cpu_info") != 0 || cur->ks_type != KSTAT_TYPE_NAMED )
                     continue;
-                }
-                else
-                {
-                    SCX_LOGWARNING(m_log, StrAppend(L"CPUEnumeration::Update() - p_online status: -1 (", errno).append(L"), the CPU is in an error state"));
-                    throw SCXErrnoException(L"p_online", errno, SCXSRCLOCATION);
-                }
-            }
 
-            // avail, check below to determine if enabled
-            num_cpu_avail++;
+                // Look up instance ID for consistency with existing code
+                size_t i = cur->ks_instance;
+
+                // a given processor ID is assigned by the OS as "available" if it has a status
+                // that is != -1
+                SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration::UpdateCollection() - calling p_online(", i).append(L", P_STATUS)"));
+                int status = m_deps->p_online(i, P_STATUS);
+
+                SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration::UpdateCollection() - p_online status: ", status));
+                if (-1 == status)
+                {
+                    if (EINVAL == errno)
+                    {
+                        // not currently assigned, so ignore it
+                        continue;
+                    }
+                    else
+                    {
+                        SCX_LOGWARNING(m_log, StrAppend(L"CPUEnumeration::UpdateCollection() - p_online status: -1 (", errno).append(L"), the CPU is in an error state"));
+                        throw SCXErrnoException(L"p_online", errno, SCXSRCLOCATION);
+                    }
+                }
+
+                // avail, check below to determine if enabled
+                num_cpu_avail++;
 #else
 #error "This code is only for hpux & sun"
 #endif
 
-            if (IsCPUEnabled(i))
-            {
-                bool found = false;
-
-                SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - begin Search loop for CPU ", i));
-                for (iter = Begin(); !found && iter != End(); iter++)
+                if (IsCPUEnabled(i))
                 {
-                    SCXCoreLib::SCXHandle<CPUInstance> inst = *iter;
+                    bool found = false;
 
-                    if (inst->GetProcNumber() == i)
+                    SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - begin Search loop for CPU ", i));
+                    for (iter = Begin(); !found && iter != End(); iter++)
                     {
-                        SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration Update() - Tracking CPU ", i));
-                        found = true;
+                        SCXCoreLib::SCXHandle<CPUInstance> inst = *iter;
+
+                        if (inst->GetProcNumber() == i)
+                        {
+                            SCX_LOGHYSTERICAL(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - Tracking CPU ", i));
+                            found = true;
+                        }
+                    }
+                    SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - end Search loop for CPU ", i));
+
+                    if (!found)
+                    {
+                        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - Adding CPU ", i));
+                        AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i, m_sampleSize)));
                     }
                 }
-                SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - end Search loop for CPU ", i));
-
-                if (!found)
-                {
-                    SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - Adding CPU ", i));
-                    AddInstance(SCXCoreLib::SCXHandle<CPUInstance>(new CPUInstance(i, m_sampleSize)));
-                }
             }
-        }
-        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - end Add loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
+            SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateCollection() - end Add loop for Solaris/HPUX CPU enumeration.  (size = ", Size()).append(L")"));
 
 #if defined(sun)
-        // Keep track of how often the number of CPU enumerated is different
-        // than what was expected.  The code should handle this descrepancy, but
-        // it is usefull to know how often it happens.
-        size_t cpu_configured = m_deps->sysconf(_SC_NPROCESSORS_CONF);
-        if (num_cpu_avail != cpu_configured)
-        {
-            SCX_LOGTRACE(m_log, StrAppend(StrAppend(L"CPUEnumeration Update() - the enumeration contains ", num_cpu_avail).append(L", but expected "), cpu_configured));
-        }
+            // Keep track of how often the number of CPU enumerated is different
+            // than what was expected.  The code should handle this descrepancy, but
+            // it is usefull to know how often it happens.
+            size_t cpu_configured = m_deps->sysconf(_SC_NPROCESSORS_CONF);
+            if (num_cpu_avail != cpu_configured)
+            {
+                SCX_LOGTRACE(m_log, StrAppend(StrAppend(L"CPUEnumeration UpdateCollection() - the enumeration contains ", num_cpu_avail).append(L", but expected "), cpu_configured));
+            }
 #endif
 
 #elif defined(aix)
 
-        /* There is nothing to do here for AIX. All instance maintenance is done
-           in the updater thread. The actual instances update themselves
-           through the code below.
-        */
+            /* There is nothing to do here for AIX. All instance maintenance is done
+               in the updater thread. The actual instances update themselves
+               through the code below.
+             */
 
 #else
 
 #error "Not implemented for this platform"
 
 #endif
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
+     Update all CPU data
+
+     \param[in]     updateInstances  true to update the instance information; false
+                    to leave the present values
+
+     First update CPU Collections followed by update all of instances               
+
+    */
+    void CPUEnumeration::Update(bool updateInstances)
+    {
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration Update() - updateInstances = ", updateInstances));
+        
+        UpdateCollection();
+
+        SCXCoreLib::SCXThreadLock lock(m_lock);
+
         if (updateInstances)
         {
             UpdateInstances();
+        }
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
+      Update a specific instance 
+     
+      First update CPU Collections followed by update specific instance               
+    */
+    void CPUEnumeration::UpdateSpecific(wstring procName, size_t *pos)
+    {
+        SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateSpecific() - procName = ", procName));
+        
+        UpdateCollection();
+
+        SCXCoreLib::SCXThreadLock lock(m_lock);
+
+        for (size_t i=0; i<Size(); ++i)
+        {
+            SCXCoreLib::SCXHandle<CPUInstance> inst = GetInstance(i);
+            if (procName == inst->m_procName)
+            {
+                SCX_LOGTRACE(m_log, StrAppend(L"CPUEnumeration UpdateSpecific()  updating procName = ", procName));
+                UpdateInstance(i);
+                *pos = i;
+                break;
+            }
         }
     }
 

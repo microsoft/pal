@@ -69,6 +69,7 @@ namespace SCXSystemLib
 
         void         UpdateInstances();
         void         UpdateInstance(const EntityInstanceId& id);
+        void         UpdateInstance(const size_t& pos);
 
         size_t       Size() const;
 
@@ -208,9 +209,26 @@ namespace SCXSystemLib
     template<class Inst>
     void EntityEnumeration<Inst>::UpdateInstance(const EntityInstanceId& id)
     {
-        EntityInstance* inst = GetInstance(id);
+        SCXCoreLib::SCXHandle<Inst> inst = GetInstance(id);
 
-        if (inst)
+        if (inst.GetData())
+        {
+            inst->Update();
+        }
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /**
+        Run the Update() method on the specified instance in the colletion
+
+        \param  pos Position of instance to get 
+    */
+    template<class Inst>
+    void EntityEnumeration<Inst>::UpdateInstance(const size_t& pos)
+    {
+        SCXCoreLib::SCXHandle<Inst> inst = GetInstance(pos);
+
+        if (inst.GetData())
         {
             inst->Update();
         }
