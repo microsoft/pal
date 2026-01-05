@@ -979,7 +979,7 @@ class XElementTest : public CPPUNIT_NS::TestFixture
             TestDoc.Save(TestFileName2);
 
             std::string DiffCommand = "diff -b " + TestFileName + " " + TestFileName2;
-            if (system(DiffCommand.c_str()) != 0)
+            if (system(DiffCommand.c_str()) != 0) // CodeQL [SM01921] This data is not tainted since it is a static string combined with a controlled variable.
             {
                 CPPUNIT_FAIL("Store / Load / Store produced different XML files");
             }
