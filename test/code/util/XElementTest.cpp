@@ -958,7 +958,7 @@ class XElementTest : public CPPUNIT_NS::TestFixture
 
             // Check the file for known contents.
             std::string GrepCommand("grep '<Child312 ChildAttr3121=\"Child&#x0020;Attr&#x0020;3121&#x0020;Value\" ChildAttr3122=\"Child&#x0020;Attr&#x0020;3122&#x0020;Value\"' " + TestFileName + "> /dev/null");
-            if (system(GrepCommand.c_str()) != 0)
+            if (system(GrepCommand.c_str()) != 0) // CodeQL [SM01921] This data is not tainted since it is a static string combined with a controlled variable.
             {
                 CPPUNIT_FAIL("Error in XML output file");
             }
