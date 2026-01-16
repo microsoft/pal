@@ -38,7 +38,7 @@ SCXCoreLib provides portable services for:
 - common logging framework
 - marshalling/unmarshalling
 - DNS name resolution
-- pocess launching/controlling
+- process launching/controlling
 - regular expressions
 - singletons
 - threading
