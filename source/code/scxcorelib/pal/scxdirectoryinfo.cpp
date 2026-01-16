@@ -481,7 +481,15 @@ namespace
 #if defined(sun)
             while (NULL != (dentp = readdir_r(dirp, currentDir))) {
 #else
+#if (__GNUC__ >= 6 )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
+#endif
+            // readdir_c is deprecated as of POSIX 1.2008 but is still supported and not simple to implement the recommended usage. Make a warning for now
             while ((0 == readdir_r(dirp, currentDir, &dentp)) && NULL != dentp) {
+#if (__GNUC__ >= 6)
+#pragma GCC diagnostic pop
+#endif
 #endif
                 bool isdir = false;                         // Is this a directory entry
                 SCXCoreLib::SCXFileSystem::SCXStatStruct* pStat = 0;

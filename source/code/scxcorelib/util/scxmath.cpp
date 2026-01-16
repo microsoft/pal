@@ -144,7 +144,7 @@ namespace SCXCoreLib
     scxlong RoundToScxLong(double value) 
     {
         double roundedValue = Round(value);
-        if (cMinScxLong <= roundedValue && roundedValue <= cMaxScxLong) {
+        if ((double)cMinScxLong <= roundedValue && roundedValue <= (double)cMaxScxLong) {
             return static_cast<scxlong> (roundedValue);
         } else {
             throw SCXInvalidArgumentException(L"value", L"Value of double outside the range of long", 
