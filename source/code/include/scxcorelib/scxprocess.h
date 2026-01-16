@@ -108,6 +108,7 @@ namespace SCXCoreLib
         virtual ~SCXProcess();
         void Kill();
         unsigned GetEffectiveTimeout(unsigned timeout);
+        std::wstring ConstructShellCommandWithElevation(const std::wstring &command, const std::wstring &elevationtype);
 
     protected:
         virtual bool ReadToStream(int fd, std::ostream& stream);
