@@ -129,6 +129,7 @@ namespace
 
         virtual bool open(const char* pathname, int flags)
         {
+            m_openPaths.push_back(pathname ? pathname : "");
             std::map<std::string, int> ::const_iterator openErrnoIt = m_openErrno.find(pathname);
             if (openErrnoIt == m_openErrno.end())
             {
@@ -140,6 +141,11 @@ namespace
                 return false;
             }
             return true;
+        }
+
+        int GetOpenCount() const
+        {
+            return static_cast<int>(m_openPaths.size());
         }
 
         virtual int close(void)
@@ -418,6 +424,7 @@ namespace
     private:
         std::map<std::string, struct stat> m_mapStat;
         std::map<std::string, int> m_openErrno;
+        std::vector<std::string> m_openPaths;
     };
 }
 

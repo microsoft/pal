@@ -1167,6 +1167,9 @@ public:
             L"vmblock",     L"vmhgfs",      L"rpc_pipefs",  L"nfs",         L"usbfs",
             L"subfs",   L"fusectl",
 #if defined(linux)
+            L"fuse.sshfs",
+#endif
+#if defined(linux)
             L"udev", L"devtmpfs", L"tracefs",
 #endif
             L"nfs",     L"DevFS",   L"autofs",

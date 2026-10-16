@@ -22,6 +22,7 @@
 #include <scxsystemlib/diskdepend.h>
 #include <scxsystemlib/statisticalphysicaldiskenumeration.h>
 #include <scxsystemlib/staticphysicaldiskenumeration.h>
+#include <scxsystemlib/staticphysicaldiskinstance.h>
 
 // On scxcm-sles11-01 with disk /dev/hda, ioctl(SG_*), ioctl(SCSI_IOCTL_*) and ioctl(HDIO_*) all fail so it's
 // impossible to determine the disk type. Machine is hosted on Xen and will be moved shortly to Hyper-V so the
@@ -53,6 +54,10 @@ class SCXStaticPhysicalDiskPalTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(TestPhysicalDiskGeometry);
     CPPUNIT_TEST(TestPhysicalDiskVendorSNumber);
     CPPUNIT_TEST(TestPhysicalDiskOpticalDrive);
+#if defined(linux)
+    CPPUNIT_TEST(TestRejectNonBlockDevice);
+    CPPUNIT_TEST(TestRejectPathTraversal);
+#endif
     SCXUNIT_TEST_ATTRIBUTE(TestDumpString, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(TestGetMethods, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(TestSamePhysicalDisksAsStatisticalDisks, SLOW);
@@ -67,6 +72,30 @@ public:
     {
         fauxMntTab = L"test_mnttab";
     }
+
+#if defined(linux)
+    void TestRejectNonBlockDevice(void)
+    {
+        DiskDependTest* mock = new DiskDependTest();
+        SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps(mock);
+        SCXSystemLib::StaticPhysicalDiskInstance disk(deps);
+        disk.SetDevice(L"/etc/passwd");
+
+        CPPUNIT_ASSERT_NO_THROW(disk.Update());
+        CPPUNIT_ASSERT_EQUAL(0, mock->GetOpenCount());
+    }
+
+    void TestRejectPathTraversal(void)
+    {
+        DiskDependTest* mock = new DiskDependTest();
+        SCXCoreLib::SCXHandle<SCXSystemLib::DiskDepend> deps(mock);
+        SCXSystemLib::StaticPhysicalDiskInstance disk(deps);
+        disk.SetDevice(L"/dev/../etc/passwd");
+
+        CPPUNIT_ASSERT_NO_THROW(disk.Update());
+        CPPUNIT_ASSERT_EQUAL(0, mock->GetOpenCount());
+    }
+#endif
 
     void setUp(void)
     {

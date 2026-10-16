@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <algorithm>
 #if defined(linux)
+#include <limits.h>
+#include <stdlib.h>
 #include <sstream>
 #include <linux/fs.h>
 #include <linux/hdreg.h>
@@ -34,6 +36,7 @@
 #include <scsi/scsi.h>
 #include <scsi/sg.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 
 #elif defined(aix)
 
@@ -1584,8 +1587,22 @@ namespace SCXSystemLib
 
 #if defined(linux)
 
+        char resolvedDevice[PATH_MAX];
+        std::string devicePath = StrToUTF8(m_rawDevice);
+        struct stat deviceStat;
+        if (NULL == realpath(devicePath.c_str(), resolvedDevice) ||
+            0 != strncmp(resolvedDevice, "/dev/", 5) ||
+            0 != stat(resolvedDevice, &deviceStat) ||
+            !S_ISBLK(deviceStat.st_mode))
+        {
+            SCX_LOG(m_log, eWarning, L"Update(): refusing non-block device '" + m_rawDevice + L"'");
+            Clear();
+            return;
+        }
+        m_rawDevice = StrFromUTF8(resolvedDevice);
+
         // Open the device (Note: We must have privileges for this to work).
-        if (!m_deps->open(StrToUTF8(m_rawDevice).c_str(), O_RDONLY | O_NONBLOCK))
+        if (!m_deps->open(StrToUTF8(m_rawDevice).c_str(), O_RDONLY | O_NONBLOCK | O_NOFOLLOW))
         {
             throw SCXErrnoOpenException(m_rawDevice, errno, SCXSRCLOCATION);
         }
